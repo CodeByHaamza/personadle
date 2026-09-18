@@ -55,8 +55,40 @@ if ($action === 'unlock') {
     $badge = $check->fetch();
     if (!$badge) jsonError('Badge not found in catalog', 404);
 
-    // Vérifie que la condition du badge est réellement remplie côté serveur
-    if (!personadle_verify_condition(
+    // ── Un badge adossé à un code événement ne s'obtient QUE par /redeem ──────
+    //
+    // Les 13 badges de `event_codes` (Noël, Saint-Valentin, badges secrets
+    // communautaires…) sont protégés par un code secret, mais ils portent
+    // `condition_type = 'manual'` — ce qui, sur cette route, valait « accordé sans
+    // vérification ». Le code ne servait donc à rien : un POST /api/badges/unlock
+    // avec le slug suffisait, et le slug est public (GET /api/badges le liste).
+    //
+    // Le contournement est fermé ici plutôt que dans condition_check.php parce que
+    // ce n'est pas une question de CONDITION mais de ROUTE : la condition de ces
+    // badges, c'est « connaître le code », et seul /redeem sait la vérifier (il
+    // valide le code, sa fenêtre de validité, et consomme la redemption).
+    //
+    // Aucun effet sur un joueur légitime : `handleEventCodeSubmit()` est
+    // serveur-d'abord (le badge n'entre dans le profil local qu'une fois
+    // /redeem revenu OK), donc le backend le connaît toujours avant le local et
+    // la synchro n'a jamais à le repousser par cette route.
+    $codeGated = $pdo->prepare('SELECT 1 FROM event_codes WHERE badge_id = ? LIMIT 1');
+    $codeGated->execute([$badgeId]);
+    if ($codeGated->fetchColumn()) {
+        jsonError('This badge can only be unlocked with its event code', 403);
+    }
+
+    // Vérifie que la condition du badge est réellement remplie côté serveur.
+    //
+    // personadle_condition_allows_unlock() et non personadle_verify_condition() :
+    // cette dernière laisse passer un condition_type inconnu (son `default:
+    // return true`, safe fallback voulu pour ne pas rendre inaccessible un badge
+    // ajouté demain avec un type pas encore implémenté). Sur le chemin d'un
+    // POST /unlock, ce fallback fait l'inverse de ce qu'on veut : une faute de
+    // frappe dans une migration ouvrirait le badge à n'importe quel compte
+    // authentifié. Les wallpapers fermaient déjà ce trou de leur côté (revue
+    // PR #14) ; les trois endpoints partagent désormais la même porte.
+    if (!personadle_condition_allows_unlock(
         $pdo,
         $authId,
         $badge['condition_type'],

@@ -887,10 +887,14 @@
     "filter_note": "Opus filters are not factored in.",
     "filter_all_modes": "All modes",
     "filter_scope": "Scope",
+    "filter_dimension": "Dimension",
+    "dimension_normal": "Normal",
+    "dimension_expert": "⚡ Expert",
     "scope_global": "Global",
     "scope_friends": "Friends",
     "login_for_friends": "Log in to see your friends leaderboard.",
-    "no_friends": "None of your friends appear in this ranking yet."
+    "no_friends": "None of your friends appear in this ranking yet.",
+    "expert_no_streak": "Best streak has no Expert ranking: a streak counts consecutive days, and Expert is not a daily run."
   },
   "friends": {
     "title": "Friends",
@@ -1097,6 +1101,8 @@
     "refuse": "Refuse",
     "already_active": "Finish your current challenge first.",
     "notif_challenges_you": "challenges you!",
+    "notif_challenges_you_expert": "challenges you in Expert!",
+    "notif_expert_tag": "⚡ EXPERT",
     "notif_beat": "Beat",
     "notif_attempts": "attempt(s)",
     "unknown_mode": "This challenge's mode is unavailable.",

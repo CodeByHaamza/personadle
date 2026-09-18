@@ -71,6 +71,29 @@
           </div>
         </div>
 
+        <!-- Dimension (Normal / Expert) — migration 045.
+             Placée juste après Scope et avant Mode : elle qualifie le mode qu'on
+             s'apprête à choisir, elle doit donc se lire avant lui. -->
+        <div class="lb-filter-group">
+          <span class="lb-filter-label" data-i18n="leaderboard.filter_dimension">Dimension</span>
+          <div class="lb-filter-pills" id="dimensionFilter">
+            <button
+              class="lb-pill active"
+              data-value="normal"
+              data-i18n="leaderboard.dimension_normal"
+            >
+              Normal
+            </button>
+            <button
+              class="lb-pill lb-pill--expert"
+              data-value="expert"
+              data-i18n="leaderboard.dimension_expert"
+            >
+              ⚡ Expert
+            </button>
+          </div>
+        </div>
+
         <!-- Mode -->
         <div class="lb-filter-group">
           <span class="lb-filter-label" data-i18n="leaderboard.filter_mode">Mode</span>

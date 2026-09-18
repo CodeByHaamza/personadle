@@ -712,3 +712,68 @@
     opacity: 0.5;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   DIMENSION EXPERT — filtre et ambiance (migration 045)
+   ──────────────────────────────────────────────────────────────────────────────
+   Le classement Expert n'est pas une vue du classement normal : autre pool de
+   tirage, autre barème, taux de victoire sans commune mesure. L'écart doit se
+   voir sans relire la pastille — un joueur qui compare deux captures d'écran
+   doit savoir laquelle est laquelle.
+
+   Palette violet/magenta, la même que la carte d'envoi de défi Expert
+   (`.challenge-card--expert`, css/global.css) et que la notification de défi
+   Expert (css/challenge-notif.css). Trois surfaces, un seul vocabulaire.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* La pastille Expert reste lisible même inactive : c'est une porte qu'on doit
+   remarquer, pas une option de plus dans la rangée. */
+.lb-pill--expert {
+  border-color: rgba(178, 106, 255, 0.45);
+  color: #8b46d8;
+}
+.lb-pill--expert:hover {
+  border-color: rgba(178, 106, 255, 0.7);
+  color: #7b3fd4;
+}
+
+/* Active : elle doit battre `.lb-pill.active` (accent du site), d'où la
+   sélectivité supérieure — deux classes contre une. */
+.lb-pill--expert.active {
+  background: linear-gradient(135deg, #7b3fd4, #b26aff);
+  border-color: rgba(178, 106, 255, 0.8);
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(150, 70, 255, 0.4);
+}
+
+/* Carte des filtres en mode Expert : un liseré et un fond à peine teinté.
+   Volontairement discret — le tableau juste en dessous doit rester le sujet,
+   contrairement à la notification de défi, qui est un événement. */
+.lb-filters-card--expert {
+  border-color: rgba(178, 106, 255, 0.4);
+  background: linear-gradient(180deg, rgba(178, 106, 255, 0.07) 0%, var(--lb-surface) 120px);
+  box-shadow:
+    var(--lb-shadow),
+    0 0 40px -22px rgba(150, 70, 255, 0.6);
+}
+
+/* Pastille Expert du résumé de filtres. */
+.lb-fn-chip--expert {
+  background: linear-gradient(90deg, #8b46d8, #d63384);
+  border-color: transparent;
+  color: #fff;
+}
+
+/* Dark mode : le violet foncé des pastilles inactives passe sous le seuil de
+   lisibilité sur fond sombre. Le dégradé des pastilles actives porte déjà du
+   texte blanc et ne bouge pas. */
+.darkmode .lb-pill--expert {
+  color: #d9a4ff;
+  border-color: rgba(178, 106, 255, 0.5);
+}
+.darkmode .lb-pill--expert:hover {
+  color: #eccfff;
+}
+.darkmode .lb-filters-card--expert {
+  border-color: rgba(178, 106, 255, 0.45);
+}

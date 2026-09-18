@@ -269,4 +269,152 @@ final class LeaderboardMetricsTest extends TestCase
         // Sans l'exclusion Expert, la veille compterait et la série vaudrait 2.
         $this->assertSame(1, $this->streakOf($uid));
     }
+    // ══════════════════════════════════════════════════════════════════════════
+    // DIMENSION EXPERT (migration 045)
+    //
+    // Jusqu'ici l'Expert était exclu du classement PARTOUT, et le seul test qui
+    // s'y intéressait (testExpertGamesDoNotFeedTheNormalStreak) vérifiait
+    // précisément cette exclusion. Maintenant que la dimension est exposée, il
+    // faut la vérifier dans les DEUX sens : l'Expert ne doit pas fuir dans le
+    // classement normal (déjà couvert), ET le classement Expert doit exister,
+    // être calculé sur les bonnes parties, et ne jamais se mélanger à l'autre.
+    // ══════════════════════════════════════════════════════════════════════════
+
+    /** Enregistre $count parties EXPERT le jour J-$daysAgo, dont $wins victoires. */
+    private function expertSessions(int $userId, int $count, int $wins, int $daysAgo = 0): void
+    {
+        $ins = self::$pdo->prepare(
+            'INSERT INTO game_sessions (user_id, mode, is_expert, played_date, target_name, result, attempts)
+             VALUES (?, "classic", 1, DATE_SUB(CURRENT_DATE, INTERVAL ? DAY), "X", ?, 1)'
+        );
+        for ($i = 0; $i < $count; $i++) {
+            $ins->execute([$userId, $daysAgo, $i < $wins ? 'win' : 'giveup']);
+        }
+    }
+
+    /** Victoires comptées par l'expression « ever Expert » pour un joueur. */
+    private function everExpertWins(int $userId): int
+    {
+        $expr = personadle_ever_expert_score_expr('wins', 0.5);
+        $stmt = self::$pdo->prepare(
+            "SELECT ({$expr}) AS score FROM game_sessions gs
+             WHERE gs.user_id = ? AND gs.is_expert = 1 GROUP BY gs.user_id"
+        );
+        $stmt->execute([$userId]);
+        return (int) ($stmt->fetchColumn() ?: 0);
+    }
+
+    public function testEverExpertReadsGameSessionsNotUserStats(): void
+    {
+        // LA raison d'être de personadle_ever_expert_score_expr() : user_stats
+        // n'agrège PAS l'Expert (api/lib/game_session.php). Un joueur avec 6
+        // victoires Expert et zéro ligne dans user_stats doit tout de même être
+        // classé — sinon le classement Expert « depuis toujours » serait vide
+        // pour tout le monde, en permanence.
+        $uid = $this->makeUser('x1');
+        $this->expertSessions($uid, 8, 6);
+
+        $this->assertSame(6, $this->everExpertWins($uid));
+        $this->assertSame(
+            0,
+            (int) self::$pdo->query("SELECT COUNT(*) FROM user_stats WHERE user_id = {$uid}")->fetchColumn(),
+            "le Mode Expert ne doit toujours pas alimenter user_stats"
+        );
+    }
+
+    public function testNormalGamesNeverCountInTheExpertRanking(): void
+    {
+        $uid = $this->makeUser('x2');
+        $this->sessions($uid, 30, 30);       // 30 victoires NORMALES
+        $this->expertSessions($uid, 2, 2);   // 2 victoires Expert
+
+        $this->assertSame(2, $this->everExpertWins($uid), 'le normal a fui dans le classement Expert');
+    }
+
+    public function testTheTwoDimensionsCanRankPlayersInOppositeOrder(): void
+    {
+        // Le cas qui justifie deux classements plutôt qu'un : le meilleur joueur
+        // normal n'est pas le meilleur joueur Expert. Si l'ordre était le même
+        // des deux côtés, la dimension ne raconterait rien de neuf.
+        $fort   = $this->makeUser('x3');  // fort en normal, faible en Expert
+        $expert = $this->makeUser('x4');  // l'inverse
+
+        $this->sessions($fort, 10, 10);
+        $this->expertSessions($fort, 2, 2);
+        $this->sessions($expert, 1, 1);
+        $this->expertSessions($expert, 8, 8);
+
+        $this->assertGreaterThan($this->everExpertWins($fort), $this->everExpertWins($expert));
+    }
+
+    public function testExpertPriorIsComputedOnExpertGamesOnly(): void
+    {
+        // Le lissage bayésien emprunte le taux moyen du site. Celui du mode normal
+        // est bien plus haut que celui de l'Expert : l'appliquer aux joueurs Expert
+        // les tirerait tous vers un repère qui n'est pas le leur.
+        $uid = $this->makeUser('x5');
+        $this->sessions($uid, 10, 10);      // 100 % en normal
+        $this->expertSessions($uid, 10, 1); // 10 % en Expert
+
+        $normal = personadle_leaderboard_prior(self::$pdo, 'classic', false);
+        $expert = personadle_leaderboard_prior(self::$pdo, 'classic', true);
+
+        $this->assertGreaterThan(
+            $expert,
+            $normal,
+            'le lissage Expert doit être calculé sur la population Expert, pas sur celle du mode normal'
+        );
+    }
+
+    public function testExpertHasNoStreakMetricOnPurpose(): void
+    {
+        // Renvoyer null et non une expression : une série se compte en jours
+        // consécutifs, et l'Expert n'est pas un rendez-vous quotidien. L'appelant
+        // sert un classement VIDE plutôt que d'inventer un chiffre — c'est
+        // exactement l'erreur que la métrique `streak` des périodes avait faite
+        // en renvoyant le nombre de victoires « en approximation ».
+        $this->assertNull(personadle_ever_expert_score_expr('streak', 0.5));
+
+        // Les quatre autres existent bien : l'absence est ciblée, pas un oubli.
+        foreach (['wins', 'winrate', 'perfect', 'games'] as $metric) {
+            $this->assertNotNull(
+                personadle_ever_expert_score_expr($metric, 0.5),
+                "la métrique $metric doit exister en Expert"
+            );
+        }
+        $this->assertNull(personadle_ever_expert_score_expr('metrique_inventee', 0.5));
+    }
+
+    public function testPeriodStreakSqlIsScopedToTheRequestedDimension(): void
+    {
+        // La série de PÉRIODE, elle, existe dans les deux dimensions (le filtre
+        // est paramétré). Ce qui compte : les deux requêtes ne doivent pas lire
+        // les mêmes lignes.
+        $normal = personadle_period_streak_scores_sql('', '', '?', false);
+        $expert = personadle_period_streak_scores_sql('', '', '?', true);
+
+        $this->assertStringContainsString('gs.is_expert = 0', $normal);
+        $this->assertStringContainsString('gs.is_expert = 1', $expert);
+        $this->assertStringNotContainsString('gs.is_expert = 1', $normal);
+        $this->assertStringNotContainsString('gs.is_expert = 0', $expert);
+    }
+
+    public function testExpertStreakOverAPeriodCountsOnlyExpertDays(): void
+    {
+        // Contrepartie de testExpertGamesDoNotFeedTheNormalStreak : dans l'autre
+        // sens, le normal ne doit pas gonfler la série Expert.
+        $uid = $this->makeUser('x6');
+        foreach ([4, 3, 2, 1, 0] as $d) $this->sessions($uid, 1, 1, $d);       // 5 jours normaux
+        foreach ([1, 0] as $d) $this->expertSessions($uid, 1, 1, $d);          // 2 jours Expert
+
+        $sql  = personadle_period_streak_scores_sql('', '', '?', true);
+        $stmt = self::$pdo->prepare($sql);
+        $stmt->execute([(new DateTime('-60 days'))->format('Y-m-d')]);
+
+        $score = null;
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+            if ((int) $r['user_id'] === $uid) $score = (int) $r['score'];
+        }
+        $this->assertSame(2, $score, 'les 5 jours normaux ne doivent pas compter dans la série Expert');
+    }
 }

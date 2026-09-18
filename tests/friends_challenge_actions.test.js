@@ -493,3 +493,67 @@ describe("ce que la Boîte affiche", () => {
     expect(document.getElementById("unreadCount").textContent).toBe("1");
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Marquage Expert dans la Boîte
+//
+// `challenge_is_expert` n'était lu que par les attributs `data-isexpert` des
+// boutons — autrement dit par le code, jamais par l'œil. Deux défis du même mode,
+// l'un normal et l'autre Expert (la migration 037 autorise explicitement les deux
+// le même jour entre les mêmes amis), s'affichaient donc comme deux lignes
+// rigoureusement identiques : même pastille de mode, même date, même score. Rien
+// ne permettait de savoir lequel des deux boutons « Accepter » menait où.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("Boîte — un défi Expert se voit", () => {
+  it("affiche une pastille EXPERT sur un défi Expert non lu", async () => {
+    await renderInbox([challengeMsg({ challenge_is_expert: 1 })]);
+
+    const pill = document.querySelector(".fr-challenge-expert-pill");
+    expect(pill, "aucune pastille .fr-challenge-expert-pill").toBeTruthy();
+    expect(pill.textContent).toMatch(/expert/i);
+  });
+
+  it("pose la classe de style sur la carte", async () => {
+    await renderInbox([challengeMsg({ challenge_is_expert: 1 })]);
+    expect(document.querySelector(".fr-challenge-card--expert")).toBeTruthy();
+  });
+
+  it("un défi normal n'a ni pastille ni classe", async () => {
+    await renderInbox([challengeMsg({ challenge_is_expert: 0 })]);
+
+    expect(document.querySelector(".fr-challenge-expert-pill")).toBeNull();
+    expect(document.querySelector(".fr-challenge-card--expert")).toBeNull();
+  });
+
+  it("le marquage survit aux statuts terminés (gagné, expiré)", async () => {
+    // Ces deux statuts ont leur propre carte, avec leurs propres surcharges de
+    // couleur : c'est là qu'un marqueur ajouté au seul cas « en cours » se serait
+    // perdu. Or l'historique est justement l'écran où l'on compare ses défis.
+    await renderInbox([
+      challengeMsg({ id: 1, status: "beaten", challenge_is_expert: 1 }),
+      challengeMsg({ id: 2, status: "expired", challenge_is_expert: 1 }),
+    ]);
+
+    expect(document.querySelectorAll(".fr-challenge-expert-pill").length).toBe(2);
+    expect(
+      document.querySelector(".fr-challenge-card--won.fr-challenge-card--expert")
+    ).toBeTruthy();
+    expect(
+      document.querySelector(".fr-challenge-card--lost.fr-challenge-card--expert")
+    ).toBeTruthy();
+  });
+
+  it("normal et Expert côte à côte le même jour : une seule ligne est marquée", async () => {
+    // Le cas qui a motivé la colonne (migration 037) : deux défis du même mode,
+    // le même jour, entre les mêmes amis. Ils doivent se distinguer à l'œil.
+    await renderInbox([
+      challengeMsg({ id: 1, challenge_is_expert: 0 }),
+      challengeMsg({ id: 2, challenge_is_expert: 1 }),
+    ]);
+
+    expect(document.querySelectorAll(".fr-challenge-card").length).toBe(2);
+    expect(document.querySelectorAll(".fr-challenge-card--expert").length).toBe(1);
+    expect(document.querySelectorAll(".fr-challenge-expert-pill").length).toBe(1);
+  });
+});
