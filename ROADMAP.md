@@ -425,13 +425,16 @@ Nouveau jeu — cas A (roster inédit)
   > point ❓ ci-dessous (badges à flags) : celui-ci touche l'intégrité des sessions elles-mêmes,
   > donc le leaderboard en entier.
   >
-  > ⚠️ **Limitation trouvée en review (PR #13)** : pour AllOutAttack/Personae, `$activeFilters`
-  > est accepté tel que soumis par le client sans être corrélé à un état côté serveur (aucune
-  > session ne mémorise le filtre opus réellement actif) — un client peut donc soumettre
-  > n'importe quel sous-ensemble de codes opus pour faire correspondre le recalcul serveur au
-  > nom qu'il veut faire valider, contrairement à Classic/Emoji/Silhouette/Music (pas de repli
-  > filtré, donc pas contournables ainsi). À corriger (filtre stocké côté serveur, pas re-soumis
-  > par le client) avant d'activer le rejet strict pour ces 2 modes spécifiquement — voir le
+  > ⚠️ **Limitation trouvée en review (PR #13), étendue aux six modes le 2026-09-17** :
+  > `$activeFilters` est accepté tel que soumis par le client sans être corrélé à un état côté
+  > serveur (aucune session ne mémorise le filtre opus réellement actif) — un client peut donc
+  > soumettre n'importe quel sous-ensemble de codes opus pour faire correspondre le recalcul
+  > serveur au nom qu'il veut faire valider. Depuis la 2.2 les six modes re-tirent dans le pool
+  > filtré (la partie du jour était injouable pour un joueur qui filtre sur Classic/Emoji/
+  > Silhouette/Music) ; la limitation vaut donc pour tous. À corriger AVANT tout rejet strict,
+  > d'un coup pour les six : **filtres synchronisés sur le compte** (comme `profiles.settings`
+  > — mêmes filtres sur tous les appareils, au passage) et recalcul depuis les filtres
+  > **stockés**, `active_filters` soumis ne servant plus que de signal de cohérence — voir le
   > commentaire en tête de `api/lib/daily_target.php`.
 
 ### ❓ Décisions de design à trancher
@@ -447,7 +450,7 @@ Nouveau jeu — cas A (roster inédit)
 > Synthèse : backend PHP/MariaDB complet (auth, sessions, social, leaderboard, admin, RGPD),
 > profil personnalisable (avatars groupés, musique, couleurs, badges, titres, wallpapers),
 > Social Link rangs 1-10, défis, streak globale + Jack Frost, FAQ, i18n 6 langues,
-> **1209 tests JS · 315 PHPUnit · 230 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
+> **1354 tests JS · 322 PHPUnit · 230 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
 
 ### Backend & Infrastructure
 
@@ -503,7 +506,7 @@ Nouveau jeu — cas A (roster inédit)
 
 | #   | Élément                                       | Notes                                                                         |
 | --- | --------------------------------------------- | ----------------------------------------------------------------------------- |
-| Q1  | Tests : 1209 Vitest · 315 PHPUnit · 230 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
+| Q1  | Tests : 1354 Vitest · 322 PHPUnit · 230 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
 | Q2  | i18n EN/FR/ES/DE/IT/PT (1264 clés)             | `npm run i18n:check`                                                          |
 | Q3  | PHPStan niveau 5 + ESLint + Prettier          | Dans la CI                                                                     |
 | Q4  | Seuils de couverture en CI                    | `npm run test:coverage` (~77 %)                                              |

@@ -36,6 +36,12 @@
 import { api, ApiError } from "./api.js";
 import { applySiteNotices } from "./site_notices.js";
 import { openModal, closeModal } from "./modal.js";
+import { clearAccountLocalState, ownsQueuedEntry } from "./gameCore.js";
+
+// syncPending() (js/api.js) ne peut pas importer gameCore.js (cycle gameCore ↔ api,
+// cf. CLAUDE.md §4) : on lui passe le filtre de propriétaire par le même pont
+// window.* que _personadleApi.
+window._personadleOwnsQueuedEntry = ownsQueuedEntry;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ÉTAT
@@ -256,6 +262,18 @@ async function migrateLocalStorageToCloud() {
     // JSON corrompu — on migre ce qu'on peut
   }
 
+  // Appareil partagé : les parties hors ligne d'un AUTRE compte (marquées
+  // `_owner`) ne sont pas celles du nouvel inscrit — elles restent en file pour
+  // leur propriétaire. Seules celles jouées en invité (sans propriétaire) migrent.
+  const foreign = Array.isArray(pendingSessions)
+    ? pendingSessions.filter((s) => !ownsQueuedEntry(s, null))
+    : [];
+  if (Array.isArray(pendingSessions)) {
+    pendingSessions = pendingSessions
+      .filter((s) => ownsQueuedEntry(s, null))
+      .map(({ _owner, ...s }) => s);
+  }
+
   try {
     const result = await api.user.migrate({ profile, pendingSessions });
     console.info(
@@ -263,8 +281,10 @@ async function migrateLocalStorageToCloud() {
         ` ${result.skipped_sessions} skipped.`
     );
 
-    // Migration réussie : vider la queue locale (les sessions sont en BDD)
-    localStorage.removeItem("pendingSessions");
+    // Migration réussie : vider la queue locale (les sessions sont en BDD) —
+    // sauf ce qui appartient à un autre compte de cet appareil.
+    if (foreign.length) localStorage.setItem("pendingSessions", JSON.stringify(foreign));
+    else localStorage.removeItem("pendingSessions");
     localStorage.setItem("migratedToCloud", "true");
   } catch (e) {
     // 409 = déjà migré côté serveur → marquer localement pour ne plus réessayer
@@ -305,6 +325,9 @@ function setupLoginForm() {
 
     try {
       const { user } = await api.auth.login({ identifier, password, remember_me: rememberMe });
+      // Un 200 sans `user` (contrat rompu, proxy qui réécrit la réponse…) fermait
+      // la modale et laissait la page en état fantôme : ni connecté, ni message.
+      if (!user?.id) throw new Error("Invalid login response");
       updateAuthUI(user);
       closeModal("loginModal");
       localStorage.removeItem("_crInitDone");
@@ -518,6 +541,10 @@ function setupLogoutButton() {
       // sur ce navigateur repart d'un profil vierge et récupère le sien depuis le cloud.
       localStorage.removeItem("personaUserProfile");
       localStorage.removeItem("personaSettings");
+      // …et tout ce qui appartient à CE compte et piégerait le suivant : trace
+      // Jack Frost, défis en cours (filtres de l'expéditeur rendus). Les files
+      // hors ligne restent, marquées par propriétaire — voir clearAccountLocalState().
+      clearAccountLocalState();
       updateAuthUI(null);
       window.dispatchEvent(new CustomEvent("personadle:auth-logout"));
     });
