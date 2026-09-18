@@ -74,12 +74,25 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       sont servies depuis le CDN, pas depuis git : sans l'upload, la cible « Wonder Shujin »
       affiche une image cassée le jour où elle est tirée. Bui Cosmic et Berry Summer ont-ils
       déjà été poussés ? À vérifier au même moment (même lot 2.2).
-- [ ] Jouer `sql/migrations/047_leaderboard_cache_score_decimal.sql` (`leaderboard_cache.score`
+- [x] Jouer `sql/migrations/047_leaderboard_cache_score_decimal.sql` (`leaderboard_cache.score`
       `int` → `DECIMAL(8,1)`, MODIFY idempotent, rejouable). Sans elle, la métrique winrate du
       classement mis en cache est tronquée à l'entier (73.4 → 73, égalités artificielles). Pas
       bloquante pour le déploiement (aucun crash, et le cache était vide en prod) — à jouer dès
       que possible : `ssh hostinger-personadle mysql u870779941_personadle < sql/migrations/047_leaderboard_cache_score_decimal.sql`
       puis `INSERT IGNORE INTO schema_migrations (version) VALUES ('047_leaderboard_cache_score_decimal')`.
+- [x] Jouer `sql/migrations/048_reconcile_prod_id_columns.sql` — **jouée en urgence le 2026-09-18**,
+      trente minutes après la mise en prod : le Compendium tombait en 500 (`user_titles.id` absente en
+      prod, `ORDER BY ut.id`). Aligne aussi `user_stats.id`, `game_sessions.created_at`,
+      `social_link_ranks.name_jp`. Depuis : prod = référence colonne pour colonne.
+- [ ] **hPanel → Avancé → Git : re-brancher l'auto-déploiement** sur `CodeByHaamza/personadle`. Il
+      est mort depuis le renommage du compte (2026-09-12) : la 2.2 a été tirée à la main
+      (`git remote set-url` + `git pull --ff-only` dans le webroot). Tant que ce n'est pas fait,
+      chaque merge sur `main` = pull manuel, et « c'est mergé » ≠ « c'est en prod ».
+- [ ] **hPanel → Cron : vérifier que `api/cron/leaderboard.php` tourne toutes les heures.** Le cache
+      `leaderboard_cache` était vide au moment de la release (0 ligne dans le dump) — il n'a
+      probablement jamais tourné. Le classement par période marche en calcul live, plus coûteux.
+- [ ] Avant la prochaine release : `npm run schema:check-prod` **sur le serveur**, et rejouer toute
+      migration qui INSERT contre le `SHOW CREATE TABLE` de la prod recréé dans Docker (CLAUDE.md §7).
 - [ ] **Après la migration 045 : laisser passer un cycle du cron** (`api/cron/leaderboard.php`,
       horaire) pour peupler la dimension Expert du cache. D'ici là le classement Expert par
       période bascule sur le calcul live — correct, mais plus coûteux. Rien à faire, ça se
