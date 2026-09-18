@@ -1914,3 +1914,45 @@ points cités, à traiter séparément :
    (`SELECT version FROM schema_migrations` = seule source fiable).
 3. Image silhouette lisible dans l'onglet Network — à recouper avec `js/silhouette_mask.js`
    (le masque est déjà cuit dans les pixels ; reste à vérifier ce qui transite).
+
+## 2026-09-18 — Badge Data Mining : appel à une fonction qui n'existe pas
+
+Signalé en test : le badge `data_mining` (« Visit 5 different user profiles ») ne se
+débloquait pas à la 5e visite. `profile/profile-view.js` appelait
+`m.checkBadges(profile, save)` sur le module `badgesManager.js` — **ce symbole n'a
+jamais été exporté**. L'appel partait donc sur `undefined`, levait un TypeError, et le
+`.catch(() => {})` qui entourait l'import dynamique l'avalait sans la moindre trace en
+console. Le joueur finissait par récupérer le badge en rouvrant SON profil (où
+`initBadgesSystem()` réévalue toutes les conditions), ce qui rendait le symptôme
+intermittent et difficile à relier à la visite elle-même.
+
+Remplacé par `checkBadgesAfterGame()`, le check léger commun à toutes les pages (déjà
+utilisé par `js/unlock-notify.js` pour les 6 modes) : il relit `localStorage` — qu'on
+vient d'écrire deux lignes plus haut — évalue toutes les conditions et affiche la
+notification de déblocage, sans toucher à l'UI de la page profil, absente ici puisqu'on
+regarde le profil de quelqu'un d'autre.
+
+### Détails techniques
+
+- `profile/profile-view.js` — `m.checkBadges(...)` → `m.checkBadgesAfterGame()`
+- `tests/dataMiningBadge.test.js` (nouveau, 7 tests) sur deux angles :
+  - **contrat d'import** : tout `m.xxx()` appelé dans `profile-view.js` doit exister
+    parmi les exports de `badgesManager.js`. C'est l'angle qui manquait — un import
+    **dynamique** n'est vérifié ni par ESLint ni au chargement, et c'est précisément ce
+    qui a laissé passer le bug pendant des mois. Ce garde-fou couvre tous les futurs
+    appels de ce module, pas seulement `checkBadges`.
+  - **comportement** : 4 profils visités → refusé, 5 → accordé ; 5 fois le même profil →
+    refusé (la liste est dédoublonnée par un `Set` côté `profile-view.js`).
+- Vérifié en réel : les 2 tests de contrat échouent sur le code d'avant, les 7 passent après.
+
+### Angles morts connus (non corrigés ici)
+
+- `visitedProfileIds` vit **uniquement en `localStorage`**, jamais poussé au backend.
+  Visiter 3 profils sur mobile et 2 sur desktop ne débloque donc rien nulle part. Une
+  colonne dédiée (ou une réutilisation de l'historique `social_links`) réglerait le point ;
+  c'est un choix produit, pas une régression.
+- Le suivi des visites est imbriqué dans le `if (gaugeContainer && ...)` de la jauge
+  Social Link : si `#socialLinkGaugeContainer` disparaît du HTML, le comptage s'arrête en
+  silence. Dépendance à une div sans rapport, à sortir de ce bloc à la prochaine passe.
+- Le badge est `condition_type = 'manual'` côté serveur (comme 46 autres) : la condition
+  n'est pas revérifiée à l'unlock. Cf. l'audit des conditions de déblocage.
