@@ -486,3 +486,57 @@ test.describe("Carte de partage — « Copier pour Discord » sous la vraie CSP"
     await ctx.close();
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+test.describe("Portrait recadré avant la 052 — l'Atelier demande de le re-choisir", () => {
+  const CROPPED =
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
+  let u;
+  test.beforeAll(async () => {
+    u = await registerUser("or");
+    // État de prod des 220 comptes concernés : image encodée, aucune origine connue
+    // (le PATCH muet garde NULL, comme un client d'avant la 052).
+    const r = await call(u.ctx, "patch", `/api/user/${u.userId}`, {
+      data: { avatar_data: CROPPED },
+      headers: await csrfHeader(u.ctx),
+    });
+    expect(r.ok(), await r.text()).toBeTruthy();
+  });
+  test.afterAll(async () => {
+    await u?.ctx?.dispose();
+  });
+
+  test("l'encart est visible dans l'onglet Avatar, et disparaît dès qu'un portrait est re-choisi", async ({
+    browser,
+  }) => {
+    const ctx = await browser.newContext({ storageState: await u.ctx.storageState() });
+    const page = await ctx.newPage();
+    await gotoSettled(page, "/profile/profile.html");
+    await page.click("#openAtelierBtn");
+    await page.click('.atelier-tab[data-pane="avatar"]');
+    const notice = page.locator("#avatarOriginNotice");
+    await expect(notice).toBeVisible();
+    await expect(notice).toContainText(/Same Energy/);
+
+    // Re-choisir un portrait (GIF : pas de recadrage, appliqué tout de suite) → le
+    // serveur reçoit l'origine et l'encart s'éteint.
+    const gif = page.locator('#avatarGrid .avatar-cell img[data-src$=".gif"]').first();
+    const src = await gif.getAttribute("data-src");
+    const patch = page.waitForResponse(
+      (r) => r.request().method() === "PATCH" && r.url().includes("/api/user/") && "avatar_data" in (r.request().postDataJSON?.() ?? {})
+    );
+    await gif.click();
+    expect((await patch).status()).toBe(200);
+    await expect(notice).toBeHidden();
+    const server = await (await call(u.ctx, "get", `/api/user/${u.userId}`)).json();
+    expect(server.profile.avatar_src).toBe(src);
+
+    // Après rechargement, plus d'encart non plus (l'origine descend du cloud).
+    await page.reload();
+    await page.waitForLoadState("networkidle");
+    await page.click("#openAtelierBtn");
+    await page.click('.atelier-tab[data-pane="avatar"]');
+    await expect(notice).toBeHidden();
+    await ctx.close();
+  });
+});

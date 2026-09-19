@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { getStreakTier, formatSongTime, bestModeOverall } from "../profile/profile-format.js";
+import { getStreakTier, formatSongTime, bestModeOverall, needsAvatarOrigin } from "../profile/profile-format.js";
 
 describe("getStreakTier", () => {
   it("returns tier 0 for no streak", () => {
@@ -72,5 +72,22 @@ describe("bestModeOverall", () => {
 
   it("tolère des compteurs absents ou non numériques", () => {
     expect(bestModeOverall([{ mode: "classic" }, e("music", 3, "2")]).mode).toBe("music");
+  });
+});
+
+describe("needsAvatarOrigin — portrait recadré sans origine connue (052)", () => {
+  const PNG = "data:image/png;base64,iVBORw0KGgo=";
+  it("vrai seulement pour une image encodée SANS portrait galerie d'origine", () => {
+    expect(needsAvatarOrigin({ avatar: PNG })).toBe(true);
+    expect(needsAvatarOrigin({ avatar: PNG, avatarSrc: "" })).toBe(true);
+    expect(needsAvatarOrigin({ avatar: PNG, avatarSrc: "none" })).toBe(true);
+  });
+  it("faux dès que l'origine est connue, ou que le portrait est un chemin galerie, ou qu'il n'y a pas d'avatar", () => {
+    expect(needsAvatarOrigin({ avatar: PNG, avatarSrc: "../img/avatar/Chie.jpg" })).toBe(false);
+    expect(needsAvatarOrigin({ avatar: PNG, avatarSrc: "../img/avatar/Kanji.avif" })).toBe(false);
+    expect(needsAvatarOrigin({ avatar: "../img/avatar/Arai.png" })).toBe(false);
+    expect(needsAvatarOrigin({ avatar: "" })).toBe(false);
+    expect(needsAvatarOrigin({})).toBe(false);
+    expect(needsAvatarOrigin(null)).toBe(false);
   });
 });
