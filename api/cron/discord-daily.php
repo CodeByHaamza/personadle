@@ -393,6 +393,13 @@ if ($erreur !== '' || $code < 200 || $code >= 300) {
     jsonError('Discord webhook call failed (HTTP ' . $code . ')', 502);
 }
 
+// Trace de succès (Admin → Logs) : un cron hPanel qui ne tourne pas ne laisse
+// AUCUNE autre empreinte — vécu du 9 au 19 septembre 2026, clé fausse, silence.
+personadle_log_error(pdo(), 'info', 'Discord daily posted (' . $v['nom'] . ')', [
+    'source' => 'cron-discord-daily',
+    'date'   => $now->format('Y-m-d H:i'),
+]);
+
 jsonSuccess([
     'success' => true,
     'data'    => [
