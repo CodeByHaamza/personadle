@@ -702,6 +702,13 @@
               <p class="atelier-hint" data-i18n="profile.avatar_hint">
                 Pick a portrait — it is applied right away. Badly framed? Adjust it.
               </p>
+              <!-- Portrait recadré avant la 052 : le jeu ne sait plus lequel c'est
+                   (profiles.avatar_src NULL). Visible tant que le joueur n'a pas
+                   re-choisi un portrait — géré par _markSelectedAvatarCell(). -->
+              <p id="avatarOriginNotice" class="atelier-notice hidden" role="status" data-i18n="profile.avatar_origin_notice">
+                🪪 Your portrait was cropped before the game started remembering which one it is.
+                Pick it again once below (crop it if you like) so your friends — and the Same Energy badge — know who you're wearing.
+              </p>
               <div class="atelier-avatar-actions">
                 <button id="avatarAdjustBtn" class="btn-secondary" type="button">
                   ✂ <span data-i18n="profile.avatar_adjust">Adjust framing</span>
