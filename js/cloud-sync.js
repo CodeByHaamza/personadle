@@ -183,6 +183,30 @@ export async function pullProfileFromCloud() {
       delete p.stats.favoriteMode;
     }
 
+    // ── Stats Expert (user_stats_expert, 051) ──────────────────────────────
+    // Tenues à part de p.stats.* (le profil les affiche dans son propre bloc), mais
+    // additionnées aux normales pour les déblocages — statsForUnlocks()
+    // (profile/profile-format.js). Champ absent (backend antérieur) → on garde ce
+    // qu'on avait ; tableau vide → aucune partie Expert, on efface.
+    if (Array.isArray(d.expert_stats)) {
+      if (!p.stats) p.stats = {};
+      const ex = { wins: 0, giveups: 0, games: 0, perfectWins: 0, streakRecord: 0, modeWins: {}, modeCount: {} };
+      for (const r of d.expert_stats) {
+        ex.wins += r.wins ?? 0;
+        ex.giveups += r.giveups ?? 0;
+        ex.games += r.games ?? 0;
+        ex.perfectWins += r.perfect_wins ?? 0;
+        ex.streakRecord = Math.max(ex.streakRecord, r.streak_record ?? 0);
+        const k = modeLabel(r.mode);
+        if (k) {
+          ex.modeWins[k] = r.wins ?? 0;
+          ex.modeCount[k] = r.games ?? 0;
+        }
+      }
+      if (d.expert_stats.length) p.stats.expert = ex;
+      else delete p.stats.expert;
+    }
+
     // Cooldown Jack Frost : le backend est la source de vérité, ici comme ailleurs.
     // Sans cette ligne, `canRecover()` ne connaissait que la trace locale et
     // proposait la récupération sur un appareil neuf, un cache vidé ou une

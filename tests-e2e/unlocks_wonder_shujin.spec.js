@@ -249,3 +249,47 @@ test.describe("Titre Go Beyond — tout Wonder, par l'API", () => {
     await u.ctx.dispose();
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+test.describe("Une victoire Expert est une victoire (décision du 2026-09-19)", () => {
+  test("Take Your Heart (40 victoires AOA) : 30 normales + 10 Expert → accordé ; 30 + 9 → refusé", async () => {
+    const ctx = await pwRequest.newContext({ baseURL: BASE });
+    // La porte Expert AOA = 15 perfects consécutifs : ce sont déjà 15 victoires normales.
+    const { userId } = await registerAndUnlockExpert(ctx, "alloutattack");
+    const u = { ctx, userId };
+    for (let i = 0; i < 15; i++) await win(u, "alloutattack", `AOA normal #${i}`);
+    for (let i = 0; i < 9; i++) await win(u, "alloutattack", `AOA expert #${i}`, { expert: true });
+    const unlock = async () =>
+      call(u.ctx, "post", "/api/titles/unlock", { data: { title_slug: "take_your_heart" }, headers: await csrfHeader(u.ctx) });
+    expect((await unlock()).status(), "30 + 9 = 39 : pas encore").toBe(403);
+    await win(u, "alloutattack", "AOA expert #9", { expert: true });
+    expect((await unlock()).status(), "30 + 10 = 40").toBe(200);
+
+    // Le pull côté client voit les deux dimensions séparément (le profil les affiche à part)…
+    const me = await (await call(u.ctx, "get", `/api/user/${userId}`)).json();
+    expect(me.stats.find((s) => s.mode === "alloutattack").wins).toBe(30);
+    expect(me.expert_stats.find((s) => s.mode === "alloutattack").wins).toBe(10);
+    await ctx.dispose();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+test.describe("Réconciliation serveur : ce qui est dû est accordé sans que le client le demande", () => {
+  test("25 victoires au premier essai → « Je ne suis pas une princesse » apparaît débloqué au simple GET /api/titles", async () => {
+    // Le client n'a jamais su évaluer perfect_wins : en prod, un joueur à 363 perfects
+    // n'avait pas le titre. Depuis, GET /api/titles accorde lui-même ce qui est dû.
+    const u = await registerUser("rc");
+    for (let i = 0; i < 24; i++) await win(u, "music", `Perfect #${i}`, { attempts: 1 });
+    let titles = await (await call(u.ctx, "get", "/api/titles")).json();
+    expect(Number(titles.find((t) => t.slug === "kotone_not_a_princess").is_unlocked), "24 perfects : pas encore").toBe(0);
+    await win(u, "music", "Perfect #24", { attempts: 1 });
+    titles = await (await call(u.ctx, "get", "/api/titles")).json();
+    expect(Number(titles.find((t) => t.slug === "kotone_not_a_princess").is_unlocked), "25 perfects, aucun POST /unlock").toBe(1);
+    // Les conditions déclaratives ne tombent jamais d'office
+    expect(Number(titles.find((t) => t.slug === "joker_looking_cool").is_unlocked)).toBe(0);
+    // Et le badge « 10 victoires » est accordé de la même façon par GET /api/badges
+    const badges = await (await call(u.ctx, "get", "/api/badges")).json();
+    expect(Number(badges.find((b) => b.slug === "ace_detective").is_unlocked)).toBe(1);
+    await u.ctx.dispose();
+  });
+});
