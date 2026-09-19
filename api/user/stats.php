@@ -7,10 +7,12 @@
  * Accès : connecté (ses propres stats uniquement pour l'instant)
  * Succès : 200 { stats: { by_mode: [...], expert_by_mode: [...], global: {...} } }
  *
- * `expert_by_mode` est calculé à la volée depuis `game_sessions` : le Mode Expert
+ * `expert_by_mode` vient de `user_stats_expert` (migration 051) : le Mode Expert
  * n'alimente pas `user_stats` (cf. api/lib/game_session.php), donc il ne peut pas
- * apparaître dans `by_mode`. Tableau vide tant que le joueur n'a fait aucune partie
- * Expert — le front n'affiche alors rien.
+ * apparaître dans `by_mode`. La table est alimentée à chaque partie Expert et
+ * éditable dans l'admin, comme `user_stats` ; seuls `best_attempts` et
+ * `last_played_date` restent lus dans l'historique `game_sessions`. Tableau vide
+ * tant que le joueur n'a aucune ligne — le front n'affiche alors rien.
  */
 
 require_once __DIR__ . '/../bootstrap.php';
