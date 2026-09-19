@@ -5,6 +5,7 @@
  */
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../lib/condition_check.php';
+require_once __DIR__ . '/../lib/unlock_reconcile.php';
 
 $authId = requireAuth();
 $pdo    = pdo();
@@ -13,6 +14,11 @@ $parts  = requestPathSegments();
 $action = end($parts);
 
 if ($method === 'GET') {
+    // Le serveur accorde d'abord ce qui est dû (unlock_reconcile.php) : la liste
+    // renvoyée est alors la vérité, même pour les conditions que le client ne sait
+    // pas évaluer (perfect_wins, expert_wins_total, titles_count, social_link_min_rank).
+    personadle_reconcile_titles($pdo, $authId);
+
     // Six langues servies (pt compris — il ne l'était pas : les joueurs portugais
     // lisaient l'anglais). Le suffixe est validé par liste blanche avant d'entrer
     // dans le nom de colonne ; la description retombe sur l'anglais si la langue
