@@ -13,6 +13,68 @@
 
 ---
 
+## 2026-09-19 — Badges : Velvet Regular « qui s'enlève », Best Bro jamais accordé — deux désaccords local ↔ serveur
+
+Signalés par Hamza via un ami : (1) épingler **Velvet Regular** (50 journées) « s'enlève »
+à chaque essai ; (2) « certains badges ont du mal, plusieurs amis notamment ». Lecture de la
+prod : cinq joueurs à 53-56 journées distinctes **sans** Velvet Regular en base, un seul
+`unique_days` jamais accordé depuis juillet ; **Gyotre, 12 amis acceptés, sans Best Bro**.
+
+### 1. Velvet Regular — le compteur de journées était tenu par appareil
+
+`uniqueDaysSet` vivait dans le profil local : un joueur pouvait se voir 50 jours chez lui —
+jours d'avant le compte compris — quand `game_sessions` en comptait 45. Le badge se
+débloquait donc en local, `syncBadgesWithBackend()` le poussait, le serveur répondait 403
+« Condition not met », **avalé** (`.catch(() => {})`), et le badge restait « débloqué » à
+l'écran. L'épingler envoyait `selected_badges` → 403 « Badge not unlocked » → **tout le PATCH
+tombait** (avatar, bordure, titre compris) → le pull suivant remettait l'ancienne sélection.
+Pour les cinq joueurs à 53-56 jours, le serveur aurait dit oui — mais leur appareil
+n'avait jamais atteint 50 (nouvel appareil, cache vidé) : rien à pousser.
+
+- **Serveur = vérité pour les journées** : `GET /api/user/:id` renvoie `unique_days`
+  (`COUNT(DISTINCT played_date)`), le pull le pose dans `profile.uniqueDaysPlayed` ;
+  connecté, `trackUniqueDay()` n'ajoute qu'aujourd'hui (+1) au lieu de reprendre la
+  taille du set local — anonyme, le set reste la vérité.
+- **`PATCH /api/user/:id` accorde lui-même** un badge épinglé que le serveur n'a pas si sa
+  condition est remplie (même `personadle_condition_allows_unlock()` que `/badges/unlock`,
+  badges à code événement exclus) ; sinon **403 « Badge not unlocked: <slug> »** — le slug,
+  pour que le client sache quoi retirer.
+- Client : `updateWithBadgeFallback()` (profile-page.js) retire le slug refusé de la
+  sélection et renvoie le PATCH sans lui, une fois — le reste du profil s'enregistre.
+- `syncBadgesWithBackend()` : un 403 « Condition not met » **retire le badge du local** (et
+  de la sélection) au lieu de l'avaler — le serveur est la vérité. Panne réseau, 5xx ou 403
+  « code événement » laissent le local intact : on ne sait pas.
+
+### 2. Best Bro — le drapeau arrivait après la vérification
+
+`checkSocialBadges()` pose `hasTwoFriends` (et `leblanc3FriendsDay`, `sameEnergyWith`) après
+`/api/friends` — donc **après** `checkAndUnlockBadges()`, déjà passé. Le badge attendait la
+visite suivante du profil, et sa synchro celle d'après. Pire : `initBadgesSystem()` l'appelle
+au chargement, quand `window._currentUser` n'est le plus souvent **pas encore posé** →
+retour immédiat, et `_fullCloudSync()` (après l'auth) ne l'appelait pas. Selon la vitesse
+de l'auth, le drapeau ne se posait jamais.
+
+- `checkSocialBadges()` revérifie les conditions et synchronise **dans la même passe** dès
+  qu'un drapeau change ; `_fullCloudSync()` l'appelle après l'auth résolue.
+
+### Tests
+
+- Vitest (+7) : `cloudSync` (unique_days remplace le local même plus grand ; payload sans
+  le champ → intact), `badgesManager` (403 « Condition not met » retire du local et de la
+  sélection ; 5xx et 403 « code événement » ne retirent rien ; `trackUniqueDay` connecté =
+  serveur + 1, anonyme = set ; Best Bro débloqué **et** poussé à la première passe).
+- E2E `unlocks_usecases` (+2) : épingler un badge que le serveur n'a pas → accordé si la
+  condition est remplie (première victoire), 403 nommant le slug sinon, `unique_days` = 1 ;
+  deux amis acceptés → **une seule** ouverture du profil suffit pour Best Bro en base.
+- `tests/social-link.test.js` « flame today » : date UTC → rouge chaque nuit 0-2 h Paris,
+  corrigé (même correctif que dans la PR 050).
+
+### Prod
+
+Rien à jouer en base. `profile/profile-page.js` est précaché → bump `CACHE_VERSION` v98 → v99 à
+la prochaine release (checklist). Les cinq joueurs à 50+ jours recevront Velvet Regular au
+prochain épinglage ou à la prochaine synchro (le serveur dit oui) ; Gyotre aura Best Bro à
+sa prochaine visite du profil.
 ## 2026-09-18 — L'annonce Discord du daily pingue le rôle opt-in « 🔔 Daily » ; le quiz d'Arcane vit dans le bot, pas dans le site
 
 `api/cron/discord-daily.php` : mention optionnelle pilotée par `DISCORD_DAILY_MENTION_ROLE`

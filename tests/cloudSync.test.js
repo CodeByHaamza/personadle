@@ -166,6 +166,34 @@ describe("pullProfileFromCloud — succès", () => {
     expect(JSON.parse(localStorage.getItem("personaUserProfile")).favoriteMode).toBeNull();
   });
 
+  it("les journées distinctes viennent du serveur : unique_days remplace le compte local, même plus grand", async () => {
+    // Le compte par appareil (uniqueDaysSet) pouvait dépasser celui de la base —
+    // jours d'avant le compte inclus : Velvet Regular se débloquait en local, le
+    // serveur le refusait à chaque synchro et l'épinglage « s'enlevait » (2026-09-19).
+    localStorage.setItem(
+      "personaUserProfile",
+      JSON.stringify({ uniqueDaysPlayed: 52, uniqueDaysSet: new Array(52).fill("2026-01-01") })
+    );
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => baseUserPayload({ unique_days: 45 }),
+    });
+    await pullProfileFromCloud();
+    expect(JSON.parse(localStorage.getItem("personaUserProfile")).uniqueDaysPlayed).toBe(45);
+  });
+
+  it("un payload sans unique_days (backend antérieur) laisse le compte local intact", async () => {
+    localStorage.setItem("personaUserProfile", JSON.stringify({ uniqueDaysPlayed: 12 }));
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => baseUserPayload(),
+    });
+    await pullProfileFromCloud();
+    expect(JSON.parse(localStorage.getItem("personaUserProfile")).uniqueDaysPlayed).toBe(12);
+  });
+
   it("un payload sans favorite_mode (backend pas encore migré) laisse le choix local intact", async () => {
     localStorage.setItem("personaUserProfile", JSON.stringify({ favoriteMode: "emoji" }));
     vi.spyOn(globalThis, "fetch").mockResolvedValue({

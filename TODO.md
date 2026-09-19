@@ -8,7 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 1416 tests Vitest (77 suites), 358 méthodes PHPUnit, 243 tests E2E,
+> Vérifié le 2026-08-26 : 1425 tests Vitest (77 suites), 358 méthodes PHPUnit, 245 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
@@ -103,6 +103,8 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       le Compendium interrogent `name_pt` → `Unknown column` → **500 pour tout le monde**, quelle
       que soit la langue. Vérifiée le 2026-09-18 sur un import vierge du nouveau `bdd_mysql.sql`
       (no-op) et sur la base de dev au schéma 048.
+- [ ] **Bumper `CACHE_VERSION` dans `sw.js` à la prochaine release (v98 → v99)** : `profile/profile-page.js`
+      (précaché) change après le hotfix des titres (badges sociaux, épinglage — 2026-09-19).
 - [x] **Bumper `CACHE_VERSION` dans `sw.js` (v96 → v97, fait le 2026-09-18 soir)** : `js/filterMenu.js`
       (précaché) et `profile/titles-ui.js` changent après la 2.2 (marqueur de format des filtres,
       descriptions de titres — 2026-09-18 soir). Sans bump,
