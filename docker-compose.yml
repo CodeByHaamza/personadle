@@ -8,7 +8,7 @@
 #
 # Ce que ça fournit :
 #   • MariaDB 10.6 avec le schéma complet + seed (social_link_ranks, titles)
-#   • PHP 8.3 + Apache avec mod_rewrite et les extensions requises
+#   • PHP 8.2 (comme la prod) + Apache avec mod_rewrite et les extensions requises
 #   • PhpMyAdmin pour inspecter la BDD sans ligne de commande
 #
 # Accès :
@@ -50,7 +50,7 @@ services:
       retries: 10
       start_period: 30s
 
-  # ── PHP 8.3 + Apache ────────────────────────────────────────────────────────
+  # ── PHP 8.2 + Apache ────────────────────────────────────────────────────────
   php:
     build:
       context: .

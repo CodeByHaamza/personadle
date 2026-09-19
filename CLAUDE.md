@@ -25,7 +25,7 @@ niveau d'implication est dit honnêtement.
 ## 2. Stack
 
 - **Frontend** : Vanilla JS ES6+ (zéro framework), modules ES6, `localStorage`
-- **Backend** : PHP 8.3 + PDO — MySQL 8.0 local / MariaDB 10.6+ Hostinger
+- **Backend** : PHP 8.2 (version de la prod Hostinger — image Docker et CI alignées dessus) + PDO — MariaDB 11.8 en prod, image `mariadb:10.6` en dev
 - **Tests** : Vitest + jsdom (`npm test`)
 - **Auth** : bcrypt + sessions PHP httpOnly — pas JWT
 
