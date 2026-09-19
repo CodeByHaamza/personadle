@@ -13,6 +13,177 @@
 
 ---
 
+## 2026-09-19 — « Copier pour Discord » échouait pour tout le monde : la CSP bloquait `fetch(data:)`
+
+Hamza, en testant le nouveau salon 🪪┃profiles : « ❌ Échec de la copie. Télécharge-la
+manuellement. » Le presse-papiers n'y était pour rien : le bouton faisait
+`fetch(dataUrl)` pour obtenir un Blob, et la CSP des pages HTML (`.htaccess` racine,
+`connect-src 'self' https://*.pusher.com …`) n'autorise pas `data:` en connexion. Bloqué
+en prod **et** en Docker (mod_headers y est actif) — mais aucun test ne cliquait ce bouton.
+
+- `profile/share-card.js` : `dataUrlToBlob()` décode le base64 sans requête ;
+  `copyPngToClipboard()` renvoie `false` au lieu de lever (pas de `ClipboardItem`,
+  permission refusée). En repli, le bouton **télécharge la carte** et le dit
+  (`profile.share_copy_fallback`, six langues) — le joueur repart toujours avec son image.
+- Tests : `shareCard.test.js` (Blob sans fetch, signature PNG ; écriture OK / refusée) ;
+  E2E `profile_atelier` « Copier pour Discord sous la vraie CSP » (permission clipboard
+  accordée au contexte, aucune violation CSP en console) — **rouge sur l'ancien code**,
+  vérifié en stashant le correctif.
+- Pas de bump `CACHE_VERSION` : `share-card.js` n'est pas précaché et les scripts sont
+  servis en network-first.
+
+---
+
+## 2026-09-19 — Discord : top 3 de la semaine, le dimanche à 20 h (`api/cron/discord_weekly.php`)
+
+Idée Hamza : « toutes les semaines, dans un salon, on affiche le top 3 de ladite semaine
+(tous les dimanches à 20 h) ». Même mécanique que l'annonce quotidienne : un cron
+Hostinger, un webhook, la clé en header — pas de bot à héberger, et les données sont
+déjà là (c'est la fenêtre `period=week` du classement).
+
+- **`api/cron/discord_weekly.php`** : deux podiums, victoires en normal (tous modes) et en
+  Expert s'il y en a eu ; égalité → moins de parties d'abord, puis pseudo ; comptes supprimés
+  exclus ; semaine sans victoire → rien posté (`posted: false`). Voix Margaret (les registres).
+  Fenêtre lundi → dimanche 20 h : les parties de 20 h à minuit ne sont pas dedans — prix d'un
+  rendez-vous à une heure où le salon est là, assumé dans l'en-tête.
+- **`api/lib/discord_webhook.php`** : validation de l'URL (forme Discord, sans query string),
+  POST `?wait=true`, caviardage URL + token avant tout log, échappement markdown des pseudos.
+  Extrait du quotidien, qui garde sa copie locale (il tourne en prod ; à rebrancher à sa
+  prochaine modification).
+- **`api/lib/weekly_podium.php`** : la requête et les lignes 🥇🥈🥉, séparées du cron pour être
+  testables — le cron exige `CRON_SECRET`, absent en local et en CI.
+- Config : `DISCORD_WEEKLY_WEBHOOK` (à défaut, celui du quotidien) et `DISCORD_WEEKLY_MENTION_ROLE`
+  (optionnel, opt-in seulement). `phpstan.neon` : les deux en `dynamicConstantNames`, même piège
+  que `DISCORD_DAILY_WEBHOOK`. `DEPLOY.md` : les deux crons Discord dans le tableau + rappel du
+  fuseau. Nouveau fichier en `snake_case` (règle CLAUDE.md), d'où `discord_weekly` à côté du
+  `discord-daily` historique.
+- Tests : `DiscordWebhookTest` (URL, caviardage, échappement, lignes), `DatabaseIntegrationTest`
+  `testWeeklyPodiumRanksByWinsThenFewerGamesAndKeepsExpertApart` (fenêtre en 2100 pour ne pas
+  croiser les parties « aujourd'hui » des autres tests).
+
+### À faire côté prod (TODO.md)
+
+Constante `DISCORD_WEEKLY_WEBHOOK` dans `config.php` (webhook du salon classement), cron hPanel
+`0 20 * * 0`, et vérifier l'heure réelle du premier post.
+## 2026-09-19 — Same Energy ne tombait presque jamais : le recadrage effaçait « qui » est porté (migration 052)
+
+Hamza : « je suis pas sûr que le badge Same Energy se débloque bien ». Vérification de la
+chaîne complète : deux vrais défauts.
+
+1. **Le recadrage cassait la détection.** Choisir un portrait ouvre aussitôt la fenêtre de
+   recadrage (retour Hamza du 2026-09-16) ; valider remplace `avatar_data`
+   (`../img/avatar/Chie.jpg`) par le PNG recadré en base64. `personadle_same_energy_partners()`
+   comparait la fin de `avatar_data` aux noms de fichiers → plus rien ne matchait. Le badge ne
+   pouvait tomber que si les **deux** amis avaient fermé la fenêtre sans recadrer. Le client
+   gardait bien l'origine (`profile.avatarSrc`) — mais en local seulement : pas synchronisée,
+   et le pull cloud la supprimait (`delete p.avatarSrc`).
+2. **Deux Chie manquaient** dans la liste (serveur et miroir client) : `chie_satonaka_icon.jpg`
+   et `chiesatonaka_revivale.jpg` (P4). `meme_chie_shut_teddie.jpg` est conservée.
+
+### `profiles.avatar_src` — le portrait galerie d'origine, synchronisé
+
+- `sql/migrations/052_profiles_avatar_src.sql` + `bdd_mysql.sql` : `avatar_src VARCHAR(120) NULL`.
+  Reprise : `avatar_src = avatar_data` quand celui-ci est un chemin galerie (58 lignes en dev) ;
+  un portrait recadré avant la 052 reste inconnu (45 en dev) — le joueur le re-choisit une fois.
+- `api/user/index.php` PATCH : règle en quatre cas — `avatar_data` chemin galerie → **déduit**
+  (le client n'a rien à dire) ; `avatar_data` null → null ; image recadrée **avec** `avatar_src`
+  (null compris) → le client sait ; image recadrée **sans** `avatar_src` → **on garde la valeur
+  connue**. Ce dernier cas est celui du sync complet (`_fullCloudSync` renvoie `avatar_data` tel
+  quel) et des clients pas encore rafraîchis : écrire NULL là aurait effacé l'origine à chaque
+  sync (état dérivé, CLAUDE.md §13). GET renvoie `avatar_src`.
+- `api/lib/validation.php` : `personadle_is_gallery_avatar()`, `personadle_validate_avatar_src()`
+  (null/'' ou chemin galerie **existant** — jamais une image inline : ce champ dit « qui », il ne
+  stocke rien).
+- `api/friends/index.php` : `avatar_src` dans chaque ami (retour immédiat côté client).
+- `api/lib/condition_check.php` : `COALESCE(avatar_src, IF(avatar_data LIKE '../img/avatar/%',
+  avatar_data, NULL))` — l'origine parle ; `avatar_data` ne remonte que s'il est lui-même un
+  chemin (profil pré-052 jamais resauvé), jamais les blobs base64.
+
+### Client
+
+- `profile/profile-page.js` : `commitAvatar()` envoie `avatar_src: galleryAvatarPath(selectedAvatarSrc)`
+  avec l'image ; `_fullCloudSync` envoie `avatar_src` **seulement s'il est connu localement**
+  (sinon silence → le serveur garde). `galleryAvatarPath()` accepte `.avif` (Kanji).
+- `js/cloud-sync.js` : `avatar_src` descend dans `profile.avatarSrc` ; null/absent → supprimé
+  (plus de portrait fantôme après un changement sur un autre appareil).
+- `profile/badges/badgesManager.js` : `mine = profile.avatarSrc || profile.avatar`,
+  `theirs = f.avatar_src || f.avatar_data`. `badgesData.js` : liste Chie complétée.
+- `sw.js` : `CACHE_VERSION` v99 → v100 (`profile-page.js` précaché).
+
+### Tests
+
+- PHPUnit : `testSameEnergySurvivesTheCropThanksToAvatarSrc` (deux recadrés, un seul, pré-052
+  inconnu), `ValidationTest` ×3 (`avatar_src`, `is_gallery_avatar`).
+- Vitest : détection via `avatarSrc`/`avatar_src`, toutes les Chie ; pull cloud d'`avatar_src`
+  (valeur, null, champ absent).
+- E2E `unlocks_wonder_shujin` : le scénario Same Energy passe maintenant par **A recadré + B en
+  icône Chie** ; nouveau test de contrat `avatar_src` (déduit, gardé si muet, suit, null explicite,
+  400 sur image inline / portrait inconnu / traversée, effacé avec l'avatar).
+
+### Angle mort
+
+- Joueurs déjà recadrés avant la 052 : `avatar_src` NULL, badge impossible tant qu'ils n'ont
+  pas re-choisi leur portrait (un clic dans l'Atelier, recadrage compris). À dire à l'ami de
+  Hamza qui teste.
+## 2026-09-19 — Stats Expert éditables : table `user_stats_expert` (migration 051)
+
+Hamza : « dans le menu admin je peux pas modifier mes stats de mode Expert ». Normal : les
+stats Expert n'existaient nulle part. `personadle_expert_stats_by_mode()` faisait un
+`GROUP BY` à la volée sur `game_sessions WHERE is_expert = 1` — rien à éditer, et une
+partie perdue par un bug (409 `uq_session`, cf. 050) ne pouvait pas être rendue au joueur.
+Décision : **même modèle que le mode normal** — une table de compteurs alimentée à chaque
+partie, lue par le profil, écrasable par l'admin. Table séparée plutôt qu'une colonne
+`is_expert` dans `user_stats` : une vingtaine de lecteurs (badges, titres, classement,
+leaderboard cache) supposent « une ligne par mode » et lisent les stats normales sans filtre.
+
+### Base
+
+- `sql/migrations/051_user_stats_expert.sql` + `sql/bdd_mysql.sql` : `user_stats_expert`
+  (`user_id, mode` PK, `wins, giveups, games, streak, streak_record, perfect_wins,
+  total_time_ms, last_played_at, first_played_at`, FK `users` CASCADE). Reprise de
+  l'historique en SQL (`INSERT … SELECT … GROUP BY user_id, mode ON DUPLICATE KEY UPDATE`) —
+  compteurs seulement.
+- `scripts/backfill_expert_streaks.php` : pose `streak` (via `personadle_recompute_mode_streak(…,
+  true)` au dernier jour joué) et `streak_record` (`personadle_expert_streak_record()`, plus longue
+  suite de journées Paris gagnantes). « Jours consécutifs » ne se calcule pas raisonnablement en
+  SQL, et l'API le faisait déjà en PHP. À lancer une fois après la 051 ; rejouable. En Docker :
+  `docker exec -e DB_HOST=db -e DB_USER=root -e DB_PASS=rootpassword personadle_php php
+  scripts/backfill_expert_streaks.php`.
+
+### API
+
+- `api/lib/game_session.php` : la branche Expert de `personadle_record_game_session()` appelle
+  `personadle_bump_expert_stats()` (INSERT IGNORE de la ligne, puis `games+1`, `wins`/`giveups`,
+  `streak` recalculée depuis l'historique — jamais incrémentale —, `streak_record = GREATEST`,
+  `perfect_wins`, `total_time_ms`) et renvoie `expert_stats` à côté des `stats` normales
+  inchangées. `personadle_expert_stats_by_mode()` lit la table ; `best_attempts` et
+  `last_played_date` restent lus dans `game_sessions` (ce ne sont pas des compteurs, l'admin n'a
+  pas à les inventer).
+- `api/admin/user_stats.php` : `is_expert` (bool) → cible `user_stats_expert`, audit
+  `user_stats_expert.overwrite`. `api/admin/user.php` : `expert_stats` dans le détail.
+- `api/user/stats.php` : `expert_by_mode` inchangé côté forme — c'est la table qui parle.
+
+### Admin
+
+- `admin/admin.js` `renderTabStats` : deux tableaux (normal / ⚡ Expert), même colonnes, Save
+  par ligne envoie `is_expert`. Note d'onglet : l'*accès* Expert reste dans l'onglet ⚡ Expert.
+
+### Tests
+
+- PHPUnit : `testExpertStatsByModeReadsTheExpertTableFedByEachGame` (3 parties Expert + 1
+  normale, compteurs, `best_attempts`, streak, écrasement admin relu),
+  `testExpertStreakRecordIsTheLongestRunOfConsecutiveWinningDays`.
+- E2E `admin-extended.spec.js` : PATCH `is_expert:true` → `expert_stats` côté admin,
+  `expert_by_mode` côté joueur, `user_stats` intacte, 403 non-admin.
+
+### Angles morts
+
+- Un joueur qui a déjà des parties Expert mais **aucune ligne** (prod avant la 051) : l'API renvoie
+  `[]` jusqu'à la reprise — d'où « 051 puis backfill AVANT le pull » dans `TODO.md`.
+- `admin/` n'est pas précaché par le SW : pas de bump `CACHE_VERSION` pour ce lot.
+
+---
+
 ## 2026-09-19 — Badges : Velvet Regular « qui s'enlève », Best Bro jamais accordé — deux désaccords local ↔ serveur
 
 Signalés par Hamza via un ami : (1) épingler **Velvet Regular** (50 journées) « s'enlève »

@@ -638,7 +638,10 @@ function personadle_count_distinct_targets_won(PDO $pdo, int $userId, string $mo
  */
 const PERSONADLE_SAME_ENERGY_AVATARS = [
     'arai' => ['Arai.png', 'Arai2.png'],
-    'chie' => ['Chie.jpg', 'Chie2.jpg', 'chie_pq.jpg', 'meme_chie_shut_teddie.jpg'],
+    'chie' => [
+        'chie_satonaka_icon.jpg', 'Chie.jpg', 'Chie2.jpg', 'chiesatonaka_revivale.jpg',
+        'chie_pq.jpg', 'meme_chie_shut_teddie.jpg',
+    ],
 ];
 
 /**
@@ -652,15 +655,21 @@ const PERSONADLE_SAME_ENERGY_AVATARS = [
  */
 function personadle_same_energy_partners(PDO $pdo, int $userId): array
 {
+    // « Qui porte-t-il ? » se lit dans avatar_src (portrait galerie d'origine,
+    // migration 052) : un portrait recadré n'est plus qu'un PNG base64 dans
+    // avatar_data. On ne remonte avatar_data que s'il est lui-même un chemin
+    // galerie (profil d'avant la 052 jamais resauvé) — jamais les blobs.
     $stmt = $pdo->prepare(
-        'SELECT f.requester_id, f.addressee_id, pm.avatar_data AS mine, pf.avatar_data AS theirs
+        "SELECT f.requester_id, f.addressee_id,
+                COALESCE(pm.avatar_src, IF(pm.avatar_data LIKE '../img/avatar/%', pm.avatar_data, NULL)) AS mine,
+                COALESCE(pf.avatar_src, IF(pf.avatar_data LIKE '../img/avatar/%', pf.avatar_data, NULL)) AS theirs
          FROM friendships f
          JOIN social_links sl
            ON sl.user_a_id = LEAST(f.requester_id, f.addressee_id)
           AND sl.user_b_id = GREATEST(f.requester_id, f.addressee_id)
          LEFT JOIN profiles pm ON pm.user_id = ?
          LEFT JOIN profiles pf ON pf.user_id = IF(f.requester_id = ?, f.addressee_id, f.requester_id)
-         WHERE f.status = ? AND (f.requester_id = ? OR f.addressee_id = ?) AND sl.`rank` >= 5'
+         WHERE f.status = ? AND (f.requester_id = ? OR f.addressee_id = ?) AND sl.`rank` >= 5"
     );
     $stmt->execute([$userId, $userId, 'accepted', $userId, $userId]);
 

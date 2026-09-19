@@ -64,3 +64,9 @@ define('PUSHER_CLUSTER', '');
 // ⚠️ Ne pas y mettre le rôle Membres : un ping tous les jours sur un
 // rendez-vous de routine fait couper le salon. Rôle opt-in « 🔔 Daily ».
 define('DISCORD_DAILY_MENTION_ROLE', '1550573338336698521');
+
+// Top 3 de la semaine (api/cron/discord_weekly.php, dimanche 20:00 Paris).
+// Webhook du salon classement ; vide ou absent => celui du quotidien est utilisé.
+// Le rôle mentionné est optionnel — même règle que le quotidien : opt-in seulement.
+define('DISCORD_WEEKLY_WEBHOOK', '');
+define('DISCORD_WEEKLY_MENTION_ROLE', '');

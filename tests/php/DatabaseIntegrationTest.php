@@ -305,9 +305,13 @@ final class DatabaseIntegrationTest extends TestCase
         $this->assertTrue(personadle_verify_condition(self::$pdo, $u, 'mode_expert_perfect_wins', 'classic', 3));
     }
 
-    /** Ami accepté + lien social au rang voulu + avatars posés. */
-    private function makeSameEnergyPair(string $myAvatar, ?string $theirAvatar, int $rank): array
-    {
+    /**
+     * Ami accepté + lien social au rang voulu + avatars posés. `$mySrc`/`$theirSrc` :
+     * portrait galerie d'origine (profiles.avatar_src, 052) quand l'avatar est recadré.
+     */
+    private function makeSameEnergyPair(
+        string $myAvatar, ?string $theirAvatar, int $rank, ?string $mySrc = null, ?string $theirSrc = null
+    ): array {
         $me = $this->makeUser('se1');
         $them = $this->makeUser('se2');
         self::$pdo->prepare('INSERT INTO friendships (requester_id, addressee_id, status) VALUES (?, ?, ?)')
@@ -318,12 +322,34 @@ final class DatabaseIntegrationTest extends TestCase
         self::$pdo->prepare('UPDATE social_links SET `rank` = ? WHERE id = ?')->execute([$rank, $linkId]);
         // makeUser() ne crée pas de ligne profiles (register.php le fait en prod) : on la pose.
         $up = self::$pdo->prepare(
-            'INSERT INTO profiles (user_id, avatar_data) VALUES (?, ?)
-             ON DUPLICATE KEY UPDATE avatar_data = VALUES(avatar_data)'
+            'INSERT INTO profiles (user_id, avatar_data, avatar_src) VALUES (?, ?, ?)
+             ON DUPLICATE KEY UPDATE avatar_data = VALUES(avatar_data), avatar_src = VALUES(avatar_src)'
         );
-        $up->execute([$me, $myAvatar]);
-        $up->execute([$them, $theirAvatar]);
+        $up->execute([$me, $myAvatar, $mySrc]);
+        $up->execute([$them, $theirAvatar, $theirSrc]);
         return [$me, $them];
+    }
+
+    public function testSameEnergySurvivesTheCropThanksToAvatarSrc(): void
+    {
+        require_once __DIR__ . '/../../api/lib/condition_check.php';
+        $png = 'data:image/png;base64,iVBORw0KGgo=';
+
+        // Les deux ont recadré leur portrait : avatar_data n'est plus qu'un PNG, mais
+        // avatar_src dit qui est porté (052). C'était LE cas courant : la fenêtre de
+        // recadrage s'ouvre dès qu'on choisit un portrait.
+        [$me, $them] = $this->makeSameEnergyPair($png, $png, 5, '../img/avatar/chiesatonaka_revivale.jpg', '../img/avatar/Arai2.png');
+        $this->assertSame([$them], personadle_same_energy_partners(self::$pdo, $me));
+        $this->assertSame([$me], personadle_same_energy_partners(self::$pdo, $them));
+
+        // Un seul recadré, l'autre porte le chemin galerie tel quel → mixte OK
+        [$me2, $them2] = $this->makeSameEnergyPair($png, '../img/avatar/chie_satonaka_icon.jpg', 6, '../img/avatar/Arai.png');
+        $this->assertSame([$them2], personadle_same_energy_partners(self::$pdo, $me2));
+
+        // Recadré AVANT la 052 (avatar_src inconnu) : rien à faire côté serveur, le
+        // joueur re-choisit son portrait une fois — limite documentée de la reprise.
+        [$me3] = $this->makeSameEnergyPair($png, '../img/avatar/Arai.png', 6);
+        $this->assertSame([], personadle_same_energy_partners(self::$pdo, $me3));
     }
 
     public function testSameEnergyNeedsRankFiveAndTheRightPairInEitherDirection(): void
@@ -1108,20 +1134,28 @@ final class DatabaseIntegrationTest extends TestCase
     }
 
 
-    public function testExpertStatsByModeReadsFromSessions(): void
+    public function testExpertStatsByModeReadsTheExpertTableFedByEachGame(): void
     {
+        // Migration 051 : les stats Expert vivent dans user_stats_expert (éditables
+        // dans l'admin), alimentée à chaque partie Expert — plus un GROUP BY à la
+        // volée. best_attempts et last_played_date restent lus dans game_sessions.
         $uid   = $this->makeUser();
         $today = new DateTime('now', new DateTimeZone('Europe/Paris'));
         $d0    = $today->format('Y-m-d');
         $d1    = (clone $today)->modify('-1 day')->format('Y-m-d');
         $d2    = (clone $today)->modify('-2 day')->format('Y-m-d');
 
-        // 2 victoires consécutives + 1 abandon plus ancien, plus une partie normale
+        // 1 abandon puis 2 victoires consécutives en Expert, plus une partie normale
         // qui ne doit PAS être comptée.
-        $this->insertSession($uid, 'music', $d2, 'C', 'giveup', 9, 1000, true);
-        $this->insertSession($uid, 'music', $d1, 'B', 'win', 4, 2000, true);
-        $this->insertSession($uid, 'music', $d0, 'A', 'win', 6, 3000, true);
-        $this->insertSession($uid, 'music', $d0, 'N', 'win', 1, 9999, false);
+        personadle_record_game_session(self::$pdo, $uid, 'music', $d2, 'C', 'giveup', 9, 1000, [], true);
+        personadle_record_game_session(self::$pdo, $uid, 'music', $d1, 'B', 'win', 4, 2000, [], true);
+        $out = personadle_record_game_session(self::$pdo, $uid, 'music', $d0, 'A', 'win', 6, 3000, [], true);
+        personadle_record_game_session(self::$pdo, $uid, 'music', $d0, 'N', 'win', 1, 9999, []);
+
+        // La réponse d'une partie Expert porte les stats Expert (et les normales inchangées).
+        $this->assertSame(3, $out['expert_stats']['games']);
+        $this->assertSame(2, $out['expert_stats']['wins']);
+        $this->assertSame(0, $out['stats']['games'], 'les stats normales ne bougent pas sur une partie Expert');
 
         $stats = personadle_expert_stats_by_mode(self::$pdo, $uid);
         $this->assertCount(1, $stats);
@@ -1129,10 +1163,35 @@ final class DatabaseIntegrationTest extends TestCase
         $this->assertSame(3, $stats[0]['games'], 'la partie normale ne doit pas être comptée');
         $this->assertSame(2, $stats[0]['wins']);
         $this->assertSame(1, $stats[0]['giveups']);
-        $this->assertSame(4, $stats[0]['best_attempts'], 'meilleure victoire = le moins d\'essais');
+        $this->assertSame(0, $stats[0]['perfect_wins'], 'aucune victoire Expert en un essai');
+        $this->assertSame(4, $stats[0]['best_attempts'], "meilleure victoire = le moins d'essais");
         $this->assertSame(6000, $stats[0]['total_time_ms']);
-        $this->assertSame(2, $stats[0]['streak'], 'deux victoires consécutives jusqu\'à aujourd\'hui');
+        $this->assertSame(2, $stats[0]['streak'], "deux victoires consécutives jusqu'à aujourd'hui");
+        $this->assertSame(2, $stats[0]['streak_record']);
         $this->assertSame($d0, $stats[0]['last_played_date']);
+
+        // L'admin écrase la ligne (PATCH …/stats { is_expert: true }) : c'est CE chiffre
+        // que le profil affiche ensuite — la table est la vérité, pas l'historique.
+        self::$pdo->prepare('UPDATE user_stats_expert SET wins = 40, games = 41 WHERE user_id = ? AND mode = ?')
+            ->execute([$uid, 'music']);
+        $stats = personadle_expert_stats_by_mode(self::$pdo, $uid);
+        $this->assertSame(40, $stats[0]['wins']);
+        $this->assertSame(41, $stats[0]['games']);
+    }
+
+    public function testExpertStreakRecordIsTheLongestRunOfConsecutiveWinningDays(): void
+    {
+        $uid   = $this->makeUser();
+        $today = new DateTime('now', new DateTimeZone('Europe/Paris'));
+        $d = fn(int $back) => (clone $today)->modify("-{$back} day")->format('Y-m-d');
+        // Victoires J-9, J-8, J-7 (série de 3), trou, J-4 (abandon), J-2, J-1 (série de 2)
+        foreach ([9, 8, 7, 2, 1] as $back) {
+            $this->insertSession($uid, 'classic', $d($back), "T{$back}", 'win', 2, 1000, true);
+        }
+        $this->insertSession($uid, 'classic', $d(4), 'G', 'giveup', 5, 1000, true);
+
+        $this->assertSame(3, personadle_expert_streak_record(self::$pdo, $uid, 'classic'));
+        $this->assertSame(0, personadle_expert_streak_record(self::$pdo, $uid, 'music'), 'aucune partie → 0');
     }
 
     public function testExpertStatsAreEmptyForAPlayerWhoNeverPlayedExpert(): void
@@ -1154,6 +1213,49 @@ final class DatabaseIntegrationTest extends TestCase
                 (user_id, mode, is_expert, played_date, target_name, result, attempts, time_ms, active_filters)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
         )->execute([$userId, $mode, $isExpert ? 1 : 0, $date, $target, $result, $attempts, $timeMs, '[]']);
+    }
+
+    // ── Top 3 hebdo Discord (api/cron/discord_weekly.php) ───────────────────
+
+    public function testWeeklyPodiumRanksByWinsThenFewerGamesAndKeepsExpertApart(): void
+    {
+        require_once __DIR__ . '/../../api/lib/weekly_podium.php';
+        // Fenêtre dans le futur : la base de test est partagée avec les autres
+        // tests, qui insèrent des parties « aujourd'hui ». Ici, seules nos lignes.
+        $monday = '2100-01-04';
+        $mk = function (string $suffix) {
+            return $this->makeUser('wk' . $suffix);
+        };
+        [$a, $b, $c, $d, $e, $f, $g, $h] = array_map($mk, ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']);
+        $pseudo = fn(int $uid): string => (string) self::$pdo->query("SELECT pseudo FROM users WHERE id = {$uid}")->fetchColumn();
+
+        foreach ([1, 2, 3] as $i) $this->insertSession($a, 'classic', "2100-01-0{$i}", "A{$i}", 'win', 2, 1000, false); // AVANT lundi : hors fenêtre
+        $this->insertSession($a, 'classic', '2100-01-04', 'A0', 'win', 2, 1000, false);
+        $this->insertSession($a, 'emoji',   '2100-01-05', 'A4', 'win', 2, 1000, false);
+        $this->insertSession($a, 'emoji',   '2100-01-05', 'A5', 'win', 2, 1000, false);
+        $this->insertSession($a, 'emoji',   '2100-01-06', 'A6', 'giveup', 9, 1000, false); // A : 3 victoires / 4 parties
+        foreach ([4, 5, 6] as $i) $this->insertSession($b, 'music', "2100-01-0{$i}", "B{$i}", 'win', 1, 1000, false); // B : 3 / 3
+        $this->insertSession($c, 'classic', '2100-01-05', 'C1', 'win', 3, 1000, false);
+        $this->insertSession($c, 'classic', '2100-01-06', 'C2', 'giveup', 9, 1000, false); // C : 1 / 2
+        foreach ([1, 2, 3, 4, 5] as $i) $this->insertSession($d, 'classic', '2100-01-03', "D{$i}", 'win', 1, 1000, false); // dimanche d'avant
+        $this->insertSession($e, 'classic', '2100-01-05', 'E1', 'win', 1, 1000, true);
+        $this->insertSession($e, 'classic', '2100-01-06', 'E2', 'win', 1, 1000, true);     // Expert seulement
+        $this->insertSession($f, 'classic', '2100-01-05', 'F1', 'giveup', 9, 1000, false); // aucune victoire
+        foreach ([4, 5, 6, 7] as $i) $this->insertSession($g, 'classic', "2100-01-0{$i}", "G{$i}", 'win', 1, 1000, false);
+        self::$pdo->exec("UPDATE users SET is_deleted = 1 WHERE id = {$g}");               // compte supprimé
+        $this->insertSession($h, 'silhouette', '2100-01-05', 'H1', 'win', 1, 1000, false); // H : 1 / 1
+
+        $normal = personadle_weekly_podium(self::$pdo, $monday, false);
+        $this->assertSame(
+            [[$pseudo($b), 3, 3], [$pseudo($a), 3, 4], [$pseudo($h), 1, 1]],
+            array_map(fn($p) => [$p['pseudo'], $p['wins'], $p['games']], $normal),
+            'B avant A (autant de victoires, moins de parties) ; H avant C ; D, F, G exclus ; E est Expert'
+        );
+
+        $expert = personadle_weekly_podium(self::$pdo, $monday, true);
+        $this->assertSame([[$pseudo($e), 2, 2]], array_map(fn($p) => [$p['pseudo'], $p['wins'], $p['games']], $expert));
+
+        $this->assertSame([], personadle_weekly_podium(self::$pdo, '2100-02-01', false), 'semaine vide → rien à poster');
     }
 
     // ── Migration 032 : toutes les parties comptent ─────────────────────────
