@@ -1,4 +1,4 @@
-# docker/php/Dockerfile — PHP 8.3 + Apache pour PersonaDLE
+# docker/php/Dockerfile — PHP + Apache pour PersonaDLE, MÊME version que la prod (8.2)
 #
 # Extensions installées :
 #   pdo_mysql   → connexion à MariaDB via PDO (obligatoire)
@@ -9,7 +9,12 @@
 # Apache : mod_rewrite activé pour les URLs propres de l'API REST,
 #          mod_headers activé pour le Content-Security-Policy des pages HTML (.htaccess racine).
 
-FROM php:8.3-apache
+# Hostinger tourne en PHP 8.2 : dev, CI et préprod aussi. Vécu le 2026-09-19 : en 8.3 le client
+# MySQL négocie une autre collation de connexion, et une requête qui plantait en prod (« Illegal
+# mix of collations », GET /api/titles en 500 pour tous) passait partout ailleurs. Une préprod qui
+# ne reproduit pas la prod ne protège de rien. Autre version : --build-arg PHP_VERSION=8.3
+ARG PHP_VERSION=8.2
+FROM php:${PHP_VERSION}-apache
 
 # Installer les extensions PDO + utilitaires
 RUN apt-get update && apt-get install -y \

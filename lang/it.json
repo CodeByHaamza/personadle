@@ -537,13 +537,13 @@
       "description": "Ryuji & Wu Kong pronti per il nuovo anno! Che l'anno del cavallo ti porti forza e coraggio!"
     },
     "valentine_2026": {
-      "name": "San Valentino 2026",
-      "condition": "Riscatta il codice evento di San Valentino 2026",
+      "name": "San Valentino",
+      "condition": "Giocare un 14 febbraio",
       "description": "Un Social Link si è approfondito! L'amore è nell'aria, proprio come un rango romance al massimo."
     },
     "easter_2026": {
-      "name": "Pasqua 2026",
-      "condition": "Riscatta il codice evento di Pasqua 2026",
+      "name": "Pasqua",
+      "condition": "Giocare la domenica o il lunedì di Pasqua",
       "description": "Caccia le uova di Pasqua come cacci le Personae! La primavera porta nuovi inizi."
     },
     "github_contributor": {
@@ -763,12 +763,12 @@
     },
     "golden_week": {
       "name": "Golden Week",
-      "condition": "Accedere tra il 29 aprile e il 5 maggio",
+      "condition": "Giocare tra il 29 aprile e il 5 maggio",
       "description": "Anche i ricercatori della verità hanno bisogno di una pausa."
     },
     "tanabata": {
       "name": "Tanabata",
-      "condition": "Accedere il 7 luglio",
+      "condition": "Giocare un 7 luglio",
       "description": "Le stelle si allineano per una sola notte. Il tuo desiderio è stato registrato."
     },
     "promised_day": {

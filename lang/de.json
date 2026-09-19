@@ -537,13 +537,13 @@
       "description": "Ryuji & Wu Kong bereit für das neue Jahr! Möge das Jahr des Pferdes dir Stärke und Mut bringen!"
     },
     "valentine_2026": {
-      "name": "Valentinstag 2026",
-      "condition": "Löse den Valentinstags-Event-Code 2026 ein",
+      "name": "Valentinstag",
+      "condition": "An einem 14. Februar spielen",
       "description": "Ein Social Link vertieft! Die Liebe liegt in der Luft, genau wie ein maximaler Romanzen-Rang."
     },
     "easter_2026": {
-      "name": "Ostern 2026",
-      "condition": "Löse den Oster-Event-Code 2026 ein",
+      "name": "Ostern",
+      "condition": "Am Ostersonntag oder Ostermontag spielen",
       "description": "Suche Ostereier wie du nach Personae suchst! Der Frühling bringt neue Anfänge."
     },
     "github_contributor": {
@@ -763,12 +763,12 @@
     },
     "golden_week": {
       "name": "Golden Week",
-      "condition": "Zwischen dem 29. April und dem 5. Mai einloggen",
+      "condition": "Zwischen dem 29. April und dem 5. Mai spielen",
       "description": "Auch Wahrheitssuchende brauchen eine Pause."
     },
     "tanabata": {
       "name": "Tanabata",
-      "condition": "Am 7. Juli einloggen",
+      "condition": "An einem 7. Juli spielen",
       "description": "Die Sterne richten sich für eine einzige Nacht aus. Dein Wunsch wurde aufgezeichnet."
     },
     "promised_day": {
