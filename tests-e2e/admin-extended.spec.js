@@ -20,6 +20,7 @@ const BASE = process.env.PLAYWRIGHT_BASE_URL || "http://localhost:8080";
 test.describe.serial("API — endpoints admin étendus (event codes, logs, RGPD, social links, dons utilisateur)", () => {
   let adminCtx;
   let userCtx;
+  let targetCtx; // gardé ouvert : le bloc user_stats relit ses propres stats côté joueur
   let targetUserId;
 
   test.beforeAll(async () => {
@@ -46,7 +47,7 @@ test.describe.serial("API — endpoints admin étendus (event codes, logs, RGPD,
 
     // Utilisateur cible pour les tests de don (badges/titres/wallpapers/stats)
     const rndB = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-    const targetCtx = await pwRequest.newContext({ baseURL: BASE });
+    targetCtx = await pwRequest.newContext({ baseURL: BASE });
     const registerTargetRes = await targetCtx.post("/api/auth/register", {
       data: {
         email: `e2e_adm_ext_target_${rndB}@test.local`,
@@ -58,12 +59,12 @@ test.describe.serial("API — endpoints admin étendus (event codes, logs, RGPD,
     const targetBody = await registerTargetRes.json();
     targetUserId = targetBody.user?.id ?? targetBody.id;
     expect(targetUserId, "l'id de l'utilisateur cible doit être présent dans la réponse register").toBeTruthy();
-    await targetCtx.dispose();
   });
 
   test.afterAll(async () => {
     await adminCtx?.dispose();
     await userCtx?.dispose();
+    await targetCtx?.dispose();
   });
 
   // ── Event Codes ──────────────────────────────────────────────────────────
@@ -311,6 +312,45 @@ test.describe.serial("API — endpoints admin étendus (event codes, logs, RGPD,
         headers: await csrfHeader(adminCtx),
       });
       expect(res.status()).toBe(400);
+    });
+
+    // Migration 051 : les stats Expert ont leur table (user_stats_expert) et se
+    // corrigent comme les normales avec is_expert:true. Avant, elles étaient
+    // recalculées depuis l'historique — l'admin ne pouvait rien y changer.
+    test("écrase les stats Expert (is_expert:true) sans toucher aux normales, et le joueur les relit", async () => {
+      const expert = { mode: "music", wins: 7, giveups: 1, games: 8, streak: 2, streak_record: 3, perfect_wins: 1 };
+      const res = await adminCtx.patch(`/api/admin/users/${targetUserId}/stats`, {
+        data: { ...expert, is_expert: true },
+        headers: await csrfHeader(adminCtx),
+      });
+      expect(res.ok(), await res.text()).toBeTruthy();
+
+      // Vue admin : deux listes distinctes.
+      const detail = await (await adminCtx.get(`/api/admin/users/${targetUserId}`)).json();
+      const adminExpert = (detail.expert_stats ?? []).find((s) => s.mode === "music");
+      expect(adminExpert, "expert_stats doit porter la ligne music").toBeTruthy();
+      expect(+adminExpert.wins).toBe(7);
+      expect(+adminExpert.streak_record).toBe(3);
+      // register pré-crée les 6 lignes user_stats à 0 : la normale doit y rester.
+      expect(+(detail.stats ?? []).find((s) => s.mode === "music")?.wins, "user_stats music ne doit pas bouger").toBe(0);
+
+      // Vue joueur : c'est CE chiffre que le profil affiche dans le bloc Expert.
+      const stats = (await (await targetCtx.get(`/api/user/${targetUserId}/stats`)).json()).stats;
+      const mine = (stats.expert_by_mode ?? []).find((s) => s.mode === "music");
+      expect(mine, "expert_by_mode doit refléter la table éditée").toBeTruthy();
+      expect(mine.wins).toBe(7);
+      expect(mine.games).toBe(8);
+      expect(mine.perfect_wins).toBe(1);
+      expect(mine.best_attempts, "pas de partie jouée → pas de meilleur essai inventé").toBeNull();
+      expect((stats.by_mode ?? []).find((s) => s.mode === "music")?.wins ?? 0).toBe(0);
+    });
+
+    test("écrase les stats Expert échoue (403) pour un non-admin", async () => {
+      const res = await userCtx.patch(`/api/admin/users/${targetUserId}/stats`, {
+        data: { mode: "music", is_expert: true, wins: 1, giveups: 0, games: 1, streak: 1, streak_record: 1, perfect_wins: 0 },
+        headers: await csrfHeader(userCtx),
+      });
+      expect(res.status()).toBe(403);
     });
   });
 
