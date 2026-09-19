@@ -13,6 +13,21 @@
 
 ---
 
+## 2026-09-19 — Badges de série : la série GLOBALE compte (celle que le joueur voit)
+
+Audit de Colonel-Maskou : record global 19, meilleur mode 16. Les badges « Reach a N-day
+streak » (Pyro Spark 7, Raphael 30, Surt 90, Lucifer 120, Helel 365) n'étaient vérifiés que
+sur le record **par mode**, alors que le profil affiche — et le client compare — la série
+**globale** (`users.global_streak_record`). Un joueur à 30 jours globaux et 25 dans son
+meilleur mode se voyait refuser Raphael. En prod : 4 joueurs concernés pour Pyro Spark.
+
+- `condition_check.php` `streak_record` → `max(MAX(user_stats.streak_record) ∪ Expert,
+  users.global_streak_record)`. Rattrapé par la réconciliation au prochain profil.
+- Test : global 30 / par mode 25 → Raphael et Pyro Spark accordés, Surt non ; l'inverse
+  (par mode > global) reste vrai.
+
+---
+
 ## 2026-09-19 — Badges de dates pour toutes les années (migration 053) ; 500 des titres ; préprod fidèle
 
 ### Pâques, Saint-Valentin, Tanabata, Golden Week, Jour Promis — n'importe quelle année
