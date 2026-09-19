@@ -13,6 +13,27 @@
 
 ---
 
+## 2026-09-19 — « Copier pour Discord » échouait pour tout le monde : la CSP bloquait `fetch(data:)`
+
+Hamza, en testant le nouveau salon 🪪┃profiles : « ❌ Échec de la copie. Télécharge-la
+manuellement. » Le presse-papiers n'y était pour rien : le bouton faisait
+`fetch(dataUrl)` pour obtenir un Blob, et la CSP des pages HTML (`.htaccess` racine,
+`connect-src 'self' https://*.pusher.com …`) n'autorise pas `data:` en connexion. Bloqué
+en prod **et** en Docker (mod_headers y est actif) — mais aucun test ne cliquait ce bouton.
+
+- `profile/share-card.js` : `dataUrlToBlob()` décode le base64 sans requête ;
+  `copyPngToClipboard()` renvoie `false` au lieu de lever (pas de `ClipboardItem`,
+  permission refusée). En repli, le bouton **télécharge la carte** et le dit
+  (`profile.share_copy_fallback`, six langues) — le joueur repart toujours avec son image.
+- Tests : `shareCard.test.js` (Blob sans fetch, signature PNG ; écriture OK / refusée) ;
+  E2E `profile_atelier` « Copier pour Discord sous la vraie CSP » (permission clipboard
+  accordée au contexte, aucune violation CSP en console) — **rouge sur l'ancien code**,
+  vérifié en stashant le correctif.
+- Pas de bump `CACHE_VERSION` : `share-card.js` n'est pas précaché et les scripts sont
+  servis en network-first.
+
+---
+
 ## 2026-09-19 — Discord : top 3 de la semaine, le dimanche à 20 h (`api/cron/discord_weekly.php`)
 
 Idée Hamza : « toutes les semaines, dans un salon, on affiche le top 3 de ladite semaine
