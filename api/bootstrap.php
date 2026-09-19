@@ -430,6 +430,20 @@ function requireCronSecret(): void
 {
     $key = $_SERVER['HTTP_X_CRON_KEY'] ?? '';
     if (!defined('CRON_SECRET') || !hash_equals(CRON_SECRET, $key)) {
+        // Trace consultable depuis l'admin (Logs) : sans elle, un cron hPanel
+        // configuré avec une mauvaise clé échoue en silence pendant des semaines
+        // (vécu : le quotidien Discord, jamais parti entre le 9 et le 19 septembre).
+        // La clé reçue n'est jamais écrite — seulement sa longueur.
+        try {
+            personadle_log_error(pdo(), 'warning', 'Cron refused: bad or missing X-Cron-Key', [
+                'source'   => 'cron-auth',
+                'endpoint' => basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')),
+                'key_len'  => strlen($key),
+                'ip'       => personadle_client_ip($_SERVER, defined('TRUSTED_PROXIES') ? (array) TRUSTED_PROXIES : []),
+            ]);
+        } catch (Throwable) {
+            // Sans base, on refuse quand même — la trace est un bonus, pas une condition.
+        }
         http_response_code(403);
         echo json_encode(['error' => 'Forbidden']);
         exit;
