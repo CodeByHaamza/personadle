@@ -84,10 +84,16 @@ export async function pullProfileFromCloud() {
 
     if (cp.avatar_data !== undefined) {
       p.avatar = cp.avatar_data;
-      // avatarSrc (chemin galerie choisi au crop) n'est pas synchronisé côté serveur ;
-      // sans ce delete il reste figé sur l'ancien avatar après un pull cloud (ex: le titre
-      // "Looking Cool" resterait débloqué après un changement d'avatar sur un autre appareil).
-      delete p.avatarSrc;
+      // avatarSrc (portrait galerie d'origine, retenu au recadrage) est synchronisé
+      // depuis la 052 (profiles.avatar_src) : le serveur est la vérité, comme pour
+      // avatar. Un serveur qui ne le renvoie pas encore → on l'efface plutôt que de
+      // garder l'ancien portrait figé après un changement sur un autre appareil.
+      if (cp.avatar_src !== undefined) {
+        if (cp.avatar_src) p.avatarSrc = cp.avatar_src;
+        else delete p.avatarSrc;
+      } else {
+        delete p.avatarSrc;
+      }
     }
     if (cp.avatar_border_color) p.avatarBorderColor = cp.avatar_border_color;
     if (cp.profile_music_id !== undefined) {

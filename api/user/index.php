@@ -16,6 +16,7 @@
  *   pseudo            VARCHAR(50) — lettre, chiffre, tiret, point, underscore
  *   lang              'en'|'fr'|'es'|'de'|'it'
  *   avatar_data       string (base64 PNG/JPEG) ou null
+ *   avatar_src        string (portrait galerie d'origine ../img/avatar/…) ou null — 052
  *   avatar_border_color  '#RRGGBB'
  *   wallpaper_id      string slug ou null
  *   profile_music_id  string slug ou null
@@ -82,7 +83,7 @@ if ($method === 'GET') {
     if (!$user) jsonError('User not found', 404);
 
     // Récupérer le profil
-    $stmt = $pdo->prepare('SELECT user_id, avatar_data, avatar_border_color, wallpaper_id, profile_music_id, selected_badges, equipped_title_id, favorite_mode, settings FROM profiles WHERE user_id = ?');
+    $stmt = $pdo->prepare('SELECT user_id, avatar_data, avatar_src, avatar_border_color, wallpaper_id, profile_music_id, selected_badges, equipped_title_id, favorite_mode, settings FROM profiles WHERE user_id = ?');
     $stmt->execute([$userId]);
     $profile = $stmt->fetch() ?: [];
 
@@ -123,6 +124,7 @@ if ($method === 'GET') {
         'user'    => formatUser($user),
         'profile' => [
             'avatar_data'         => $profile['avatar_data']        ?? null,
+            'avatar_src'          => $profile['avatar_src']         ?? null,
             'avatar_border_color' => $profile['avatar_border_color'] ?? '#ffffff',
             'wallpaper_id'        => $profile['wallpaper_id']        ?? null,
             'profile_music_id'    => $profile['profile_music_id']    ?? null,
@@ -241,6 +243,39 @@ if ($method === 'PATCH') {
         }
         $profileFields[] = 'avatar_data = ?';
         $profileParams[] = $avatar;
+
+        // avatar_src (migration 052) : le portrait galerie d'ORIGINE, qui survit au
+        // recadrage — sans lui, le badge Same Energy ne tombait que sans recadrer.
+        //   - avatar_data est un chemin galerie → déduit, le client n'a rien à dire ;
+        //   - avatar_data vidé → plus de portrait ;
+        //   - image recadrée + avatar_src fourni (null compris) → c'est le client qui
+        //     sait (il recadre toujours un portrait de la galerie) ;
+        //   - image recadrée SANS avatar_src → on garde la valeur connue. C'est le cas
+        //     du sync complet et des clients pas encore rafraîchis : écrire NULL ici
+        //     effacerait l'origine à chaque sync (état dérivé, CLAUDE.md §13).
+        $src    = null;
+        $setSrc = true;
+        if (personadle_is_gallery_avatar($avatar)) {
+            $src = $avatar;
+        } elseif ($avatar === null) {
+            $src = null;
+        } elseif (array_key_exists('avatar_src', $data)) {
+            $src = $data['avatar_src'];
+            if ($src !== null && !is_string($src)) {
+                jsonError('Invalid avatar_src format', 400);
+            }
+            $srcError = personadle_validate_avatar_src($src);
+            if ($srcError !== null) {
+                jsonError($srcError, 400);
+            }
+            if ($src === '') $src = null;
+        } else {
+            $setSrc = false;
+        }
+        if ($setSrc) {
+            $profileFields[] = 'avatar_src = ?';
+            $profileParams[] = $src;
+        }
     }
 
     // avatar_border_color

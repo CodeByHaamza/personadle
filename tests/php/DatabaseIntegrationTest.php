@@ -305,9 +305,13 @@ final class DatabaseIntegrationTest extends TestCase
         $this->assertTrue(personadle_verify_condition(self::$pdo, $u, 'mode_expert_perfect_wins', 'classic', 3));
     }
 
-    /** Ami accepté + lien social au rang voulu + avatars posés. */
-    private function makeSameEnergyPair(string $myAvatar, ?string $theirAvatar, int $rank): array
-    {
+    /**
+     * Ami accepté + lien social au rang voulu + avatars posés. `$mySrc`/`$theirSrc` :
+     * portrait galerie d'origine (profiles.avatar_src, 052) quand l'avatar est recadré.
+     */
+    private function makeSameEnergyPair(
+        string $myAvatar, ?string $theirAvatar, int $rank, ?string $mySrc = null, ?string $theirSrc = null
+    ): array {
         $me = $this->makeUser('se1');
         $them = $this->makeUser('se2');
         self::$pdo->prepare('INSERT INTO friendships (requester_id, addressee_id, status) VALUES (?, ?, ?)')
@@ -318,12 +322,34 @@ final class DatabaseIntegrationTest extends TestCase
         self::$pdo->prepare('UPDATE social_links SET `rank` = ? WHERE id = ?')->execute([$rank, $linkId]);
         // makeUser() ne crée pas de ligne profiles (register.php le fait en prod) : on la pose.
         $up = self::$pdo->prepare(
-            'INSERT INTO profiles (user_id, avatar_data) VALUES (?, ?)
-             ON DUPLICATE KEY UPDATE avatar_data = VALUES(avatar_data)'
+            'INSERT INTO profiles (user_id, avatar_data, avatar_src) VALUES (?, ?, ?)
+             ON DUPLICATE KEY UPDATE avatar_data = VALUES(avatar_data), avatar_src = VALUES(avatar_src)'
         );
-        $up->execute([$me, $myAvatar]);
-        $up->execute([$them, $theirAvatar]);
+        $up->execute([$me, $myAvatar, $mySrc]);
+        $up->execute([$them, $theirAvatar, $theirSrc]);
         return [$me, $them];
+    }
+
+    public function testSameEnergySurvivesTheCropThanksToAvatarSrc(): void
+    {
+        require_once __DIR__ . '/../../api/lib/condition_check.php';
+        $png = 'data:image/png;base64,iVBORw0KGgo=';
+
+        // Les deux ont recadré leur portrait : avatar_data n'est plus qu'un PNG, mais
+        // avatar_src dit qui est porté (052). C'était LE cas courant : la fenêtre de
+        // recadrage s'ouvre dès qu'on choisit un portrait.
+        [$me, $them] = $this->makeSameEnergyPair($png, $png, 5, '../img/avatar/chiesatonaka_revivale.jpg', '../img/avatar/Arai2.png');
+        $this->assertSame([$them], personadle_same_energy_partners(self::$pdo, $me));
+        $this->assertSame([$me], personadle_same_energy_partners(self::$pdo, $them));
+
+        // Un seul recadré, l'autre porte le chemin galerie tel quel → mixte OK
+        [$me2, $them2] = $this->makeSameEnergyPair($png, '../img/avatar/chie_satonaka_icon.jpg', 6, '../img/avatar/Arai.png');
+        $this->assertSame([$them2], personadle_same_energy_partners(self::$pdo, $me2));
+
+        // Recadré AVANT la 052 (avatar_src inconnu) : rien à faire côté serveur, le
+        // joueur re-choisit son portrait une fois — limite documentée de la reprise.
+        [$me3] = $this->makeSameEnergyPair($png, '../img/avatar/Arai.png', 6);
+        $this->assertSame([], personadle_same_energy_partners(self::$pdo, $me3));
     }
 
     public function testSameEnergyNeedsRankFiveAndTheRightPairInEitherDirection(): void

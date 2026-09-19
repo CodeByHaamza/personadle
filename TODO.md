@@ -8,7 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 1425 tests Vitest (77 suites), 358 méthodes PHPUnit, 245 tests E2E,
+> Vérifié le 2026-08-26 : 1428 tests Vitest (77 suites), 362 méthodes PHPUnit, 246 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
@@ -109,6 +109,15 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       (dump `game_sessions` avant) : la contrainte « une partie par jour » de l'archive de mai
       (`uq_session`) n'avait jamais été supprimée, la 032 visant un autre nom. Chaque rejeu et chaque
       partie Expert du même jour tombaient en 409 depuis le 1er septembre ; porte Émoji inatteignable.
+- [ ] Jouer `sql/migrations/052_profiles_avatar_src.sql` (colonne `profiles.avatar_src` + reprise
+      des portraits galerie non recadrés ; `ADD COLUMN IF NOT EXISTS`, `UPDATE` borné, rejouable).
+      **À jouer AVANT le `git pull` Hostinger.** Sans elle, `GET /api/user/:id`, `GET /api/friends/`
+      et tout PATCH d'avatar tombent en `Unknown column 'avatar_src'` → **500 sur le profil et la
+      liste d'amis pour tout le monde**. Puis `INSERT IGNORE INTO schema_migrations (version) VALUES
+      ('052_profiles_avatar_src')`. Vérifiée le 2026-09-19 sur la base de dev au schéma 051 (58 origines
+      reprises, 45 portraits recadrés restent inconnus) et sur un import vierge (no-op).
+- [x] **Bumper `CACHE_VERSION` dans `sw.js` (v99 → v100, fait le 2026-09-19)** : `profile/profile-page.js`
+      (précaché) envoie désormais `avatar_src` au recadrage (badge Same Energy).
 - [x] **Bumper `CACHE_VERSION` dans `sw.js` (v96 → v97, fait le 2026-09-18 soir)** : `js/filterMenu.js`
       (précaché) et `profile/titles-ui.js` changent après la 2.2 (marqueur de format des filtres,
       descriptions de titres — 2026-09-18 soir). Sans bump,

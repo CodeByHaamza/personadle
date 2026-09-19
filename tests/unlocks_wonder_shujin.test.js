@@ -207,6 +207,25 @@ describe("checkSocialBadges — Same Energy depuis la liste d'amis", () => {
     await checkSocialBadges(profile, saved);
     expect(saved).not.toHaveBeenCalled();
   });
+
+  it("portraits recadrés des deux côtés : c'est l'origine (avatarSrc / avatar_src) qui parle", async () => {
+    // Cas courant : la fenêtre de recadrage s'ouvre dès qu'on choisit un portrait,
+    // et valider remplace l'avatar par un PNG. Sans l'origine, rien ne tombait.
+    profile.avatar = "data:image/png;base64,xxxx";
+    profile.avatarSrc = "../img/avatar/chiesatonaka_revivale.jpg";
+    withFriends([{ user_id: 6, social_link_rank: 5, avatar_data: "data:image/png;base64,yyyy", avatar_src: "../img/avatar/Arai.png" }]);
+    await checkSocialBadges(profile, saved);
+    expect(profile.sameEnergyWith).toBe(6);
+  });
+
+  it("toutes les Chie de la galerie comptent (icône et revival comprises)", async () => {
+    for (const f of ["chie_satonaka_icon.jpg", "chiesatonaka_revivale.jpg", "Chie2.jpg", "chie_pq.jpg"]) {
+      const p = { avatar: "../img/avatar/Arai.png" };
+      withFriends([{ user_id: 7, social_link_rank: 5, avatar_data: `../img/avatar/${f}` }]);
+      await checkSocialBadges(p, saved);
+      expect(p.sameEnergyWith, f).toBe(7);
+    }
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
