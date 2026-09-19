@@ -103,7 +103,7 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       le Compendium interrogent `name_pt` → `Unknown column` → **500 pour tout le monde**, quelle
       que soit la langue. Vérifiée le 2026-09-18 sur un import vierge du nouveau `bdd_mysql.sql`
       (no-op) et sur la base de dev au schéma 048.
-- [ ] **Bumper `CACHE_VERSION` dans `sw.js` à la prochaine release (v98 → v99)** : `profile/profile-page.js`
+- [x] **Bumper `CACHE_VERSION` dans `sw.js` (v98 → v99, fait le 2026-09-19)** : `profile/profile-page.js`
       (précaché) change après le hotfix des titres (badges sociaux, épinglage — 2026-09-19).
 - [x] Jouer `sql/migrations/050_game_sessions_drop_uq_session.sql` — **jouée en prod le 2026-09-19**
       (dump `game_sessions` avant) : la contrainte « une partie par jour » de l'archive de mai
@@ -128,6 +128,11 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       volontaire (c'est lui qui garantit qu'on ne reste pas sur du code périmé), simplement
       à ne pas déclencher en pleine affluence.
 
+> ✅ **Release 2.2.2 — 2026-09-19** : ping du rôle « 🔔 Daily » (#141), migration 050 déjà jouée en prod +
+> détecteur de schéma sur les UNIQUE (#142), badges : le serveur est la vérité (#143), v99. Rien à jouer
+> en base. Reste côté serveur : `define('DISCORD_DAILY_MENTION_ROLE', '1550573338336698521');` dans
+> `api/config.php` pour activer le ping.
+>
 > ✅ **Release 2.2.1 — 2026-09-18 soir** : 049 jouée en prod (dump `titles`/`user_titles` avant, 22 titres,
 > 0 NULL), `CACHE_VERSION` v97, puis `develop → main` — l'auto-déploiement Hostinger re-branché a
 > tiré le commit tout seul. Contient #135 (filtres) et #136 (titres PT + descriptions).
