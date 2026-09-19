@@ -25,6 +25,10 @@
  *   titles_count         → nb de titres débloqués (une collection en appelle une autre)
  *   played_on_date       → a joué un jour d'anniversaire donné, condition_mode = 'MM-JJ'
  *                          (n'importe quelle année : c'est une date qui revient)
+ *   played_in_period     → a joué entre deux dates 'MM-JJ:MM-JJ' (Golden Week), toute année,
+ *                          période pouvant enjamber le Nouvel An
+ *   played_on_all_dates  → a joué CHACUNE des dates 'MM-JJ,MM-JJ' (Promised Day), toute année
+ *   played_on_easter     → a joué un dimanche ou lundi de Pâques, toute année (computus)
  *   social_link_min_rank → au moins un Social Link au rang >= condition_value
  *   all_modes_won        → au moins 1 victoire dans chacun des 6 modes
  *   weekly_clean_modes   → nb de modes où l'utilisateur a joué cette semaine (approx.)
@@ -200,6 +204,57 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
             return (bool) $s->fetchColumn();
         }
 
+        case 'played_in_period': {
+            // Golden Week : avoir joué entre deux dates (MM-JJ:MM-JJ), n'importe quelle année.
+            // La période peut enjamber le Nouvel An (12-24:01-02). Entiers uniquement en SQL
+            // (pas de chaîne comparée — cf. played_on_date).
+            if (!is_string($condMode) || !preg_match('/^\d{2}-\d{2}:\d{2}-\d{2}$/', $condMode)) {
+                return false;
+            }
+            [$from, $to] = explode(':', $condMode);
+            $f = (int) str_replace('-', '', $from); // 0429
+            $t = (int) str_replace('-', '', $to);   // 0505
+            $where = $f <= $t
+                ? '(MONTH(played_date) * 100 + DAY(played_date)) BETWEEN ? AND ?'
+                : '((MONTH(played_date) * 100 + DAY(played_date)) >= ? OR (MONTH(played_date) * 100 + DAY(played_date)) <= ?)';
+            $s = $pdo->prepare("SELECT 1 FROM game_sessions WHERE user_id = ? AND $where LIMIT 1");
+            $s->execute([$userId, $f, $t]);
+            return (bool) $s->fetchColumn();
+        }
+
+        case 'played_on_all_dates': {
+            // Promised Day : avoir joué CHACUNE des dates listées (MM-JJ,MM-JJ), n'importe
+            // quelle année, pas forcément la même.
+            if (!is_string($condMode) || !preg_match('/^\d{2}-\d{2}(,\d{2}-\d{2})*$/', $condMode)) {
+                return false;
+            }
+            $s = $pdo->prepare(
+                'SELECT 1 FROM game_sessions WHERE user_id = ? AND MONTH(played_date) = ? AND DAY(played_date) = ? LIMIT 1'
+            );
+            foreach (explode(',', $condMode) as $d) {
+                [$mm, $dd] = array_map('intval', explode('-', $d));
+                $s->execute([$userId, $mm, $dd]);
+                if (!$s->fetchColumn()) return false;
+            }
+            return true;
+        }
+
+        case 'played_on_easter': {
+            // Pâques bouge chaque année : dimanche OU lundi de Pâques (férié en France) de
+            // n'importe quelle année où le joueur a joué — calcul de Meeus/Jones/Butcher,
+            // aucune extension PHP requise.
+            $y = $pdo->prepare('SELECT DISTINCT YEAR(played_date) FROM game_sessions WHERE user_id = ?');
+            $y->execute([$userId]);
+            $s = $pdo->prepare('SELECT 1 FROM game_sessions WHERE user_id = ? AND played_date IN (?, ?) LIMIT 1');
+            foreach ($y->fetchAll(PDO::FETCH_COLUMN) as $year) {
+                $sunday = personadle_easter_sunday((int) $year);
+                $monday = (new DateTimeImmutable($sunday))->modify('+1 day')->format('Y-m-d');
+                $s->execute([$userId, $sunday, $monday]);
+                if ($s->fetchColumn()) return true;
+            }
+            return false;
+        }
+
         case 'social_link_min_rank': {
             // Au moins un Social Link au rang >= condition_value (défaut 10 = rang
             // maximum si non précisé, pour rester équivalent à l'ancien
@@ -314,7 +369,7 @@ function personadle_known_condition_types(): array
     return [
         'wins_total', 'mode_wins', 'mode_games', 'games_total', 'streak_record',
         'perfect_wins', 'unique_days', 'giveups_total', 'friends_count', 'badges_count',
-        'titles_count', 'played_on_date',
+        'titles_count', 'played_on_date', 'played_in_period', 'played_on_all_dates', 'played_on_easter',
         'social_link_min_rank', 'all_modes_won', 'weekly_clean_modes',
         'classic_p1_wins', 'emoji_p2_wins', 'joker_profile', 'manual',
         'mode_wins_under_attempts', 'mode_wins_single_day', 'mode_consecutive_perfects',
@@ -708,4 +763,27 @@ function personadle_same_energy_partners(PDO $pdo, int $userId): array
         if ($pair) $partners[] = $friendId;
     }
     return array_values(array_unique($partners));
+}
+
+/**
+ * Dimanche de Pâques (calendrier grégorien) — algorithme de Meeus/Jones/Butcher.
+ * Sert au badge Pâques, qui doit tomber n'importe quelle année sans code événement.
+ */
+function personadle_easter_sunday(int $year): string
+{
+    $a = $year % 19;
+    $b = intdiv($year, 100);
+    $c = $year % 100;
+    $d = intdiv($b, 4);
+    $e = $b % 4;
+    $f = intdiv($b + 8, 25);
+    $g = intdiv($b - $f + 1, 3);
+    $h = (19 * $a + $b - $d - $g + 15) % 30;
+    $i = intdiv($c, 4);
+    $k = $c % 4;
+    $l = (32 + 2 * $e + 2 * $i - $h - $k) % 7;
+    $m = intdiv($a + 11 * $h + 22 * $l, 451);
+    $month = intdiv($h + $l - 7 * $m + 114, 31);
+    $day   = (($h + $l - 7 * $m + 114) % 31) + 1;
+    return sprintf('%04d-%02d-%02d', $year, $month, $day);
 }
