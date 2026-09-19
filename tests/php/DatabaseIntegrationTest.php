@@ -1156,6 +1156,49 @@ final class DatabaseIntegrationTest extends TestCase
         )->execute([$userId, $mode, $isExpert ? 1 : 0, $date, $target, $result, $attempts, $timeMs, '[]']);
     }
 
+    // ── Top 3 hebdo Discord (api/cron/discord_weekly.php) ───────────────────
+
+    public function testWeeklyPodiumRanksByWinsThenFewerGamesAndKeepsExpertApart(): void
+    {
+        require_once __DIR__ . '/../../api/lib/weekly_podium.php';
+        // Fenêtre dans le futur : la base de test est partagée avec les autres
+        // tests, qui insèrent des parties « aujourd'hui ». Ici, seules nos lignes.
+        $monday = '2100-01-04';
+        $mk = function (string $suffix) {
+            return $this->makeUser('wk' . $suffix);
+        };
+        [$a, $b, $c, $d, $e, $f, $g, $h] = array_map($mk, ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']);
+        $pseudo = fn(int $uid): string => (string) self::$pdo->query("SELECT pseudo FROM users WHERE id = {$uid}")->fetchColumn();
+
+        foreach ([1, 2, 3] as $i) $this->insertSession($a, 'classic', "2100-01-0{$i}", "A{$i}", 'win', 2, 1000, false); // AVANT lundi : hors fenêtre
+        $this->insertSession($a, 'classic', '2100-01-04', 'A0', 'win', 2, 1000, false);
+        $this->insertSession($a, 'emoji',   '2100-01-05', 'A4', 'win', 2, 1000, false);
+        $this->insertSession($a, 'emoji',   '2100-01-05', 'A5', 'win', 2, 1000, false);
+        $this->insertSession($a, 'emoji',   '2100-01-06', 'A6', 'giveup', 9, 1000, false); // A : 3 victoires / 4 parties
+        foreach ([4, 5, 6] as $i) $this->insertSession($b, 'music', "2100-01-0{$i}", "B{$i}", 'win', 1, 1000, false); // B : 3 / 3
+        $this->insertSession($c, 'classic', '2100-01-05', 'C1', 'win', 3, 1000, false);
+        $this->insertSession($c, 'classic', '2100-01-06', 'C2', 'giveup', 9, 1000, false); // C : 1 / 2
+        foreach ([1, 2, 3, 4, 5] as $i) $this->insertSession($d, 'classic', '2100-01-03', "D{$i}", 'win', 1, 1000, false); // dimanche d'avant
+        $this->insertSession($e, 'classic', '2100-01-05', 'E1', 'win', 1, 1000, true);
+        $this->insertSession($e, 'classic', '2100-01-06', 'E2', 'win', 1, 1000, true);     // Expert seulement
+        $this->insertSession($f, 'classic', '2100-01-05', 'F1', 'giveup', 9, 1000, false); // aucune victoire
+        foreach ([4, 5, 6, 7] as $i) $this->insertSession($g, 'classic', "2100-01-0{$i}", "G{$i}", 'win', 1, 1000, false);
+        self::$pdo->exec("UPDATE users SET is_deleted = 1 WHERE id = {$g}");               // compte supprimé
+        $this->insertSession($h, 'silhouette', '2100-01-05', 'H1', 'win', 1, 1000, false); // H : 1 / 1
+
+        $normal = personadle_weekly_podium(self::$pdo, $monday, false);
+        $this->assertSame(
+            [[$pseudo($b), 3, 3], [$pseudo($a), 3, 4], [$pseudo($h), 1, 1]],
+            array_map(fn($p) => [$p['pseudo'], $p['wins'], $p['games']], $normal),
+            'B avant A (autant de victoires, moins de parties) ; H avant C ; D, F, G exclus ; E est Expert'
+        );
+
+        $expert = personadle_weekly_podium(self::$pdo, $monday, true);
+        $this->assertSame([[$pseudo($e), 2, 2]], array_map(fn($p) => [$p['pseudo'], $p['wins'], $p['games']], $expert));
+
+        $this->assertSame([], personadle_weekly_podium(self::$pdo, '2100-02-01', false), 'semaine vide → rien à poster');
+    }
+
     // ── Migration 032 : toutes les parties comptent ─────────────────────────
 
     public function testEveryGameOfTheDayIsRecordedAndCounted(): void
