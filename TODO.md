@@ -8,7 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 1425 tests Vitest (77 suites), 358 méthodes PHPUnit, 245 tests E2E,
+> Vérifié le 2026-08-26 : 1425 tests Vitest (77 suites), 363 méthodes PHPUnit, 245 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
@@ -121,6 +121,13 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       `profile/friends/friends.{css,js}` sont tous **précachés** et tous modifiés — sans bump,
       un joueur déjà venu garde l'ancien front et ne voit ni le filtre Dimension du classement,
       ni la pastille Expert de sa Boîte, alors que l'API, elle, aura changé.
+- [ ] **Top 3 hebdo Discord** (`api/cron/discord_weekly.php`) : (1) créer le webhook du salon
+      classement (Modifier le salon → Intégrations → Webhooks, ou `setup.mjs` côté dépôt
+      Discord) ; (2) `define('DISCORD_WEEKLY_WEBHOOK', '…')` dans `api/config.php` sur le serveur
+      (sans elle, le post part sur le webhook du quotidien) ; (3) cron hPanel `0 20 * * 0` avec la
+      commande de `DEPLOY.md` § Étape 6 ; (4) tester à la main une fois
+      (`curl -H "X-Cron-Key: …" https://personadle.net/api/cron/discord_weekly.php`) et vérifier
+      l'heure réelle du premier dimanche (fuseau du cron).
 - [ ] **Déployer hors heure de pointe.** `sw.js` envoie `SW_UPDATED` à tous les onglets via
       `clients.claim()`, et chaque page répond par `window.location.reload()`. L'état de
       partie survit (il vit dans `localStorage`), mais un joueur en cours de partie est
