@@ -196,8 +196,31 @@ export async function syncBadgesWithBackend(profile, saveProfile) {
     // Local → backend (bloqué si le profil vient d'un autre compte)
     if (ownProfile) {
       const toSyncUp = localIds.filter((id) => !backendIds.includes(id));
+      const refused = [];
       for (const id of toSyncUp) {
-        await api.badges.unlock(id).catch(() => {});
+        try {
+          await api.badges.unlock(id);
+        } catch (err) {
+          // 403 « Condition not met » : le serveur a recalculé la condition et dit
+          // non — le badge n'est débloqué que dans la tête de cet appareil (compteur
+          // local en avance, vécu avec Velvet Regular). Le garder affiché « débloqué »
+          // faisait échouer chaque épinglage en boucle. Le serveur est la vérité :
+          // on le retire du local, il reviendra quand la condition sera vraiment
+          // remplie. Tout autre échec (réseau, 5xx, code événement) laisse le local
+          // tel quel : on ne sait pas.
+          if (err?.status === 403 && /condition not met/i.test(err?.message || "")) refused.push(id);
+        }
+      }
+      if (refused.length) {
+        profile.badges = (profile.badges || []).filter((id) => !refused.includes(id));
+        if (Array.isArray(profile.selectedBadges)) {
+          profile.selectedBadges = profile.selectedBadges.filter((id) => !refused.includes(id));
+        }
+        saveProfile();
+        console.warn(`[badges] refusés par le serveur (condition non remplie) : ${refused.join(", ")}`);
+        renderBadgesPreview(profile);
+        renderBadgePicker(profile, saveProfile);
+        renderBadgesModal(profile, saveProfile);
       }
     } else {
       console.warn("[badges] sync local→backend bloqué : profil importé depuis un autre compte");
@@ -215,6 +238,13 @@ export async function checkSocialBadges(profile, saveProfile) {
   const user = window._currentUser;
   if (!user) return;
 
+  // Les drapeaux posés ici (hasTwoFriends, leblanc3FriendsDay, sameEnergyWith) sont
+  // lus par les check() des badges — mais checkAndUnlockBadges() a déjà tourné,
+  // AVANT cette réponse réseau. Sans repasse, le badge n'apparaissait qu'à la
+  // visite SUIVANTE du profil, et n'était poussé au serveur qu'à celle d'après :
+  // Gyotre, 12 amis acceptés, sans Best Bro (2026-09-19). Si un drapeau change,
+  // on revérifie les conditions et on synchronise tout de suite.
+  let changed = false;
   try {
     const api = window._personadleApi;
     const friendsRes = api ? await api.friends.list() : null;
@@ -224,6 +254,7 @@ export async function checkSocialBadges(profile, saveProfile) {
     // Best Bro : 2+ amis
     if (friendCount >= 2 && !profile.hasTwoFriends) {
       profile.hasTwoFriends = true;
+      changed = true;
       saveProfile();
     }
 
@@ -236,6 +267,7 @@ export async function checkSocialBadges(profile, saveProfile) {
     const onlineToday = friends.filter((f) => f.last_seen_at?.startsWith(today));
     if (onlineToday.length >= 3 && !profile.leblanc3FriendsDay) {
       profile.leblanc3FriendsDay = today;
+      changed = true;
       saveProfile();
     }
     // Same Energy : un ami de rang ≥ 5 porte Arai quand je porte Chie (ou l'inverse).
@@ -253,11 +285,21 @@ export async function checkSocialBadges(profile, saveProfile) {
       });
       if (partner) {
         profile.sameEnergyWith = partner.user_id ?? partner.id ?? true;
+        changed = true;
         saveProfile();
       }
     }
   } catch (e) {
     console.warn("⚠️ Social badge check failed:", e.message);
+  }
+
+  if (changed) {
+    initializeProfileBadgesData(profile); // tableaux garantis, même sur un profil minimal
+    checkAndUnlockBadges(profile, saveProfile);
+    await syncBadgesWithBackend(profile, saveProfile);
+    renderBadgesPreview(profile);
+    renderBadgePicker(profile, saveProfile);
+    renderBadgesModal(profile, saveProfile);
   }
 }
 
@@ -273,7 +315,15 @@ export function trackUniqueDay(profile, saveProfile) {
   if (!profile.uniqueDaysSet) profile.uniqueDaysSet = [];
   if (!profile.uniqueDaysSet.includes(today)) {
     profile.uniqueDaysSet.push(today);
-    profile.uniqueDaysPlayed = profile.uniqueDaysSet.length;
+    // Connecté : le compte vient du serveur (pullProfileFromCloud le pose depuis
+    // game_sessions) et on n'ajoute qu'aujourd'hui — le prochain pull réaligne.
+    // Reprendre la taille du set local ici remettait le compte par appareil (jours
+    // d'avant le compte inclus) au-dessus de celui du serveur : Velvet Regular se
+    // débloquait chez le joueur, le serveur le refusait (2026-09-19).
+    // Anonyme : le set local reste la seule vérité.
+    profile.uniqueDaysPlayed = window._currentUser?.id
+      ? (profile.uniqueDaysPlayed || 0) + 1
+      : profile.uniqueDaysSet.length;
     saveProfile();
   }
   trackP4ConsecutiveDays(profile, saveProfile, today);

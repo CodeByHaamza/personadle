@@ -8,7 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 1416 tests Vitest (77 suites), 358 méthodes PHPUnit, 243 tests E2E,
+> Vérifié le 2026-08-26 : 1425 tests Vitest (77 suites), 358 méthodes PHPUnit, 245 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
@@ -91,7 +91,7 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
 - [ ] **hPanel → Cron : vérifier que `api/cron/leaderboard.php` tourne toutes les heures.** Le cache
       `leaderboard_cache` était vide au moment de la release (0 ligne dans le dump) — il n'a
       probablement jamais tourné. Le classement par période marche en calcul live, plus coûteux.
-- [ ] Avant la prochaine release : `npm run schema:check-prod` **sur le serveur**, et rejouer toute
+- [ ] Avant la prochaine release : `npm run schema:check-prod` **sur le serveur** (colonnes ET contraintes UNIQUE depuis la 050), et rejouer toute
       migration qui INSERT contre le `SHOW CREATE TABLE` de la prod recréé dans Docker (CLAUDE.md §7).
 - [ ] **Après la migration 045 : laisser passer un cycle du cron** (`api/cron/leaderboard.php`,
       horaire) pour peupler la dimension Expert du cache. D'ici là le classement Expert par
@@ -103,6 +103,12 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       le Compendium interrogent `name_pt` → `Unknown column` → **500 pour tout le monde**, quelle
       que soit la langue. Vérifiée le 2026-09-18 sur un import vierge du nouveau `bdd_mysql.sql`
       (no-op) et sur la base de dev au schéma 048.
+- [x] **Bumper `CACHE_VERSION` dans `sw.js` (v98 → v99, fait le 2026-09-19)** : `profile/profile-page.js`
+      (précaché) change après le hotfix des titres (badges sociaux, épinglage — 2026-09-19).
+- [x] Jouer `sql/migrations/050_game_sessions_drop_uq_session.sql` — **jouée en prod le 2026-09-19**
+      (dump `game_sessions` avant) : la contrainte « une partie par jour » de l'archive de mai
+      (`uq_session`) n'avait jamais été supprimée, la 032 visant un autre nom. Chaque rejeu et chaque
+      partie Expert du même jour tombaient en 409 depuis le 1er septembre ; porte Émoji inatteignable.
 - [x] **Bumper `CACHE_VERSION` dans `sw.js` (v96 → v97, fait le 2026-09-18 soir)** : `js/filterMenu.js`
       (précaché) et `profile/titles-ui.js` changent après la 2.2 (marqueur de format des filtres,
       descriptions de titres — 2026-09-18 soir). Sans bump,
@@ -122,6 +128,11 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       volontaire (c'est lui qui garantit qu'on ne reste pas sur du code périmé), simplement
       à ne pas déclencher en pleine affluence.
 
+> ✅ **Release 2.2.2 — 2026-09-19** : ping du rôle « 🔔 Daily » (#141), migration 050 déjà jouée en prod +
+> détecteur de schéma sur les UNIQUE (#142), badges : le serveur est la vérité (#143), v99. Rien à jouer
+> en base. Reste côté serveur : `define('DISCORD_DAILY_MENTION_ROLE', '1550573338336698521');` dans
+> `api/config.php` pour activer le ping.
+>
 > ✅ **Release 2.2.1 — 2026-09-18 soir** : 049 jouée en prod (dump `titles`/`user_titles` avant, 22 titres,
 > 0 NULL), `CACHE_VERSION` v97, puis `develop → main` — l'auto-déploiement Hostinger re-branché a
 > tiré le commit tout seul. Contient #135 (filtres) et #136 (titres PT + descriptions).

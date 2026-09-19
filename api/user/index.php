@@ -30,6 +30,7 @@
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../lib/validation.php';
+require_once __DIR__ . '/../lib/condition_check.php'; // épinglage : accorder un badge dont la condition est remplie
 
 // ── Extraire l'userId depuis l'URL (/api/user/42 ou /api/user/42/stats) ───────
 $parts  = requestPathSegments();
@@ -105,6 +106,11 @@ if ($method === 'GET') {
     $stmt->execute([$userId]);
     $unlockedTitles = $stmt->fetchAll();
 
+    // Journées distinctes jouées, comptées par le SERVEUR (game_sessions) — cf. 'unique_days' plus bas.
+    $stmt = $pdo->prepare('SELECT COUNT(DISTINCT played_date) FROM game_sessions WHERE user_id = ?');
+    $stmt->execute([$userId]);
+    $uniqueDays = (int) $stmt->fetchColumn();
+
     // Résoudre le slug du titre équipé (évite un aller-retour supplémentaire côté JS)
     $equippedTitleSlug = null;
     if (!empty($profile['equipped_title_id'])) {
@@ -127,6 +133,13 @@ if ($method === 'GET') {
             'settings'            => json_decode($profile['settings']  ?? 'null', true) ?? [],
         ],
         'stats'   => $stats,
+        // Journées distinctes jouées, comptées par le SERVEUR (game_sessions). Le
+        // client tenait ce compte par appareil (uniqueDaysSet) : un joueur pouvait
+        // se voir 50 jours en local — dont ses jours d'avant le compte — quand la
+        // base en avait 45, débloquer Velvet Regular chez lui, et se le voir refuser
+        // par le serveur à chaque synchro et à chaque épinglage. Le pull remplace
+        // désormais le compteur local par cette valeur.
+        'unique_days' => $uniqueDays,
         'global_streak'        => (int) ($user['global_streak'] ?? 0),
         'global_streak_record' => (int) ($user['global_streak_record'] ?? 0),
         // Dernière JOURNÉE (Paris, "Y-m-d") comptée dans la streak globale, ou null.
@@ -275,7 +288,34 @@ if ($method === 'PATCH') {
             }
             $owns = $pdo->prepare('SELECT 1 FROM badges_unlocked WHERE user_id = ? AND badge_id = ? LIMIT 1');
             $owns->execute([$userId, $bid]);
-            if (!$owns->fetch()) jsonError('Badge not unlocked', 403);
+            if (!$owns->fetch()) {
+                // Le client croit le badge débloqué (son compteur local dit oui) mais le
+                // serveur ne l'a jamais reçu — la synchro local→backend avale ses 403 et
+                // l'épinglage échouait en boucle : le badge « s'enlevait » au pull suivant
+                // (vécu : Velvet Regular, 2026-09-19). Si la condition est réellement
+                // remplie côté serveur, on accorde ici même — c'est la même vérification
+                // que POST /api/badges/unlock. Sinon, refus explicite AVEC le slug, pour
+                // que le client sache quel badge retirer de sa sélection.
+                $b = $pdo->prepare('SELECT condition_type, condition_mode, condition_value FROM badges WHERE slug = ? LIMIT 1');
+                $b->execute([$bid]);
+                $badge = $b->fetch();
+                $codeGated = $pdo->prepare('SELECT 1 FROM event_codes WHERE badge_id = ? LIMIT 1');
+                $codeGated->execute([$bid]);
+                $grantable = $badge
+                    && !$codeGated->fetchColumn()
+                    && personadle_condition_allows_unlock(
+                        $pdo,
+                        $userId,
+                        $badge['condition_type'],
+                        $badge['condition_mode'] ?? null,
+                        isset($badge['condition_value']) ? (int) $badge['condition_value'] : null
+                    );
+                if (!$grantable) {
+                    jsonError("Badge not unlocked: $bid", 403);
+                }
+                $pdo->prepare('INSERT IGNORE INTO badges_unlocked (user_id, badge_id) VALUES (?, ?)')
+                    ->execute([$userId, $bid]);
+            }
         }
         $profileFields[] = 'selected_badges = ?';
         $profileParams[] = json_encode($sel);

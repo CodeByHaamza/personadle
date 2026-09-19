@@ -15,6 +15,13 @@
  *
  * NB : ne signale que les colonnes MANQUANTES (dangereuses). Les colonnes EN PLUS
  *      côté prod sont inoffensives et volontairement ignorées.
+ *
+ * Depuis le 2026-09-19, compare AUSSI les contraintes UNIQUE : une contrainte
+ * présente en prod mais absente de la référence refuse des écritures que le code
+ * croit permises. Vécu : `game_sessions.uq_session (user_id, mode, played_date)`,
+ * jamais supprimée parce que la migration 032 visait le nom de la référence
+ * (`uq_session_per_day`) — chaque rejeu et chaque partie Expert du même jour
+ * tombaient en 409 « déjà enregistrée » pendant dix-huit jours, sans un log.
  */
 
 $root = dirname(__DIR__);
@@ -36,6 +43,24 @@ foreach ($blocks as $b) {
         }
     }
     $expected[$b[1]] = $cols;
+}
+
+// ── 1b. Contraintes UNIQUE attendues — par colonnes, sans le nom : la prod peut
+//        porter la même contrainte sous un autre nom, c'est même le piège ──────
+$expectedUnique = [];
+foreach ($blocks as $b) {
+    foreach (explode("\n", $b[2]) as $line) {
+        $line = trim($line);
+        if (preg_match('/^UNIQUE\s+(?:KEY|INDEX)?\s*`?\w*`?\s*\(([^)]+)\)/i', $line, $um)) {
+            $expectedUnique[$b[1]][] = preg_replace('/[`\s]/', '', $um[1]);
+        }
+        // La clé primaire de la référence compte aussi : les 025/048 ont posé l'`id`
+        // AUTO_INCREMENT de prod en UNIQUE KEY (la PK composite d'origine restant) —
+        // même garantie que la référence, pas une dérive.
+        if (preg_match('/^PRIMARY\s+KEY\s*\(([^)]+)\)/i', $line, $pm)) {
+            $expectedUnique[$b[1]][] = preg_replace('/[`\s]/', '', $pm[1]);
+        }
+    }
 }
 
 // ── 2. Colonnes réelles (information_schema) ─────────────────────────────────
@@ -69,8 +94,25 @@ foreach ($expected as $table => $cols) {
     }
 }
 
+// ── 3b. Contraintes UNIQUE en prod que la référence n'a pas ──────────────────
+$uniqueRows = $pdo->query(
+    "SELECT table_name, index_name, GROUP_CONCAT(column_name ORDER BY seq_in_index) AS cols
+     FROM information_schema.statistics
+     WHERE table_schema = DATABASE() AND non_unique = 0 AND index_name <> 'PRIMARY'
+     GROUP BY table_name, index_name"
+)->fetchAll(PDO::FETCH_ASSOC);
+foreach ($uniqueRows as $u) {
+    if (!isset($expected[$u['table_name']])) continue; // table propre à la prod : hors périmètre
+    $wanted = $expectedUnique[$u['table_name']] ?? [];
+    if (!in_array($u['cols'], $wanted, true)) {
+        echo "🔴 {$u['table_name']} — contrainte UNIQUE en trop : {$u['index_name']} ({$u['cols']}) "
+           . "— la référence ne l'a pas : elle refuse des écritures que le code croit permises\n";
+        $drift++;
+    }
+}
+
 if ($drift === 0) {
-    echo "✅ Aucune dérive : toutes les colonnes attendues par bdd_mysql.sql sont présentes.\n";
+    echo "✅ Aucune dérive : colonnes et contraintes UNIQUE conformes à bdd_mysql.sql.\n";
     exit(0);
 }
 

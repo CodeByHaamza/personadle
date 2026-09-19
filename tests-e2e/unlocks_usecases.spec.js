@@ -331,6 +331,48 @@ test.describe.serial("Déblocages vérifiés par le serveur", () => {
     expect((await unlockBadge("ace_defective")).ok()).toBeTruthy();
   });
 
+  test("épingler un badge que le serveur n'a pas : accordé si la condition est remplie, refusé AVEC le slug sinon ; unique_days vient du serveur", async () => {
+    // Un compte neuf, une partie gagnée : ace_detective (10 victoires) n'est pas
+    // méritée, streak_record 3 (« three_days ») non plus… on prend un badge à
+    // condition remplie mais jamais poussé au serveur : first_win vient d'être
+    // accordé plus haut ; on en fabrique un second cas avec giveups_total (ace_defective
+    // a été poussé aussi). Le plus simple : un compte frais.
+    const v = await registerUser("pin");
+    try {
+      await playOk(v, { attempts: 2 }); // 1 victoire, jamais poussée à /badges/unlock
+      const me = await (await call(v.ctx, "get", `/api/user/${v.userId}`)).json();
+      expect(me.unique_days, "le serveur compte les journées distinctes").toBe(1);
+      const cat0 = await (await call(v.ctx, "get", "/api/badges")).json();
+      expect(Number(cat0.find((b) => b.slug === "first_win")?.is_unlocked)).toBe(0);
+
+      // Épingler first_win sans l'avoir déclaré : le serveur vérifie la condition (1
+      // victoire) et l'accorde lui-même au lieu de renvoyer 403 — c'est ce qui faisait
+      // « s'enlever » Velvet Regular à chaque essai.
+      const pin = await call(v.ctx, "patch", `/api/user/${v.userId}`, {
+        data: { selected_badges: ["first_win"] },
+        headers: await csrfHeader(v.ctx),
+      });
+      expect(pin.ok(), await pin.text()).toBeTruthy();
+      const cat1 = await (await call(v.ctx, "get", "/api/badges")).json();
+      expect(Number(cat1.find((b) => b.slug === "first_win")?.is_unlocked)).toBe(1);
+      const prof = await (await call(v.ctx, "get", `/api/user/${v.userId}`)).json();
+      expect(prof.profile.selected_badges).toEqual(["first_win"]);
+
+      // Condition NON remplie (ace_detective = 10 victoires) : 403, et le message
+      // nomme le badge pour que le client sache lequel retirer de sa sélection.
+      const bad = await call(v.ctx, "patch", `/api/user/${v.userId}`, {
+        data: { selected_badges: ["first_win", "ace_detective"] },
+        headers: await csrfHeader(v.ctx),
+      });
+      expect(bad.status()).toBe(403);
+      expect((await bad.json()).error).toBe("Badge not unlocked: ace_detective");
+      const prof2 = await (await call(v.ctx, "get", `/api/user/${v.userId}`)).json();
+      expect(prof2.profile.selected_badges, "rien n'a été écrit").toEqual(["first_win"]);
+    } finally {
+      await v.ctx.dispose();
+    }
+  });
+
   test("badge inconnu → 404 ; badge « manuel » (one_shot) → toujours accordé sur déclaration", async () => {
     expect((await unlockBadge("nope_badge")).status()).toBe(404);
     expect((await unlockBadge("one_shot")).ok()).toBeTruthy();
@@ -521,5 +563,42 @@ test.describe.serial("Autre appareil : badges et titres accordés en base", () =
       )
       .toBe("junes");
     await ctx2.close();
+  });
+});
+
+test.describe("Badges sociaux — Best Bro à la première visite du profil", () => {
+  test("2 amis acceptés → une seule ouverture du profil suffit : badge en base et affiché débloqué", async ({
+    browser,
+  }) => {
+    // Le drapeau hasTwoFriends arrivait après la vérification des conditions : le
+    // badge attendait la visite suivante, sa synchro celle d'après. Gyotre : 12 amis
+    // acceptés, jamais Best Bro (2026-09-19).
+    const me = await registerUser("bb");
+    const f1 = await registerUser("bbf1");
+    const f2 = await registerUser("bbf2");
+    try {
+      await befriend(f1, me);
+      await befriend(f2, me);
+      const before = await (await call(me.ctx, "get", "/api/badges")).json();
+      expect(Number(before.find((b) => b.slug === "best_bro")?.is_unlocked)).toBe(0);
+
+      const ctx = await browser.newContext({ storageState: await me.ctx.storageState() });
+      const page = await ctx.newPage();
+      await gotoSettled(page, "/profile/profile.html");
+      // Le badge apparaît débloqué dans la collection sans recharger…
+      await expect
+        .poll(async () => (await (await call(me.ctx, "get", "/api/badges")).json()).find((b) => b.slug === "best_bro")?.is_unlocked)
+        .toBe(1);
+      // …et le profil local le connaît aussi.
+      const localBadges = await page.evaluate(
+        () => JSON.parse(localStorage.getItem("personaUserProfile") || "{}").badges || []
+      );
+      expect(localBadges).toContain("best_bro");
+      await ctx.close();
+    } finally {
+      await me.ctx.dispose();
+      await f1.ctx.dispose();
+      await f2.ctx.dispose();
+    }
   });
 });
