@@ -82,10 +82,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Setup PHP 8.3
+      - name: Setup PHP 8.2 (version de prod Hostinger)
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.2'
           extensions: pdo_mysql
 
       - name: Check PHP syntax (all .php files)
