@@ -199,6 +199,36 @@ final class ValidationTest extends TestCase
         $this->assertSame('Unknown gallery avatar', personadle_validate_avatar('../img/avatar/Nope.gif', $this->galleryDir()));
     }
 
+    // ── personadle_validate_avatar_src (052) ─────────────────────────────────
+    // Le portrait galerie d'ORIGINE d'un recadrage : un chemin existant ou rien —
+    // jamais une image inline, ce champ dit « qui » est porté, il ne stocke rien.
+
+    public function testAvatarSrcAcceptsNothingOrAnExistingGalleryPortrait(): void
+    {
+        $this->assertNull(personadle_validate_avatar_src(null, $this->galleryDir()));
+        $this->assertNull(personadle_validate_avatar_src('', $this->galleryDir()));
+        $this->assertNull(personadle_validate_avatar_src('../img/avatar/Eriko.png', $this->galleryDir()));
+        $this->assertNull(personadle_validate_avatar_src('../img/avatar/Kanji.avif', $this->galleryDir()));
+    }
+
+    public function testAvatarSrcRejectsInlineImagesAndUnknownPortraits(): void
+    {
+        $this->assertSame(
+            'Invalid avatar_src (gallery path expected)',
+            personadle_validate_avatar_src('data:image/png;base64,iVBORw0KGgo=', $this->galleryDir())
+        );
+        $this->assertSame('Unknown gallery avatar', personadle_validate_avatar_src('../img/avatar/Nope.gif', $this->galleryDir()));
+        $this->assertSame('Invalid avatar format', personadle_validate_avatar_src('../img/avatar/../config.php', $this->galleryDir()));
+    }
+
+    public function testIsGalleryAvatarTellsAPathFromAnInlineImage(): void
+    {
+        $this->assertTrue(personadle_is_gallery_avatar('../img/avatar/Eriko.png'));
+        $this->assertFalse(personadle_is_gallery_avatar('data:image/png;base64,iVBORw0KGgo='));
+        $this->assertFalse(personadle_is_gallery_avatar(null));
+        $this->assertFalse(personadle_is_gallery_avatar(''));
+    }
+
     public function testAvatarRejectsAnyOtherPathOrTraversal(): void
     {
         foreach ([

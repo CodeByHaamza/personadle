@@ -8,7 +8,9 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 1425 tests Vitest (77 suites), 358 méthodes PHPUnit, 245 tests E2E,
+> Vérifié le 2026-08-26 : 1431 tests Vitest (77 suites), 368 méthodes PHPUnit, 249 tests E2E,
+> Vérifié le 2026-08-26 : 1428 tests Vitest (77 suites), 363 méthodes PHPUnit, 248 tests E2E,
+> Vérifié le 2026-08-26 : 1425 tests Vitest (77 suites), 359 méthodes PHPUnit, 247 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
@@ -109,6 +111,26 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       (dump `game_sessions` avant) : la contrainte « une partie par jour » de l'archive de mai
       (`uq_session`) n'avait jamais été supprimée, la 032 visant un autre nom. Chaque rejeu et chaque
       partie Expert du même jour tombaient en 409 depuis le 1er septembre ; porte Émoji inatteignable.
+- [x] Jouer `sql/migrations/052_profiles_avatar_src.sql` (colonne `profiles.avatar_src` + reprise
+      des portraits galerie non recadrés ; `ADD COLUMN IF NOT EXISTS`, `UPDATE` borné, rejouable).
+      **À jouer AVANT le `git pull` Hostinger.** Sans elle, `GET /api/user/:id`, `GET /api/friends/`
+      et tout PATCH d'avatar tombent en `Unknown column 'avatar_src'` → **500 sur le profil et la
+      liste d'amis pour tout le monde**. Puis `INSERT IGNORE INTO schema_migrations (version) VALUES
+      ('052_profiles_avatar_src')`. Vérifiée le 2026-09-19 sur la base de dev au schéma 051 (58 origines
+      reprises, 45 portraits recadrés restent inconnus) et sur un import vierge (no-op).
+- [x] **Bumper `CACHE_VERSION` dans `sw.js` (v99 → v100, fait le 2026-09-19)** : `profile/profile-page.js`
+      (précaché) envoie désormais `avatar_src` au recadrage (badge Same Energy).
+- [x] Jouer `sql/migrations/051_user_stats_expert.sql` (table `user_stats_expert` + reprise des
+      **Jouées en prod le 2026-09-19 (051 puis 052, dump 51 Mo en local avant, validées contre le schéma prod recréé dans Docker) : 79 lignes Expert / 300 parties reprises, 7 origines d'avatar.** Backfill des streaks à lancer depuis le webroot après le pull.
+      compteurs depuis `game_sessions WHERE is_expert = 1`, `CREATE TABLE IF NOT EXISTS` + `INSERT …
+      ON DUPLICATE KEY`, rejouable), **puis** `php scripts/backfill_expert_streaks.php` depuis le
+      webroot (pose `streak`/`streak_record`, que le SQL ne peut pas calculer ; rejouable aussi).
+      **À jouer AVANT le `git pull` Hostinger.** Sans la table, `GET /api/user/:id/stats`
+      (`expert_by_mode`) et chaque enregistrement de partie Expert tombent en `Table doesn't exist`
+      → **500 sur la page profil et sur toute partie Expert**. Puis `INSERT IGNORE INTO
+      schema_migrations (version) VALUES ('051_user_stats_expert')`. Vérifiée le 2026-09-19 sur la
+      base de dev au schéma 050 (326 lignes reprises pour 540 parties Expert) et sur un import vierge
+      du nouveau `bdd_mysql.sql` (no-op).
 - [x] **Bumper `CACHE_VERSION` dans `sw.js` (v96 → v97, fait le 2026-09-18 soir)** : `js/filterMenu.js`
       (précaché) et `profile/titles-ui.js` changent après la 2.2 (marqueur de format des filtres,
       descriptions de titres — 2026-09-18 soir). Sans bump,
@@ -121,6 +143,13 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       `profile/friends/friends.{css,js}` sont tous **précachés** et tous modifiés — sans bump,
       un joueur déjà venu garde l'ancien front et ne voit ni le filtre Dimension du classement,
       ni la pastille Expert de sa Boîte, alors que l'API, elle, aura changé.
+- [ ] **Top 3 hebdo Discord** (`api/cron/discord_weekly.php`) : (1) créer le webhook du salon
+      classement (Modifier le salon → Intégrations → Webhooks, ou `setup.mjs` côté dépôt
+      Discord) ; (2) `define('DISCORD_WEEKLY_WEBHOOK', '…')` dans `api/config.php` sur le serveur
+      (sans elle, le post part sur le webhook du quotidien) ; (3) cron hPanel `0 20 * * 0` avec la
+      commande de `DEPLOY.md` § Étape 6 ; (4) tester à la main une fois
+      (`curl -H "X-Cron-Key: …" https://personadle.net/api/cron/discord_weekly.php`) et vérifier
+      l'heure réelle du premier dimanche (fuseau du cron).
 - [ ] **Déployer hors heure de pointe.** `sw.js` envoie `SW_UPDATED` à tous les onglets via
       `clients.claim()`, et chaque page répond par `window.location.reload()`. L'état de
       partie survit (il vit dans `localStorage`), mais un joueur en cours de partie est
@@ -128,6 +157,13 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       volontaire (c'est lui qui garantit qu'on ne reste pas sur du code périmé), simplement
       à ne pas déclencher en pleine affluence.
 
+> ✅ **Release 2.2.3 — 2026-09-19 soir** : stats Expert éditables (#146, table `user_stats_expert`, 051),
+> Same Energy survit au recadrage (#147, `profiles.avatar_src`, 052, v100), top 3 hebdo Discord (#148,
+> cron `discord_weekly.php`), « Copier pour Discord » réparé (#149, CSP). 051 + 052 jouées et enregistrées en
+> prod avant le merge. Reste côté serveur : `php scripts/backfill_expert_streaks.php` depuis le webroot
+> juste après le pull, `DISCORD_WEEKLY_WEBHOOK` dans `config.php` (sinon repli sur le quotidien), cron hPanel
+> `0 20 * * 0`.
+>
 > ✅ **Release 2.2.2 — 2026-09-19** : ping du rôle « 🔔 Daily » (#141), migration 050 déjà jouée en prod +
 > détecteur de schéma sur les UNIQUE (#142), badges : le serveur est la vérité (#143), v99. Rien à jouer
 > en base. Reste côté serveur : `define('DISCORD_DAILY_MENTION_ROLE', '1550573338336698521');` dans

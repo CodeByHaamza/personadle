@@ -411,6 +411,7 @@
     "share_generate_error": "❌ Couldn't generate the share image. Please try again.",
     "share_discord_copied": "📋 Profile image copied! Paste it in Discord with Ctrl+V.",
     "share_copy_failed": "❌ Copy failed. Please download manually.",
+    "share_copy_fallback": "📥 This browser can't copy images — the card was downloaded instead. Drag it into Discord.",
     "share_tweet_text": "Check out my PersonaDLE profile! 🎭\n{{pseudo}} – {{wins}} wins & {{badges}} badges 🏅\n\n#PersonaDLE #Persona",
     "share_email_subject": "My PersonaDLE Profile",
     "share_email_body": "Check out my PersonaDLE stats!\n\nWins: {{wins}}\nBest Streak: {{streak}}\nBadges: {{badges}}\n\nPlay at: https://personadle.net",

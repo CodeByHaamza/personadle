@@ -445,3 +445,44 @@ test.describe("Atelier — badges épinglés et profil consulté", () => {
     await ctx.close();
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+test.describe("Carte de partage — « Copier pour Discord » sous la vraie CSP", () => {
+  let u;
+  test.beforeAll(async () => {
+    u = await registerUser("sh");
+  });
+  test.afterAll(async () => {
+    await u?.ctx?.dispose();
+  });
+
+  test("la copie réussit (la CSP bloquait le fetch(data:) qui précédait l'écriture presse-papiers)", async ({
+    browser,
+  }) => {
+    const ctx = await browser.newContext({
+      storageState: await u.ctx.storageState(),
+      permissions: ["clipboard-read", "clipboard-write"],
+    });
+    const page = await ctx.newPage();
+    const alerts = [];
+    page.on("dialog", async (d) => {
+      alerts.push(d.message());
+      await d.accept();
+    });
+    const cspViolations = [];
+    page.on("console", (m) => {
+      if (/Content Security Policy/i.test(m.text())) cspViolations.push(m.text());
+    });
+    await gotoSettled(page, "/profile/profile.html");
+    await page.locator("#shareProfileBtn").click();
+    await expect(page.locator("#sharePreviewModal")).toBeVisible();
+    // Le PNG se génère en différé (html2canvas) : le bouton n'a son handler qu'après.
+    await expect.poll(() => page.evaluate(() => typeof document.getElementById("shareDiscordBtn").onclick === "function")).toBe(true);
+    await page.locator("#shareDiscordBtn").click();
+    await expect.poll(() => alerts.length).toBeGreaterThan(0);
+    expect(alerts[0], alerts.join(" | ")).toMatch(/copi|copied/i);
+    expect(alerts[0]).not.toMatch(/échec|failed/i);
+    expect(cspViolations, "aucune violation CSP ne doit être déclenchée par la copie").toEqual([]);
+    await ctx.close();
+  });
+});
