@@ -1,48 +1,75 @@
-# 🎭 PERSONADLE
+<p align="center">
+  <img src="./img/New_Logo_PersonaDLE.png" alt="PersonaDLE" width="640">
+</p>
+
+<h3 align="center">A daily guessing game set in the Persona universe — from Persona 1 to Persona 5X.</h3>
 
 <p align="center">
-  <img src="./img/New_Logo_PersonaDLE.png" alt="Personadle Logo" width="700">
+  <a href="https://personadle.net"><img src="https://img.shields.io/badge/▶%20Play-personadle.net-E60012?style=for-the-badge" alt="Play at personadle.net"></a>
+  <a href="https://github.com/CodeByHaamza/personadle/releases"><img src="https://img.shields.io/github/v/release/CodeByHaamza/personadle?style=for-the-badge&label=Release&color=1E3A8A" alt="Latest release"></a>
+  <a href="https://github.com/CodeByHaamza/personadle/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/CodeByHaamza/personadle/ci.yml?branch=develop&style=for-the-badge&label=CI" alt="CI"></a>
+  <img src="https://img.shields.io/badge/Tests-1431%20passing-2ECC71?style=for-the-badge&logo=vitest&logoColor=white" alt="Tests">
+  <a href="LICENSE.txt"><img src="https://img.shields.io/badge/License-MIT%20(code)-blue?style=for-the-badge" alt="MIT (code only)"></a>
 </p>
 
 <p align="center">
-  <strong>A daily guessing game set in the Persona universe</strong>
-  <br>
-  <em>From Persona 1 to Persona 5X</em>
+  <img src="https://img.shields.io/badge/Vanilla%20JS-no%20framework-F7DF1E?style=flat-square&logo=javascript&logoColor=black" alt="Vanilla JS">
+  <img src="https://img.shields.io/badge/PHP%208.3-PDO-8892BF?style=flat-square&logo=php&logoColor=white" alt="PHP 8.3">
+  <img src="https://img.shields.io/badge/MariaDB-29%20tables-003545?style=flat-square&logo=mariadb&logoColor=white" alt="MariaDB">
+  <img src="https://img.shields.io/badge/i18n-EN%20FR%20ES%20DE%20IT%20PT-8E44AD?style=flat-square" alt="6 languages">
+  <a href="https://discord.gg/wpMdGGDp3y"><img src="https://img.shields.io/badge/Discord-join%20the%20Velvet%20Room-5865F2?style=flat-square&logo=discord&logoColor=white" alt="Discord"></a>
 </p>
 
 <p align="center">
-  <a href="https://personadle.net"><img src="https://img.shields.io/badge/Play%20Now-personadle.net-red?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMkM2LjQ4IDIgMiA2LjQ4IDIgMTJzNC40OCAxMCAxMCAxMCAxMC00LjQ4IDEwLTEwUzE3LjUyIDIgMTIgMnptLTIgMTVsLTUtNSAxLjQxLTEuNDFMMTAgMTQuMTdsNy41OS03LjU5TDE5IDhsLTkgOXoiIGZpbGw9IndoaXRlIi8+PC9zdmc+"/></a>
-  <a href="LICENSE.txt"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="License"></a>
-  <a href="https://github.com/CodeByHaamza/personadle/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/CodeByHaamza/personadle/ci.yml?branch=develop&style=for-the-badge&label=CI" alt="CI Status"></a>
-  <img src="https://img.shields.io/badge/Version-2.1-brightgreen?style=for-the-badge" alt="Version">
-  <img src="https://img.shields.io/badge/Made%20with-Vanilla%20JS-yellow?style=for-the-badge&logo=javascript" alt="Made with JavaScript">
-  <img src="https://img.shields.io/badge/Tests-1431%20passing-brightgreen?style=for-the-badge&logo=vitest" alt="Tests">
-  <img src="https://img.shields.io/badge/Backend-PHP%208.3%20%2B%20MariaDB-8892BF?style=for-the-badge&logo=php" alt="PHP Backend">
-  <img src="https://img.shields.io/badge/i18n-EN%20%7C%20FR%20%7C%20ES%20%7C%20DE%20%7C%20IT%20%7C%20PT-blueviolet?style=for-the-badge" alt="Languages">
+  <a href="#-play">Play</a> ·
+  <a href="#-six-modes-twelve-ways-to-play">Modes</a> ·
+  <a href="#-features">Features</a> ·
+  <a href="#-whats-new">What's new</a> ·
+  <a href="#-under-the-hood">Under the hood</a> ·
+  <a href="#-run-it-locally">Run it locally</a> ·
+  <a href="#-community">Community</a> ·
+  <a href="#-credits">Credits</a>
 </p>
 
 <p align="center">
-  <a href="#-features">Features</a> •
-  <a href="#-game-modes">Game Modes</a> •
-  <a href="#-whats-new">What's New</a> •
-  <a href="#-how-to-play">How to Play</a> •
-  <a href="#-tech-stack">Tech Stack</a> •
-  <a href="#-roadmap">Roadmap</a>
+  <img src="./img/preview/home.png" alt="PersonaDLE home — six game modes" width="820">
 </p>
 
 ---
 
-## 🎮 About
+## 🎮 Play
 
-**Personadle** is a free, fan-made browser game celebrating the beloved Persona series (Persona 1-5X). Inspired by [Smashdle](https://smashdle.net), each day brings a new character to identify through various clue types—silhouettes, quotes, personas, emojis, music, and more.
+Every day at midnight (Paris time), each mode draws a new target. Guess it with the clues you're given,
+compare with your friends, keep your streak alive.
 
-Perfect for both long-time fans and newcomers to the series!
+1. Open **[personadle.net](https://personadle.net)** — no install, no account required.
+2. Pick a mode. Type a name; the autocomplete shows portraits.
+3. Every guess reveals something. Find the answer, or **give up** to see it.
+4. **Replay** as many times as you like — every game counts toward your stats.
+5. Create a free account to sync across devices, add friends, climb the leaderboard and unlock badges.
 
-👉 **[Play now at personadle.net](https://personadle.net)**
+> 🇫🇷 🇪🇸 🇩🇪 🇮🇹 🇵🇹 The whole game is available in six languages, auto-detected from your browser.
 
-<p align="center">
-  <img src="./img/preview/home.png" alt="PersonaDLE home — 6 game modes" width="820">
-</p>
+---
+
+## 🎯 Six modes, twelve ways to play
+
+<table>
+  <tr>
+    <td align="center" width="33%"><img src="./img/preview/preview_classic.png" alt="Classic" width="360"><br><b>🔍 Classic</b><br><sub>Compare traits — Arcana, gender, age, game, Persona — with colour-coded feedback.</sub></td>
+    <td align="center" width="33%"><img src="./img/preview/preview_emoji.png" alt="Emoji" width="360"><br><b>😀 Emoji</b><br><sub>Four emojis describe a character. One new emoji every wrong guess.</sub></td>
+    <td align="center" width="33%"><img src="./img/preview/preview_all_out_attack.png" alt="All-Out Attack" width="360"><br><b>⚔️ All-Out Attack</b><br><sub>Recognise the finisher animation, from a blurred frame to the full sequence.</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="./img/preview/preview_shadow.png" alt="Silhouette" width="360"><br><b>🖤 Silhouette</b><br><sub>A black shape that sharpens with each attempt. Right-click can't cheat it.</sub></td>
+    <td align="center"><img src="./img/preview/preview_personae.png" alt="Personae" width="360"><br><b>👤 Personae</b><br><sub>Here's the Persona — who wields it? From Orpheus to the Kanzato brothers.</sub></td>
+    <td align="center"><img src="./img/preview/preview_music.png" alt="Music" width="360"><br><b>🎵 Music</b><br><sub>A few seconds of a track. 80+ songs, P1 → P5X, Q and Q2 included.</sub></td>
+  </tr>
+</table>
+
+**⚡ Expert Mode** — every mode has a harder twin, earned by playing: a single quote instead of traits,
+one *lying* emoji, a flash you trigger yourself, a frozen black-and-white blur, lyrics without audio,
+the Persona's real myth with its name masked. Expert keeps its own targets, stats and leaderboard.
 
 ---
 
@@ -50,662 +77,182 @@ Perfect for both long-time fans and newcomers to the series!
 
 <table>
   <tr>
-    <td>🎖️ <strong>Badge System</strong></td>
-    <td>Unlock 60+ unique achievements across 4 categories</td>
+    <td width="33%">🎖️ <b>69 badges</b><br><sub>Some secret, one you earn <i>together</i> with a friend, all verified server-side.</sub></td>
+    <td width="33%">🏅 <b>Titles & Compendium</b><br><sub>Equip a title; every deed is written, dated, in your Compendium.</sub></td>
+    <td width="33%">🖼️ <b>Profile card</b><br><sub>A shareable PNG of your profile — 8 themes, 39 wallpapers, copy straight to Discord.</sub></td>
   </tr>
   <tr>
-    <td>🖼️ <strong>Profile Card Sharing</strong></td>
-    <td>Export your profile as a PNG — 8 themes, 37 wallpapers, share on X / Discord</td>
+    <td>👥 <b>Friends & Social Links</b><br><sub>Friend codes, P4 TV / calling-card animations, ranks 1 → 10 per Arcana.</sub></td>
+    <td>⚔️ <b>Challenges</b><br><sub>Send your daily game to a friend — normal or Expert — and compare.</sub></td>
+    <td>🏆 <b>Leaderboard</b><br><sub>By mode, period and dimension (Normal / Expert), friends-only scope.</sub></td>
   </tr>
   <tr>
-    <td>🔊 <strong>Sound Effects</strong></td>
-    <td>Victory sounds and interactive button feedback</td>
-  </tr>
-  <tr>
-    <td>🎨 <strong>Persona 5 UI</strong></td>
-    <td>Stylish interface with SVG effects and dynamic transitions</td>
-  </tr>
-  <tr>
-    <td>📊 <strong>Stats Tracking</strong></td>
-    <td>Monitor wins, streaks, playtime, and favorite modes</td>
-  </tr>
-  <tr>
-    <td>🌙 <strong>Dark Mode</strong></td>
-    <td>Eye-friendly default theme with colorblind options</td>
-  </tr>
-  <tr>
-    <td>🌐 <strong>Multi-language</strong></td>
-    <td>6 languages: EN, FR, ES, DE, IT, PT — auto-detected from browser</td>
-  </tr>
-  <tr>
-    <td>👥 <strong>Friends System</strong></td>
-    <td>Search by code, send requests, online status, P4 TV / Calling Card animations</td>
-  </tr>
-  <tr>
-    <td>🏆 <strong>Leaderboard</strong></td>
-    <td>Rankings by mode and period (weekly / monthly / all-time), friends scope</td>
-  </tr>
-  <tr>
-    <td>💫 <strong>Social Link System</strong></td>
-    <td>Ranks 1-10 (Stranger → True Confidant), XP, mutual actions, golden halo effect</td>
-  </tr>
-  <tr>
-    <td>⚔️ <strong>Daily Challenges</strong></td>
-    <td>Challenge friends to a specific mode and compare results</td>
-  </tr>
-  <tr>
-    <td>☁️ <strong>Cloud Sync</strong></td>
-    <td>Offline-first, PHP backend — progress synced automatically when online</td>
-  </tr>
-  <tr>
-    <td>🔔 <strong>Notifications</strong></td>
-    <td>Challenge results, friend requests, Social Link rank-ups</td>
-  </tr>
-  <tr>
-    <td>🎵 <strong>Profile Music</strong></td>
-    <td>Choose a Persona track that plays on your profile page</td>
-  </tr>
-  <tr>
-    <td>🔰 <strong>Titles / Ranks</strong></td>
-    <td>Unlock titles via stats (e.g. "Phantom Thief", "Wild Card"), equip one on your profile</td>
-  </tr>
-  <tr>
-    <td>🎟️ <strong>Event Codes</strong></td>
-    <td>Redeem limited-time codes for exclusive badges</td>
-  </tr>
-  <tr>
-    <td>🛡️ <strong>Admin Panel</strong></td>
-    <td>User moderation (ban, pseudo lock), event codes CRUD, stats dashboard</td>
+    <td>☁️ <b>Cloud sync</b><br><sub>Offline-first; the server is the source of truth once you log in.</sub></td>
+    <td>🎨 <b>Persona 5 UI</b><br><sub>Dark mode, colour-blind palette, profile music, atelier for everything you customise.</sub></td>
+    <td>🛡️ <b>Admin & anti-cheat</b><br><sub>Moderation panel, event codes, daily target recomputed on the server.</sub></td>
   </tr>
 </table>
 
----
-
-## 🎯 Game Modes
-
-### 🔍 Classic Mode
-
-Compare character traits—Arcana, gender, age, game, Persona, etc.—with color-coded feedback (colorblind-friendly mode available). Each guess brings you closer!
-
-### 😀 Emoji Mode
-
-Decode a series of emojis that gradually appear. Use logic (and creativity) to link them to a character.
-
-### ⚔️ All-Out Attack Mode
-
-A blurred battle animation reveals step by step. Identify the pose, costume, or attack pattern!
-
-### 🖤 Shadow Mode
-
-A dark silhouette zooms out with each wrong guess. Test your visual memory!
-
-### 👤 Personae Mode
-
-Identify which character uses a specific Persona. Perfect for Velvet Room veterans!
-
-### 🎵 Music Mode
-
-Listen to short music clips and identify the character or theme. True fans will excel here!
-
 <details>
-<summary><strong>📸 View Screenshots</strong></summary>
-
+<summary><b>More screenshots</b> — profile, leaderboard, friends</summary>
+<br>
 <table>
   <tr>
-    <td><img src="./img/preview/preview_classic.png" alt="Classic Mode" width="400"/></td>
-    <td><img src="./img/preview/preview_emoji.png" alt="Emoji Mode" width="400"/></td>
+    <td><img src="./img/preview/profile.png" alt="Profile" width="400"></td>
+    <td><img src="./img/preview/leaderboard.png" alt="Leaderboard" width="400"></td>
   </tr>
   <tr>
-    <td><img src="./img/preview/preview_all_out_attack.png" alt="All-Out Attack" width="400"/></td>
-    <td><img src="./img/preview/preview_shadow.png" alt="Shadow Mode" width="400"/></td>
-  </tr>
-  <tr>
-    <td><img src="./img/preview/preview_personae.png" alt="Personae Mode" width="400"/></td>
-    <td><img src="./img/preview/preview_music.png" alt="Music Mode" width="400"/></td>
+    <td><img src="./img/preview/friends.png" alt="Friends & Social Link" width="400"></td>
+    <td><img src="./img/preview/preview_classic_victory.png" alt="Classic — victory" width="400"></td>
   </tr>
 </table>
-
-<p><strong>Social & progression</strong></p>
-
-<table>
-  <tr>
-    <td><img src="./img/preview/profile.png" alt="Profile page" width="400"/></td>
-    <td><img src="./img/preview/leaderboard.png" alt="Leaderboard" width="400"/></td>
-  </tr>
-  <tr>
-    <td><img src="./img/preview/friends.png" alt="Friends & Social Link" width="400"/></td>
-    <td><img src="./img/preview/home.png" alt="Home — 6 game modes" width="400"/></td>
-  </tr>
-</table>
-
 </details>
 
 ---
 
-## 🆕 What's New
+## 🆕 What's new
 
-<details open>
-<summary><b>⚡ v2.1 - September 2026 (Latest)</b></summary>
+**2.2 — September 2026** · *Profile showcase & Compendium*
 
-### ⚡ Expert Mode — a second way to play all six modes
+- **Profile showcase**: badges in large, wallpaper collection, share card; everything editable lives in one **Atelier**.
+- **Compendium** of titles, **Expert leaderboard** dimension, opus filters in a window.
+- **Wonder Shujin** in All-Out Attack, five new badges, the *Go Beyond* title, seven titles, three songs.
+- Persona Q / Q2 portraits, Persona 4 Revival wallpaper, Portuguese titles.
+- 2.2.x: Expert stats editable, badge *Same Energy* fixed, weekly Discord top 3, "Copy for Discord" repaired.
 
-- **One Expert variant per mode**, each with its own degraded clue: a single quote (Classic),
-  one lying emoji (Emoji), a self-triggered flash instead of a permanent image (Silhouette),
-  a frozen black-and-white blur (All-Out Attack), lyrics with no audio (Music), and the real
-  mythological story behind the Persona, with the name masked (Personae)
-- **Earned, not given**: each mode unlocks through its own condition (fast wins, wins in a
-  single day, or a streak of perfect first-try wins), verified server-side
-- A **lock-shattering animation** plays on the next page load once a mode is unlocked
-- Expert games keep **their own state, targets and stats** — playing Expert never touches
-  your daily game
-- Admins can grant a mode manually — but **never revoke an access earned by playing**
-
-### 🎯 New content
-
-- **8 Arena Ultimax silhouettes** for the SEES (Aigis, Akihiko, Fuuka, Junpei, Ken, Koromaru,
-  Mitsuru, Yukari) — separate answers from their P3 versions, tagged `P4AU` in the suggestions
-- **11 more songs**, including *Memories of You* (P3R), *Kimi no Tonari* (P2IS),
-  *Wait and See* (PQ2) and *Heartful Cry* (P3FES)
-- **Chord Summer** joins All-Out Attack, and **Persona 1** joins Personae mode
-- **Persona Trinity Souls** as a filterable title, with the Kanzato brothers
-- Two new badges and three new titles (**Junes**, **Investigation Team**, **Shadows Converge**)
-
-### 🤝 Challenges, fixed and extended
-
-- Accepting a challenge no longer strands it: the destination is resolved **before** anything
-  is written, so a challenge is never marked accepted with nowhere to go
-- **Challenges work in Expert Mode**, and an Expert challenge coexists with a normal one —
-  two different games, two different scores
-- **One live challenge per sender**: a new challenge replaces an unread one instead of
-  stacking up, and an **Abandon** button frees a challenge you accepted but can't finish
-
-### 🏆 Leaderboard
-
-- **Win rate** now uses a Bayesian average — a single 1-for-1 win no longer tops the board
-- **Best streak** counts consecutive *days*, not wins in a day, and finally agrees with the
-  number shown on your profile
-
-### 🌐 Polish
-
-- **Badge names translated** in French, Spanish, German and Italian — about half of them were
-  still in English
-- **Link previews** (Discord, X) on all six mode pages, each with its own title and description
-- Silhouette mode no longer flashes a zoomed-out image on first load, and its picture can no
-  longer be copied in the clear
-
-</details>
-
-<details>
-<summary><b>🚀 v2.0 - May 2026</b></summary>
-
-### ☁️ Full Backend — PHP 8.3 + MariaDB
-
-- Complete REST API with JWT-less auth (bcrypt + PHP sessions httpOnly)
-- 29-table relational schema, 1431+ unit tests (Vitest + jsdom)
-- Cloud sync: offline-first, auto-sync on reconnect, migration from localStorage
-
-### 👥 Friends & Social
-
-- Friend system: search by pseudo or friend code, accept/decline, online status
-- **Social Link** system — ranks 1-10 (Stranger → True Confidant), XP gained via real interactions
-- True Confidant effect: pulsing golden halo + burst animation on rank 10
-- Friend request animations: Persona 4 TV style, Persona 3 Evoker style, Calling Card style
-
-### 🏆 Leaderboard & Challenges
-
-- Leaderboard by mode × period (weekly / monthly / all-time), Global or Friends scope
-- Daily challenges between friends — send, accept, compare results
-- Notifications for challenge results and rank-ups
-
-### 🎨 Profile Overhaul
-
-- **Profile card export**: PNG image, 8 themes, 37 wallpapers, one-click share on X / Discord / Email
-- Profile music: choose a Persona track that plays when friends visit your profile
-- 60+ badges (server-side unlock verification), titles/ranks, event codes
-
-### 🌐 Internationalisation
-
-- 6 languages: EN · FR · ES · DE · IT · PT (1286 keys each)
-- Auto-detected from browser, persisted in cloud account
-- Localised buttons, messages, badge descriptions, titles
-
-### 🛡️ Admin Panel
-
-- User moderation (ban accounts, lock pseudos)
-- Event codes CRUD (create, distribute, expire)
-- Stats dashboard per user
-- Internal tool, French-only by design (no `data-i18n` coverage) — not part of the
-  player-facing i18n scope described above
-
-</details>
-
-<details>
-<summary><b>🎊 v1.1 - February 2026</b></summary>
-
-### 🧧 Chinese New Year Event
-
-- **Limited-time All-Out Attack skins** celebrating the Lunar New Year
-- **Exclusive seasonal wallpaper** and event badges
-- Special rewards for discovering festive characters
-
-### 🎭 Personae Mode - Expansion
-
-- **8+ new ultimate personas** from P2, P3, P4G, P5R, and P5 Tactica
-- **12 Picaro variants** - corrupted DLC personas join the roster
-- Complete persona collection spanning the entire series
-
-### 👤 New Characters
-
-- Added **Persona 2 EP characters** to Classic, Emoji, and Silhouette modes
-- Added **Velvet Room attendants** Belladonna and Demon Painter
-- New **All-Out Attack skin** for Wonder
-- Special guest appearance in Silhouette Mode
-
-### 🎵 Music Mode Expansion
-
-- **Persona 1 classics** make their debut
-- **Persona 5X tracks** from the mobile spinoff
-- **Persona Q & Q2 favorites** added to the jukebox
-- Enhanced **Velvet Room collection** with multiple Aria of the Soul versions
-
-### 🖼️ Profile Sharing
-
-- **37 total wallpapers** now available across all Persona games
-- New additions from P1, P2, P3, P4, P5, and Q series
-- Iconic locations, character moments, and crossover artwork
-- Seasonal and special event wallpapers
-
-### 🎖️ Badge Collection
-
-- **5+ new badges** added with hidden unlock conditions
-- Achievement badges for character discoveries
-- Secret badges for dedicated fans
-- Event-exclusive badges with limited-time codes
-
-### 🎨 UI & Polish
-
-- Redesigned filter buttons and wallpaper selection interface
-- **Emoji Mode improvement**: Error history now shows character portraits
-- Consistent navigation across all game modes
-- Enhanced mobile responsiveness
-
-[View full changelog →](./PersonaDLE_Update_Documentation/PersonaDLE%201.1/PersonaDLE_Update_V2.pdf)
-
-</details>
-
-<details>
-<summary><b>🎄 v1.0 - December 2025</b></summary>
-
-### 🎖️ Badge System
-
-- **19 unique badges** across 4 categories: Achievement, Event, Secret, and Social
-- **Track your progress** with badge counter (e.g., "12/19 unlocked")
-- **Showcase up to 4 badges** on your profile
-- Unlock through gameplay, seasonal events, or hidden secrets!
-
-### 🖼️ Profile Sharing
-
-- **11+ custom wallpapers** featuring iconic Persona locations
-- Share your stats, badges, and achievements
-- Download as image or share directly on social media
-- Customize with profile pictures including new additions: Chidori, Tae, and Maruki
-
-### 🔊 Sound Effects
-
-- Victory celebration sound on wins
-- Hover feedback on all interactive buttons
-- Enhanced immersion across all game modes
-
-### 🌟 New Content
-
-- Added **Fuuka Yamagishi** to All-Out Attack mode
-- Added **Persona 5 Tactica characters**: Erina and Toshiro Kasukabe
-- Complete character data for all modes
-
-### ⚡ Performance & Improvements
-
-- **All-Out Attack overhaul**: 66% faster load times, 40% less memory usage
-- Progressive image loading with WebP format via CDN
-- Smarter randomization to reduce character repetition
-- Smoother experience on all devices
-
-### 🐞 Bug Fixes
-
-- Fixed Silhouette Mode image display issues
-- Fixed Emoji Mode daily reset not triggering correctly
-- Fixed Classic Mode data error (Yukino Mayuzumi opus)
-- Fixed time tracking calculations
-- Corrected Music Mode song titles
-- Dark mode and UI polish
-
-[View full changelog →](./PersonaDLE_Update_Documentation/PersonaDLE%201.0/PersonaDLE_Update.pdf)
-
-</details>
-
-## 🚀 How to Play
-
-1. **Visit** [personadle.net](https://personadle.net)
-2. **Create an account** (optional — enables cloud save, leaderboard, friends)
-3. **Choose** your game mode
-4. **Guess** the daily character using provided clues
-5. **Play once per day** (resets at midnight Paris time)
-6. Use **Replay** to try again or **Give Up** to see the answer
-
-### Features:
-
-- ✅ Smart autocompletion with character portraits
-- ✅ Persistent game filters (P1 to P5X)
-- ✅ Keyboard-friendly interface
-- ✅ Cloud progress saving (with account) or local fallback
-- ✅ Export/import data as JSON
-- ✅ Challenge friends to your daily score
+📦 **[All releases with notes →](https://github.com/CodeByHaamza/personadle/releases)** ·
+📖 Player changelogs: [2.2](./PersonaDLE_Update_Documentation/PersonaDLE%202.2/PersonaDLE_Update.html) · [2.1](./PersonaDLE_Update_Documentation/PersonaDLE%202.1/PersonaDLE_Update.html) ·
+🔧 Dev changelogs: [2.2](./PersonaDLE_Update_Documentation/PersonaDLE%202.2/DEV_CHANGELOG.md) · [2.1](./PersonaDLE_Update_Documentation/PersonaDLE%202.1/DEV_CHANGELOG.md) · [2.0](./PersonaDLE_Update_Documentation/PersonaDLE%202.0/DEV_CHANGELOG.md)
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Under the hood
 
-### Frontend
-
-Built with **pure vanilla web technologies**—fast, lightweight, and dependency-free:
-
-```
-HTML5       → Semantic markup and accessible structure
-CSS3        → Custom animations, responsive design, dark mode
-JavaScript  → Modular ES6+, localStorage, dynamic UI
-```
-
-**No frontend frameworks. No external JS libraries.**
-
-### Backend (v2.0)
+No framework, no bundler, no build step. The front end is plain ES modules; the back end is PHP with
+prepared statements only; the database is the source of truth.
 
 ```
-PHP 8.3       → REST API, bcrypt auth, PDO prepared statements, rate-limiting SQL
-MariaDB 10.6+ → 29-table relational schema (MySQL 8.0 compatible)
-Apache        → .htaccess routing, CORS exact-origin, HTTPS, CSP/HSTS
-Hostinger     → Production hosting
+Browser ── ES modules ──► /api (PHP 8.3, PDO) ──► MariaDB 10.6+ → 29-table relational schema
+   │                          │
+   │  localStorage            │  sessions httpOnly · bcrypt · CSRF · rate limiting
+   │  (offline-first)         │  CSP · HSTS · exact-origin CORS · Psalm taint analysis
+   ▼                          ▼
+Service worker              Cron: leaderboard cache, Discord daily & weekly posts, GDPR purge
 ```
 
-API structure: `GET/POST/PATCH/DELETE /api/{resource}` — JSON responses, HTTP status codes.
+| Layer | What |
+|---|---|
+| **Front end** | HTML5 · CSS3 (one file per component, dark mode) · Vanilla JavaScript ES6+ |
+| **Back end** | PHP 8.3 REST API — `GET/POST/PATCH/DELETE /api/{resource}`, JSON, proper status codes |
+| **Database** | MariaDB 10.6+ / MySQL 8.0 — 29-table relational schema, 1431+ unit tests keep the contract honest |
+| **i18n** | EN · FR · ES · DE · IT · PT (1286 keys each), `en.json` is the source of truth |
+| **Hosting** | Hostinger, auto-deploy on push to `main`; SQL migrations applied by hand *before* the merge |
 
-### Local dev & CI
+### Quality gates
 
-```
-Docker Compose → MariaDB + PHP + phpMyAdmin, schéma + seed auto-chargés (make up)
-GitHub Actions → lint + i18n + data-check + coverage + PHPUnit (DB) + PHPStan
-```
-
-### Tests & quality
+Every pull request runs the whole thing; `main` only receives releases from `develop`.
 
 ```
 Vitest + jsdom → 1431 tests unitaires (logique de jeu, backend, streak, i18n, validation données)
 PHPUnit        → tests de logique pure + intégration DB (contrat de schéma)
 Playwright     → 249 E2E sur la stack Docker complète (smoke, API, Social Link)
-PHPStan        → analyse statique PHP niveau 5
-ESLint+Prettier→ lint + format
-npm test       → lance la suite Vitest · make check → tout (lint, data, i18n)
+PHPStan        → analyse statique PHP niveau 5 · Psalm → taint analysis
+ESLint+Prettier→ lint + format · i18n / data / daily-pool consistency checks
 ```
 
-### Browser Compatibility
-
-| Browser | Version | Status                          |
-| ------- | ------- | ------------------------------- |
-| Chrome  | 90+     | ✅ Supported (Best performance) |
-| Firefox | 88+     | ✅ Supported                    |
-| Safari  | 14+     | ✅ Supported (iOS 14+)          |
-| Edge    | 90+     | ✅ Supported                    |
-| Opera   | 76+     | ✅ Supported                    |
-
-**Requirements:**
-
-- JavaScript enabled
-- LocalStorage enabled
-- 1280x720+ resolution recommended
+Supported browsers: Chrome 90+, Firefox 88+, Safari 14+ (iOS 14+), Edge 90+.
 
 ---
 
-## 📊 Profile System
-
-Track your journey with comprehensive stats:
-
-- **Custom Profile**: Editable username and avatar (with cropping)
-- **Statistics**: Wins, give-ups, streaks, total playtime — per mode
-- **Badge Collection**: 60+ unique achievements to unlock
-- **Titles / Ranks**: Unlock via stats, one equipped at a time (e.g. "Phantom Thief", "Wild Card")
-- **Profile Music**: A Persona track that plays when others visit your profile
-- **Favorite Mode**: Automatically tracked based on playtime
-- **Data Control**: Export, import, or reset your profile
-- **Cloud Sync**: Linked to your account — survives browser clears
-
-> ☁️ With an account, all data is synced to the cloud. Offline-first: the game works without a connection and syncs when you come back online.
-
----
-
-## 🗺️ Roadmap
-
-Grosses briques déjà livrées — backend PHP/MariaDB, amis + Social Link, leaderboard, défis
-quotidiens, i18n 6 langues, panel admin, 1431 tests automatisés (Vitest + PHPUnit + Playwright).
-
-| Feature                            | Status       |
-| ----------------------------------- | ------------ |
-| All 6 Game Modes + Full Backend     | ✅ Done      |
-| Friends, Social Link & Leaderboard  | ✅ Done      |
-| Multi-language (EN/FR/ES/DE/IT/PT)  | ✅ Done      |
-| Mobile App (PWA)                    | 🔜 Planned   |
-| Japanese (JP) translation           | 🔜 Post-v2.0 |
-
-> 📋 **La roadmap complète et à jour (prochaines étapes priorisées, décisions en attente,
-> historique détaillé par domaine) vit dans [`ROADMAP.md`](ROADMAP.md)** — document vivant,
-> mis à jour en continu, pas dupliqué ici.
-
-<br>
-
-<div align="center">
-
-### 🔮 On the Horizon
-
-<sub>New Atlus releases mean new content pipelines — here's what's on our radar.</sub>
-
-<br><br>
-
-<table>
-  <tr>
-    <td align="center" width="50%">
-      <img src="./docs/roadmap/persona-4-revival.jpg" alt="Persona 4 Revival" width="380"><br><br>
-      <img src="https://img.shields.io/badge/Persona%204%20Revival-🔄%20Remaster-6bbf59?style=for-the-badge" alt="Persona 4 Revival — Remaster">
-      <br><br>
-      <sub>Character art refresh planned for P4/P4G once official assets release.</sub>
-    </td>
-    <td align="center" width="50%">
-      <img src="./docs/roadmap/persona-6.jpg" alt="Persona 6" width="380"><br><br>
-      <img src="https://img.shields.io/badge/Persona%206-🆕%20New%20Roster-c0193a?style=for-the-badge" alt="Persona 6 — New Roster">
-      <br><br>
-      <sub>Full new character roster to add once the cast is officially revealed.</sub>
-    </td>
-  </tr>
-</table>
-
-<sub>📋 Full content pipeline checklist in <a href="ROADMAP.md">ROADMAP.md</a></sub>
-
-</div>
-
----
-
-## 👥 Authors & Contributors
-
-### Core Team
-
-<table>
-  <tr>
-    <td align="center" width="100%">
-      <img src="https://github.com/CodeByHaamza.png" width="100px;" alt="Hamza"/><br>
-      <sub><b>Hamza Karrouchi</b></sub><br>
-      <em>Founder & Lead Developer</em><br>
-      <sub>Game design, game logic, backend, animations, UI, profile system, content, ops</sub><br>
-      <sub>CS student & Persona/JoJo enjoyer</sub>
-    </td>
-  </tr>
-</table>
-
-### Contributors & Credits
-
-PersonaDLE started as a small team in spring 2025. The people below shaped its early
-days and are credited for it — the project is maintained by Hamza alone since mid-2025.
-
-<table>
-  <tr>
-    <td align="center" width="33%">
-      <img src="https://github.com/L2GENDAIRE.png" width="100px;" alt="Léo" /><br>
-      <sub><b>Léo (L2GENDAIRE)</b></sub><br>
-      <em>Data & Design — 2025</em><br>
-      <sub>Original character database, layout, portraits</sub><br>
-      <sub>Spreadsheet wizard & UI enthusiast</sub>
-    </td>
-    <td align="center" width="33%">
-      <img src="https://github.com/Corbover.png" width="100px;" alt="Damien"/><br>
-      <sub><b>Damien (Corbover)</b></sub><br>
-      <em>Front-End — 2026</em><br>
-      <sub>CSS modularization, responsive groundwork</sub>
-    </td>
-    <td align="center" width="33%">
-      <img src="https://i.pinimg.com/736x/db/c8/93/dbc8933b2e2b02ae9aca23fc78ea9107.jpg" width="100px;" alt="Dzulian"/><br>
-      <sub><b>Dzulian</b></sub><br>
-      <em>Consultant — P1 / P2</em><br>
-      <sub>Ideas & data accuracy for Persona 1 & 2 (Megami Ibunroku, IS, EP)</sub>
-    </td>
-  </tr>
-</table>
-
----
-
-## 🙏 Acknowledgments
-
-### Inspiration
-
-- **[Smashdle](https://smashdle.net/)** by _Pimeko_ - Original concept inspiration
-- **[Pokedle](https://github.com/maxm33/pokedle)** - Codebase reference
-
-### Community
-
-- <img src="img/credits/arati_youtube.jpg" width="28" height="28" alt="" align="absmiddle"/> **Arati** ([YouTube](https://www.youtube.com/@Arati_Persona) · [@Arati](https://x.com/Arati)) - Community support and featuring PersonaDLE
-- **Discord Communities** - [PersonaDLE (international)](https://discord.gg/wpMdGGDp3y) & [Le Grimoire du Cœur (French partner, most active)](https://discord.gg/CfR8UHXTAE) - beta testing, bug reports, and endless feedback
-- **Reddit r/persona4golden** - Support and suggestions
-
-### Contributors & Development
-
-- **Damien ( Corbover )** - CSS architecture restructuring and modularization
-- **Dzulian** - Creative ideas and data accuracy for classic Persona games (P1/P2)
-- All GitHub contributors who have helped improve the project
-
-### Resources
-
-- **[Megami Tensei Wiki](https://megamitensei.fandom.com/)** - Character data and lore
-- <img src="img/credits/faz_youtube.jpg" width="28" height="28" alt="" align="absmiddle"/> **[Faz](https://www.youtube.com/@FazPersona)** (YouTube) - Persona footage, notably the All-Out Attack references
-- **Atlus/SEGA** - For creating the incredible Persona universe
-- **Shoji Meguro** - For the unforgettable music
-
----
-
-## ⚖️ License
-
-The **source code** of this project is licensed under the **MIT License**.
-
-The **game assets** (character names, portraits, artwork, music, logos, quotes and
-other Persona / Shin Megami Tensei / Atlus / SEGA content) are **NOT** covered by
-the MIT License — they remain the property of their respective rights holders and
-may not be redistributed. See [LICENSE.txt](LICENSE.txt) for the full terms.
-
-You're free to reuse the **code**, but bring your own assets. 😎
-
----
-
-## ⚠️ Disclaimer
-
-**PersonaDLE is a fan-made project** and is **not affiliated with, endorsed by, or connected to Atlus, SEGA, or the Persona franchise** in any way.
-
-All characters, music, artwork and references remain the property of their respective rights holders (© ATLUS / © SEGA). They are used here only for a non-commercial, fan-made tribute. Rights holders may request removal of their material at any time, and such requests will be honored.
-
-### Regarding AI-Generated Assets
-
-Some badges and wallpapers were created with AI assistance. As students working on this passion project for free in our spare time, we didn't have the budget or resources to commission artists. We deeply respect human artists and would prioritize working with them if PersonaDLE ever generates revenue or receives support.
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! Here's how you can help:
-
-1. **Report Bugs** - Found an issue? [Open an issue](https://github.com/CodeByHaamza/personadle/issues)
-2. **Suggest Features** - Have an idea? We'd love to hear it!
-3. **Join the Community** - Share your achievements and help others
-4. **Spread the Word** - Share PersonaDLE with fellow Persona fans!
-
-### Development Setup
+## 🧑‍💻 Run it locally
 
 ```bash
-# Clone the repository
-git clone https://github.com/CodeByHaamza/personadle.git
-cd personadle
-
-# Install test dependencies
+git clone https://github.com/CodeByHaamza/personadle.git && cd personadle
 npm install
 
-# Run the 1431 unit tests
-npm test
-
-# Backend setup (first time only — creates DB, imports schema, configures Apache)
-bash setup.sh
-
-# Check i18n key coverage across all 6 languages
-npm run i18n:check
-
-# Open in browser — no build step required
-# With backend: http://localhost/personadle/
+make up          # MariaDB + PHP + phpMyAdmin in Docker, schema and seed loaded → http://localhost:8080
+npm test         # 1431 unit tests
+make test-php    # PHPUnit, inside the container
+npm run test:e2e # Playwright against the Docker stack
+make check       # lint + data + i18n + doc numbers + daily pools
 ```
 
-### Want to Join the Team?
-
-We're always looking for passionate contributors! Whether you're a developer, designer, or just a Persona fan with ideas, feel free to reach out.
-
-**Current Focus Areas:**
-
-- New game mode ideas
-- Performance optimization
-- Accessibility improvements
-- Japanese (JP) translation (post-v2.0)
+Where to read next: **[CONTRIBUTING.md](CONTRIBUTING.md)** (branches, conventions, review checklist) ·
+**[DEPLOY.md](DEPLOY.md)** (release procedure, migrations) · **[ROADMAP.md](ROADMAP.md)** (what's next) ·
+**[tests/README.md](tests/README.md)** and **[tests-e2e/README.md](tests-e2e/README.md)** (the test pyramid).
 
 ---
 
-## 📞 Contact & Community
+## 💬 Community
 
-- 🌐 **Website**: [personadle.net](https://personadle.net)
-- 🐙 **GitHub**: [CodeByHaamza/personadle](https://github.com/CodeByHaamza/personadle)
-- 💬 **Discord (PersonaDLE)**: [International server](https://discord.gg/wpMdGGDp3y) — always active, English-friendly
-- 💬 **Discord (Le Grimoire du Cœur)**: [French partner server](https://discord.gg/CfR8UHXTAE) — our most active community, in collaboration with PersonaDLE
-- 📧 **Contact**: Open an issue on GitHub for support or collaboration
+- **Discord — PersonaDLE** · [discord.gg/wpMdGGDp3y](https://discord.gg/wpMdGGDp3y): daily puzzle announcements, weekly top 3, the Velvet Room Arcana test, profile gallery, bug reports and ideas (one thread each — every thread gets a status).
+- **Discord — Le Grimoire du Cœur** · [discord.gg/CfR8UHXTAE](https://discord.gg/CfR8UHXTAE): our French partner server, the most active.
+- **Bugs & ideas** · [GitHub issues](https://github.com/CodeByHaamza/personadle/issues) work too.
 
 ---
 
-## 📈 Stats
+## 👥 Credits
+
+### Core team
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="https://github.com/CodeByHaamza.png" width="96" alt="Hamza"><br>
+      <b>Hamza Karrouchi</b><br>
+      <sub>Founder & lead developer — game design, logic, backend, UI, content, ops. Sole maintainer since mid-2025.</sub>
+    </td>
+  </tr>
+</table>
+
+### Contributors
+
+PersonaDLE started as a small team in spring 2025. These people shaped its early days.
+
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <img src="https://github.com/L2GENDAIRE.png" width="80" alt="Léo"><br>
+      <b>Léo (L2GENDAIRE)</b><br><sub>Data & design, 2025 — original character database, layout, portraits</sub>
+    </td>
+    <td align="center" width="33%">
+      <img src="https://github.com/Corbover.png" width="80" alt="Damien"><br>
+      <b>Damien (Corbover)</b><br><sub>Front end, 2026 — CSS modularisation, responsive groundwork</sub>
+    </td>
+    <td align="center" width="33%">
+      <img src="https://i.pinimg.com/736x/db/c8/93/dbc8933b2e2b02ae9aca23fc78ea9107.jpg" width="80" alt="Dzulian"><br>
+      <b>Dzulian</b><br><sub>Consultant — Persona 1 & 2 ideas and data accuracy</sub>
+    </td>
+  </tr>
+</table>
+
+### Thanks
+
+- **[Smashdle](https://smashdle.net/)** (Pimeko) for the concept, **[Pokedle](https://github.com/maxm33/pokedle)** for the early codebase reference.
+- <img src="img/credits/arati_youtube.jpg" width="22" height="22" alt="" align="absmiddle"> **Arati** ([YouTube](https://www.youtube.com/@Arati_Persona) · [X](https://x.com/Arati)) for featuring PersonaDLE, and <img src="img/credits/faz_youtube.jpg" width="22" height="22" alt="" align="absmiddle"> **[Faz](https://www.youtube.com/@FazPersona)** for the All-Out Attack footage.
+- The **[Megami Tensei Wiki](https://megamitensei.fandom.com/)** for character data, r/persona4golden and both Discord servers for testing and endless feedback.
+- **Atlus / SEGA** for the universe, **Shoji Meguro** for the music.
+
+---
+
+## ⚖️ License & disclaimer
+
+The **source code** is released under the [MIT License](LICENSE.txt). The **game assets** — character
+names, portraits, artwork, music, logos, quotes and any other Persona / Shin Megami Tensei content —
+are **not** covered by it: they remain the property of their rights holders (© ATLUS · © SEGA) and may
+not be redistributed. Reuse the code, bring your own assets.
+
+PersonaDLE is a **fan-made, non-commercial project**, not affiliated with, endorsed by or connected to
+Atlus or SEGA. Rights holders may request the removal of their material at any time; such requests are
+honoured.
+
+<sub>Some badges and wallpapers were made with AI assistance. As students working on this project for
+free, we didn't have the budget to commission artists; we deeply respect them and would prioritise
+working with human artists if PersonaDLE ever received support.</sub>
+
+---
 
 <p align="center">
-  <img src="https://img.shields.io/github/stars/CodeByHaamza/personadle?style=social" alt="GitHub Stars">
-  <img src="https://img.shields.io/github/forks/CodeByHaamza/personadle?style=social" alt="GitHub Forks">
-  <img src="https://img.shields.io/github/watchers/CodeByHaamza/personadle?style=social" alt="GitHub Watchers">
-  <img src="https://img.shields.io/github/contributors/CodeByHaamza/personadle?style=social" alt="Contributors">
-</p>
-
----
-
-<p align="center">
-  <strong>"I am thou, thou art I… And together, we'll reach the truth."</strong>
-  <br><br>
-  Made with ❤️ by fans, for fans
-  <br>
-  <em>If you enjoy PersonaDLE, please support the official Persona games by purchasing them from Atlus/SEGA!</em>
-</p>
-
----
-
-<p align="center">
-  <sub>Last updated: July 2026 • Version 2.0</sub>
+  <strong>"I am thou, thou art I… And together, we'll reach the truth."</strong><br>
+  <sub>Made with ❤️ by fans, for fans. If you enjoy PersonaDLE, support the official games.</sub>
 </p>
