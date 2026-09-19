@@ -4,6 +4,7 @@
 
 import { badgesList, BADGE_CATEGORIES, getBadgeById, SAME_ENERGY_AVATARS, wearsAvatar } from "./badgesData.js";
 import { normalizeModeKey } from "../../js/gameCore.js";
+import { statsForUnlocks } from "../profile-format.js";
 import { openAtelier } from "../atelier.js";
 // Référence au saveProfile courant pour les click handlers (mis à jour à chaque renderBadgesModal)
 let _lastSaveProfile = () => {};
@@ -535,7 +536,9 @@ function initializeProfileBadgesData(profile) {
  * @param {Function} saveProfile - Fonction de sauvegarde
  */
 function checkAndUnlockBadges(profile, saveProfile) {
-  const stats = profile.stats || {};
+  // Normal + Expert : une victoire Expert est une victoire (2026-09-19) — le serveur
+  // compte pareil (condition_check.php), on tente donc l'unlock au même moment que lui.
+  const stats = statsForUnlocks(profile.stats);
   const newlyUnlocked = [];
 
   badgesList.forEach((badge) => {

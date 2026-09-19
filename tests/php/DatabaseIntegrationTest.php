@@ -515,6 +515,68 @@ final class DatabaseIntegrationTest extends TestCase
         ]);
     }
 
+    public function testGenericUnlockConditionsCountNormalAndExpertTogether(): void
+    {
+        // Décision Hamza du 2026-09-19 : « une victoire Expert est une victoire ».
+        // 20 perfects en normal + 5 en Expert = 25 → Kotone ; 30 victoires AOA + 10 Expert
+        // = 40 → Take Your Heart ; record de série = le max des deux dimensions.
+        require_once __DIR__ . '/../../api/lib/condition_check.php';
+        $uid = $this->makeUser('ne');
+        $this->makeUserStats($uid, 'alloutattack', ['wins' => 30, 'games' => 35, 'perfect_wins' => 20, 'streak_record' => 4, 'giveups' => 5]);
+        self::$pdo->prepare(
+            'INSERT INTO user_stats_expert (user_id, mode, wins, giveups, games, streak, streak_record, perfect_wins)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+        )->execute([$uid, 'alloutattack', 10, 2, 12, 3, 9, 5]);
+
+        $this->assertFalse(personadle_verify_condition(self::$pdo, $uid, 'perfect_wins', null, 26));
+        $this->assertTrue(personadle_verify_condition(self::$pdo, $uid, 'perfect_wins', null, 25), '20 normal + 5 Expert');
+        $this->assertTrue(personadle_verify_condition(self::$pdo, $uid, 'mode_wins', 'alloutattack', 40), '30 normal + 10 Expert');
+        $this->assertFalse(personadle_verify_condition(self::$pdo, $uid, 'mode_wins', 'alloutattack', 41));
+        $this->assertTrue(personadle_verify_condition(self::$pdo, $uid, 'wins_total', null, 40));
+        $this->assertTrue(personadle_verify_condition(self::$pdo, $uid, 'mode_games', 'alloutattack', 47));
+        $this->assertTrue(personadle_verify_condition(self::$pdo, $uid, 'giveups_total', null, 7));
+        $this->assertTrue(personadle_verify_condition(self::$pdo, $uid, 'streak_record', null, 9), 'MAX des deux dimensions');
+        $this->assertFalse(personadle_verify_condition(self::$pdo, $uid, 'streak_record', null, 10));
+        // Un joueur sans ligne Expert : rien ne change pour lui.
+        $solo = $this->makeUser('nx');
+        $this->makeUserStats($solo, 'music', ['wins' => 3]);
+        $this->assertSame(3, personadle_user_stat_for_mode(self::$pdo, $solo, 'music', 'wins'));
+        $this->assertSame(0, personadle_user_stat_for_mode(self::$pdo, $solo, 'classic', 'wins'));
+    }
+
+    public function testServerReconciliationGrantsWhatIsDueWithoutTheClientAsking(): void
+    {
+        // Colonel-Maskou en prod (2026-09-19) : 363 perfects, 135 victoires Expert, 13 titres,
+        // rang 10 — et ni Kotone, ni Shadows Converge, ni SEES, ni Same Soul : le client
+        // ne savait pas évaluer ces conditions, donc ne demandait jamais l'unlock.
+        require_once __DIR__ . '/../../api/lib/unlock_reconcile.php';
+        $uid = $this->makeUser('rc');
+        $this->makeUserStats($uid, 'classic', ['wins' => 60, 'games' => 70, 'perfect_wins' => 30, 'streak_record' => 3]);
+        self::$pdo->prepare('INSERT INTO user_stats_expert (user_id, mode, wins, games, perfect_wins) VALUES (?, ?, ?, ?, ?)')
+            ->execute([$uid, 'music', 55, 60, 10]);
+
+        $granted = personadle_reconcile_titles(self::$pdo, $uid);
+        $this->assertContains('kotone_not_a_princess', $granted, 'perfect_wins 25 (30 + 10)');
+        $this->assertContains('shadows_converge', $granted, 'expert_wins_total 50 (55)');
+        $this->assertContains('aigis_i_am_not_afraid', $granted, 'mode_wins classic 50 (60)');
+        $this->assertNotContains('joker_looking_cool', $granted, 'joker_profile : déclaratif, jamais d\'office');
+        $this->assertNotContains('yosuke_ride_the_wind', $granted, 'friends_count 5 : aucun ami');
+        $this->assertNotContains('sees', $granted, 'titles_count 8 : pas encore, à ce premier passage');
+
+        // Second passage : rien de nouveau à accorder (idempotent), et SEES ne tombe qu\'à
+        // partir de 8 titres — on en pose 5 de plus à la main pour l\'atteindre.
+        $this->assertSame([], personadle_reconcile_titles(self::$pdo, $uid));
+        $ins = self::$pdo->prepare('INSERT IGNORE INTO user_titles (user_id, title_id) SELECT ?, id FROM titles WHERE slug = ?');
+        foreach (['junes', 'investigation_team', 'naoya_first_awakening', 'maya_always_be_positive', 'take_your_heart'] as $slug) {
+            $ins->execute([$uid, $slug]);
+        }
+        $this->assertSame(['sees'], personadle_reconcile_titles(self::$pdo, $uid), '3 + 5 = 8 titres → SEES');
+
+        $c = self::$pdo->prepare('SELECT COUNT(*) FROM user_titles WHERE user_id = ?');
+        $c->execute([$uid]);
+        $this->assertSame(9, (int) $c->fetchColumn());
+    }
+
     public function testRecordGameSessionInsertsSessionAndUpdatesStats(): void
     {
         $uid   = $this->makeUser();
