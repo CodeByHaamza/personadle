@@ -6,6 +6,10 @@ ErrorDocument 404 /pages/404.html
     RewriteCond %{HTTPS} off
     RewriteCond %{HTTP_HOST} !^localhost(:\d+)?$ [NC]
     RewriteCond %{HTTP_HOST} !^127\.0\.0\.1(:\d+)?$
+    # Réseau local (préprod sur le serveur maison, http://192.168.x.x:8080) : ces IP ne
+    # servent jamais la prod et n'ont pas de certificat — sans cette exception le 301 vers
+    # https finit en ERR_SSL_PROTOCOL_ERROR (vécu le 2026-09-19).
+    RewriteCond %{HTTP_HOST} !^(192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)(:\d+)?$
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 </IfModule>
 
