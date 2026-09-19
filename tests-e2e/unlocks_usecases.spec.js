@@ -342,8 +342,11 @@ test.describe.serial("Déblocages vérifiés par le serveur", () => {
       await playOk(v, { attempts: 2 }); // 1 victoire, jamais poussée à /badges/unlock
       const me = await (await call(v.ctx, "get", `/api/user/${v.userId}`)).json();
       expect(me.unique_days, "le serveur compte les journées distinctes").toBe(1);
-      const cat0 = await (await call(v.ctx, "get", "/api/badges")).json();
-      expect(Number(cat0.find((b) => b.slug === "first_win")?.is_unlocked)).toBe(0);
+      // Le badge n'a pas été poussé et AUCUN GET /api/badges n'a encore eu lieu : depuis
+      // la réconciliation serveur (2.2.6), lire le catalogue accorderait first_win tout
+      // seul — ici on veut le chemin de l'ÉPINGLAGE, donc on épingle sans lire avant.
+      const raw = await (await call(v.ctx, "get", `/api/user/${v.userId}`)).json();
+      expect(raw.badges.map((b) => b.badge_id)).not.toContain("first_win");
 
       // Épingler first_win sans l'avoir déclaré : le serveur vérifie la condition (1
       // victoire) et l'accorde lui-même au lieu de renvoyer 403 — c'est ce qui faisait
@@ -579,8 +582,11 @@ test.describe("Badges sociaux — Best Bro à la première visite du profil", ()
     try {
       await befriend(f1, me);
       await befriend(f2, me);
-      const before = await (await call(me.ctx, "get", "/api/badges")).json();
-      expect(Number(before.find((b) => b.slug === "best_bro")?.is_unlocked)).toBe(0);
+      // Pas encore en base : on lit le profil brut, pas le catalogue — GET /api/badges
+      // accorderait déjà Best Bro tout seul (réconciliation serveur, 2.2.6). Le test
+      // vérifie qu'UNE ouverture du profil suffit, quel que soit le chemin qui l'accorde.
+      const raw = await (await call(me.ctx, "get", `/api/user/${me.userId}`)).json();
+      expect(raw.badges.map((b) => b.badge_id)).not.toContain("best_bro");
 
       const ctx = await browser.newContext({ storageState: await me.ctx.storageState() });
       const page = await ctx.newPage();
