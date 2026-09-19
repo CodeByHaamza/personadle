@@ -651,6 +651,57 @@ final class DatabaseIntegrationTest extends TestCase
         $this->assertTrue(personadle_verify_condition(self::$pdo, $u2, 'streak_record', null, 30));
     }
 
+    public function testDailyRewardCalendarReadsTheCatalogAndEventCodes(): void
+    {
+        // Le quotidien Discord annonce lui-même ce qui se gagne aujourd'hui (api/lib/event_calendar.php).
+        require_once __DIR__ . '/../../api/lib/event_calendar.php';
+        $slugs = fn(array $rs) => array_map(fn($r) => $r['slug'] . ':' . $r['phase'] . ':' . $r['how'], $rs);
+        $day   = fn(string $d) => new DateTimeImmutable($d);
+
+        $this->assertContains('valentine_2026:today:play', $slugs(personadle_rewards_for_date(self::$pdo, $day('2027-02-14'))), 'toute année');
+        $this->assertContains('tanabata:today:play', $slugs(personadle_rewards_for_date(self::$pdo, $day('2026-07-07'))));
+        $this->assertContains('tatsuya_dont_burn_out:today:play', $slugs(personadle_rewards_for_date(self::$pdo, $day('2026-06-24'))), 'les titres aussi');
+        $this->assertContains('promised_day:today:play', $slugs(personadle_rewards_for_date(self::$pdo, $day('2026-12-31'))));
+        $this->assertContains('promised_day:today:play', $slugs(personadle_rewards_for_date(self::$pdo, $day('2027-01-01'))));
+        $this->assertContains('golden_week:first_day:play', $slugs(personadle_rewards_for_date(self::$pdo, $day('2026-04-29'))));
+        $this->assertContains('golden_week:ongoing:play', $slugs(personadle_rewards_for_date(self::$pdo, $day('2026-05-02'))));
+        $this->assertContains('golden_week:last_day:play', $slugs(personadle_rewards_for_date(self::$pdo, $day('2026-05-05'))));
+        $this->assertContains('easter_2026:first_day:play', $slugs(personadle_rewards_for_date(self::$pdo, $day('2026-04-05'))), 'dimanche de Pâques 2026');
+        $this->assertContains('easter_2026:last_day:play', $slugs(personadle_rewards_for_date(self::$pdo, $day('2026-04-06'))), 'lundi de Pâques');
+        $this->assertSame([], personadle_rewards_for_date(self::$pdo, $day('2026-09-23')), 'un jour ordinaire : rien');
+
+        // Un code événement créé dans l'admin avec une date de début : annoncé ce jour-là avec
+        // le code, rappelé le dernier jour, ignoré s'il est inactif ou permanent.
+        self::$pdo->exec("DELETE FROM event_codes WHERE code IN ('TESTNOEL','TESTOFF')");
+        self::$pdo->prepare('INSERT INTO event_codes (code, badge_id, start_date, end_date, is_permanent, is_active, description) VALUES (?, ?, ?, ?, 0, ?, ?)')
+            ->execute(['TESTNOEL', 'christmas_2025', '2026-12-20', '2026-12-26', 1, 'test']);
+        self::$pdo->prepare('INSERT INTO event_codes (code, badge_id, start_date, end_date, is_permanent, is_active, description) VALUES (?, ?, ?, ?, 0, ?, ?)')
+            ->execute(['TESTOFF', 'christmas_2025', '2026-12-20', '2026-12-26', 0, 'inactif']);
+        try {
+            $start = personadle_rewards_for_date(self::$pdo, $day('2026-12-20'));
+            $codes = array_values(array_filter($start, fn($r) => $r['how'] === 'code'));
+            $this->assertCount(1, $codes, 'le code inactif n\'est pas annoncé');
+            $this->assertSame('TESTNOEL', $codes[0]['code']);
+            $this->assertSame('first_day', $codes[0]['phase']);
+            $this->assertSame('12-26', $codes[0]['until']);
+            $end = array_values(array_filter(personadle_rewards_for_date(self::$pdo, $day('2026-12-26')), fn($r) => $r['how'] === 'code'));
+            $this->assertSame('ends_today', $end[0]['phase']);
+            $this->assertSame([], array_filter(personadle_rewards_for_date(self::$pdo, $day('2026-12-23')), fn($r) => $r['how'] === 'code'), 'pas de rappel au milieu');
+
+            $txt = personadle_rewards_announcement($start);
+            $this->assertStringContainsString('`TESTNOEL`', $txt);
+            $this->assertStringContainsString("jusqu'au 26 décembre", $txt);
+            $this->assertStringContainsString('until December 26', $txt);
+        } finally {
+            self::$pdo->exec("DELETE FROM event_codes WHERE code IN ('TESTNOEL','TESTOFF')");
+        }
+
+        $gw = personadle_rewards_announcement(personadle_rewards_for_date(self::$pdo, $day('2026-04-29')));
+        $this->assertStringContainsString("d'ici le 5 mai", $gw);
+        $this->assertStringContainsString('**Golden Week**', $gw);
+        $this->assertSame('', personadle_rewards_announcement([]));
+    }
+
     public function testReconciliationSurvivesAConditionThatThrows(): void
     {
         // Une condition qui plante (SQL refusé par la prod…) ne doit jamais rendre la liste

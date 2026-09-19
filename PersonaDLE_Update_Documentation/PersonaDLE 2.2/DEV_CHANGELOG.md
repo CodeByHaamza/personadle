@@ -13,6 +13,24 @@
 
 ---
 
+## 2026-09-20 — Le quotidien Discord annonce lui-même les récompenses du jour
+
+Demande Hamza : ne plus écrire à la main les annonces de badges/titres de dates et de
+codes événement. `api/lib/event_calendar.php` lit le catalogue :
+
+- badges/titres à condition de date (`played_on_date`, `played_in_period` — premier /
+  dernier jour / en cours —, `played_on_all_dates`, `played_on_easter` — dimanche puis
+  lundi) → « joue aujourd'hui, c'est à toi » ;
+- `event_codes` actifs et non permanents : annoncés **avec le code** le jour de
+  `start_date`, rappelés le jour de `end_date`. Créer le code dans l'admin suffit.
+- Noms EN/FR depuis `lang/*.json` (`personadle_reward_names()`), texte bilingue
+  (`personadle_rewards_announcement()`), champ « 🎁 Récompense du jour » ajouté à l'embed
+  du quotidien (`discord-daily.php`), slugs annoncés dans la réponse JSON du cron.
+- Test : `testDailyRewardCalendarReadsTheCatalogAndEventCodes` (toute année, phases,
+  code actif/inactif, rappel du dernier jour, textes FR/EN, jour ordinaire vide).
+
+---
+
 ## 2026-09-19 — Badges de série : la série GLOBALE compte (celle que le joueur voit)
 
 Audit de Colonel-Maskou : record global 19, meilleur mode 16. Les badges « Reach a N-day
