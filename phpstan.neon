@@ -17,6 +17,9 @@ parameters:
         # replie la constante sur '' et déclare mort tout le code qui suit la
         # garde — cf. api/cron/discord-daily.php.
         - DISCORD_DAILY_WEBHOOK
+        # Même chose pour le top 3 hebdo (api/cron/discord_weekly.php).
+        - DISCORD_WEEKLY_WEBHOOK
+        - DISCORD_WEEKLY_MENTION_ROLE
         # Identifiants Pusher Channels (notifications temps réel) : vides dans
         # config.example.php, renseignés seulement en prod. Même piège que
         # DISCORD_DAILY_WEBHOOK — sans ces lignes PHPStan déclare la garde
