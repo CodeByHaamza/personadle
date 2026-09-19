@@ -160,8 +160,8 @@ const syncPoints = [
   { file: README, re: /EN · FR · ES · DE · IT · PT \((\d+) keys each\)/, expected: [i18nKeys] },
   { file: README, re: /Vitest \+ jsdom → (\d+) tests unitaires/, expected: [vitestTests] },
   { file: README, re: /Playwright\s+→ (\d+) E2E sur la stack Docker/, expected: [e2e.total] },
-  { file: README, re: /panel admin, (\d+) tests automatisés/, expected: [vitestTests] },
-  { file: README, re: /# Run the (\d+) unit tests/, expected: [vitestTests] },
+  { file: README, re: /npm test\s+# (\d+) unit tests/, expected: [vitestTests] },
+  { file: README, re: /MariaDB-(\d+)%20tables/, expected: [tables] },
 
   // ROADMAP.md
   { file: ROADMAP, re: /\*\*(\d+) tests JS · (\d+) PHPUnit · (\d+) E2E · PHPStan/, expected: [vitestTests, phpunit.total, e2e.total] },
