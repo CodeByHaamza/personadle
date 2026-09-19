@@ -8,7 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 1431 tests Vitest (77 suites), 368 méthodes PHPUnit, 249 tests E2E,
+> Vérifié le 2026-08-26 : 1433 tests Vitest (77 suites), 368 méthodes PHPUnit, 250 tests E2E,
 > Vérifié le 2026-08-26 : 1428 tests Vitest (77 suites), 363 méthodes PHPUnit, 248 tests E2E,
 > Vérifié le 2026-08-26 : 1425 tests Vitest (77 suites), 359 méthodes PHPUnit, 247 tests E2E,
 > lint et data/i18n/pools propres.
@@ -118,6 +118,8 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       liste d'amis pour tout le monde**. Puis `INSERT IGNORE INTO schema_migrations (version) VALUES
       ('052_profiles_avatar_src')`. Vérifiée le 2026-09-19 sur la base de dev au schéma 051 (58 origines
       reprises, 45 portraits recadrés restent inconnus) et sur un import vierge (no-op).
+- [x] **Bumper `CACHE_VERSION` dans `sw.js` (v100 → v101, fait le 2026-09-19 nuit)** : `profile/profile-page.js`
+      (précaché) porte l'encart Atelier « portrait sans origine ».
 - [x] **Bumper `CACHE_VERSION` dans `sw.js` (v99 → v100, fait le 2026-09-19)** : `profile/profile-page.js`
       (précaché) envoie désormais `avatar_src` au recadrage (badge Same Energy).
 - [x] Jouer `sql/migrations/051_user_stats_expert.sql` (table `user_stats_expert` + reprise des
@@ -157,6 +159,9 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       volontaire (c'est lui qui garantit qu'on ne reste pas sur du code périmé), simplement
       à ne pas déclencher en pleine affluence.
 
+> ✅ **Release 2.2.4 — 2026-09-19 nuit** : encart Atelier « re-choisis ton portrait » pour les 220 comptes
+> recadrés avant la 052 (`needsAvatarOrigin`), v101. Rien à jouer en base.
+>
 > ✅ **Release 2.2.3 — 2026-09-19 soir** : stats Expert éditables (#146, table `user_stats_expert`, 051),
 > Same Energy survit au recadrage (#147, `profiles.avatar_src`, 052, v100), top 3 hebdo Discord (#148,
 > cron `discord_weekly.php`), « Copier pour Discord » réparé (#149, CSP). 051 + 052 jouées et enregistrées en

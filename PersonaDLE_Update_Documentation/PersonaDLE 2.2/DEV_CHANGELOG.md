@@ -13,6 +13,27 @@
 
 ---
 
+## 2026-09-19 — Atelier : « re-choisis ton portrait » pour les 220 comptes recadrés avant la 052
+
+Suite de la 052 : en prod, 220 profils portent une image recadrée dont l'origine est
+inconnue (`avatar_src` NULL) — leurs amis et le badge Same Energy ne savent pas qui ils
+portent tant qu'ils n'ont pas re-choisi un portrait. Décision Hamza : le leur dire dans
+l'Atelier.
+
+- `profile/profile-format.js` : `needsAvatarOrigin(profile)` — image encodée ET pas de
+  portrait galerie dans `avatarSrc`.
+- `profile/profile.html` : `#avatarOriginNotice` (`.atelier-notice`, caché par défaut) sous
+  le hint de l'onglet Avatar ; six langues (`profile.avatar_origin_notice`).
+- `profile/profile-page.js` : `_markSelectedAvatarCell()` pilote l'encart, et est désormais
+  appelé aussi depuis `_applyCloudToUI()` — sur un navigateur neuf, le local est vide au
+  moment où la grille se construit, c'est le pull cloud qui apporte l'avatar.
+- `sw.js` : `CACHE_VERSION` v100 → v101 (`profile-page.js` précaché).
+- Tests : `profileFormat.test.js` (+2), E2E `profile_atelier` « recadré avant la 052 » :
+  encart visible, disparaît au re-choix (le serveur reçoit `avatar_src`), absent après
+  rechargement.
+
+---
+
 ## 2026-09-19 — « Copier pour Discord » échouait pour tout le monde : la CSP bloquait `fetch(data:)`
 
 Hamza, en testant le nouveau salon 🪪┃profiles : « ❌ Échec de la copie. Télécharge-la

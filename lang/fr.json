@@ -337,6 +337,7 @@
     "tab_title": "Titre",
     "tab_badges": "Badges",
     "avatar_hint": "Choisis un portrait — il est appliqué tout de suite. Mal cadré ? Ajuste-le.",
+    "avatar_origin_notice": "🪪 Ton portrait a été recadré avant que le jeu ne retienne lequel c'est. Re-choisis-le une fois ci-dessous (recadrage compris) pour que tes amis — et le badge Same Energy — sachent qui tu portes.",
     "avatar_adjust": "Ajuster le cadrage",
     "crop_title": "Ajuste ton avatar",
     "crop_label": "Déplace, zoome, valide",

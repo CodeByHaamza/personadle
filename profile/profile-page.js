@@ -43,6 +43,7 @@ import {
   formatSongTime,
   normalizeAvatarPath,
   bestModeOverall,
+  needsAvatarOrigin,
 } from "./profile-format.js";
 import { THEME_COLORS, hexToRgb, adjustHex, resolveTheme, applyThemeVars } from "./theme.js";
 import { initAtelier, openAtelier, initSaveStatus, scheduleAutosave } from "./atelier.js";
@@ -551,6 +552,9 @@ function _applyCloudToUI() {
     pageAvatar.style.borderColor = profile.avatarBorderColor || "#000000";
   }
   if (borderColorPicker) borderColorPicker.value = profile.avatarBorderColor || "#000000";
+  // La grille de l'Atelier et l'encart « portrait sans origine » suivent l'avatar
+  // qui vient de descendre du cloud (sur un navigateur neuf, le local était vide).
+  _markSelectedAvatarCell();
 
   // ── Thème ─────────────────────────────────────────────────
   const themeId = profile.profileTheme || "all_out";
@@ -983,6 +987,9 @@ function _markSelectedAvatarCell() {
   avatarGrid?.querySelectorAll(".avatar-cell img").forEach((img) => {
     img.classList.toggle("selected", !!current && img.dataset.src === current);
   });
+  // Portrait recadré avant la 052 : on ne sait plus lequel c'est → l'Atelier le dit,
+  // et l'encart disparaît dès qu'un portrait est re-choisi (avatarSrc posé).
+  document.getElementById("avatarOriginNotice")?.classList.toggle("hidden", !needsAvatarOrigin(profile));
 }
 
 // ── Réinitialiser le profil ──────────────────────────────────────────────────
