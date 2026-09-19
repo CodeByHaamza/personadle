@@ -994,23 +994,22 @@ function renderTabStats(d) {
     personae: "🎭 Personae",
     music: "🎵 Music",
   };
-  const statsMap = {};
-  (d.stats || []).forEach((s) => {
-    statsMap[s.mode] = s;
-  });
+  const toMap = (rows) => {
+    const m = {};
+    (rows || []).forEach((s) => {
+      m[s.mode] = s;
+    });
+    return m;
+  };
+  const statsMap = toMap(d.stats);
+  // Expert (migration 051) : même forme, table user_stats_expert. Avant, ces
+  // stats étaient recalculées à la volée depuis game_sessions — rien à éditer.
+  const expertMap = toMap(d.expert_stats);
+  const empty = { wins: 0, giveups: 0, games: 0, streak: 0, streak_record: 0, perfect_wins: 0 };
 
-  document.getElementById("user-detail-content").innerHTML = `
-    <div class="tab-section">
-      <h3>Statistiques par mode</h3>
-      <div class="tab-note">
-        Modifier les valeurs puis cliquer Save sur chaque ligne.<br>
-        ⚠️ Les colonnes <strong>streak</strong> / <strong>streak_record</strong> ci-dessous sont
-        <em>par mode</em>. La « Série actuelle » que le joueur voit sur son profil est la streak
-        <strong>globale</strong> (<code>users.global_streak</code>) : elle se corrige dans l'onglet
-        🔥 Streak, pas ici.
-      </div>
+  const tableHtml = (map, isExpert) => `
       <div style="overflow-x:auto">
-        <table class="stats-table">
+        <table class="stats-table" data-expert="${isExpert ? 1 : 0}">
           <thead>
             <tr>
               <th>Mode</th>
@@ -1026,15 +1025,8 @@ function renderTabStats(d) {
           <tbody>
             ${modes
               .map((mode) => {
-                const s = statsMap[mode] || {
-                  wins: 0,
-                  giveups: 0,
-                  games: 0,
-                  streak: 0,
-                  streak_record: 0,
-                  perfect_wins: 0,
-                };
-                return `<tr data-mode="${mode}">
+                const s = map[mode] || empty;
+                return `<tr data-mode="${mode}" data-expert="${isExpert ? 1 : 0}">
                 <td><strong style="font-family:Oswald,sans-serif;font-size:13px">${labels[mode]}</strong></td>
                 <td><input type="number" min="0" class="stat-input" data-field="wins"          value="${s.wins}"></td>
                 <td><input type="number" min="0" class="stat-input" data-field="giveups"       value="${s.giveups}"></td>
@@ -1048,7 +1040,29 @@ function renderTabStats(d) {
               .join("")}
           </tbody>
         </table>
+      </div>`;
+
+  document.getElementById("user-detail-content").innerHTML = `
+    <div class="tab-section">
+      <h3>Statistiques par mode</h3>
+      <div class="tab-note">
+        Modifier les valeurs puis cliquer Save sur chaque ligne.<br>
+        ⚠️ Les colonnes <strong>streak</strong> / <strong>streak_record</strong> ci-dessous sont
+        <em>par mode</em>. La « Série actuelle » que le joueur voit sur son profil est la streak
+        <strong>globale</strong> (<code>users.global_streak</code>) : elle se corrige dans l'onglet
+        🔥 Streak, pas ici.
       </div>
+      ${tableHtml(statsMap, false)}
+    </div>
+    <div class="tab-section">
+      <h3>⚡ Mode Expert</h3>
+      <div class="tab-note">
+        Mêmes compteurs, table <code>user_stats_expert</code> (une ligne par mode, alimentée à chaque
+        partie Expert). Le « meilleur essai » et la dernière date de jeu affichés au joueur viennent
+        de l'historique des parties, pas d'ici. L'<em>accès</em> aux Modes Expert se règle dans
+        l'onglet ⚡ Expert.
+      </div>
+      ${tableHtml(expertMap, true)}
     </div>
   `;
 
@@ -1056,6 +1070,7 @@ function renderTabStats(d) {
     btn.onclick = async () => {
       const row = btn.closest("tr");
       const mode = row.dataset.mode;
+      const isExpert = row.dataset.expert === "1";
       const payload = {};
       row.querySelectorAll(".stat-input").forEach((inp) => {
         payload[inp.dataset.field] = +inp.value;
@@ -1063,18 +1078,19 @@ function renderTabStats(d) {
 
       btn.textContent = "…";
       btn.disabled = true;
-      const res = await api.patch(`/api/admin/users/${_selectedUser}/stats`, { mode, ...payload });
+      const res = await api.patch(`/api/admin/users/${_selectedUser}/stats`, { mode, is_expert: isExpert, ...payload });
       btn.disabled = false;
       btn.textContent = "Save";
 
       if (res.error) {
         toast("❌ Stats — " + res.error, "error");
       } else {
-        toast("✅ Stats " + labels[mode] + " sauvegardées", "success");
-        const idx = (_userDetail.stats || []).findIndex((s) => s.mode === mode);
-        if (idx >= 0) _userDetail.stats[idx] = { ..._userDetail.stats[idx], mode, ...payload };
-        else _userDetail.stats = [...(_userDetail.stats || []), { mode, ...payload }];
-        renderDetailQuickStats(_userDetail);
+        toast(`✅ Stats ${isExpert ? "⚡ Expert " : ""}${labels[mode]} sauvegardées`, "success");
+        const key = isExpert ? "expert_stats" : "stats";
+        const idx = (_userDetail[key] || []).findIndex((s) => s.mode === mode);
+        if (idx >= 0) _userDetail[key][idx] = { ..._userDetail[key][idx], mode, ...payload };
+        else _userDetail[key] = [...(_userDetail[key] || []), { mode, ...payload }];
+        if (!isExpert) renderDetailQuickStats(_userDetail);
       }
     };
   });

@@ -425,7 +425,7 @@ function saveProfile() {
 function galleryAvatarPath(avatar) {
   if (typeof avatar !== "string" || !avatar) return null;
   const path = avatar.replace(/^\.\/img\//, "../img/");
-  return /^\.\.\/img\/avatar\/[A-Za-z0-9_-]+\.(?:gif|png|jpe?g|webp)$/i.test(path) ? path : null;
+  return /^\.\.\/img\/avatar\/[A-Za-z0-9_-]+\.(?:gif|png|jpe?g|webp|avif)$/i.test(path) ? path : null;
 }
 
 /**
@@ -502,6 +502,10 @@ async function syncProfileToCloud({ strict = false } = {}) {
   // est ramené à la forme attendue depuis profile/.
   if (profile.avatar) {
     fields.avatar_data = galleryAvatarPath(profile.avatar) ?? profile.avatar;
+    // Portrait d'origine d'un recadrage, s'il est connu ici. Sinon on ne dit rien :
+    // le serveur garde alors ce qu'il savait (envoyer null l'effacerait).
+    const src = galleryAvatarPath(profile.avatarSrc);
+    if (src) fields.avatar_src = src;
   }
   // Sync des settings (son, animations…) — stockés dans personaSettings
   const settings = JSON.parse(localStorage.getItem("personaSettings") || "{}");
@@ -939,14 +943,18 @@ function applyAvatarPreset(src) {
   openModal("avatarCropModal");
 }
 
-/** Pose l'avatar, sauvegarde, envoie. */
+/**
+ * Pose l'avatar, sauvegarde, envoie. Le portrait d'ORIGINE part avec (avatar_src,
+ * 052) : une fois recadré, `result` n'est plus qu'un PNG et le serveur ne saurait
+ * plus qui est porté — le badge Same Energy ne tombait que sans recadrage.
+ */
 function commitAvatar(result) {
   profile.avatar = result;
   profile.avatarSrc = selectedAvatarSrc;
   pageAvatar.src = result;
   saveProfile();
   markDirty();
-  saveProfileToCloud({ avatar_data: result });
+  saveProfileToCloud({ avatar_data: result, avatar_src: galleryAvatarPath(selectedAvatarSrc) });
   refreshShareCardPreview();
   _markSelectedAvatarCell();
 }
@@ -966,9 +974,9 @@ document.getElementById("avatarAdjustBtn")?.addEventListener("click", () => {
 
 /**
  * Surligne dans la grille le portrait actuellement porté. Un portrait recadré
- * (PNG) se reconnaît à avatarSrc ; un GIF est stocké tel quel dans avatar
- * (../img/avatar/…), et avatarSrc ne survit pas à un pull cloud — on regarde
- * donc les deux.
+ * (PNG) se reconnaît à avatarSrc (synchronisé depuis la 052) ; un GIF est stocké
+ * tel quel dans avatar (../img/avatar/…), et un profil recadré avant la 052 n'a
+ * pas d'origine connue — on regarde donc les deux.
  */
 function _markSelectedAvatarCell() {
   const current = profile.avatarSrc || (profile.avatar?.startsWith("../img/") ? profile.avatar : "");

@@ -5,7 +5,11 @@
  * Écrase les stats d'un utilisateur pour un mode donné (UPSERT).
  * Body : { "mode": "classic", "wins": 50, "giveups": 3, "games": 53,
  *          "streak": 10, "streak_record": 15, "perfect_wins": 5,
- *          "total_time_ms": 12345 }
+ *          "total_time_ms": 12345, "is_expert": false }
+ *
+ * `is_expert: true` (migration 051) vise `user_stats_expert`, le pendant Expert de
+ * `user_stats` — mêmes colonnes, même UPSERT. Avant, les stats Expert étaient un
+ * GROUP BY à la volée sur game_sessions : l'admin ne pouvait rien y changer.
  *
  * Accès : admin uniquement (requireAdmin()).
  */
@@ -39,6 +43,11 @@ if (!in_array($mode, $validModes, true)) {
     jsonError('Invalid mode. Valid values: ' . implode(', ', $validModes), 400);
 }
 
+$isExpert = filter_var($data['is_expert'] ?? false, FILTER_VALIDATE_BOOLEAN);
+// Nom de table choisi entre deux littéraux, jamais depuis l'entrée : PDO ne
+// paramètre pas un identifiant.
+$table = $isExpert ? 'user_stats_expert' : 'user_stats';
+
 $intFields = ['wins', 'giveups', 'games', 'streak', 'streak_record', 'perfect_wins'];
 $values    = [];
 
@@ -57,7 +66,7 @@ if (array_key_exists('total_time_ms', $data)) {
     if ($val < 0) jsonError("Field total_time_ms must be >= 0", 400);
     $values['total_time_ms'] = $val;
 } else {
-    $existing = $pdo->prepare('SELECT total_time_ms FROM user_stats WHERE user_id = ? AND mode = ? LIMIT 1');
+    $existing = $pdo->prepare("SELECT total_time_ms FROM {$table} WHERE user_id = ? AND mode = ? LIMIT 1");
     $existing->execute([$userId, $mode]);
     $row = $existing->fetch();
     $values['total_time_ms'] = $row ? (int) $row['total_time_ms'] : 0;
@@ -65,7 +74,7 @@ if (array_key_exists('total_time_ms', $data)) {
 
 // ── UPSERT ────────────────────────────────────────────────────────────────────
 $pdo->prepare(
-    'INSERT INTO user_stats
+    "INSERT INTO {$table}
         (user_id, mode, wins, giveups, games, streak, streak_record, perfect_wins, total_time_ms)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON DUPLICATE KEY UPDATE
@@ -75,7 +84,7 @@ $pdo->prepare(
         streak         = VALUES(streak),
         streak_record  = VALUES(streak_record),
         perfect_wins   = VALUES(perfect_wins),
-        total_time_ms  = VALUES(total_time_ms)'
+        total_time_ms  = VALUES(total_time_ms)"
 )->execute([
     $userId,
     $mode,
@@ -88,7 +97,7 @@ $pdo->prepare(
     $values['total_time_ms'],
 ]);
 
-personadle_log_admin_action($pdo, $adminId, 'user_stats.overwrite', 'user', (string) $userId, [
+personadle_log_admin_action($pdo, $adminId, $isExpert ? 'user_stats_expert.overwrite' : 'user_stats.overwrite', 'user', (string) $userId, [
     'mode' => $mode,
     ...$values,
 ]);
