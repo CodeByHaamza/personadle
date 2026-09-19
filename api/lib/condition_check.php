@@ -16,7 +16,7 @@
  *   mode_wins            → wins dans condition_mode
  *   mode_games           → games (parties, pas victoires) dans condition_mode
  *   games_total          → SUM(games) tous modes
- *   streak_record        → MAX(streak_record) tous modes
+ *   streak_record        → max(record par mode, users.global_streak_record) — la série que le profil affiche
  *   perfect_wins         → SUM(perfect_wins) tous modes
  *   unique_days          → nb de jours uniques joués (COUNT DISTINCT played_date)
  *   giveups_total        → SUM(giveups) tous modes
@@ -141,8 +141,16 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
         case 'games_total':
             return personadle_aggregate_user_stat($pdo, $userId, 'games', 'SUM') >= $val;
 
-        case 'streak_record':
-            return personadle_aggregate_user_stat($pdo, $userId, 'streak_record', 'MAX') >= $val;
+        case 'streak_record': {
+            // « Reach a N-day streak » : le joueur lit sa série GLOBALE (users.global_streak_record,
+            // celle du profil, tous modes confondus). Ne comparer que le record par mode refusait
+            // Raphael à qui a 30 jours de série globale mais 25 dans son meilleur mode.
+            $g = $pdo->prepare('SELECT COALESCE(global_streak_record, 0) FROM users WHERE id = ?');
+            $g->execute([$userId]);
+            $global  = (int) $g->fetchColumn();
+            $perMode = personadle_aggregate_user_stat($pdo, $userId, 'streak_record', 'MAX');
+            return max($global, $perMode) >= $val;
+        }
 
         case 'perfect_wins':
             return personadle_aggregate_user_stat($pdo, $userId, 'perfect_wins', 'SUM') >= $val;

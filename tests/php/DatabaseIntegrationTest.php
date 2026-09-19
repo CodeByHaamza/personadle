@@ -627,6 +627,30 @@ final class DatabaseIntegrationTest extends TestCase
         $this->assertFalse(personadle_verify_condition(self::$pdo, $uid, 'played_on_all_dates', '', null));
     }
 
+    public function testStreakBadgesHonourTheGlobalStreakRecordThePlayerSees(): void
+    {
+        // « Reach a 30-day streak » : le joueur lit sa série globale (profil). Colonel-Maskou :
+        // record global 19, meilleur mode 16 — le serveur ne regardait que le par-mode. Un
+        // joueur à 30 jours globaux et 25 dans son meilleur mode se voyait refuser Raphael.
+        require_once __DIR__ . '/../../api/lib/unlock_reconcile.php';
+        $uid = $this->makeUser('gs');
+        $this->makeUserStats($uid, 'classic', ['streak_record' => 25]);
+        $this->makeUserStats($uid, 'music',   ['streak_record' => 12]);
+        self::$pdo->prepare('UPDATE users SET global_streak_record = 30 WHERE id = ?')->execute([$uid]);
+
+        $this->assertTrue(personadle_verify_condition(self::$pdo, $uid, 'streak_record', null, 30), 'la série globale compte');
+        $this->assertFalse(personadle_verify_condition(self::$pdo, $uid, 'streak_record', null, 31));
+        $granted = personadle_reconcile_badges(self::$pdo, $uid);
+        $this->assertContains('raphael', $granted);    // 30
+        $this->assertContains('pyro_spark', $granted); // 7
+        $this->assertNotContains('surt', $granted);    // 90
+
+        // Et l'inverse reste vrai : un record par mode supérieur au global compte aussi.
+        $u2 = $this->makeUser('gs2');
+        $this->makeUserStats($u2, 'emoji', ['streak_record' => 40]);
+        $this->assertTrue(personadle_verify_condition(self::$pdo, $u2, 'streak_record', null, 30));
+    }
+
     public function testReconciliationSurvivesAConditionThatThrows(): void
     {
         // Une condition qui plante (SQL refusé par la prod…) ne doit jamais rendre la liste
