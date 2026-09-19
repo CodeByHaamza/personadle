@@ -855,16 +855,17 @@ export function setupShareProfile(profile, saveProfile) {
         unlockPhotographerBadge(profile, saveProfile);
       };
 
-      // Copier pour Discord
+      // Copier pour Discord. Si le presse-papiers refuse (navigateur sans
+      // ClipboardItem, permission…), on télécharge la carte à la place : le
+      // joueur repart toujours avec son image, jamais avec un simple « échec ».
       discordBtn.onclick = async () => {
-        try {
-          const blob = await (await fetch(dataUrl)).blob();
-          await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+        if (await copyPngToClipboard(dataUrl)) {
           alert(tr("profile.share_discord_copied", null, "📋 Profile image copied! Paste it in Discord with Ctrl+V."));
-          unlockPhotographerBadge(profile, saveProfile);
-        } catch {
-          alert(tr("profile.share_copy_failed", null, "❌ Copy failed. Please download manually."));
+        } else {
+          downloadBtn.onclick();
+          alert(tr("profile.share_copy_fallback", null, "📥 This browser can't copy images — the card was downloaded instead. Drag it into Discord."));
         }
+        unlockPhotographerBadge(profile, saveProfile);
       };
 
       // Email
@@ -889,6 +890,42 @@ export function setupShareProfile(profile, saveProfile) {
   }
 
   closeBtn.onclick = () => closeModal("sharePreviewModal");
+}
+
+/**
+ * data:image/png;base64,… → Blob, sans passer par fetch().
+ *
+ * L'ancienne version faisait `fetch(dataUrl)` : la CSP des pages HTML
+ * (`connect-src 'self' …`, .htaccess racine) n'autorise pas `data:` en connexion,
+ * donc le fetch était bloqué en prod ET en Docker — « Échec de la copie » pour
+ * tout le monde, alors que le presse-papiers n'était jamais en cause (vécu par
+ * Hamza le 2026-09-19). Décoder le base64 ici ne fait aucune requête.
+ */
+export function dataUrlToBlob(dataUrl) {
+  const comma = dataUrl.indexOf(",");
+  const meta = dataUrl.slice(0, comma);
+  const mime = meta.slice(5, meta.indexOf(";") > 0 ? meta.indexOf(";") : undefined) || "image/png";
+  const bin = atob(dataUrl.slice(comma + 1));
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new Blob([bytes], { type: mime });
+}
+
+/**
+ * Copie un PNG (data URL) dans le presse-papiers. Renvoie false si le navigateur
+ * ne sait pas (pas de ClipboardItem, permission refusée, contexte non sécurisé) —
+ * l'appelant décide du repli. Ne lève jamais.
+ */
+export async function copyPngToClipboard(dataUrl) {
+  try {
+    if (typeof ClipboardItem === "undefined" || !navigator.clipboard?.write) return false;
+    const blob = dataUrlToBlob(dataUrl);
+    await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+    return true;
+  } catch (e) {
+    console.warn("[Share] clipboard write failed:", e?.message || e);
+    return false;
+  }
 }
 
 /**
