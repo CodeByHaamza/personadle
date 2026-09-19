@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { getStreakTier, formatSongTime, bestModeOverall, needsAvatarOrigin } from "../profile/profile-format.js";
+import { getStreakTier, formatSongTime, bestModeOverall, needsAvatarOrigin, statsForUnlocks } from "../profile/profile-format.js";
 
 describe("getStreakTier", () => {
   it("returns tier 0 for no streak", () => {
@@ -89,5 +89,31 @@ describe("needsAvatarOrigin — portrait recadré sans origine connue (052)", ()
     expect(needsAvatarOrigin({ avatar: "" })).toBe(false);
     expect(needsAvatarOrigin({})).toBe(false);
     expect(needsAvatarOrigin(null)).toBe(false);
+  });
+});
+
+describe("statsForUnlocks — normal + Expert pour les déblocages (décision du 2026-09-19)", () => {
+  it("additionne compteurs et modeWins, prend le max des records, et retire la clé expert", () => {
+    const s = {
+      wins: 30, giveups: 5, games: 35, perfectWins: 20, streakRecord: 4,
+      modeWins: { AllOutAttack: 30 }, modeCount: { AllOutAttack: 35 }, streak: 2,
+      expert: { wins: 10, giveups: 2, games: 12, perfectWins: 5, streakRecord: 9, modeWins: { AllOutAttack: 10, Music: 1 }, modeCount: { AllOutAttack: 12, Music: 1 } },
+    };
+    const v = statsForUnlocks(s);
+    expect(v.wins).toBe(40);
+    expect(v.perfectWins).toBe(25);
+    expect(v.giveups).toBe(7);
+    expect(v.games).toBe(47);
+    expect(v.streakRecord).toBe(9);
+    expect(v.modeWins).toEqual({ AllOutAttack: 40, Music: 1 });
+    expect(v.modeCount).toEqual({ AllOutAttack: 47, Music: 1 });
+    expect(v.streak).toBe(2); // les autres champs passent tels quels
+    expect(v.expert).toBeUndefined();
+    expect(s.wins, "pure : l'objet d'origine n'est pas modifié").toBe(30);
+  });
+  it("sans stats Expert (hors ligne, backend antérieur), la vue est le normal tel quel", () => {
+    const s = { wins: 3, modeWins: { Music: 3 } };
+    expect(statsForUnlocks(s)).toBe(s);
+    expect(statsForUnlocks(undefined)).toEqual({});
   });
 });

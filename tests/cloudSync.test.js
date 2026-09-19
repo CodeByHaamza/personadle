@@ -287,3 +287,25 @@ describe("pushLangToCloud", () => {
     await new Promise((r) => setTimeout(r, 0));
   });
 });
+
+describe("pullProfileFromCloud — stats Expert (user_stats_expert)", () => {
+  it("expert_stats descend dans stats.expert sans toucher aux compteurs normaux ; tableau vide → effacé ; absent → inchangé", async () => {
+    const pull = async (extra) => {
+      vi.spyOn(globalThis, "fetch").mockResolvedValue({
+        ok: true, status: 200,
+        json: async () => baseUserPayload({ stats: [{ mode: "alloutattack", wins: 30, games: 35, perfect_wins: 20, streak_record: 4 }], ...extra }),
+      });
+      await pullProfileFromCloud();
+      return JSON.parse(localStorage.getItem("personaUserProfile")).stats;
+    };
+    let s = await pull({ expert_stats: [{ mode: "alloutattack", wins: 10, giveups: 2, games: 12, perfect_wins: 5, streak_record: 9 }, { mode: "music", wins: 1, games: 1 }] });
+    expect(s.wins, "le total normal reste normal (le profil l'affiche à part)").toBe(30);
+    expect(s.expert).toEqual({ wins: 11, giveups: 2, games: 13, perfectWins: 5, streakRecord: 9, modeWins: { AllOutAttack: 10, Music: 1 }, modeCount: { AllOutAttack: 12, Music: 1 } });
+
+    s = await pull({});
+    expect(s.expert, "backend antérieur : on garde ce qu'on avait").toBeDefined();
+
+    s = await pull({ expert_stats: [] });
+    expect(s.expert, "aucune partie Expert → pas de vue Expert").toBeUndefined();
+  });
+});

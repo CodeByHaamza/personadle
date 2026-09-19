@@ -725,6 +725,20 @@ final class BadgeWallpaperCatalogTest extends TestCase
     private function clearSessions(int $userId): void
     {
         self::$pdo->prepare('DELETE FROM game_sessions WHERE user_id = ?')->execute([$userId]);
+        self::$pdo->prepare('DELETE FROM user_stats_expert WHERE user_id = ?')->execute([$userId]);
+    }
+
+    /**
+     * Compteurs Expert (user_stats_expert, 051) — c'est cette table, éditable par
+     * l'admin, que lisent expert_wins_total et expert_modes_mastered depuis le
+     * 2026-09-19 (plus game_sessions). Les helpers ci-dessous posent les deux.
+     */
+    private function bumpExpertStats(int $userId, string $mode, int $wins): void
+    {
+        self::$pdo->prepare(
+            'INSERT INTO user_stats_expert (user_id, mode, wins, games) VALUES (?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE wins = wins + VALUES(wins), games = games + VALUES(games)'
+        )->execute([$userId, $mode, $wins, $wins]);
     }
 
     /**
@@ -749,6 +763,7 @@ final class BadgeWallpaperCatalogTest extends TestCase
         for ($i = 0; $i < $wins; $i++) {
             $this->insertSession($userId, $mode, 'win', 2, 1, $i);
         }
+        $this->bumpExpertStats($userId, $mode, $wins);
     }
 
     /** $winsPerMode victoires EN EXPERT dans CHACUN des 6 modes. */
@@ -760,6 +775,7 @@ final class BadgeWallpaperCatalogTest extends TestCase
             for ($i = 0; $i < $winsPerMode; $i++) {
                 $this->insertSession($userId, $mode, 'win', 2, 1, $day++);
             }
+            $this->bumpExpertStats($userId, $mode, $winsPerMode);
         }
     }
 

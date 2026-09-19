@@ -13,6 +13,63 @@
 
 ---
 
+## 2026-09-19 — Déblocages : le serveur accorde ce qui est dû, et une victoire Expert est une victoire
+
+Hamza : Colonel-Maskou a 13 titres mais pas SEES, une relation au rang 10 mais pas Same
+Soul, largement les 25 perfects sans Kotone, 135 victoires Expert sans Shadows Converge.
+Lecture de la prod : 363 perfects, tout est rempli côté données. La cause est le **modèle**,
+pas les compteurs : « le client tente, le serveur tranche » — et le client ne savait pas
+évaluer `perfect_wins`, `titles_count`, `social_link_min_rank`, ni `expert_wins_total`
+(renvoyé `false` exprès). Personne ne frappait à la porte. Dry-run sur le dump de prod
+(préprod) : **~290 titres et ~100 badges dus et jamais accordés** sur la communauté —
+Kotone ×59, Reach Out to the Truth ×46, Pancakes ×42, SEES ×22, Best Bro ×29…
+
+### Réconciliation serveur — `api/lib/unlock_reconcile.php`
+
+- `personadle_reconcile_titles()` / `personadle_reconcile_badges()` : à chaque
+  `GET /api/titles` et `GET /api/badges` (chargement du profil), tout ce que le joueur n'a pas
+  et dont la condition est remplie est accordé, avec la **même porte fail-closed** que les
+  POST /unlock (`personadle_condition_allows_unlock`). `same_energy` accordé aux deux.
+- Hors périmètre : `manual` et `joker_profile` — déclaratifs (drapeau client, code événement,
+  endpoint dédié) ; la fonction générique les laisse passer, les accorder d'office les
+  donnerait à tout le monde.
+- Le client peut continuer à tenter (retour immédiat), mais ce n'est plus lui qui décide
+  de ce qui existe. Coût : ~20 vérifications par GET titres, ~25 par GET badges (les
+  `manual` sont sautés) — négligeable, indexé par `user_id`.
+
+### Une victoire Expert est une victoire (décision B, Hamza)
+
+- `personadle_aggregate_user_stat()` et `personadle_user_stat_for_mode()` lisent
+  `user_stats` **UNION ALL** `user_stats_expert` : `wins_total`, `mode_wins`, `mode_games`,
+  `games_total`, `perfect_wins`, `giveups_total`, `streak_record` (MAX) comptent les deux
+  dimensions. Les types qui nomment une dimension s'y limitent toujours
+  (`mode_wins_under_attempts` etc. — portes Expert et *Don't Need Your Pity*).
+- `expert_wins_total` et `expert_modes_mastered` lisent désormais `user_stats_expert`
+  (éditable par l'admin) et non plus `game_sessions` : un titre Expert suit ce que l'admin
+  a posé, comme les titres normaux suivent `user_stats`.
+- `GET /api/user/:id` renvoie `expert_stats` ; `js/cloud-sync.js` en fait `stats.expert` ;
+  `statsForUnlocks()` (`profile/profile-format.js`) additionne les deux pour
+  `checkAndUnlockBadges()` et `checkAndUnlockTitles()`. Le profil continue d'afficher les
+  deux blocs séparément.
+
+### Tests
+
+- PHPUnit : `testGenericUnlockConditionsCountNormalAndExpertTogether`,
+  `testServerReconciliationGrantsWhatIsDueWithoutTheClientAsking` (idempotence, SEES après
+  8 titres, `joker_profile` jamais d'office) ; helpers de `BadgeWallpaperCatalogTest`
+  alimentent `user_stats_expert`.
+- Vitest : `statsForUnlocks`, pull `expert_stats`, badge « 10 victoires » à 6 + 4.
+- E2E : Take Your Heart 30 normales + 10 Expert (39 → 403, 40 → 200) ; Kotone accordée au
+  simple GET après 25 perfects, sans POST /unlock ; `ace_detective` idem via GET /api/badges.
+
+### Angle mort
+
+- Les titres accordés par le serveur apparaissent débloqués sans l'animation « nouveau
+  titre » côté client (elle ne joue que sur les unlocks que le client a tentés). À
+  brancher sur le diff `is_unlocked` du GET si on veut la fanfare.
+
+---
+
 ## 2026-09-19 — Crons : un refus de clé laisse une trace, un post Discord aussi
 
 En corrigeant les crons hPanel, découverte : le quotidien Discord (`5 0 * * *`) n'avait
