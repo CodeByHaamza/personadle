@@ -118,7 +118,7 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       liste d'amis pour tout le monde**. Puis `INSERT IGNORE INTO schema_migrations (version) VALUES
       ('052_profiles_avatar_src')`. Vérifiée le 2026-09-19 sur la base de dev au schéma 051 (58 origines
       reprises, 45 portraits recadrés restent inconnus) et sur un import vierge (no-op).
-- [ ] Jouer `sql/migrations/053_date_badges_any_year.sql` (5 `UPDATE badges` par slug, rejouable) **avant le
+- [x] Jouer `sql/migrations/053_date_badges_any_year.sql` — **jouée et enregistrée en prod le 2026-09-19 nuit** (dump `badges` avant). (5 `UPDATE badges` par slug, rejouable) **avant le
       pull** : sans elle, les cinq badges de dates gardent `manual` et ne tombent jamais d'office ; avec le
       nouveau code, aucun crash dans les deux sens (pas de nouvelle colonne). Puis `INSERT IGNORE INTO
       schema_migrations (version) VALUES ('053_date_badges_any_year')`. Validée le 2026-09-19 sur import
@@ -164,6 +164,10 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       volontaire (c'est lui qui garantit qu'on ne reste pas sur du code périmé), simplement
       à ne pas déclencher en pleine affluence.
 
+> ✅ **Release 2.2.8 — 2026-09-19 nuit** : badges de dates toutes années (053), PHP 8.2 partout, garde-fou de
+> catalogue (réconciliation), préprod fidèle. Après 2.2.5 (traces crons), 2.2.6 (réconciliation serveur +
+> victoires Expert), 2.2.7 (hotfix 500 titres).
+>
 > ✅ **Release 2.2.4 — 2026-09-19 nuit** : encart Atelier « re-choisis ton portrait » pour les 220 comptes
 > recadrés avant la 052 (`needsAvatarOrigin`), v101. Rien à jouer en base.
 >
