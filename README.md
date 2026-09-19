@@ -241,7 +241,7 @@ Listen to short music clips and identify the character or theme. True fans will 
 ### ☁️ Full Backend — PHP 8.3 + MariaDB
 
 - Complete REST API with JWT-less auth (bcrypt + PHP sessions httpOnly)
-- 28-table relational schema, 1425+ unit tests (Vitest + jsdom)
+- 29-table relational schema, 1425+ unit tests (Vitest + jsdom)
 - Cloud sync: offline-first, auto-sync on reconnect, migration from localStorage
 
 ### 👥 Friends & Social
@@ -420,7 +420,7 @@ JavaScript  → Modular ES6+, localStorage, dynamic UI
 
 ```
 PHP 8.3       → REST API, bcrypt auth, PDO prepared statements, rate-limiting SQL
-MariaDB 10.6+ → 28-table relational schema (MySQL 8.0 compatible)
+MariaDB 10.6+ → 29-table relational schema (MySQL 8.0 compatible)
 Apache        → .htaccess routing, CORS exact-origin, HTTPS, CSP/HSTS
 Hostinger     → Production hosting
 ```
@@ -439,7 +439,7 @@ GitHub Actions → lint + i18n + data-check + coverage + PHPUnit (DB) + PHPStan
 ```
 Vitest + jsdom → 1425 tests unitaires (logique de jeu, backend, streak, i18n, validation données)
 PHPUnit        → tests de logique pure + intégration DB (contrat de schéma)
-Playwright     → 245 E2E sur la stack Docker complète (smoke, API, Social Link)
+Playwright     → 247 E2E sur la stack Docker complète (smoke, API, Social Link)
 PHPStan        → analyse statique PHP niveau 5
 ESLint+Prettier→ lint + format
 npm test       → lance la suite Vitest · make check → tout (lint, data, i18n)
