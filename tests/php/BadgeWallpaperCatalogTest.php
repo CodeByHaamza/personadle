@@ -547,6 +547,69 @@ final class BadgeWallpaperCatalogTest extends TestCase
         }
     }
 
+    /**
+     * Les conditions SANS seuil numérique du catalogue (date, ensemble de cibles, six
+     * modes) doivent aussi être accordées par la réconciliation — c'est `played_on_date`
+     * qui a mis GET /api/titles en 500 pour tous le 2026-09-19 : jamais jouée avant la
+     * réconciliation, donc jamais testée sur le chemin réel. Ici chaque entrée non
+     * numérique du catalogue est semée puis réconciliée.
+     */
+    public function testNonNumericCatalogConditionsAreGrantedByServerReconciliation(): void
+    {
+        require_once __DIR__ . '/../../api/lib/unlock_reconcile.php';
+        $rows = [];
+        foreach (['badges' => 'slug', 'titles' => 'slug'] as $table => $idCol) {
+            $stmt = self::$pdo->query(
+                "SELECT $idCol AS slug, condition_type, condition_mode FROM $table
+                 WHERE condition_type IN ('played_on_date', 'targets_found', 'all_modes_won')"
+            );
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) $rows[] = [$table, $r['slug'], $r['condition_type'], $r['condition_mode']];
+        }
+        $this->assertGreaterThanOrEqual(5, count($rows), 'Tatsuya, Go Beyond, les trois badges targets_found, Reach Out to the Truth…');
+
+        $sess = self::$pdo->prepare(
+            'INSERT INTO game_sessions (user_id, mode, is_expert, client_session_id, played_date, target_name, result, attempts)
+             VALUES (?, ?, ?, ?, ?, ?, ?, 2)'
+        );
+        foreach ($rows as [$table, $slug, $type, $mode]) {
+            $uid = $this->makeUser();
+            self::$pdo->beginTransaction();
+            try {
+                $reconcile = fn() => $table === 'titles'
+                    ? personadle_reconcile_titles(self::$pdo, $uid)
+                    : personadle_reconcile_badges(self::$pdo, $uid);
+                $this->assertNotContains($slug, $reconcile(), "$table:$slug : rien à accorder à un compte vierge");
+
+                switch ($type) {
+                    case 'played_on_date':
+                        [$mm, $dd] = explode('-', (string) $mode);
+                        $sess->execute([$uid, 'classic', 0, self::uuid(), "2025-$mm-$dd", 'x', 'giveup']);
+                        break;
+                    case 'all_modes_won':
+                        foreach (PERSONADLE_MODES as $m) {
+                            self::$pdo->prepare('INSERT INTO user_stats (user_id, mode, wins) VALUES (?, ?, 1)')->execute([$uid, $m]);
+                        }
+                        break;
+                    case 'targets_found':
+                        $this->assertArrayHasKey($mode, PERSONADLE_TARGET_SETS, "$slug : ensemble « $mode » inconnu");
+                        $day = 0;
+                        foreach (PERSONADLE_TARGET_SETS[$mode] as [$gmode, $expert, $targets]) {
+                            foreach ((array) ($expert === null ? [0] : [$expert]) as $isExpert) {
+                                foreach ($targets as $target) {
+                                    $date = (new DateTime('2025-01-01'))->modify('+' . ($day++) . ' day')->format('Y-m-d');
+                                    $sess->execute([$uid, $gmode, $isExpert, self::uuid(), $date, $target, 'win']);
+                                }
+                            }
+                        }
+                        break;
+                }
+                $this->assertContains($slug, $reconcile(), "$table:$slug ($type) : accordé par la réconciliation une fois la condition remplie");
+            } finally {
+                self::$pdo->rollBack();
+            }
+        }
+    }
+
     public function testDeclarativeConditionsAreNeverGrantedByReconciliation(): void
     {
         require_once __DIR__ . '/../../api/lib/unlock_reconcile.php';
