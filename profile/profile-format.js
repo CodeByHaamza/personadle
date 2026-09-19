@@ -50,6 +50,22 @@ export function normalizeAvatarPath(avatarPath) {
 }
 
 /**
+ * Vrai si le portrait porté est un recadrage dont on ne connaît plus l'origine :
+ * `avatar` est une image encodée et `avatarSrc` (portrait galerie d'origine,
+ * synchronisé depuis la 052) est absent. C'est le cas de tout joueur qui a
+ * recadré son portrait AVANT la 052 (220 comptes en prod le 2026-09-19) : ses
+ * amis — et le badge Same Energy — ne savent pas qui il porte tant qu'il ne
+ * re-choisit pas son portrait une fois. L'Atelier lui le dit.
+ *
+ * @param {{avatar?: string|null, avatarSrc?: string|null}|null} profile
+ */
+export function needsAvatarOrigin(profile) {
+  const avatar = profile?.avatar;
+  if (typeof avatar !== "string" || !avatar.startsWith("data:")) return false;
+  return !/^\.\.\/img\/avatar\/[A-Za-z0-9_-]+\.(?:gif|png|jpe?g|webp|avif)$/i.test(profile?.avatarSrc || "");
+}
+
+/**
  * « Best Mode Overall » — le mode où le joueur performe le mieux.
  *
  * Décision produit 2026-09-12 (retour joueur) : le mode favori devient un CHOIX
