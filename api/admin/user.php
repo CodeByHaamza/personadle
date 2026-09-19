@@ -70,6 +70,14 @@ if ($method === 'GET') {
     $stmt->execute([$userId]);
     $stats = $stmt->fetchAll();
 
+    // Stats Expert (migration 051) — même forme, table user_stats_expert
+    $stmt = $pdo->prepare(
+        'SELECT mode, wins, giveups, games, streak, streak_record, perfect_wins, total_time_ms
+         FROM user_stats_expert WHERE user_id = ? ORDER BY mode'
+    );
+    $stmt->execute([$userId]);
+    $expertStats = $stmt->fetchAll();
+
     // Badges débloqués (slugs)
     $stmt = $pdo->prepare(
         'SELECT badge_id FROM badges_unlocked WHERE user_id = ? ORDER BY unlocked_at'
@@ -166,6 +174,7 @@ if ($method === 'GET') {
             'equipped_title_id'   => $profile['equipped_title_id']   ?? null,
         ],
         'stats'        => $stats,
+        'expert_stats' => $expertStats,
         'badges'       => $badges,
         'wallpapers'   => $wallpapers,
         'titles'       => array_map(fn($t) => [

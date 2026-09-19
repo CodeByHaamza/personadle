@@ -1108,20 +1108,28 @@ final class DatabaseIntegrationTest extends TestCase
     }
 
 
-    public function testExpertStatsByModeReadsFromSessions(): void
+    public function testExpertStatsByModeReadsTheExpertTableFedByEachGame(): void
     {
+        // Migration 051 : les stats Expert vivent dans user_stats_expert (éditables
+        // dans l'admin), alimentée à chaque partie Expert — plus un GROUP BY à la
+        // volée. best_attempts et last_played_date restent lus dans game_sessions.
         $uid   = $this->makeUser();
         $today = new DateTime('now', new DateTimeZone('Europe/Paris'));
         $d0    = $today->format('Y-m-d');
         $d1    = (clone $today)->modify('-1 day')->format('Y-m-d');
         $d2    = (clone $today)->modify('-2 day')->format('Y-m-d');
 
-        // 2 victoires consécutives + 1 abandon plus ancien, plus une partie normale
+        // 1 abandon puis 2 victoires consécutives en Expert, plus une partie normale
         // qui ne doit PAS être comptée.
-        $this->insertSession($uid, 'music', $d2, 'C', 'giveup', 9, 1000, true);
-        $this->insertSession($uid, 'music', $d1, 'B', 'win', 4, 2000, true);
-        $this->insertSession($uid, 'music', $d0, 'A', 'win', 6, 3000, true);
-        $this->insertSession($uid, 'music', $d0, 'N', 'win', 1, 9999, false);
+        personadle_record_game_session(self::$pdo, $uid, 'music', $d2, 'C', 'giveup', 9, 1000, [], true);
+        personadle_record_game_session(self::$pdo, $uid, 'music', $d1, 'B', 'win', 4, 2000, [], true);
+        $out = personadle_record_game_session(self::$pdo, $uid, 'music', $d0, 'A', 'win', 6, 3000, [], true);
+        personadle_record_game_session(self::$pdo, $uid, 'music', $d0, 'N', 'win', 1, 9999, []);
+
+        // La réponse d'une partie Expert porte les stats Expert (et les normales inchangées).
+        $this->assertSame(3, $out['expert_stats']['games']);
+        $this->assertSame(2, $out['expert_stats']['wins']);
+        $this->assertSame(0, $out['stats']['games'], 'les stats normales ne bougent pas sur une partie Expert');
 
         $stats = personadle_expert_stats_by_mode(self::$pdo, $uid);
         $this->assertCount(1, $stats);
@@ -1129,10 +1137,35 @@ final class DatabaseIntegrationTest extends TestCase
         $this->assertSame(3, $stats[0]['games'], 'la partie normale ne doit pas être comptée');
         $this->assertSame(2, $stats[0]['wins']);
         $this->assertSame(1, $stats[0]['giveups']);
-        $this->assertSame(4, $stats[0]['best_attempts'], 'meilleure victoire = le moins d\'essais');
+        $this->assertSame(0, $stats[0]['perfect_wins'], 'aucune victoire Expert en un essai');
+        $this->assertSame(4, $stats[0]['best_attempts'], "meilleure victoire = le moins d'essais");
         $this->assertSame(6000, $stats[0]['total_time_ms']);
-        $this->assertSame(2, $stats[0]['streak'], 'deux victoires consécutives jusqu\'à aujourd\'hui');
+        $this->assertSame(2, $stats[0]['streak'], "deux victoires consécutives jusqu'à aujourd'hui");
+        $this->assertSame(2, $stats[0]['streak_record']);
         $this->assertSame($d0, $stats[0]['last_played_date']);
+
+        // L'admin écrase la ligne (PATCH …/stats { is_expert: true }) : c'est CE chiffre
+        // que le profil affiche ensuite — la table est la vérité, pas l'historique.
+        self::$pdo->prepare('UPDATE user_stats_expert SET wins = 40, games = 41 WHERE user_id = ? AND mode = ?')
+            ->execute([$uid, 'music']);
+        $stats = personadle_expert_stats_by_mode(self::$pdo, $uid);
+        $this->assertSame(40, $stats[0]['wins']);
+        $this->assertSame(41, $stats[0]['games']);
+    }
+
+    public function testExpertStreakRecordIsTheLongestRunOfConsecutiveWinningDays(): void
+    {
+        $uid   = $this->makeUser();
+        $today = new DateTime('now', new DateTimeZone('Europe/Paris'));
+        $d = fn(int $back) => (clone $today)->modify("-{$back} day")->format('Y-m-d');
+        // Victoires J-9, J-8, J-7 (série de 3), trou, J-4 (abandon), J-2, J-1 (série de 2)
+        foreach ([9, 8, 7, 2, 1] as $back) {
+            $this->insertSession($uid, 'classic', $d($back), "T{$back}", 'win', 2, 1000, true);
+        }
+        $this->insertSession($uid, 'classic', $d(4), 'G', 'giveup', 5, 1000, true);
+
+        $this->assertSame(3, personadle_expert_streak_record(self::$pdo, $uid, 'classic'));
+        $this->assertSame(0, personadle_expert_streak_record(self::$pdo, $uid, 'music'), 'aucune partie → 0');
     }
 
     public function testExpertStatsAreEmptyForAPlayerWhoNeverPlayedExpert(): void
