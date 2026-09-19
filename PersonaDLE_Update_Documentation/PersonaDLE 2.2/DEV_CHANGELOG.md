@@ -13,6 +13,66 @@
 
 ---
 
+## 2026-09-19 — Same Energy ne tombait presque jamais : le recadrage effaçait « qui » est porté (migration 052)
+
+Hamza : « je suis pas sûr que le badge Same Energy se débloque bien ». Vérification de la
+chaîne complète : deux vrais défauts.
+
+1. **Le recadrage cassait la détection.** Choisir un portrait ouvre aussitôt la fenêtre de
+   recadrage (retour Hamza du 2026-09-16) ; valider remplace `avatar_data`
+   (`../img/avatar/Chie.jpg`) par le PNG recadré en base64. `personadle_same_energy_partners()`
+   comparait la fin de `avatar_data` aux noms de fichiers → plus rien ne matchait. Le badge ne
+   pouvait tomber que si les **deux** amis avaient fermé la fenêtre sans recadrer. Le client
+   gardait bien l'origine (`profile.avatarSrc`) — mais en local seulement : pas synchronisée,
+   et le pull cloud la supprimait (`delete p.avatarSrc`).
+2. **Deux Chie manquaient** dans la liste (serveur et miroir client) : `chie_satonaka_icon.jpg`
+   et `chiesatonaka_revivale.jpg` (P4). `meme_chie_shut_teddie.jpg` est conservée.
+
+### `profiles.avatar_src` — le portrait galerie d'origine, synchronisé
+
+- `sql/migrations/052_profiles_avatar_src.sql` + `bdd_mysql.sql` : `avatar_src VARCHAR(120) NULL`.
+  Reprise : `avatar_src = avatar_data` quand celui-ci est un chemin galerie (58 lignes en dev) ;
+  un portrait recadré avant la 052 reste inconnu (45 en dev) — le joueur le re-choisit une fois.
+- `api/user/index.php` PATCH : règle en quatre cas — `avatar_data` chemin galerie → **déduit**
+  (le client n'a rien à dire) ; `avatar_data` null → null ; image recadrée **avec** `avatar_src`
+  (null compris) → le client sait ; image recadrée **sans** `avatar_src` → **on garde la valeur
+  connue**. Ce dernier cas est celui du sync complet (`_fullCloudSync` renvoie `avatar_data` tel
+  quel) et des clients pas encore rafraîchis : écrire NULL là aurait effacé l'origine à chaque
+  sync (état dérivé, CLAUDE.md §13). GET renvoie `avatar_src`.
+- `api/lib/validation.php` : `personadle_is_gallery_avatar()`, `personadle_validate_avatar_src()`
+  (null/'' ou chemin galerie **existant** — jamais une image inline : ce champ dit « qui », il ne
+  stocke rien).
+- `api/friends/index.php` : `avatar_src` dans chaque ami (retour immédiat côté client).
+- `api/lib/condition_check.php` : `COALESCE(avatar_src, IF(avatar_data LIKE '../img/avatar/%',
+  avatar_data, NULL))` — l'origine parle ; `avatar_data` ne remonte que s'il est lui-même un
+  chemin (profil pré-052 jamais resauvé), jamais les blobs base64.
+
+### Client
+
+- `profile/profile-page.js` : `commitAvatar()` envoie `avatar_src: galleryAvatarPath(selectedAvatarSrc)`
+  avec l'image ; `_fullCloudSync` envoie `avatar_src` **seulement s'il est connu localement**
+  (sinon silence → le serveur garde). `galleryAvatarPath()` accepte `.avif` (Kanji).
+- `js/cloud-sync.js` : `avatar_src` descend dans `profile.avatarSrc` ; null/absent → supprimé
+  (plus de portrait fantôme après un changement sur un autre appareil).
+- `profile/badges/badgesManager.js` : `mine = profile.avatarSrc || profile.avatar`,
+  `theirs = f.avatar_src || f.avatar_data`. `badgesData.js` : liste Chie complétée.
+- `sw.js` : `CACHE_VERSION` v99 → v100 (`profile-page.js` précaché).
+
+### Tests
+
+- PHPUnit : `testSameEnergySurvivesTheCropThanksToAvatarSrc` (deux recadrés, un seul, pré-052
+  inconnu), `ValidationTest` ×3 (`avatar_src`, `is_gallery_avatar`).
+- Vitest : détection via `avatarSrc`/`avatar_src`, toutes les Chie ; pull cloud d'`avatar_src`
+  (valeur, null, champ absent).
+- E2E `unlocks_wonder_shujin` : le scénario Same Energy passe maintenant par **A recadré + B en
+  icône Chie** ; nouveau test de contrat `avatar_src` (déduit, gardé si muet, suit, null explicite,
+  400 sur image inline / portrait inconnu / traversée, effacé avec l'avatar).
+
+### Angle mort
+
+- Joueurs déjà recadrés avant la 052 : `avatar_src` NULL, badge impossible tant qu'ils n'ont
+  pas re-choisi leur portrait (un clic dans l'Atelier, recadrage compris). À dire à l'ami de
+  Hamza qui teste.
 ## 2026-09-19 — Stats Expert éditables : table `user_stats_expert` (migration 051)
 
 Hamza : « dans le menu admin je peux pas modifier mes stats de mode Expert ». Normal : les

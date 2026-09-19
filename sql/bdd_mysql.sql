@@ -543,6 +543,10 @@ INSERT INTO titles (slug, image_path, name_en, name_fr, name_es, name_de, name_i
 CREATE TABLE profiles (
     user_id             BIGINT UNSIGNED  NOT NULL,
     avatar_data         MEDIUMTEXT,                       -- base64 (canvas crop)
+    -- Portrait de la galerie d'origine (../img/avatar/<fichier>) ou NULL : survit
+    -- au recadrage, qui remplace avatar_data par un PNG base64. C'est lui que lit
+    -- toute logique « qui porte-t-il ? » (badge Same Energy) — migration 052.
+    avatar_src          VARCHAR(120)     NULL,
     avatar_border_color VARCHAR(7)       NOT NULL DEFAULT '#ffffff',
     wallpaper_id        VARCHAR(100),
     profile_music_id    VARCHAR(100),
