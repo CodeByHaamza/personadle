@@ -8,7 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 1437 tests Vitest (77 suites), 375 méthodes PHPUnit, 253 tests E2E,
+> Vérifié le 2026-08-26 : 1437 tests Vitest (77 suites), 376 méthodes PHPUnit, 253 tests E2E,
 > Vérifié le 2026-08-26 : 1428 tests Vitest (77 suites), 363 méthodes PHPUnit, 248 tests E2E,
 > Vérifié le 2026-08-26 : 1425 tests Vitest (77 suites), 359 méthodes PHPUnit, 247 tests E2E,
 > lint et data/i18n/pools propres.
@@ -118,6 +118,11 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       liste d'amis pour tout le monde**. Puis `INSERT IGNORE INTO schema_migrations (version) VALUES
       ('052_profiles_avatar_src')`. Vérifiée le 2026-09-19 sur la base de dev au schéma 051 (58 origines
       reprises, 45 portraits recadrés restent inconnus) et sur un import vierge (no-op).
+- [ ] Jouer `sql/migrations/053_date_badges_any_year.sql` (5 `UPDATE badges` par slug, rejouable) **avant le
+      pull** : sans elle, les cinq badges de dates gardent `manual` et ne tombent jamais d'office ; avec le
+      nouveau code, aucun crash dans les deux sens (pas de nouvelle colonne). Puis `INSERT IGNORE INTO
+      schema_migrations (version) VALUES ('053_date_badges_any_year')`. Validée le 2026-09-19 sur import
+      vierge + rejouée sur la préprod (dump de prod).
 - [x] **Bumper `CACHE_VERSION` dans `sw.js` (v100 → v101, fait le 2026-09-19 nuit)** : `profile/profile-page.js`
       (précaché) porte l'encart Atelier « portrait sans origine ».
 - [x] **Bumper `CACHE_VERSION` dans `sw.js` (v99 → v100, fait le 2026-09-19)** : `profile/profile-page.js`

@@ -1218,11 +1218,11 @@ INSERT IGNORE INTO badges (slug, name_en, category, rarity, image_path, conditio
 ('christmas_2025',      'Christmas 2025',             'event',       'common',    'profile/badges/images/Badges_Christmas_2025.png',        'Redeem code during Christmas 2025', 'manual', NULL, NULL, 0),
 ('new_years_2026',      'New Year''s 2026',           'event',       'common',    'profile/badges/images/Badges_New_Years_2026.png',        'Redeem code during New Year 2026', 'manual', NULL, NULL, 0),
 ('chinese_new_year_2026','Happy Chinese New Year 2026','event',      'common',    'profile/badges/images/Badges_Chiness_New_Year.webp',     'Type the Chinese New Year code during the 2026 celebration', 'manual', NULL, NULL, 0),
-('valentine_2026',      'Valentine''s Day 2026',      'event',       'common',    'profile/badges/images/Badges_St_Valentin.png',           'Redeem code during Valentine''s 2026', 'manual', NULL, NULL, 0),
-('easter_2026',         'Easter 2026',                'event',       'common',    'profile/badges/images/Badges_Paques.png',                'Redeem code during Easter 2026', 'manual', NULL, NULL, 0),
-('golden_week',         'Golden Week',                'event',       'common',    'profile/badges/images/Badge_Golden_Week.webp',           'Log in between April 29 and May 5', 'manual', NULL, NULL, 0),
-('tanabata',            'Tanabata',                   'event',       'common',    'profile/badges/images/Badge_Tanabata.webp',              'Log in on July 7th', 'manual', NULL, NULL, 0),
-('promised_day',        'The Promised Day',           'event',       'rare',      'profile/badges/images/Badge_Promised_Day.webp',          'Play on December 31st AND January 1st', 'manual', NULL, NULL, 0),
+('valentine_2026',      'Valentine''s Day',           'event',       'common',    'profile/badges/images/Badges_St_Valentin.png',           'Play on February 14th', 'played_on_date', '02-14', NULL, 0),
+('easter_2026',         'Easter',                     'event',       'common',    'profile/badges/images/Badges_Paques.png',                'Play on Easter Sunday or Monday', 'played_on_easter', NULL, NULL, 0),
+('golden_week',         'Golden Week',                'event',       'common',    'profile/badges/images/Badge_Golden_Week.webp',           'Play between April 29 and May 5', 'played_in_period', '04-29:05-05', NULL, 0),
+('tanabata',            'Tanabata',                   'event',       'common',    'profile/badges/images/Badge_Tanabata.webp',              'Play on July 7th', 'played_on_date', '07-07', NULL, 0),
+('promised_day',        'The Promised Day',           'event',       'rare',      'profile/badges/images/Badge_Promised_Day.webp',          'Play on December 31st AND January 1st', 'played_on_all_dates', '12-31,01-01', NULL, 0),
 
 -- ── Secret badges ────────────────────────────────────────────────────────────
 ('true_hacker',         'True Hacker',                'secret',      'rare',      'profile/badges/images/Badges_True_Hacker.png',           '???', 'manual', NULL, NULL, 1),

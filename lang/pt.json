@@ -537,13 +537,13 @@
       "description": "O Ryuji e o Wu Kong prontos para o novo ano! Que o ano do cavalo te traga força e coragem!"
     },
     "valentine_2026": {
-      "name": "Dia dos Namorados 2026",
-      "condition": "Resgata o código de evento do Dia dos Namorados 2026",
+      "name": "Dia dos Namorados",
+      "condition": "Jogar num 14 de fevereiro",
       "description": "Um Social Link aprofundado! O amor está no ar, tal como um romance de nível máximo."
     },
     "easter_2026": {
-      "name": "Páscoa 2026",
-      "condition": "Resgata o código de evento da Páscoa 2026",
+      "name": "Páscoa",
+      "condition": "Jogar no domingo ou na segunda-feira de Páscoa",
       "description": "Caça ovos da Páscoa como caças Personas! A primavera traz novos começos."
     },
     "github_contributor": {
@@ -763,12 +763,12 @@
     },
     "golden_week": {
       "name": "Golden Week",
-      "condition": "Inicia sessão entre 29 de abril e 5 de maio",
+      "condition": "Jogar entre 29 de abril e 5 de maio",
       "description": "Até os que buscam a verdade precisam de descanso. Passaste as férias douradas a forjar laços sob o sol da tarde."
     },
     "tanabata": {
       "name": "Tanabata",
-      "condition": "Inicia sessão a 7 de julho",
+      "condition": "Jogar num 7 de julho",
       "description": "As estrelas alinham-se por uma única noite. O teu desejo foi registado nos arquivos celestes do Mar das Almas."
     },
     "promised_day": {
