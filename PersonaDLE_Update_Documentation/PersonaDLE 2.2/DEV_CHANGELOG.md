@@ -13,6 +13,47 @@
 
 ---
 
+## 2026-09-19 — Badges de dates pour toutes les années (migration 053) ; 500 des titres ; préprod fidèle
+
+### Pâques, Saint-Valentin, Tanabata, Golden Week, Jour Promis — n'importe quelle année
+
+Décision Hamza. Jusqu'ici Pâques et Saint-Valentin étaient des codes événement d'une seule
+année (EASTER2026, VALENTINE2026), Golden Week / Tanabata / Jour Promis des drapeaux posés par
+le client si l'on **visitait** le site à la bonne date (par appareil, perdus avec le cache).
+Désormais vérifiés côté serveur depuis `game_sessions`, toutes années, et accordés à
+l'ouverture du profil :
+
+- `played_on_date` 'MM-JJ' (Saint-Valentin 02-14, Tanabata 07-07), `played_in_period`
+  'MM-JJ:MM-JJ' (Golden Week, fenêtre pouvant enjamber le Nouvel An), `played_on_all_dates`
+  'MM-JJ,MM-JJ' (Jour Promis : les deux dates, pas forcément la même année),
+  `played_on_easter` (dimanche **ou lundi** de Pâques, computus Meeus/Jones/Butcher —
+  `personadle_easter_sunday()`). Entiers en SQL, jamais une chaîne formatée.
+- Migration 053 : conditions + noms sans année ('Valentine''s Day', 'Easter') ; slugs et
+  images inchangés. `lang/*.json` : noms et conditions (« Jouer un 14 février »…).
+- Client `badgesData.js` : Valentine/Easter n'ont plus de `eventCode` (`check: () => false`,
+  le serveur accorde) ; Golden Week / Tanabata / Jour Promis gardent leurs drapeaux comme
+  retour immédiat, le serveur tranche sur les vraies dates de jeu.
+- Tests : `testDateBadgeConditionsWorkAnyYear` (Pâques 2024/25/26, samedi refusé, lundi
+  accepté ; fenêtre enjambant l'année ; deux dates de deux années) ; le garde-fou de catalogue
+  sème et réconcilie les quatre nouveaux types.
+
+### 500 sur GET /api/titles (2.2.6 → hotfix 2.2.7)
+
+`played_on_date` faisait `DATE_FORMAT(played_date,'%m-%d') = ?` ; avec les préparées natives,
+sur la MariaDB d'Hostinger (`skip-character-set-client-handshake`), paramètre en
+`utf8mb4_general_ci` contre chaîne en `utf8mb4_unicode_ci` → « Illegal mix of collations ».
+La réconciliation la jouait pour tous → le menu des titres retombait sur la liste locale.
+Corrigé (MONTH/DAY) ; `personadle_condition_allows_unlock_safely()` : une condition qui
+plante est loguée (`unlock-reconcile`) et sautée. CLAUDE.md §7 : trois pièges ajoutés.
+
+### Préprod fidèle
+
+Trois écarts fermés : MariaDB 11.8 configurée comme Hostinger (`ops/preprod/`), PHP **8.2**
+partout (`ARG PHP_VERSION`, CI), collation de connexion identique. Preuve : l'ancienne
+requête échoue désormais aussi sur la préprod.
+
+---
+
 ## 2026-09-19 — Déblocages : le serveur accorde ce qui est dû, et une victoire Expert est une victoire
 
 Hamza : Colonel-Maskou a 13 titres mais pas SEES, une relation au rang 10 mais pas Same
