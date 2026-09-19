@@ -591,6 +591,66 @@ final class DatabaseIntegrationTest extends TestCase
         $this->assertContains('tatsuya_dont_burn_out', personadle_reconcile_titles(self::$pdo, $uid));
     }
 
+    public function testDateBadgeConditionsWorkAnyYear(): void
+    {
+        // Migration 053 : Pâques, Saint-Valentin, Tanabata, Golden Week, Jour Promis tombent
+        // n'importe quelle année, depuis game_sessions — plus de code d'une année, plus de
+        // drapeau posé par l'appareil.
+        require_once __DIR__ . '/../../api/lib/condition_check.php';
+        $uid = $this->makeUser('dt');
+
+        // Pâques : dimanche 2024-03-31, lundi 2026-04-06 ; ni le samedi ni le mardi
+        $this->assertSame('2024-03-31', personadle_easter_sunday(2024));
+        $this->assertSame('2025-04-20', personadle_easter_sunday(2025));
+        $this->assertSame('2026-04-05', personadle_easter_sunday(2026));
+        $this->insertSession($uid, 'classic', '2026-04-04', 'X', 'win', 1, 500, false); // samedi
+        $this->assertFalse(personadle_verify_condition(self::$pdo, $uid, 'played_on_easter', null, null));
+        $this->insertSession($uid, 'classic', '2026-04-06', 'X', 'giveup', 8, 500, false); // lundi de Pâques
+        $this->assertTrue(personadle_verify_condition(self::$pdo, $uid, 'played_on_easter', null, null));
+
+        // Golden Week : fenêtre 04-29:05-05, n'importe quelle année
+        $this->assertFalse(personadle_verify_condition(self::$pdo, $uid, 'played_in_period', '04-29:05-05', null));
+        $this->insertSession($uid, 'music', '2023-05-05', 'X', 'win', 2, 500, false);
+        $this->assertTrue(personadle_verify_condition(self::$pdo, $uid, 'played_in_period', '04-29:05-05', null));
+        // Fenêtre qui enjambe le Nouvel An
+        $this->assertFalse(personadle_verify_condition(self::$pdo, $uid, 'played_in_period', '12-24:01-02', null));
+        $this->insertSession($uid, 'music', '2025-01-01', 'X', 'win', 2, 500, false);
+        $this->assertTrue(personadle_verify_condition(self::$pdo, $uid, 'played_in_period', '12-24:01-02', null));
+
+        // Jour Promis : les DEUX dates, pas forcément la même année ; le 1er janvier est déjà là
+        $this->assertFalse(personadle_verify_condition(self::$pdo, $uid, 'played_on_all_dates', '12-31,01-01', null));
+        $this->insertSession($uid, 'emoji', '2022-12-31', 'X', 'win', 2, 500, false);
+        $this->assertTrue(personadle_verify_condition(self::$pdo, $uid, 'played_on_all_dates', '12-31,01-01', null));
+
+        // Formats refusés (jamais true par accident)
+        $this->assertFalse(personadle_verify_condition(self::$pdo, $uid, 'played_in_period', 'avril', null));
+        $this->assertFalse(personadle_verify_condition(self::$pdo, $uid, 'played_on_all_dates', '', null));
+    }
+
+    public function testStreakBadgesHonourTheGlobalStreakRecordThePlayerSees(): void
+    {
+        // « Reach a 30-day streak » : le joueur lit sa série globale (profil). Colonel-Maskou :
+        // record global 19, meilleur mode 16 — le serveur ne regardait que le par-mode. Un
+        // joueur à 30 jours globaux et 25 dans son meilleur mode se voyait refuser Raphael.
+        require_once __DIR__ . '/../../api/lib/unlock_reconcile.php';
+        $uid = $this->makeUser('gs');
+        $this->makeUserStats($uid, 'classic', ['streak_record' => 25]);
+        $this->makeUserStats($uid, 'music',   ['streak_record' => 12]);
+        self::$pdo->prepare('UPDATE users SET global_streak_record = 30 WHERE id = ?')->execute([$uid]);
+
+        $this->assertTrue(personadle_verify_condition(self::$pdo, $uid, 'streak_record', null, 30), 'la série globale compte');
+        $this->assertFalse(personadle_verify_condition(self::$pdo, $uid, 'streak_record', null, 31));
+        $granted = personadle_reconcile_badges(self::$pdo, $uid);
+        $this->assertContains('raphael', $granted);    // 30
+        $this->assertContains('pyro_spark', $granted); // 7
+        $this->assertNotContains('surt', $granted);    // 90
+
+        // Et l'inverse reste vrai : un record par mode supérieur au global compte aussi.
+        $u2 = $this->makeUser('gs2');
+        $this->makeUserStats($u2, 'emoji', ['streak_record' => 40]);
+        $this->assertTrue(personadle_verify_condition(self::$pdo, $u2, 'streak_record', null, 30));
+    }
+
     public function testReconciliationSurvivesAConditionThatThrows(): void
     {
         // Une condition qui plante (SQL refusé par la prod…) ne doit jamais rendre la liste

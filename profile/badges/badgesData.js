@@ -388,35 +388,30 @@ export const badgesList = [
   },
 
   {
+    // Décision Hamza (2026-09-19) : les badges de dates tombent N'IMPORTE QUELLE année,
+    // sans code — le serveur les accorde depuis game_sessions (played_on_date 02-14) à
+    // l'ouverture du profil. Slug et image gardés (valentine_2026), nom sans année.
     id: "valentine_2026",
-    name: "Valentine's Day 2026",
+    name: "Valentine's Day",
     category: BADGE_CATEGORIES.EVENT,
     img: BADGE_IMG_BASE + "Badges_St_Valentin.png",
-    condition: "Redeem code during Valentine's 2026",
+    condition: "Play on February 14th",
     description: "A Social Link deepened! Love is in the air, just like a max rank romance.",
     secret: false,
-    eventCode: "VALENTINE2026",
-    eventStart: "2026-02-10",
-    eventEnd: "2026-02-17",
-    check: (stats, profile) => {
-      return profile?.eventCodes?.includes("VALENTINE2026") || false;
-    },
+    check: () => false, // vérifié et accordé côté serveur
   },
 
   {
+    // Pâques bouge chaque année : le serveur calcule la date (played_on_easter,
+    // dimanche ou lundi de Pâques) et accorde le badge à l'ouverture du profil.
     id: "easter_2026",
-    name: "Easter 2026",
+    name: "Easter",
     category: BADGE_CATEGORIES.EVENT,
     img: BADGE_IMG_BASE + "Badges_Paques.png",
-    condition: "Redeem code during Easter 2026",
+    condition: "Play on Easter Sunday or Monday",
     description: "Hunt for easter eggs like you hunt for Personas! Spring brings new beginnings.",
     secret: false,
-    eventCode: "EASTER2026",
-    eventStart: "2026-04-01",
-    eventEnd: "2026-04-10",
-    check: (stats, profile) => {
-      return profile?.eventCodes?.includes("EASTER2026") || false;
-    },
+    check: () => false, // vérifié et accordé côté serveur
   },
 
   // ═════════════════════════════════════════════════════════════════════════
@@ -903,7 +898,7 @@ export const badgesList = [
     name: "Golden Week",
     category: BADGE_CATEGORIES.EVENT,
     img: BADGE_IMG_BASE + "Badge_Golden_Week.webp",
-    condition: "Log in between April 29 and May 5",
+    condition: "Play between April 29 and May 5",
     description:
       "Even truth-seekers need a break. You spent the golden holidays forging bonds under the evening sun.",
     secret: false,
@@ -914,7 +909,7 @@ export const badgesList = [
     name: "Tanabata",
     category: BADGE_CATEGORIES.EVENT,
     img: BADGE_IMG_BASE + "Badge_Tanabata.webp",
-    condition: "Log in on July 7th",
+    condition: "Play on July 7th",
     description:
       "The stars align for a single night. Your wish has been recorded in the celestial archives of the Sea of Souls.",
     secret: false,

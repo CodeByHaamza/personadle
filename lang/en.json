@@ -537,13 +537,13 @@
       "description": "Ryuji & Wu Kong ready for the new year! May the year of the horse bring you strength and courage!"
     },
     "valentine_2026": {
-      "name": "Valentine's Day 2026",
-      "condition": "Redeem the Valentine's 2026 event code",
+      "name": "Valentine's Day",
+      "condition": "Play on February 14th",
       "description": "A Social Link deepened! Love is in the air, just like a max rank romance."
     },
     "easter_2026": {
-      "name": "Easter 2026",
-      "condition": "Redeem the Easter 2026 event code",
+      "name": "Easter",
+      "condition": "Play on Easter Sunday or Monday",
       "description": "Hunt for easter eggs like you hunt for Personas! Spring brings new beginnings."
     },
     "github_contributor": {
@@ -763,12 +763,12 @@
     },
     "golden_week": {
       "name": "Golden Week",
-      "condition": "Log in between April 29 and May 5",
+      "condition": "Play between April 29 and May 5",
       "description": "Even truth-seekers need a break. You spent the golden holidays forging bonds under the evening sun."
     },
     "tanabata": {
       "name": "Tanabata",
-      "condition": "Log in on July 7th",
+      "condition": "Play on July 7th",
       "description": "The stars align for a single night. Your wish has been recorded in the celestial archives of the Sea of Souls."
     },
     "promised_day": {
