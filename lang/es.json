@@ -337,6 +337,7 @@
     "tab_title": "Título",
     "tab_badges": "Insignias",
     "avatar_hint": "Elige un retrato — se aplica al instante. ¿Mal encuadrado? Ajústalo.",
+    "avatar_origin_notice": "🪪 Tu retrato se recortó antes de que el juego recordara cuál es. Vuelve a elegirlo una vez abajo (recórtalo si quieres) para que tus amigos — y la insignia Same Energy — sepan a quién llevas.",
     "avatar_adjust": "Ajustar el encuadre",
     "crop_title": "Ajusta tu avatar",
     "crop_label": "Mueve, amplía, confirma",

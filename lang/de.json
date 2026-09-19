@@ -337,6 +337,7 @@
     "tab_title": "Titel",
     "tab_badges": "Abzeichen",
     "avatar_hint": "Wähle ein Porträt — es wird sofort übernommen. Schlecht zugeschnitten? Passe es an.",
+    "avatar_origin_notice": "🪪 Dein Porträt wurde zugeschnitten, bevor das Spiel sich merkte, welches es ist. Wähle es unten einmal neu (Zuschneiden erlaubt), damit deine Freunde — und das Abzeichen Same Energy — wissen, wen du trägst.",
     "avatar_adjust": "Ausschnitt anpassen",
     "crop_title": "Avatar anpassen",
     "crop_label": "Ziehen, zoomen, bestätigen",
