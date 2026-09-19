@@ -31,10 +31,15 @@ export const BADGE_CATEGORIES = {
  */
 export const SAME_ENERGY_AVATARS = {
   arai: ["Arai.png", "Arai2.png"],
-  chie: ["Chie.jpg", "Chie2.jpg", "chie_pq.jpg", "meme_chie_shut_teddie.jpg"],
+  chie: ["chie_satonaka_icon.jpg", "Chie.jpg", "Chie2.jpg", "chiesatonaka_revivale.jpg", "chie_pq.jpg", "meme_chie_shut_teddie.jpg"],
 };
 
-/** Vrai si `avatar` (chemin galerie ou data URL) est l'un des portraits listés. */
+/**
+ * Vrai si `avatar` (chemin galerie) est l'un des portraits listés. Un portrait
+ * recadré n'est plus qu'un PNG base64 : passer ici le chemin d'ORIGINE
+ * (`profile.avatarSrc` / `friend.avatar_src`, synchronisés depuis la 052), pas
+ * l'image portée.
+ */
 export function wearsAvatar(avatar, files) {
   if (typeof avatar !== "string" || !avatar) return false;
   return files.some((f) => avatar.endsWith("/" + f));
