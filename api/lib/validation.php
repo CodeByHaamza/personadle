@@ -132,3 +132,31 @@ function personadle_validate_avatar(?string $avatar, string $galleryDir = __DIR_
     }
     return 'Invalid avatar format';
 }
+
+/**
+ * Vrai si `$avatar` est un chemin de portrait de la galerie (`../img/avatar/<fichier>`),
+ * par opposition à une image base64 recadrée ou téléversée.
+ */
+function personadle_is_gallery_avatar(?string $avatar): bool
+{
+    return is_string($avatar) && str_starts_with($avatar, '../img/avatar/');
+}
+
+/**
+ * Valide `profiles.avatar_src` (migration 052) : le portrait de la galerie
+ * d'ORIGINE, retenu même quand `avatar_data` est devenu un PNG recadré. Accepte
+ * null/'' (aucun portrait connu) ou un chemin galerie existant — jamais une
+ * image inline : ce champ dit « qui » le joueur porte, il ne stocke rien.
+ *
+ * @return string|null Message d'erreur, ou null si valide
+ */
+function personadle_validate_avatar_src(?string $src, string $galleryDir = __DIR__ . '/../../img/avatar'): ?string
+{
+    if ($src === null || $src === '') {
+        return null;
+    }
+    if (!personadle_is_gallery_avatar($src)) {
+        return 'Invalid avatar_src (gallery path expected)';
+    }
+    return personadle_validate_avatar($src, $galleryDir);
+}
