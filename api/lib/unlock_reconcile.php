@@ -26,9 +26,36 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/condition_check.php';
+require_once __DIR__ . '/error_log.php';
 
 /** Types qu'on n'accorde JAMAIS d'office : ils se gagnent par une déclaration ailleurs. */
 const PERSONADLE_DECLARATIVE_CONDITION_TYPES = ['manual', 'joker_profile'];
+
+/**
+ * Vérification TOLÉRANTE : une condition qui plante (SQL refusé par la prod, type
+ * mal renseigné…) est loguée et comptée comme non remplie — elle ne doit jamais
+ * transformer la liste des titres ou des badges en 500. Vécu le 2026-09-19 : la
+ * condition `played_on_date` (un seul titre, Tatsuya) tombait en « Illegal mix of
+ * collations » sur la MariaDB de prod, et comme la réconciliation la jouait pour
+ * tout le monde à chaque GET /api/titles, le menu des titres retombait sur la
+ * liste locale (sans les nouveaux titres) pour TOUS les joueurs.
+ */
+function personadle_condition_allows_unlock_safely(PDO $pdo, int $userId, string $table, string $slug, ?string $type, ?string $mode, ?int $value): bool
+{
+    try {
+        return personadle_condition_allows_unlock($pdo, $userId, $type, $mode, $value);
+    } catch (Throwable $e) {
+        try {
+            personadle_log_error($pdo, 'error', 'Unlock reconciliation: condition check failed', [
+                'source' => 'unlock-reconcile', 'table' => $table, 'slug' => $slug,
+                'type' => $type, 'error' => $e->getMessage(),
+            ], $userId);
+        } catch (Throwable) {
+            // le log est un bonus
+        }
+        return false;
+    }
+}
 
 /**
  * Accorde au joueur les titres dont la condition est remplie et qu'il n'a pas.
@@ -50,8 +77,8 @@ function personadle_reconcile_titles(PDO $pdo, int $userId): array
         if (in_array($t['condition_type'], PERSONADLE_DECLARATIVE_CONDITION_TYPES, true)) {
             continue;
         }
-        if (!personadle_condition_allows_unlock(
-            $pdo, $userId, $t['condition_type'], $t['condition_mode'] ?? null,
+        if (!personadle_condition_allows_unlock_safely(
+            $pdo, $userId, 'titles', (string) $t['slug'], $t['condition_type'], $t['condition_mode'] ?? null,
             isset($t['condition_value']) ? (int) $t['condition_value'] : null
         )) {
             continue;
@@ -85,8 +112,8 @@ function personadle_reconcile_badges(PDO $pdo, int $userId): array
         if (in_array($b['condition_type'], PERSONADLE_DECLARATIVE_CONDITION_TYPES, true)) {
             continue;
         }
-        if (!personadle_condition_allows_unlock(
-            $pdo, $userId, $b['condition_type'], $b['condition_mode'] ?? null,
+        if (!personadle_condition_allows_unlock_safely(
+            $pdo, $userId, 'badges', (string) $b['slug'], $b['condition_type'], $b['condition_mode'] ?? null,
             isset($b['condition_value']) ? (int) $b['condition_value'] : null
         )) {
             continue;

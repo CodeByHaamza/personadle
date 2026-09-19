@@ -186,12 +186,17 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
             if (!is_string($condMode) || !preg_match('/^\d{2}-\d{2}$/', $condMode)) {
                 return false;
             }
+            // MONTH/DAY en entiers, pas DATE_FORMAT() comparé à une chaîne : sur la MariaDB
+            // 11.8 de prod, la chaîne produite et le paramètre lié n'ont pas la même
+            // collation → « Illegal mix of collations » → 500 sur GET /api/titles pour
+            // TOUT LE MONDE dès que la réconciliation a joué cette condition (2.2.6).
+            [$mm, $dd] = array_map('intval', explode('-', $condMode));
             $s = $pdo->prepare(
-                "SELECT 1 FROM game_sessions
-                 WHERE user_id = ? AND DATE_FORMAT(played_date, '%m-%d') = ?
-                 LIMIT 1"
+                'SELECT 1 FROM game_sessions
+                 WHERE user_id = ? AND MONTH(played_date) = ? AND DAY(played_date) = ?
+                 LIMIT 1'
             );
-            $s->execute([$userId, $condMode]);
+            $s->execute([$userId, $mm, $dd]);
             return (bool) $s->fetchColumn();
         }
 
