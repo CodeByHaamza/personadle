@@ -66,6 +66,44 @@ export function needsAvatarOrigin(profile) {
 }
 
 /**
+ * Vue des stats POUR LES DÉBLOCAGES : normal + Expert additionnés.
+ *
+ * Décision Hamza du 2026-09-19 : une victoire Expert est une victoire — les
+ * conditions génériques (« 25 perfects », « 40 victoires en All-Out Attack »…)
+ * comptent les deux dimensions, comme le serveur (condition_check.php lit
+ * user_stats ET user_stats_expert). Le profil, lui, continue d'AFFICHER les deux
+ * séparément : cette vue ne sert qu'à décider quand tenter un unlock.
+ *
+ * `stats.expert` vient du pull cloud (GET /api/user/:id → expert_stats) ; absent
+ * (hors ligne, backend antérieur) → la vue est simplement égale au normal.
+ *
+ * @param {object|null|undefined} stats profile.stats
+ * @returns {object} même forme que profile.stats (wins, giveups, games,
+ *          perfectWins, streakRecord, modeWins, modeCount), sans la clé expert
+ */
+export function statsForUnlocks(stats) {
+  const s = stats || {};
+  const e = s.expert;
+  if (!e) return s;
+  const sumMaps = (a = {}, b = {}) => {
+    const out = { ...a };
+    for (const [k, v] of Object.entries(b)) out[k] = (out[k] || 0) + (v || 0);
+    return out;
+  };
+  const { expert: _omit, ...rest } = s;
+  return {
+    ...rest,
+    wins: (s.wins || 0) + (e.wins || 0),
+    giveups: (s.giveups || 0) + (e.giveups || 0),
+    games: (s.games || 0) + (e.games || 0),
+    perfectWins: (s.perfectWins || 0) + (e.perfectWins || 0),
+    streakRecord: Math.max(s.streakRecord || 0, e.streakRecord || 0),
+    modeWins: sumMaps(s.modeWins, e.modeWins),
+    modeCount: sumMaps(s.modeCount, e.modeCount),
+  };
+}
+
+/**
  * « Best Mode Overall » — le mode où le joueur performe le mieux.
  *
  * Décision produit 2026-09-12 (retour joueur) : le mode favori devient un CHOIX

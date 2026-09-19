@@ -351,6 +351,20 @@ describe("checkBadgesAfterGame", () => {
     expect(saved.badges).toContain("ace_defective");
   });
 
+  it("les stats Expert comptent : 6 victoires normales + 4 Expert débloquent « Win 10 games » (2026-09-19)", () => {
+    localStorage.setItem(
+      "personaUserProfile",
+      JSON.stringify(baseProfile({ stats: { wins: 6, modeWins: { Music: 6 }, expert: { wins: 4, modeWins: { Music: 4 } } } }))
+    );
+    checkBadgesAfterGame();
+    const saved = JSON.parse(localStorage.getItem("personaUserProfile"));
+    expect(saved.badges).toContain("first_win");
+    expect(saved.badges).toContain("ace_detective"); // Win 10 games
+    // Et le profil garde ses deux blocs séparés : rien n'a été fusionné dans stats.wins
+    expect(saved.stats.wins).toBe(6);
+    expect(saved.stats.expert.wins).toBe(4);
+  });
+
   it("does not re-unlock a badge already present in profile.badges", () => {
     localStorage.setItem(
       "personaUserProfile",

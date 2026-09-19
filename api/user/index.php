@@ -92,6 +92,13 @@ if ($method === 'GET') {
     $stmt->execute([$userId]);
     $stats = $stmt->fetchAll();
 
+    // Stats Expert (user_stats_expert, 051) : le client en a besoin pour tenter les
+    // déblocages génériques — une victoire Expert est une victoire (2026-09-19). Le
+    // serveur revérifie de son côté (condition_check.php lit les deux tables).
+    $stmt = $pdo->prepare('SELECT mode, wins, giveups, games, streak, streak_record, perfect_wins, total_time_ms FROM user_stats_expert WHERE user_id = ? ORDER BY mode');
+    $stmt->execute([$userId]);
+    $expertStats = $stmt->fetchAll();
+
     // Récupérer les badges débloqués
     $stmt = $pdo->prepare('SELECT badge_id, unlocked_at FROM badges_unlocked WHERE user_id = ? ORDER BY unlocked_at');
     $stmt->execute([$userId]);
@@ -135,6 +142,7 @@ if ($method === 'GET') {
             'settings'            => json_decode($profile['settings']  ?? 'null', true) ?? [],
         ],
         'stats'   => $stats,
+        'expert_stats' => $expertStats,
         // Journées distinctes jouées, comptées par le SERVEUR (game_sessions). Le
         // client tenait ce compte par appareil (uniqueDaysSet) : un joueur pouvait
         // se voir 50 jours en local — dont ses jours d'avant le compte — quand la
