@@ -13,6 +13,37 @@
 
 ---
 
+## 2026-09-19 — Discord : top 3 de la semaine, le dimanche à 20 h (`api/cron/discord_weekly.php`)
+
+Idée Hamza : « toutes les semaines, dans un salon, on affiche le top 3 de ladite semaine
+(tous les dimanches à 20 h) ». Même mécanique que l'annonce quotidienne : un cron
+Hostinger, un webhook, la clé en header — pas de bot à héberger, et les données sont
+déjà là (c'est la fenêtre `period=week` du classement).
+
+- **`api/cron/discord_weekly.php`** : deux podiums, victoires en normal (tous modes) et en
+  Expert s'il y en a eu ; égalité → moins de parties d'abord, puis pseudo ; comptes supprimés
+  exclus ; semaine sans victoire → rien posté (`posted: false`). Voix Margaret (les registres).
+  Fenêtre lundi → dimanche 20 h : les parties de 20 h à minuit ne sont pas dedans — prix d'un
+  rendez-vous à une heure où le salon est là, assumé dans l'en-tête.
+- **`api/lib/discord_webhook.php`** : validation de l'URL (forme Discord, sans query string),
+  POST `?wait=true`, caviardage URL + token avant tout log, échappement markdown des pseudos.
+  Extrait du quotidien, qui garde sa copie locale (il tourne en prod ; à rebrancher à sa
+  prochaine modification).
+- **`api/lib/weekly_podium.php`** : la requête et les lignes 🥇🥈🥉, séparées du cron pour être
+  testables — le cron exige `CRON_SECRET`, absent en local et en CI.
+- Config : `DISCORD_WEEKLY_WEBHOOK` (à défaut, celui du quotidien) et `DISCORD_WEEKLY_MENTION_ROLE`
+  (optionnel, opt-in seulement). `phpstan.neon` : les deux en `dynamicConstantNames`, même piège
+  que `DISCORD_DAILY_WEBHOOK`. `DEPLOY.md` : les deux crons Discord dans le tableau + rappel du
+  fuseau. Nouveau fichier en `snake_case` (règle CLAUDE.md), d'où `discord_weekly` à côté du
+  `discord-daily` historique.
+- Tests : `DiscordWebhookTest` (URL, caviardage, échappement, lignes), `DatabaseIntegrationTest`
+  `testWeeklyPodiumRanksByWinsThenFewerGamesAndKeepsExpertApart` (fenêtre en 2100 pour ne pas
+  croiser les parties « aujourd'hui » des autres tests).
+
+### À faire côté prod (TODO.md)
+
+Constante `DISCORD_WEEKLY_WEBHOOK` dans `config.php` (webhook du salon classement), cron hPanel
+`0 20 * * 0`, et vérifier l'heure réelle du premier post.
 ## 2026-09-19 — Same Energy ne tombait presque jamais : le recadrage effaçait « qui » est porté (migration 052)
 
 Hamza : « je suis pas sûr que le badge Same Energy se débloque bien ». Vérification de la

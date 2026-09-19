@@ -362,6 +362,13 @@ Dans hPanel → **Avancé** → **Tâches Cron** :
 | **Toutes les heures**   | `wget --header="X-Cron-Key: TON_SECRET" -qO- "https://personadle.net/api/cron/leaderboard.php" > /dev/null 2>&1`   |
 | **1× par jour à 03:00** | `wget --header="X-Cron-Key: TON_SECRET" -qO- "https://personadle.net/api/cron/hard-delete.php" > /dev/null 2>&1`   |
 | **1× par jour à 04:00** | `wget --header="X-Cron-Key: TON_SECRET" -qO- "https://personadle.net/api/cron/purge-rate-limits.php" > /dev/null 2>&1` |
+| **1× par jour à 00:05** | `wget --header="X-Cron-Key: TON_SECRET" -qO- "https://personadle.net/api/cron/discord-daily.php" > /dev/null 2>&1` |
+| **Dimanche 20:00** (`0 20 * * 0`) | `wget --header="X-Cron-Key: TON_SECRET" -qO- "https://personadle.net/api/cron/discord_weekly.php" > /dev/null 2>&1` |
+
+Les deux crons Discord attendent l'heure de **Paris** : vérifier le fuseau du cron hPanel
+(première exécution : regarder l'heure réelle du post dans le salon, ajuster si décalé).
+Le top 3 hebdo a besoin de `DISCORD_WEEKLY_WEBHOOK` dans `config.php` (à défaut il poste
+sur le webhook du quotidien).
 
 Remplace `TON_SECRET` par la valeur de `CRON_SECRET` de ton `config.php`. Le secret passe
 désormais par un header (`X-Cron-Key`) plutôt qu'en query string `?key=` — une query string
