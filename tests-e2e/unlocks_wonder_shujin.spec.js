@@ -128,11 +128,20 @@ test.describe("Badges du 2026-09-18 — le serveur refuse avant, accorde après"
     expect(fr.ok()).toBeTruthy();
     const { friendship_id } = await fr.json();
     expect((await call(b.ctx, "patch", `/api/friends/${friendship_id}`, { data: { action: "accept" }, headers: await csrfHeader(b.ctx) })).ok()).toBeTruthy();
-    // Avatars : A en Arai, B en Chie (version PQ)
-    for (const [u, avatar] of [[a, "../img/avatar/Arai.png"], [b, "../img/avatar/chie_pq.jpg"]]) {
-      const r = await call(u.ctx, "patch", `/api/user/${u.userId}`, { data: { avatar_data: avatar }, headers: await csrfHeader(u.ctx) });
-      expect(r.ok(), `avatar ${avatar} : ${r.status()} ${await r.text()}`).toBeTruthy();
+    // Avatars : A en Arai RECADRÉ (le cas courant — la fenêtre de recadrage s'ouvre
+    // dès qu'on choisit un portrait ; avatar_data n'est plus qu'un PNG, avatar_src dit
+    // l'origine, 052), B en Chie (icône) telle quelle.
+    const CROPPED = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
+    for (const [u, data] of [
+      [a, { avatar_data: CROPPED, avatar_src: "../img/avatar/Arai.png" }],
+      [b, { avatar_data: "../img/avatar/chie_satonaka_icon.jpg" }],
+    ]) {
+      const r = await call(u.ctx, "patch", `/api/user/${u.userId}`, { data, headers: await csrfHeader(u.ctx) });
+      expect(r.ok(), `avatar ${JSON.stringify(data).slice(0, 60)} : ${r.status()} ${await r.text()}`).toBeTruthy();
     }
+    // B voit l'origine de A dans sa liste d'amis (retour immédiat côté client)
+    const friendsOfB = (await (await call(b.ctx, "get", "/api/friends/")).json()).friends;
+    expect(friendsOfB.find((f) => f.friend_id === a.userId)?.avatar_src).toBe("../img/avatar/Arai.png");
     // Le lien social naît à la première interaction ; l'admin le monte au rang voulu
     const inter = await call(a.ctx, "post", `/api/social-links/by-friend/${b.userId}/interact`, { data: { action_type: "visit_profile" }, headers: await csrfHeader(a.ctx) });
     expect(inter.ok(), `interact : ${inter.status()} ${await inter.text()}`).toBeTruthy();
@@ -155,6 +164,41 @@ test.describe("Badges du 2026-09-18 — le serveur refuse avant, accorde après"
     await admin.dispose();
     await a.ctx.dispose();
     await b.ctx.dispose();
+  });
+
+  test("avatar_src (052) : déduit d'un chemin galerie, gardé si le recadrage ne dit rien, effacé avec l'avatar, refusé s'il n'est pas un portrait", async () => {
+    const u = await registerUser("src");
+    const CROPPED = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
+    const patch = async (data) => call(u.ctx, "patch", `/api/user/${u.userId}`, { data, headers: await csrfHeader(u.ctx) });
+    const src = async () => (await (await call(u.ctx, "get", `/api/user/${u.userId}`)).json()).profile.avatar_src;
+
+    // Chemin galerie → l'origine est le chemin lui-même, le client n'a rien à dire
+    expect((await patch({ avatar_data: "../img/avatar/Chie2.jpg" })).ok()).toBeTruthy();
+    expect(await src()).toBe("../img/avatar/Chie2.jpg");
+
+    // Recadrage sans indication (sync complet, client pas rafraîchi) → on garde
+    expect((await patch({ avatar_data: CROPPED })).ok()).toBeTruthy();
+    expect(await src(), "un PATCH muet ne doit pas effacer l'origine").toBe("../img/avatar/Chie2.jpg");
+
+    // Recadrage d'un autre portrait, dit par le client → suit
+    expect((await patch({ avatar_data: CROPPED, avatar_src: "../img/avatar/Arai2.png" })).ok()).toBeTruthy();
+    expect(await src()).toBe("../img/avatar/Arai2.png");
+
+    // Origine inconnue dite explicitement → null
+    expect((await patch({ avatar_data: CROPPED, avatar_src: null })).ok()).toBeTruthy();
+    expect(await src()).toBeNull();
+
+    // Pas un portrait de la galerie → 400, rien d'écrit
+    expect((await patch({ avatar_data: CROPPED, avatar_src: "../img/avatar/Arai.png" })).ok()).toBeTruthy();
+    for (const bad of [CROPPED, "../img/avatar/Nope.png", "../../api/config.php"]) {
+      expect((await patch({ avatar_data: CROPPED, avatar_src: bad })).status(), bad).toBe(400);
+    }
+    expect(await src()).toBe("../img/avatar/Arai.png");
+
+    // Plus d'avatar → plus d'origine
+    expect((await patch({ avatar_data: null })).ok()).toBeTruthy();
+    expect(await src()).toBeNull();
+    await u.ctx.dispose();
   });
 
   test("le catalogue expose les cinq badges avec une image qui répond", async () => {

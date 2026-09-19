@@ -194,6 +194,29 @@ describe("pullProfileFromCloud — succès", () => {
     expect(JSON.parse(localStorage.getItem("personaUserProfile")).uniqueDaysPlayed).toBe(12);
   });
 
+  it("le portrait d'origine (avatar_src, 052) descend avec l'avatar recadré ; null ou absent l'efface", async () => {
+    const pull = async (profile) => {
+      vi.spyOn(globalThis, "fetch").mockResolvedValue({ ok: true, status: 200, json: async () => baseUserPayload({ profile }) });
+      await pullProfileFromCloud();
+      return JSON.parse(localStorage.getItem("personaUserProfile"));
+    };
+    localStorage.setItem("personaUserProfile", JSON.stringify({ avatarSrc: "../img/avatar/Yukari.jpg" }));
+
+    // Recadré sur un autre appareil : l'origine suit — c'est elle que lit Same Energy.
+    let p = await pull({ avatar_data: "data:image/png;base64,xxxx", avatar_src: "../img/avatar/Chie.jpg" });
+    expect(p.avatar).toBe("data:image/png;base64,xxxx");
+    expect(p.avatarSrc).toBe("../img/avatar/Chie.jpg");
+
+    // Origine inconnue côté serveur (recadré avant la 052) : pas de Yukari fantôme.
+    p = await pull({ avatar_data: "data:image/png;base64,xxxx", avatar_src: null });
+    expect(p.avatarSrc).toBeUndefined();
+
+    // Backend antérieur (pas de champ) : même prudence qu'avant.
+    localStorage.setItem("personaUserProfile", JSON.stringify({ avatarSrc: "../img/avatar/Yukari.jpg" }));
+    p = await pull({ avatar_data: "../img/avatar/Ren.gif" });
+    expect(p.avatarSrc).toBeUndefined();
+  });
+
   it("un payload sans favorite_mode (backend pas encore migré) laisse le choix local intact", async () => {
     localStorage.setItem("personaUserProfile", JSON.stringify({ favoriteMode: "emoji" }));
     vi.spyOn(globalThis, "fetch").mockResolvedValue({
