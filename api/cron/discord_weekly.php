@@ -114,6 +114,13 @@ if ($r['error'] !== '' || $r['code'] < 200 || $r['code'] >= 300) {
     jsonError('Discord webhook call failed (HTTP ' . $r['code'] . ')', 502);
 }
 
+personadle_log_error($pdo, 'info', 'Discord weekly top 3 posted', [
+    'source' => 'cron-discord-weekly',
+    'from'   => $from,
+    'normal' => count($normal),
+    'expert' => count($expert),
+]);
+
 jsonSuccess([
     'success' => true,
     'data'    => [

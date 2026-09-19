@@ -125,6 +125,22 @@ test.describe.serial("API — endpoints admin étendus (event codes, logs, RGPD,
       expect(res.status()).toBe(403);
     });
 
+    test("un cron appelé avec une mauvaise clé laisse une trace 'cron-auth' lisible par l'admin", async () => {
+      // Un cron hPanel mal configuré échouait en silence pendant des semaines : depuis,
+      // requireCronSecret() journalise le refus (endpoint, longueur de clé, IP — jamais la clé).
+      const refused = await userCtx.get("/api/cron/leaderboard.php", { headers: { "X-Cron-Key": "mauvaise-cle-e2e" } });
+      expect(refused.status()).toBe(403);
+      const res = await adminCtx.get("/api/admin/error_logs?page=1&limit=20");
+      expect(res.ok()).toBeTruthy();
+      const { data } = await res.json();
+      const trace = data.find((l) => /Cron refused/.test(l.message));
+      expect(trace, "la trace du refus doit être dans error_log").toBeTruthy();
+      const ctx = typeof trace.context === "string" ? JSON.parse(trace.context) : trace.context;
+      expect(ctx.endpoint).toBe("leaderboard.php");
+      expect(ctx.key_len).toBe("mauvaise-cle-e2e".length);
+      expect(JSON.stringify(ctx)).not.toContain("mauvaise-cle-e2e");
+    });
+
     test("GET /api/admin/error_logs réussit pour un admin (pagination)", async () => {
       const res = await adminCtx.get("/api/admin/error_logs?page=1&limit=5");
       expect(res.ok(), await res.text()).toBeTruthy();
