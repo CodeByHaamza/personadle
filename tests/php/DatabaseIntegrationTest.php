@@ -577,6 +577,35 @@ final class DatabaseIntegrationTest extends TestCase
         $this->assertSame(9, (int) $c->fetchColumn());
     }
 
+    public function testPlayedOnDateComparesMonthAndDayAsIntegersAndIsReconciled(): void
+    {
+        // 2026-09-19 : DATE_FORMAT(played_date,'%m-%d') = ? tombait en « Illegal mix of
+        // collations » sur la MariaDB de prod avec les préparées natives, et la
+        // réconciliation la jouait pour tout le monde → GET /api/titles en 500 pour tous.
+        require_once __DIR__ . '/../../api/lib/unlock_reconcile.php';
+        $uid = $this->makeUser('pd');
+        $this->insertSession($uid, 'classic', '2025-06-24', 'T', 'giveup', 8, 1000, false); // n'importe quelle année, même perdue
+        $this->assertTrue(personadle_verify_condition(self::$pdo, $uid, 'played_on_date', '06-24', null));
+        $this->assertFalse(personadle_verify_condition(self::$pdo, $uid, 'played_on_date', '06-25', null));
+        $this->assertFalse(personadle_verify_condition(self::$pdo, $uid, 'played_on_date', 'juin', null), 'format MM-JJ obligatoire');
+        $this->assertContains('tatsuya_dont_burn_out', personadle_reconcile_titles(self::$pdo, $uid));
+    }
+
+    public function testReconciliationSurvivesAConditionThatThrows(): void
+    {
+        // Une condition qui plante (SQL refusé par la prod…) ne doit jamais rendre la liste
+        // des titres/badges en 500 : elle est loguée et comptée comme non remplie.
+        require_once __DIR__ . '/../../api/lib/unlock_reconcile.php';
+        $boom = new class extends PDO {
+            public function __construct() {} // pas de connexion : tout appel SQL explose
+            public function prepare(string $query, array $options = []): PDOStatement|false
+            {
+                throw new PDOException('SQLSTATE[HY000]: General error: 1267 Illegal mix of collations');
+            }
+        };
+        $this->assertFalse(personadle_condition_allows_unlock_safely($boom, 1, 'titles', 'x', 'played_on_date', '06-24', null));
+    }
+
     public function testRecordGameSessionInsertsSessionAndUpdatesStats(): void
     {
         $uid   = $this->makeUser();
