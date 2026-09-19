@@ -14,6 +14,9 @@ import {
   markProfileAsShared,
   checkBadgesAfterGame,
   trackWeeklyModePlay,
+  syncBadgesWithBackend,
+  trackUniqueDay,
+  checkSocialBadges,
 } from "../profile/badges/badgesManager.js";
 
 function baseProfile(overrides = {}) {
@@ -460,5 +463,129 @@ describe("trackWeeklyModePlay", () => {
 
     expect(profile.weeklyModeLog).toBeUndefined();
     expect(saveProfile).not.toHaveBeenCalled();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 2026-09-19 — Velvet Regular « qui s'enlève » : le compteur de journées était
+// tenu par appareil et pouvait dépasser celui du serveur ; le badge se débloquait
+// en local, le serveur le refusait à chaque synchro (403 avalé), et chaque
+// épinglage échouait en boucle.
+// ─────────────────────────────────────────────────────────────────────────────
+describe("syncBadgesWithBackend — un badge refusé par le serveur ne reste pas « débloqué » en local", () => {
+  const apiError = (status, message) => Object.assign(new Error(message), { status });
+
+  beforeEach(() => {
+    globalThis.window._currentUser = { id: 7 };
+  });
+  afterEach(() => {
+    delete globalThis.window._currentUser;
+    delete globalThis.window._personadleApi;
+  });
+
+  it("403 « Condition not met » → retiré de profile.badges et de la sélection épinglée, profil sauvé", async () => {
+    const saveProfile = vi.fn();
+    const profile = baseProfile({ badges: ["velvet_regular", "first_win"], selectedBadges: ["velvet_regular"] });
+    globalThis.window._personadleApi = {
+      badges: {
+        catalog: vi.fn().mockResolvedValue([
+          { slug: "velvet_regular", is_unlocked: 0 },
+          { slug: "first_win", is_unlocked: 0 },
+        ]),
+        unlock: vi.fn(async (id) => {
+          if (id === "velvet_regular") throw apiError(403, "Condition not met");
+          return { success: true };
+        }),
+      },
+    };
+    await syncBadgesWithBackend(profile, saveProfile);
+    expect(profile.badges).toEqual(["first_win"]);
+    expect(profile.selectedBadges).toEqual([]);
+    expect(saveProfile).toHaveBeenCalled();
+  });
+
+  it("une panne réseau ou un 5xx ne retire rien : on ne sait pas, on garde le local", async () => {
+    const saveProfile = vi.fn();
+    const profile = baseProfile({ badges: ["velvet_regular"] });
+    globalThis.window._personadleApi = {
+      badges: {
+        catalog: vi.fn().mockResolvedValue([{ slug: "velvet_regular", is_unlocked: 0 }]),
+        unlock: vi.fn().mockRejectedValue(apiError(503, "Service Unavailable")),
+      },
+    };
+    await syncBadgesWithBackend(profile, saveProfile);
+    expect(profile.badges).toEqual(["velvet_regular"]);
+  });
+
+  it("un 403 « code événement » (badge protégé par /redeem) ne retire rien non plus", async () => {
+    const saveProfile = vi.fn();
+    const profile = baseProfile({ badges: ["christmas_2025"] });
+    globalThis.window._personadleApi = {
+      badges: {
+        catalog: vi.fn().mockResolvedValue([{ slug: "christmas_2025", is_unlocked: 0 }]),
+        unlock: vi.fn().mockRejectedValue(apiError(403, "This badge can only be unlocked with its event code")),
+      },
+    };
+    await syncBadgesWithBackend(profile, saveProfile);
+    expect(profile.badges).toEqual(["christmas_2025"]);
+  });
+});
+
+describe("trackUniqueDay — connecté, le compte n'ajoute qu'aujourd'hui au chiffre du serveur", () => {
+  afterEach(() => {
+    delete globalThis.window._currentUser;
+  });
+
+  it("connecté : 45 (serveur, posé par le pull) + aujourd'hui = 46, pas la taille du set local", () => {
+    globalThis.window._currentUser = { id: 7 };
+    const set = Array.from({ length: 52 }, (_, i) => `2025-01-${String(i + 1).padStart(2, "0")}`);
+    const profile = { uniqueDaysPlayed: 45, uniqueDaysSet: set };
+    trackUniqueDay(profile, () => {});
+    expect(profile.uniqueDaysPlayed).toBe(46);
+    trackUniqueDay(profile, () => {}); // même jour : rien ne bouge
+    expect(profile.uniqueDaysPlayed).toBe(46);
+  });
+
+  it("anonyme : le set local reste la vérité", () => {
+    const profile = { uniqueDaysPlayed: 0, uniqueDaysSet: ["2025-01-01", "2025-01-02"] };
+    trackUniqueDay(profile, () => {});
+    expect(profile.uniqueDaysPlayed).toBe(3);
+  });
+});
+
+describe("checkSocialBadges — Best Bro se débloque et se pousse à la PREMIÈRE visite", () => {
+  afterEach(() => {
+    delete globalThis.window._currentUser;
+    delete globalThis.window._personadleApi;
+  });
+
+  it("2 amis acceptés → drapeau posé, badge débloqué en local ET poussé au serveur dans la même passe", async () => {
+    // Avant : le drapeau hasTwoFriends arrivait après checkAndUnlockBadges() ; le badge
+    // attendait la visite suivante, et sa synchro celle d'après (Gyotre, 12 amis, sans Best Bro).
+    globalThis.window._currentUser = { id: 7 };
+    const unlock = vi.fn().mockResolvedValue({ success: true });
+    globalThis.window._personadleApi = {
+      friends: { list: vi.fn().mockResolvedValue({ friends: [{ user_id: 1 }, { user_id: 2 }] }) },
+      badges: { catalog: vi.fn().mockResolvedValue([{ slug: "best_bro", is_unlocked: 0 }]), unlock },
+    };
+    const saveProfile = vi.fn();
+    const profile = baseProfile();
+    await checkSocialBadges(profile, saveProfile);
+    expect(profile.hasTwoFriends).toBe(true);
+    expect(profile.badges).toContain("best_bro");
+    expect(unlock).toHaveBeenCalledWith("best_bro");
+  });
+
+  it("un seul ami → rien ne bouge, rien n'est poussé", async () => {
+    globalThis.window._currentUser = { id: 7 };
+    const unlock = vi.fn();
+    globalThis.window._personadleApi = {
+      friends: { list: vi.fn().mockResolvedValue({ friends: [{ user_id: 1 }] }) },
+      badges: { catalog: vi.fn().mockResolvedValue([]), unlock },
+    };
+    const profile = baseProfile();
+    await checkSocialBadges(profile, vi.fn());
+    expect(profile.hasTwoFriends).toBeFalsy();
+    expect(unlock).not.toHaveBeenCalled();
   });
 });
