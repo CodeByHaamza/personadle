@@ -13,6 +13,25 @@
 
 ---
 
+## 2026-09-19 — Crons : un refus de clé laisse une trace, un post Discord aussi
+
+En corrigeant les crons hPanel, découverte : le quotidien Discord (`5 0 * * *`) n'avait
+**jamais** tourné tout seul depuis le 9 septembre — sa ligne portait une mauvaise clé, et un
+403 de `requireCronSecret()` ne laissait aucune empreinte (pas de logs d'accès en SSH chez
+Hostinger). Tous les posts du salon étaient des tests manuels.
+
+- `api/bootstrap.php` `requireCronSecret()` : avant le 403, `personadle_log_error('warning',
+  'Cron refused: bad or missing X-Cron-Key')` avec `source=cron-auth`, l'endpoint, la
+  **longueur** de la clé reçue (jamais la clé) et l'IP. Best-effort : sans base, on refuse
+  quand même.
+- `discord-daily.php` / `discord_weekly.php` : trace `info` à chaque post réussi
+  (`cron-discord-daily` / `cron-discord-weekly`). Demain matin, Admin → Logs dit ce qui s'est
+  passé à 00:05 — post, refus, ou rien (= le cron n'a pas tourné).
+- E2E `admin-extended` : mauvaise clé sur `leaderboard.php` → 403 + trace lisible par l'admin,
+  sans la clé dedans.
+
+---
+
 ## 2026-09-19 — Atelier : « re-choisis ton portrait » pour les 220 comptes recadrés avant la 052
 
 Suite de la 052 : en prod, 220 profils portent une image recadrée dont l'origine est
