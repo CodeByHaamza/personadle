@@ -501,6 +501,70 @@ final class BadgeWallpaperCatalogTest extends TestCase
         }
     }
 
+    /**
+     * Le garde-fou structurel du 2026-09-19 : pour CHAQUE titre et badge du catalogue à
+     * seuil numérique, semer exactement le seuil et vérifier que le serveur l'ACCORDE de
+     * lui-même (GET /api/titles, GET /api/badges → unlock_reconcile.php) — sans qu'aucun
+     * client n'appelle POST /unlock. C'est ce qui manquait : Kotone (perfect_wins),
+     * Shadows Converge (expert_wins_total), SEES (titles_count), Same Soul
+     * (social_link_min_rank) étaient vérifiables côté serveur mais jamais demandés, et
+     * ~290 titres / ~100 badges dus dormaient en prod. Un futur condition_type ajouté au
+     * catalogue est couvert dès son insertion : s'il n'est pas accordé au seuil, ce test
+     * casse.
+     */
+    public function testEveryStructuredTitleAndBadgeIsGrantedByServerReconciliationAtThreshold(): void
+    {
+        require_once __DIR__ . '/../../api/lib/unlock_reconcile.php';
+        $rows = array_filter($this->structuredThresholdRows(), static fn($r) => !str_starts_with($r[0], 'wallpapers:'));
+        $this->assertGreaterThanOrEqual(20, count($rows));
+
+        foreach ($rows as [$label, $type, $mode, $value]) {
+            [$table, $slug] = explode(':', $label, 2);
+            $uid = $this->makeUser();
+            self::$pdo->beginTransaction();
+            try {
+                $this->setConditionStat($uid, $type, $mode, $value - 1);
+                $before = $table === 'titles'
+                    ? personadle_reconcile_titles(self::$pdo, $uid)
+                    : personadle_reconcile_badges(self::$pdo, $uid);
+                $this->assertNotContains($slug, $before, "$label : sous le seuil, la réconciliation ne doit rien accorder");
+
+                $this->setConditionStat($uid, $type, $mode, $value);
+                $granted = $table === 'titles'
+                    ? personadle_reconcile_titles(self::$pdo, $uid)
+                    : personadle_reconcile_badges(self::$pdo, $uid);
+                $this->assertContains($slug, $granted, "$label ($type=$value) : le serveur doit l'accorder sans POST /unlock");
+
+                // Ce que le joueur voit ensuite : is_unlocked = 1 dans la liste.
+                $has = $table === 'titles'
+                    ? self::$pdo->prepare('SELECT COUNT(*) FROM user_titles ut JOIN titles t ON t.id = ut.title_id WHERE ut.user_id = ? AND t.slug = ?')
+                    : self::$pdo->prepare('SELECT COUNT(*) FROM badges_unlocked WHERE user_id = ? AND badge_id = ?');
+                $has->execute([$uid, $slug]);
+                $this->assertSame(1, (int) $has->fetchColumn(), "$label : présent en base après réconciliation");
+            } finally {
+                self::$pdo->rollBack();
+            }
+        }
+    }
+
+    public function testDeclarativeConditionsAreNeverGrantedByReconciliation(): void
+    {
+        require_once __DIR__ . '/../../api/lib/unlock_reconcile.php';
+        $uid = $this->makeUser();
+        self::$pdo->beginTransaction();
+        try {
+            $titles = personadle_reconcile_titles(self::$pdo, $uid);
+            $badges = personadle_reconcile_badges(self::$pdo, $uid);
+            $declTitles = self::$pdo->query("SELECT slug FROM titles WHERE condition_type IN ('manual','joker_profile')")->fetchAll(PDO::FETCH_COLUMN);
+            $declBadges = self::$pdo->query("SELECT slug FROM badges WHERE condition_type IN ('manual','joker_profile')")->fetchAll(PDO::FETCH_COLUMN);
+            $this->assertNotEmpty($declBadges, 'le catalogue a des badges manuels (codes événement…)');
+            $this->assertSame([], array_intersect($titles, $declTitles), 'aucun titre déclaratif accordé d\'office');
+            $this->assertSame([], array_intersect($badges, $declBadges), 'aucun badge déclaratif (code événement) accordé d\'office');
+        } finally {
+            self::$pdo->rollBack();
+        }
+    }
+
     public function testAllModesWonRequiresAllSixModes(): void
     {
         // Logique générique — couvre à la fois kamoshida_palace (wallpaper) et
