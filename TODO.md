@@ -91,7 +91,7 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
 - [ ] **hPanel → Cron : vérifier que `api/cron/leaderboard.php` tourne toutes les heures.** Le cache
       `leaderboard_cache` était vide au moment de la release (0 ligne dans le dump) — il n'a
       probablement jamais tourné. Le classement par période marche en calcul live, plus coûteux.
-- [ ] Avant la prochaine release : `npm run schema:check-prod` **sur le serveur**, et rejouer toute
+- [ ] Avant la prochaine release : `npm run schema:check-prod` **sur le serveur** (colonnes ET contraintes UNIQUE depuis la 050), et rejouer toute
       migration qui INSERT contre le `SHOW CREATE TABLE` de la prod recréé dans Docker (CLAUDE.md §7).
 - [ ] **Après la migration 045 : laisser passer un cycle du cron** (`api/cron/leaderboard.php`,
       horaire) pour peupler la dimension Expert du cache. D'ici là le classement Expert par
@@ -105,6 +105,10 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       (no-op) et sur la base de dev au schéma 048.
 - [ ] **Bumper `CACHE_VERSION` dans `sw.js` à la prochaine release (v98 → v99)** : `profile/profile-page.js`
       (précaché) change après le hotfix des titres (badges sociaux, épinglage — 2026-09-19).
+- [x] Jouer `sql/migrations/050_game_sessions_drop_uq_session.sql` — **jouée en prod le 2026-09-19**
+      (dump `game_sessions` avant) : la contrainte « une partie par jour » de l'archive de mai
+      (`uq_session`) n'avait jamais été supprimée, la 032 visant un autre nom. Chaque rejeu et chaque
+      partie Expert du même jour tombaient en 409 depuis le 1er septembre ; porte Émoji inatteignable.
 - [x] **Bumper `CACHE_VERSION` dans `sw.js` (v96 → v97, fait le 2026-09-18 soir)** : `js/filterMenu.js`
       (précaché) et `profile/titles-ui.js` changent après la 2.2 (marqueur de format des filtres,
       descriptions de titres — 2026-09-18 soir). Sans bump,
