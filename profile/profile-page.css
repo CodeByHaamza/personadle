@@ -4675,6 +4675,25 @@ body.darkmode .share-modal-close {
   font-weight: 700;
   color: var(--accent);
 }
+/* Encart d'action dans un onglet (ex. portrait recadré sans origine connue) :
+   plus visible qu'un hint, moins qu'une erreur. */
+.atelier-notice {
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: rgba(230, 0, 18, 0.06);
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: #444;
+}
+.atelier-notice.hidden {
+  display: none;
+}
+body.darkmode .atelier-notice {
+  background: rgba(230, 0, 18, 0.14);
+  color: #ddd;
+}
 
 /* Onglet Avatar : la grille de portraits (héritée de la modale) prend la largeur */
 .atelier-avatar-actions {
