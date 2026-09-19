@@ -125,6 +125,12 @@ final class BadgeWallpaperCatalogTest extends TestCase
             'absolute_authority'     => ['targets_found', 'absolute_authority', null],
             'dont_waste_your_breath' => ['mode_expert_perfect_wins', 'classic', 5],
             'same_energy'            => ['same_energy', null, null],
+            // Badges de dates (migration 053) : n'importe quelle année, vérifiés depuis game_sessions
+            'valentine_2026' => ['played_on_date', '02-14', null],
+            'tanabata'       => ['played_on_date', '07-07', null],
+            'golden_week'    => ['played_in_period', '04-29:05-05', null],
+            'promised_day'   => ['played_on_all_dates', '12-31,01-01', null],
+            'easter_2026'    => ['played_on_easter', null, null],
         ];
 
         // Le reste du catalogue (46 badges) est 'manual' — flags narratifs, redeem
@@ -138,7 +144,6 @@ final class BadgeWallpaperCatalogTest extends TestCase
             'stylist',
             'reborn_phoenix', 'take_the_pose', 'data_mining', 'leblanc_meeting',
             'rentree', 'sport', 'christmas_2025', 'new_years_2026', 'chinese_new_year_2026',
-            'valentine_2026', 'easter_2026', 'golden_week', 'tanabata', 'promised_day',
             'true_hacker', 'tae_takemi', 'arati', 'gyotre', 'dzulian', 'chef', 'github_contributor',
             'lobster', 'hifumi_archives', 'report',
         ];
@@ -561,7 +566,7 @@ final class BadgeWallpaperCatalogTest extends TestCase
         foreach (['badges' => 'slug', 'titles' => 'slug'] as $table => $idCol) {
             $stmt = self::$pdo->query(
                 "SELECT $idCol AS slug, condition_type, condition_mode FROM $table
-                 WHERE condition_type IN ('played_on_date', 'targets_found', 'all_modes_won')"
+                 WHERE condition_type IN ('played_on_date', 'played_in_period', 'played_on_all_dates', 'played_on_easter', 'targets_found', 'all_modes_won')"
             );
             foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) $rows[] = [$table, $r['slug'], $r['condition_type'], $r['condition_mode']];
         }
@@ -584,6 +589,21 @@ final class BadgeWallpaperCatalogTest extends TestCase
                     case 'played_on_date':
                         [$mm, $dd] = explode('-', (string) $mode);
                         $sess->execute([$uid, 'classic', 0, self::uuid(), "2025-$mm-$dd", 'x', 'giveup']);
+                        break;
+                    case 'played_in_period':
+                        // Une seule journée dans la fenêtre suffit — le dernier jour, une autre année.
+                        [, $to] = explode(':', (string) $mode);
+                        $sess->execute([$uid, 'music', 0, self::uuid(), "2024-$to", 'x', 'win']);
+                        break;
+                    case 'played_on_all_dates':
+                        // Chaque date, pas forcément la même année.
+                        foreach (explode(',', (string) $mode) as $i => $d) {
+                            $sess->execute([$uid, 'emoji', 0, self::uuid(), (2023 + $i) . "-$d", 'x', 'win']);
+                        }
+                        break;
+                    case 'played_on_easter':
+                        // Lundi de Pâques 2025 (le 21 avril) : accepté comme le dimanche.
+                        $sess->execute([$uid, 'classic', 0, self::uuid(), '2025-04-21', 'x', 'win']);
                         break;
                     case 'all_modes_won':
                         foreach (PERSONADLE_MODES as $m) {
