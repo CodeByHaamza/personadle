@@ -57,6 +57,7 @@ if ($method === 'GET') {
             u.friend_code,
             u.last_login_at,
             p.avatar_data,
+            p.avatar_src,
             p.avatar_border_color,
             p.selected_badges
         FROM friendships f
@@ -86,6 +87,8 @@ if ($method === 'GET') {
             'pseudo'                       => $r['pseudo'],
             'friend_code'                  => $r['friend_code'],
             'avatar_data'                  => $r['avatar_data'],
+            // Portrait galerie d'origine (survit au recadrage) — badge Same Energy côté client
+            'avatar_src'                   => $r['avatar_src'] ?? null,
             'avatar_border_color'          => $r['avatar_border_color'] ?? '#ffffff',
             'selected_badges'              => json_decode($r['selected_badges'] ?? 'null') ?? [],
             'last_seen_at'                 => $r['last_login_at'],

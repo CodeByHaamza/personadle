@@ -8,7 +8,9 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 1425 tests Vitest (77 suites), 363 méthodes PHPUnit, 245 tests E2E,
+> Vérifié le 2026-08-26 : 1428 tests Vitest (77 suites), 368 méthodes PHPUnit, 248 tests E2E,
+> Vérifié le 2026-08-26 : 1428 tests Vitest (77 suites), 363 méthodes PHPUnit, 248 tests E2E,
+> Vérifié le 2026-08-26 : 1425 tests Vitest (77 suites), 359 méthodes PHPUnit, 247 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
@@ -109,6 +111,25 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       (dump `game_sessions` avant) : la contrainte « une partie par jour » de l'archive de mai
       (`uq_session`) n'avait jamais été supprimée, la 032 visant un autre nom. Chaque rejeu et chaque
       partie Expert du même jour tombaient en 409 depuis le 1er septembre ; porte Émoji inatteignable.
+- [ ] Jouer `sql/migrations/052_profiles_avatar_src.sql` (colonne `profiles.avatar_src` + reprise
+      des portraits galerie non recadrés ; `ADD COLUMN IF NOT EXISTS`, `UPDATE` borné, rejouable).
+      **À jouer AVANT le `git pull` Hostinger.** Sans elle, `GET /api/user/:id`, `GET /api/friends/`
+      et tout PATCH d'avatar tombent en `Unknown column 'avatar_src'` → **500 sur le profil et la
+      liste d'amis pour tout le monde**. Puis `INSERT IGNORE INTO schema_migrations (version) VALUES
+      ('052_profiles_avatar_src')`. Vérifiée le 2026-09-19 sur la base de dev au schéma 051 (58 origines
+      reprises, 45 portraits recadrés restent inconnus) et sur un import vierge (no-op).
+- [x] **Bumper `CACHE_VERSION` dans `sw.js` (v99 → v100, fait le 2026-09-19)** : `profile/profile-page.js`
+      (précaché) envoie désormais `avatar_src` au recadrage (badge Same Energy).
+- [ ] Jouer `sql/migrations/051_user_stats_expert.sql` (table `user_stats_expert` + reprise des
+      compteurs depuis `game_sessions WHERE is_expert = 1`, `CREATE TABLE IF NOT EXISTS` + `INSERT …
+      ON DUPLICATE KEY`, rejouable), **puis** `php scripts/backfill_expert_streaks.php` depuis le
+      webroot (pose `streak`/`streak_record`, que le SQL ne peut pas calculer ; rejouable aussi).
+      **À jouer AVANT le `git pull` Hostinger.** Sans la table, `GET /api/user/:id/stats`
+      (`expert_by_mode`) et chaque enregistrement de partie Expert tombent en `Table doesn't exist`
+      → **500 sur la page profil et sur toute partie Expert**. Puis `INSERT IGNORE INTO
+      schema_migrations (version) VALUES ('051_user_stats_expert')`. Vérifiée le 2026-09-19 sur la
+      base de dev au schéma 050 (326 lignes reprises pour 540 parties Expert) et sur un import vierge
+      du nouveau `bdd_mysql.sql` (no-op).
 - [x] **Bumper `CACHE_VERSION` dans `sw.js` (v96 → v97, fait le 2026-09-18 soir)** : `js/filterMenu.js`
       (précaché) et `profile/titles-ui.js` changent après la 2.2 (marqueur de format des filtres,
       descriptions de titres — 2026-09-18 soir). Sans bump,

@@ -58,51 +58,130 @@ function personadle_bump_global_streak(PDO $pdo, int $userId, ?string $playedDat
 
 
 /**
- * Statistiques Mode Expert d'un joueur, calculées **directement depuis
- * game_sessions** — `user_stats` n'agrège pas l'Expert (cf.
- * personadle_record_game_session), et rien ne justifie encore d'y ajouter une
- * dimension pour un affichage unique.
+ * Statistiques Mode Expert d'un joueur, lues dans `user_stats_expert`
+ * (migration 051) — le pendant Expert de `user_stats`, alimenté à chaque partie
+ * par personadle_bump_expert_stats() et éditable dans l'admin. Avant la 051,
+ * c'était un GROUP BY à la volée sur game_sessions : rien à éditer, et la
+ * demande « corriger mes stats Expert » n'avait pas de réponse.
  *
- * Volume : une ligne par (mode, jour) et par joueur, donc quelques centaines au
- * pire — un GROUP BY direct est largement suffisant.
- * ponytail: agrégation à la volée, à matérialiser si la page profil devient lente
+ * `best_attempts` et `last_played_date` restent lus dans game_sessions : ce ne
+ * sont pas des compteurs, et l'admin n'a pas à les inventer.
  *
- * @return list<array{mode:string, games:int, wins:int, giveups:int, streak:int, best_attempts:int|null, total_time_ms:int, last_played_date:?string}>
+ * @return list<array{mode:string, games:int, wins:int, giveups:int, streak:int, streak_record:int, perfect_wins:int, best_attempts:int|null, total_time_ms:int, last_played_date:?string}>
  */
 function personadle_expert_stats_by_mode(PDO $pdo, int $userId): array
 {
     $stmt = $pdo->prepare(
-        "SELECT mode,
-                COUNT(*)                                          AS games,
-                SUM(result = 'win')                               AS wins,
-                SUM(result = 'giveup')                            AS giveups,
-                MIN(CASE WHEN result = 'win' THEN attempts END)   AS best_attempts,
-                COALESCE(SUM(time_ms), 0)                         AS total_time_ms,
-                MAX(played_date)                                  AS last_played_date
-         FROM game_sessions
-         WHERE user_id = ? AND is_expert = 1
-         GROUP BY mode
-         ORDER BY mode"
+        'SELECT mode, games, wins, giveups, streak, streak_record, perfect_wins, total_time_ms
+         FROM user_stats_expert WHERE user_id = ? ORDER BY mode'
     );
     $stmt->execute([$userId]);
+    $rows = $stmt->fetchAll();
+    if ($rows === []) {
+        return [];
+    }
 
-    $today = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+    $extra = $pdo->prepare(
+        "SELECT mode,
+                MIN(CASE WHEN result = 'win' THEN attempts END) AS best_attempts,
+                MAX(played_date)                                AS last_played_date
+         FROM game_sessions
+         WHERE user_id = ? AND is_expert = 1
+         GROUP BY mode"
+    );
+    $extra->execute([$userId]);
+    $byMode = [];
+    foreach ($extra->fetchAll() as $e) {
+        $byMode[$e['mode']] = $e;
+    }
+
     $out = [];
-    foreach ($stmt->fetchAll() as $row) {
+    foreach ($rows as $row) {
+        $e = $byMode[$row['mode']] ?? [];
         $out[] = [
             'mode'             => $row['mode'],
             'games'            => (int) $row['games'],
             'wins'             => (int) $row['wins'],
             'giveups'          => (int) $row['giveups'],
-            // Streak Expert du mode, recalculée depuis l'historique — il n'existe
-            // aucun compteur persisté pour l'Expert.
-            'streak'           => personadle_recompute_mode_streak($pdo, $userId, $row['mode'], $today, true),
-            'best_attempts'    => $row['best_attempts'] === null ? null : (int) $row['best_attempts'],
+            'streak'           => (int) $row['streak'],
+            'streak_record'    => (int) $row['streak_record'],
+            'perfect_wins'     => (int) $row['perfect_wins'],
+            'best_attempts'    => isset($e['best_attempts']) ? (int) $e['best_attempts'] : null,
             'total_time_ms'    => (int) $row['total_time_ms'],
-            'last_played_date' => $row['last_played_date'],
+            'last_played_date' => $e['last_played_date'] ?? null,
         ];
     }
     return $out;
+}
+
+/**
+ * Met à jour `user_stats_expert` pour une partie Expert qui vient d'être
+ * insérée dans game_sessions — même arithmétique que le mode normal dans
+ * personadle_record_game_session() : compteurs incrémentés, streak recalculée
+ * depuis l'historique (jamais incrémentale), record = max.
+ */
+function personadle_bump_expert_stats(
+    PDO $pdo,
+    int $userId,
+    string $mode,
+    string $result,
+    int $attempts,
+    int $timeMs,
+    string $playedDate
+): void {
+    $pdo->prepare('INSERT IGNORE INTO user_stats_expert (user_id, mode, first_played_at) VALUES (?, ?, UTC_TIMESTAMP())')
+        ->execute([$userId, $mode]);
+
+    $isWin     = $result === 'win';
+    $isPerfect = personadle_is_perfect($result, $attempts);
+    $newStreak = personadle_recompute_mode_streak($pdo, $userId, $mode, $playedDate, true);
+
+    $pdo->prepare('
+        UPDATE user_stats_expert SET
+            games          = games + 1,
+            wins           = wins + ?,
+            giveups        = giveups + ?,
+            streak         = ?,
+            streak_record  = GREATEST(streak_record, ?),
+            perfect_wins   = perfect_wins + ?,
+            total_time_ms  = total_time_ms + ?,
+            last_played_at = UTC_TIMESTAMP()
+        WHERE user_id = ? AND mode = ?
+    ')->execute([
+        $isWin ? 1 : 0,
+        $isWin ? 0 : 1,
+        $newStreak,
+        $newStreak,
+        $isPerfect ? 1 : 0,
+        $timeMs,
+        $userId,
+        $mode,
+    ]);
+}
+
+/**
+ * Record de streak Expert d'un mode, recalculé depuis tout l'historique : la
+ * plus longue suite de journées Paris consécutives comportant au moins une
+ * victoire Expert. Sert à la reprise (scripts/backfill_expert_streaks.php),
+ * user_stats_expert.streak_record ne l'ayant pas mémorisé avant la 051.
+ */
+function personadle_expert_streak_record(PDO $pdo, int $userId, string $mode): int
+{
+    $s = $pdo->prepare(
+        "SELECT DISTINCT played_date FROM game_sessions
+         WHERE user_id = ? AND mode = ? AND is_expert = 1 AND result = 'win'
+         ORDER BY played_date"
+    );
+    $s->execute([$userId, $mode]);
+    $best = 0;
+    $run  = 0;
+    $prev = null;
+    foreach ($s->fetchAll(PDO::FETCH_COLUMN) as $day) {
+        $run  = ($prev !== null && (new DateTime($prev))->modify('+1 day')->format('Y-m-d') === $day) ? $run + 1 : 1;
+        $best = max($best, $run);
+        $prev = $day;
+    }
+    return $best;
 }
 
 /**
@@ -226,14 +305,21 @@ function personadle_record_game_session(
     }
     $sessionId = (int) $pdo->lastInsertId();
 
-    // 2. Expert : on saute toute l'agrégation par mode (voir docbloc). On passe
-    //    directement à la streak globale, puis on renvoie les stats du mode
-    //    INCHANGÉES — le client doit voir que sa streak Music n'a pas bougé.
+    // 2. Expert : user_stats (mode normal) n'est PAS touché — le client doit voir
+    //    que sa streak Music n'a pas bougé — mais user_stats_expert l'est, avec la
+    //    même arithmétique que le mode normal plus bas (migration 051 : les stats
+    //    Expert sont une table, éditable dans l'admin, et non plus un GROUP BY à
+    //    la volée sur game_sessions). Puis la streak globale, et on renvoie les
+    //    stats normales INCHANGÉES + les stats Expert mises à jour.
     if ($isExpert) {
+        personadle_bump_expert_stats($pdo, $userId, $mode, $result, $attempts, $timeMs, $playedDate);
         $globalStreak = personadle_bump_global_streak($pdo, $userId, $playedDate);
         $stmt = $pdo->prepare('SELECT * FROM user_stats WHERE user_id = ? AND mode = ? LIMIT 1');
         $stmt->execute([$userId, $mode]);
         $unchanged = $stmt->fetch() ?: [];
+        $stmt = $pdo->prepare('SELECT * FROM user_stats_expert WHERE user_id = ? AND mode = ? LIMIT 1');
+        $stmt->execute([$userId, $mode]);
+        $expert = $stmt->fetch() ?: [];
         return [
             'session_id'    => $sessionId,
             'is_expert'     => true,
@@ -246,6 +332,16 @@ function personadle_record_game_session(
                 'streak_record' => (int) ($unchanged['streak_record'] ?? 0),
                 'perfect_wins'  => (int) ($unchanged['perfect_wins'] ?? 0),
                 'total_time_ms' => (int) ($unchanged['total_time_ms'] ?? 0),
+            ],
+            'expert_stats'  => [
+                'mode'          => $mode,
+                'games'         => (int) ($expert['games'] ?? 0),
+                'wins'          => (int) ($expert['wins'] ?? 0),
+                'giveups'       => (int) ($expert['giveups'] ?? 0),
+                'streak'        => (int) ($expert['streak'] ?? 0),
+                'streak_record' => (int) ($expert['streak_record'] ?? 0),
+                'perfect_wins'  => (int) ($expert['perfect_wins'] ?? 0),
+                'total_time_ms' => (int) ($expert['total_time_ms'] ?? 0),
             ],
             'global_streak' => $globalStreak,
         ];

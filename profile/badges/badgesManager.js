@@ -274,10 +274,11 @@ export async function checkSocialBadges(profile, saveProfile) {
     // Retour immédiat seulement — le serveur revérifie la paire à l'unlock et
     // accorde le badge aux deux (api/badges/index.php).
     if (!profile.sameEnergyWith) {
-      const mine = profile.avatar;
+      // Portrait d'ORIGINE d'abord : une fois recadré, avatar n'est plus qu'un PNG.
+      const mine = profile.avatarSrc || profile.avatar;
       const partner = friends.find((f) => {
         if ((f.social_link_rank ?? 1) < 5) return false;
-        const theirs = f.avatar_data;
+        const theirs = f.avatar_src || f.avatar_data;
         return (
           (wearsAvatar(mine, SAME_ENERGY_AVATARS.arai) && wearsAvatar(theirs, SAME_ENERGY_AVATARS.chie)) ||
           (wearsAvatar(mine, SAME_ENERGY_AVATARS.chie) && wearsAvatar(theirs, SAME_ENERGY_AVATARS.arai))
