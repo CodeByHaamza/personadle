@@ -6,6 +6,7 @@
  */
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../lib/condition_check.php';
+require_once __DIR__ . '/../lib/unlock_reconcile.php';
 
 $authId = requireAuth();
 $pdo    = pdo();
@@ -15,6 +16,10 @@ $action = end($parts);
 
 // ── GET /api/badges — full catalog with per-user is_unlocked ─────────────────
 if ($method === 'GET') {
+    // Réconciliation serveur (unlock_reconcile.php) : tout badge dont la condition
+    // est remplie est accordé ici, que le client sache ou non l'évaluer.
+    personadle_reconcile_badges($pdo, $authId);
+
     $lang = $_GET['lang'] ?? 'en';
     $col  = in_array($lang, ['fr','es','de','it'], true) ? "name_{$lang}" : 'name_en';
 

@@ -9,7 +9,9 @@
  * validaient via un mapping slug→logique en dur (fragile, cf. ROADMAP.md
  * "Conditions badges/wallpapers en colonnes structurées").
  *
- * condition_type supportés :
+ * condition_type supportés (les compteurs lus dans user_stats le sont AUSSI dans
+ * user_stats_expert depuis le 2026-09-19 : une victoire Expert est une victoire —
+ * seuls les types qui nomment une dimension s'y limitent) :
  *   wins_total           → SUM(wins) tous modes
  *   mode_wins            → wins dans condition_mode
  *   mode_games           → games (parties, pas victoires) dans condition_mode
@@ -346,7 +348,13 @@ function personadle_condition_allows_unlock(PDO $pdo, int $userId, ?string $cond
 }
 
 /**
- * SUM ou MAX d'une colonne numérique de user_stats sur tous les modes d'un joueur.
+ * SUM ou MAX d'une colonne numérique sur tous les modes d'un joueur, **normal ET
+ * Expert** (user_stats + user_stats_expert). Décision Hamza du 2026-09-19 : une
+ * victoire Expert est une victoire — les conditions génériques (wins_total,
+ * perfect_wins, mode_wins, streak_record…) comptent les deux dimensions. Avant la
+ * 051 l'Expert n'avait pas de compteurs, donc 25 perfects en Expert ne donnaient
+ * pas « Je ne suis pas une princesse ». Les conditions qui ne visent qu'une
+ * dimension le disent dans leur type (expert_wins_total, mode_wins_under_attempts…).
  * $column est toujours un littéral fixe passé par les appelants de ce fichier
  * (jamais une entrée utilisateur) — la whitelist ci-dessous est une protection en
  * profondeur, pas une nécessité fonctionnelle actuelle.
@@ -358,20 +366,32 @@ function personadle_aggregate_user_stat(PDO $pdo, int $userId, string $column, s
     if (!in_array($column, $allowedColumns, true) || !in_array($fn, $allowedFns, true)) {
         throw new InvalidArgumentException("Colonne/fonction non autorisée: $fn($column)");
     }
-    $s = $pdo->prepare("SELECT COALESCE($fn($column), 0) FROM user_stats WHERE user_id = ?");
-    $s->execute([$userId]);
+    $s = $pdo->prepare(
+        "SELECT COALESCE($fn(v), 0) FROM (
+             SELECT $column AS v FROM user_stats        WHERE user_id = ?
+             UNION ALL
+             SELECT $column AS v FROM user_stats_expert WHERE user_id = ?
+         ) AS both_dimensions"
+    );
+    $s->execute([$userId, $userId]);
     return (int) $s->fetchColumn();
 }
 
-/** Valeur d'une colonne numérique de user_stats pour UN mode précis (pas d'agrégation). */
+/** Valeur d'une colonne numérique pour UN mode précis, normal + Expert additionnés. */
 function personadle_user_stat_for_mode(PDO $pdo, int $userId, string $mode, string $column): int
 {
     $allowedColumns = ['wins', 'games'];
     if (!in_array($column, $allowedColumns, true)) {
         throw new InvalidArgumentException("Colonne non autorisée: $column");
     }
-    $s = $pdo->prepare("SELECT COALESCE($column, 0) FROM user_stats WHERE user_id = ? AND mode = ?");
-    $s->execute([$userId, $mode]);
+    $s = $pdo->prepare(
+        "SELECT COALESCE(SUM(v), 0) FROM (
+             SELECT $column AS v FROM user_stats        WHERE user_id = ? AND mode = ?
+             UNION ALL
+             SELECT $column AS v FROM user_stats_expert WHERE user_id = ? AND mode = ?
+         ) AS both_dimensions"
+    );
+    $s->execute([$userId, $mode, $userId, $mode]);
     return (int) $s->fetchColumn();
 }
 
@@ -479,11 +499,11 @@ function personadle_count_consecutive_perfects(PDO $pdo, int $userId, string $mo
  */
 function personadle_count_expert_wins(PDO $pdo, int $userId): int
 {
-    $s = $pdo->prepare(
-        'SELECT COUNT(*) FROM game_sessions
-         WHERE user_id = ? AND is_expert = 1 AND result = ?'
-    );
-    $s->execute([$userId, 'win']);
+    // user_stats_expert (051) plutôt que game_sessions : c'est la table que l'admin
+    // corrige — un titre Expert doit suivre ce que l'admin a posé, comme les titres
+    // normaux suivent user_stats. Reprise de l'historique faite par la 051.
+    $s = $pdo->prepare('SELECT COALESCE(SUM(wins), 0) FROM user_stats_expert WHERE user_id = ?');
+    $s->execute([$userId]);
     return (int) $s->fetchColumn();
 }
 
@@ -494,15 +514,9 @@ function personadle_count_expert_wins(PDO $pdo, int $userId): int
 function personadle_count_mastered_expert_modes(PDO $pdo, int $userId, int $winsPerMode): int
 {
     if ($winsPerMode < 1) return 0;
-    $s = $pdo->prepare(
-        'SELECT COUNT(*) FROM (
-             SELECT mode FROM game_sessions
-             WHERE user_id = ? AND is_expert = 1 AND result = ?
-             GROUP BY mode
-             HAVING COUNT(*) >= ?
-         ) AS mastered'
-    );
-    $s->execute([$userId, 'win', $winsPerMode]);
+    // Même source que personadle_count_expert_wins() : user_stats_expert, éditable.
+    $s = $pdo->prepare('SELECT COUNT(*) FROM user_stats_expert WHERE user_id = ? AND wins >= ?');
+    $s->execute([$userId, $winsPerMode]);
     return (int) $s->fetchColumn();
 }
 

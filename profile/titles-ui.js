@@ -11,6 +11,7 @@
 
 import { openModal, closeModal } from "../js/modal.js";
 import { targetSetMet } from "./badges/badgesData.js";
+import { statsForUnlocks } from "./profile-format.js";
 
 /** Définitions locales des titres — toujours disponibles ; l'API enrichit avec le statut par utilisateur. */
 export const TITLES_LOCAL = [
@@ -223,7 +224,10 @@ function _resolveEquippedTitle(profile, saveProfile, saveProfileToCloud) {
 }
 
 async function checkAndUnlockTitles(profile, saveProfile) {
-  const stats = profile.stats || {};
+  // Normal + Expert additionnés : une victoire Expert est une victoire (2026-09-19),
+  // le serveur compte pareil (condition_check.php). Le profil affiche toujours les
+  // deux blocs séparément — cette vue ne sert qu'à décider quand tenter l'unlock.
+  const stats = statsForUnlocks(profile.stats);
   // stats.giveups (total, tous modes) — pas stats.modeGiveups, un champ jamais
   // peuplé nulle part (js/cloud-sync.js ne calcule que modeCount/modeWins par
   // mode, pas modeGiveups) : giveups valait donc toujours 0, bloquant
