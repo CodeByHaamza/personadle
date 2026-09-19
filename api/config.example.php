@@ -58,3 +58,9 @@ define('PUSHER_APP_ID', '');
 define('PUSHER_KEY', '');
 define('PUSHER_SECRET', '');
 define('PUSHER_CLUSTER', '');
+
+// ID du rôle mentionné dans l'annonce quotidienne Discord.
+// Constante absente ou vide => aucun ping.
+// ⚠️ Ne pas y mettre le rôle Membres : un ping tous les jours sur un
+// rendez-vous de routine fait couper le salon. Rôle opt-in « 🔔 Daily ».
+define('DISCORD_DAILY_MENTION_ROLE', '1550573338336698521');

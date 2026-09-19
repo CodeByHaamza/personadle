@@ -42,7 +42,7 @@ personadle/
 ├── classiqueMode/  emojiMode/  allOutAttackMode/  silhouetteMode/  personaeMode/  musicsMode/
 ├── profile/             ← profile-page.js, badges/, friends/, leaderboard/
 ├── api/                 ← PHP REST (auth/, user/, messages/, social-links/, leaderboard/…)
-├── tests/               ← 77 suites Vitest (1416 tests) + tests/php/ (PHPUnit)
+├── tests/               ← 77 suites Vitest (1425 tests) + tests/php/ (PHPUnit)
 └── sql/                 ← bdd_mysql.sql (28 tables)
 ```
 
@@ -214,6 +214,7 @@ Utiliser `min()`, `clamp()`, `vw`/`vh`. Éviter les largeurs fixes en `px` sur l
 | Condition de déblocage non monotone | Un accès **gagné ne doit jamais se reperdre**. Toute condition doit être cumulative (`COUNT` à vie) ou un `MAX` sur l'historique — jamais une valeur « en cours ». Vécu en 2.1 : `mode_consecutive_perfects` renvoyait la série courante, donc 3 Modes Expert se re-verrouillaient à la première partie ratée, et une partie Expert en cours était refusée en 403 |
 | Une migration écrite ≠ une migration jouée | `sql/migrations/` n'est PAS le reflet de la prod — une migration vit sur `develop` jusqu'à la release. Seule source fiable : `SELECT version FROM schema_migrations`. Vécu en 2.1 : 029/030 oubliées de la checklist |
 | Colonne « cosmétique » absente en prod | La BDD prod vient d'une archive de 2026-05 : jusqu'à la **048**, quatre colonnes de `bdd_mysql.sql` n'y existaient pas parce qu'« aucun code ne les lisait » (025). Vécu à la release 2.2 : la 044 refusée (`titles.description_*`), puis le Compendium en 500 pour tout le monde (`ORDER BY ut.id`, `user_titles.id` absente). Depuis la 048, **prod = référence colonne pour colonne** et ça doit le rester : plus d'exception « cosmétique ». Avant chaque release, `npm run schema:check-prod` sur le serveur, et rejouer toute migration qui INSERT contre le `SHOW CREATE TABLE` de la prod (recréé dans Docker), pas seulement contre `bdd_mysql.sql` |
+| Contrainte de prod sous un autre nom | Une migration qui `DROP INDEX IF EXISTS <nom>` ne dit rien si la prod porte la même contrainte sous un **autre nom**. Vécu (050) : la 032 supprimait `uq_session_per_day`, la prod avait `uq_session (user_id, mode, played_date)` — 18 jours où chaque rejeu et chaque partie Expert du même jour tombaient en 409 « déjà enregistrée », jetés en silence par le client, porte Émoji inatteignable. `scripts/check_prod_schema.php` compare désormais aussi les UNIQUE ; un `DROP` de contrainte se vérifie **par ses colonnes** dans `information_schema.STATISTICS`, jamais par son nom seul |
 | Bouton rond/carré rendu ovale | `css/global.css` §18 impose `min-height: 48px; padding: 12px 20px` à **tout** `<button>` (cible tactile). Un bouton-icône avec `width`/`height` propres (pastille 28px, play 34px, ✕ de modale) sort en 28×48. Tout nouveau bouton-icône pose `min-height: 0` dans sa propre règle. Vécu en 2.2 : pastilles de bordure, lecteur de musique, ⚙ Settings, boutons amis |
 
 ---
@@ -221,7 +222,7 @@ Utiliser `min()`, `clamp()`, `vw`/`vh`. Éviter les largeurs fixes en `px` sur l
 ## 8. Tests & qualité
 
 - `npm test` · `npm run test:watch` · `npm run test:coverage`
-- **1416 tests** (Vitest + jsdom), 77 suites dans `tests/` (`gameCore`, `backend`, `auth`, `i18n`,
+- **1425 tests** (Vitest + jsdom), 77 suites dans `tests/` (`gameCore`, `backend`, `auth`, `i18n`,
   `social-link`, `profilePage`, `badgesManager`, `badgesConditions`, `streakFlow.integration`,
   `streakRecovery`, `validateCharacters`, `formatPlayTime`… — cf. `tests/` pour la liste à jour)
 - `npm run lint` (ESLint flat config) · `npm run data:check` (schéma personnages) · `npm run i18n:check`

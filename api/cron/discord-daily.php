@@ -332,6 +332,14 @@ $corps = sprintf(
     $ph['relance']
 );
 
+// Mention optionnelle, pilotée par config.php.
+// ⚠️ Ne PAS y mettre le rôle Membres : un ping quotidien sur un rendez-vous
+// de routine pousse les gens à couper les notifications du salon, voire à
+// partir. Utiliser le rôle opt-in « 🔔 Daily », que chacun prend s'il veut.
+$mention = defined('DISCORD_DAILY_MENTION_ROLE')
+    ? preg_replace('/\D/', '', (string) DISCORD_DAILY_MENTION_ROLE)
+    : '';
+
 $payload = [
     'username'   => $v['nom'],
     'avatar_url' => $avatar,
@@ -342,8 +350,12 @@ $payload = [
         'thumbnail'   => ['url' => $avatar],
         'footer'      => ['text' => 'PersonaDLE — ' . $now->format('d/m/Y')],
     ]],
-    'allowed_mentions' => ['parse' => []],
+    'allowed_mentions' => ['parse' => [], 'roles' => $mention !== '' ? [$mention] : []],
 ];
+
+if ($mention !== '') {
+    $payload['content'] = '<@&' . $mention . '>';
+}
 
 $body = json_encode($payload, JSON_UNESCAPED_UNICODE);
 if ($body === false) {
@@ -384,6 +396,7 @@ if ($erreur !== '' || $code < 200 || $code >= 300) {
 jsonSuccess([
     'success' => true,
     'data'    => [
+        'mention'    => $mention !== '' ? $mention : null,
         'date'         => $now->format('Y-m-d'),
         'voix'         => $v['nom'],
         'index_voix'   => $iVoix,

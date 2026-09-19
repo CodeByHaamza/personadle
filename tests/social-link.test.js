@@ -44,9 +44,12 @@ describe("addFlameIfPlayedToday", () => {
   });
 
   it("adds the flame when the last interaction is today", () => {
-    // Midi UTC est « aujourd'hui » à Paris quel que soit le jour de l'année.
-    const today = new Date().toISOString().slice(0, 10);
-    addFlameIfPlayedToday({ social_link_last_interaction: `${today} 12:00:00` }, container);
+    // « Il y a une minute », au format DATETIME UTC du serveur : c'est aujourd'hui à
+    // Paris quelle que soit l'heure. L'ancien « date UTC du jour à 12:00 » tombait
+    // HIER à Paris entre minuit et 2 h (la date UTC est encore celle de la veille) —
+    // test rouge chaque nuit à cette heure-là, vécu le 2026-09-19 à 01:14.
+    const oneMinuteAgo = new Date(Date.now() - 60_000).toISOString().slice(0, 19).replace("T", " ");
+    addFlameIfPlayedToday({ social_link_last_interaction: oneMinuteAgo }, container);
     expect(container.querySelector(".fr-flame")).not.toBeNull();
   });
 

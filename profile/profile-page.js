@@ -26,6 +26,7 @@ import {
   initBadgesSystem,
   forceCheckBadges,
   syncBadgesWithBackend,
+  checkSocialBadges,
   renderBadgesModal,
   renderBadgesPreview,
   renderBadgePicker,
@@ -437,9 +438,39 @@ async function saveProfileToCloud(fields) {
   const api = window._personadleApi;
   if (!api) return;
   try {
-    await api.user.update(window._currentUser.id, fields);
+    await updateWithBadgeFallback(api, fields);
   } catch (e) {
     console.warn("[Profile] Cloud sync failed:", e.message);
+  }
+}
+
+/**
+ * PATCH du profil, avec UN repli : si le serveur refuse un badge épinglé qu'il ne
+ * considère pas débloqué (403 « Badge not unlocked: <slug> »), on le retire de la
+ * sélection locale et on renvoie la requête sans lui. Sans ce repli, tout le PATCH
+ * tombait — avatar, bordure, titre compris — et le pull suivant remettait
+ * l'ancienne sélection : le badge « s'enlevait » à chaque essai, sans un mot
+ * (Velvet Regular, 2026-09-19). Le serveur accorde désormais lui-même un badge
+ * dont la condition est remplie ; ce repli ne joue que pour un badge que le
+ * serveur refuse vraiment.
+ */
+async function updateWithBadgeFallback(api, fields) {
+  try {
+    return await api.user.update(window._currentUser.id, fields);
+  } catch (e) {
+    const m = e?.status === 403 ? /Badge not unlocked: ([a-z0-9_-]+)/i.exec(e?.message || "") : null;
+    if (!m || !Array.isArray(fields.selected_badges)) throw e;
+    const slug = m[1];
+    console.warn(`[Profile] badge « ${slug} » refusé par le serveur : retiré de la sélection`);
+    if (profile) {
+      profile.selectedBadges = (profile.selectedBadges || []).filter((id) => id !== slug);
+      saveProfile();
+      _applyCloudToUI();
+    }
+    return api.user.update(window._currentUser.id, {
+      ...fields,
+      selected_badges: fields.selected_badges.filter((id) => id !== slug),
+    });
   }
 }
 
@@ -476,7 +507,7 @@ async function syncProfileToCloud({ strict = false } = {}) {
   const settings = JSON.parse(localStorage.getItem("personaSettings") || "{}");
   if (Object.keys(settings).length) fields.settings = settings;
   try {
-    await window._personadleApi.user.update(window._currentUser.id, fields);
+    await updateWithBadgeFallback(window._personadleApi, fields);
   } catch (e) {
     console.warn("[Profile] Sync to cloud failed:", e.message);
     if (strict) throw e;
@@ -1362,6 +1393,14 @@ document.addEventListener("DOMContentLoaded", () => {
       // plus bas tourne AVANT que ce pull résolve, donc sur un profil local
       // potentiellement périmé (autre appareil, localStorage vidé…).
       forceCheckBadges(profile, saveProfileAndSyncBadges);
+      // Badges sociaux (Best Bro, Leblanc, Same Energy) : leurs drapeaux viennent
+      // de /api/friends, donc d'une session valide. initBadgesSystem() plus bas
+      // lance checkSocialBadges() quand window._currentUser n'est souvent pas
+      // encore posé → retour immédiat, et la seule autre occasion était… la visite
+      // suivante, si l'auth arrivait à temps. Gyotre, 12 amis acceptés, jamais Best
+      // Bro (2026-09-19). Ici l'auth est résolue ; la fonction revérifie et pousse
+      // elle-même quand un drapeau change.
+      await checkSocialBadges(profile, saveProfileAndSyncBadges);
       // Re-fetcher /api/titles avec session valide → is_unlocked correct par user
       await initTitlesSection(profile, saveProfile, saveProfileToCloud, markDirty);
       // Pousser les badges locaux manquants vers le backend (local → cloud)

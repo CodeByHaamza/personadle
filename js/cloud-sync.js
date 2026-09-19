@@ -184,6 +184,16 @@ export async function pullProfileFromCloud() {
     // Hors du `if (d.stats)` : la date ne dépend pas des statistiques de modes.
     syncRecoveryCooldown(d.streak_recovered_at);
 
+    // Journées distinctes jouées : le compte du SERVEUR remplace celui de l'appareil.
+    // `uniqueDaysSet` était tenu en local, par appareil : un joueur pouvait se voir
+    // 50 jours ici (dont ses jours d'avant le compte) quand la base en avait 45 —
+    // Velvet Regular se débloquait chez lui, le serveur le refusait à chaque synchro
+    // et l'épinglage « s'enlevait » au pull suivant (2026-09-19). Backend antérieur
+    // sans le champ → on ne touche à rien.
+    if (typeof d.unique_days === "number") {
+      p.uniqueDaysPlayed = d.unique_days;
+    }
+
     // ── Badges (cloud → local, jamais régressif) ───────────────────────────
     let newB = [];
     if (Array.isArray(d.badges)) {
