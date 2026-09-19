@@ -73,6 +73,62 @@ chaîne complète : deux vrais défauts.
 - Joueurs déjà recadrés avant la 052 : `avatar_src` NULL, badge impossible tant qu'ils n'ont
   pas re-choisi leur portrait (un clic dans l'Atelier, recadrage compris). À dire à l'ami de
   Hamza qui teste.
+## 2026-09-19 — Stats Expert éditables : table `user_stats_expert` (migration 051)
+
+Hamza : « dans le menu admin je peux pas modifier mes stats de mode Expert ». Normal : les
+stats Expert n'existaient nulle part. `personadle_expert_stats_by_mode()` faisait un
+`GROUP BY` à la volée sur `game_sessions WHERE is_expert = 1` — rien à éditer, et une
+partie perdue par un bug (409 `uq_session`, cf. 050) ne pouvait pas être rendue au joueur.
+Décision : **même modèle que le mode normal** — une table de compteurs alimentée à chaque
+partie, lue par le profil, écrasable par l'admin. Table séparée plutôt qu'une colonne
+`is_expert` dans `user_stats` : une vingtaine de lecteurs (badges, titres, classement,
+leaderboard cache) supposent « une ligne par mode » et lisent les stats normales sans filtre.
+
+### Base
+
+- `sql/migrations/051_user_stats_expert.sql` + `sql/bdd_mysql.sql` : `user_stats_expert`
+  (`user_id, mode` PK, `wins, giveups, games, streak, streak_record, perfect_wins,
+  total_time_ms, last_played_at, first_played_at`, FK `users` CASCADE). Reprise de
+  l'historique en SQL (`INSERT … SELECT … GROUP BY user_id, mode ON DUPLICATE KEY UPDATE`) —
+  compteurs seulement.
+- `scripts/backfill_expert_streaks.php` : pose `streak` (via `personadle_recompute_mode_streak(…,
+  true)` au dernier jour joué) et `streak_record` (`personadle_expert_streak_record()`, plus longue
+  suite de journées Paris gagnantes). « Jours consécutifs » ne se calcule pas raisonnablement en
+  SQL, et l'API le faisait déjà en PHP. À lancer une fois après la 051 ; rejouable. En Docker :
+  `docker exec -e DB_HOST=db -e DB_USER=root -e DB_PASS=rootpassword personadle_php php
+  scripts/backfill_expert_streaks.php`.
+
+### API
+
+- `api/lib/game_session.php` : la branche Expert de `personadle_record_game_session()` appelle
+  `personadle_bump_expert_stats()` (INSERT IGNORE de la ligne, puis `games+1`, `wins`/`giveups`,
+  `streak` recalculée depuis l'historique — jamais incrémentale —, `streak_record = GREATEST`,
+  `perfect_wins`, `total_time_ms`) et renvoie `expert_stats` à côté des `stats` normales
+  inchangées. `personadle_expert_stats_by_mode()` lit la table ; `best_attempts` et
+  `last_played_date` restent lus dans `game_sessions` (ce ne sont pas des compteurs, l'admin n'a
+  pas à les inventer).
+- `api/admin/user_stats.php` : `is_expert` (bool) → cible `user_stats_expert`, audit
+  `user_stats_expert.overwrite`. `api/admin/user.php` : `expert_stats` dans le détail.
+- `api/user/stats.php` : `expert_by_mode` inchangé côté forme — c'est la table qui parle.
+
+### Admin
+
+- `admin/admin.js` `renderTabStats` : deux tableaux (normal / ⚡ Expert), même colonnes, Save
+  par ligne envoie `is_expert`. Note d'onglet : l'*accès* Expert reste dans l'onglet ⚡ Expert.
+
+### Tests
+
+- PHPUnit : `testExpertStatsByModeReadsTheExpertTableFedByEachGame` (3 parties Expert + 1
+  normale, compteurs, `best_attempts`, streak, écrasement admin relu),
+  `testExpertStreakRecordIsTheLongestRunOfConsecutiveWinningDays`.
+- E2E `admin-extended.spec.js` : PATCH `is_expert:true` → `expert_stats` côté admin,
+  `expert_by_mode` côté joueur, `user_stats` intacte, 403 non-admin.
+
+### Angles morts
+
+- Un joueur qui a déjà des parties Expert mais **aucune ligne** (prod avant la 051) : l'API renvoie
+  `[]` jusqu'à la reprise — d'où « 051 puis backfill AVANT le pull » dans `TODO.md`.
+- `admin/` n'est pas précaché par le SW : pas de bump `CACHE_VERSION` pour ce lot.
 
 ---
 

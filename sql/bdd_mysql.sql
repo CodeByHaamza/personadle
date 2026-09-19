@@ -611,6 +611,28 @@ CREATE TABLE user_stats (
 CREATE INDEX idx_user_stats_user ON user_stats(user_id);
 CREATE INDEX idx_user_stats_mode ON user_stats(mode, wins DESC);
 
+-- ── Pendant Expert de user_stats (migration 051) ─────────────────────────────
+-- Une ligne par (joueur, mode) pour les parties Expert, alimentée par
+-- personadle_record_game_session(), lue par GET /api/user/:id/stats
+-- (expert_by_mode) et éditable dans l'admin (PATCH …/stats { is_expert: true }).
+-- Table séparée : tous les lecteurs de user_stats supposent « mode normal ».
+CREATE TABLE user_stats_expert (
+    user_id         BIGINT UNSIGNED  NOT NULL,
+    mode            VARCHAR(30)      NOT NULL,
+    wins            INT              NOT NULL DEFAULT 0,
+    giveups         INT              NOT NULL DEFAULT 0,
+    games           INT              NOT NULL DEFAULT 0,
+    streak          INT              NOT NULL DEFAULT 0,
+    streak_record   INT              NOT NULL DEFAULT 0,
+    perfect_wins    INT              NOT NULL DEFAULT 0,
+    total_time_ms   BIGINT           NOT NULL DEFAULT 0,
+    last_played_at  TIMESTAMP        NULL,
+    first_played_at TIMESTAMP        NULL,
+
+    PRIMARY KEY (user_id, mode),
+    CONSTRAINT fk_user_stats_expert_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 -- =============================================================================
 -- 6. GAME_SESSIONS — Historique de chaque partie jouée
