@@ -6,7 +6,9 @@
  *   GET https://personadle.net/api/cron/discord-daily.php
  *   Header: X-Cron-Key: <CRON_SECRET>
  *
- * Fréquence : tous les jours à 00:05 (Paris), juste après le reset du jeu.
+ * Fréquence : tous les jours à 06:00 UTC (8 h Paris l'été, 7 h l'hiver) — décision Hamza
+ * 2026-09-21 : le matin plutôt que 00:05 Paris, personne ne joue à minuit et le ping réveillait.
+ * La cible du jour, elle, change à minuit Paris : le message reste juste (« jusqu'à minuit »).
  *
  * Un webhook Discord accepte 'username' et 'avatar_url' à CHAQUE message : un
  * seul webhook fait donc parler plusieurs personnages, avec leur avatar, sans
