@@ -26,7 +26,39 @@ export const AVATAR_GROUPS = [
     "Tatsuya2.jpg",
   ] },
   { game: "P3", key: "persona3", avatars: [
+    // ── Les deux protagonistes de Persona 3, en tête et chacun d'un bloc ──────
+    // Demande Hamza (2026-09-22) : Makoto puis Kotone, anciens et nouveaux
+    // portraits mêlés. La galerie se parcourt à l'œil — un joueur cherche un
+    // personnage, pas le lot qui a livré l'image.
+    //
+    // Deux exclusions volontaires, valables pour l'un comme pour l'autre :
+    //   - `makoto_yuki_pq2.jpg` et `kotone_pq.jpg` restent dans le groupe PQ,
+    //     qui est un roster COMPLET en style Persona Q (chaque personnage y a son
+    //     entrée, de makoto_yuki_pq2 à crow_pq2). Les en sortir y ferait un trou.
+    //   - `pfp_makoto.gif` et `Yuki_Zutomayo.jpeg` restent dans SPECIAL, qui
+    //     regroupe les détournements et crossovers.
+    //
+    // Le crossover P5X × P3P de Kotone est ici et non dans le groupe P5X : c'est
+    // elle qu'on cherche, pas le jeu où le dessin la place. Ses portraits ANIMÉS
+    // ne sont pas ici non plus — ils forment le pack déblocable du lot 6, et seuls
+    // les portraits libres vivent dans ce fichier.
+    // Makoto Yuki
     "makoto_yuki.jpg",
+    "Yuki.gif",
+    "Yuki.jpeg",
+    "yuki.jpg",
+    "Yuki2.gif",
+    // Kotone Shiomi
+    "Kotone.jpeg",
+    "Kotone2.jpeg",
+    "Kotone3.jpeg",
+    "kotone_pdp.jpg",
+    "kotone_shiomi.jpg",
+    "kotone_shiomi_p3p.jpg",
+    "kotone_shiomi_p3p_2.jpg",
+    "kotone_shiomi_p3p_3.jpg",
+    "kotone_shiomi_p5x_crossover.jpg",
+    // ─────────────────────────────────────────────────────────────────────────
     "aigis_train.jpg",
     "aigis.gif",
     "Aigis.jpg",
@@ -49,11 +81,6 @@ export const AVATAR_GROUPS = [
     "Ken.jpeg",
     "Koromaru.jpg",
     "Koromaru2.jpg",
-    "kotone_pdp.jpg",
-    "kotone_shiomi.jpg",
-    "Kotone.jpeg",
-    "Kotone2.jpeg",
-    "Kotone3.jpeg",
     "Metis.jpg",
     "Metis2.jpeg",
     "Mitsuru.jpg",
@@ -62,10 +89,6 @@ export const AVATAR_GROUPS = [
     "Shinji.webp",
     "Yukari.jpg",
     "Yukari2.jpg",
-    "Yuki.gif",
-    "Yuki.jpeg",
-    "yuki.jpg",
-    "Yuki2.gif",
   ] },
   { game: "P4", key: "persona4", avatars: [
     "Adachi.jpg",
@@ -105,6 +128,8 @@ export const AVATAR_GROUPS = [
     "Yukiko2.jpg",
     "hui_marie_p4r_pfp.jpg",
     "naoto_p4r.jpg",
+    // Lot 2.3
+    "rise_kujikawa_p4.jpg",
   ] },
   { game: "P5", key: "persona5", avatars: [
     "akechi_alt.jpg",
@@ -152,6 +177,9 @@ export const AVATAR_GROUPS = [
     "Yusuke.webp",
     "yusukekitagawa_jazz.jpg",
     "morgana_dancing.jpg",
+    // Lot 2.3 — Sophia vient de P5 Strikers, que ce groupe couvre déjà
+    // (P5 / P5R / P5S), d'où sa place ici et non dans un groupe à part.
+    "sophia_p5s.jpg",
   ] },
   { game: "P5X", key: "persona5x", avatars: [
     "Arai.png",
@@ -179,6 +207,38 @@ export const AVATAR_GROUPS = [
     "YUI.png",
     "YUI2.png",
     "yukimifujikawa_persona_5_phantom_x.jpg",
+    // Lot 2.3 — Phantom Idols, skins, et le passage de Kotone Shiomi dans P5X.
+    // Noms en snake_case (CLAUDE.md §4) : les fichiers livrés portaient des emoji,
+    // des espaces multiples et des « (1) », que la liste blanche du serveur
+    // (personadle_validate_avatar) refuse — un avatar refusé reste local et
+    // disparaît au prochain pull cloud, sans le moindre message.
+    "aran_hirano_p5x.jpg",
+    "ayaka_sakai_p5x.jpg",
+    "ayaka_sakai_p5x_2.jpg",
+    "ayaka_sakai_p5x_3.jpg",
+    "ayaka_sakai_p5x_4.jpg",
+    "ayaka_sakai_summer_p5x.jpg",
+    "hatsune_miku_p5x.jpg",
+    "ichigo_shikano_p5x.jpg",
+    "kira_kitazato_p5x.jpg",
+    "kira_kitazato_p5x_2.jpg",
+    "kira_kitazato_p5x_3.jpg",
+    "kiyoshi_kurotani_p5x.jpg",
+    // Kotone MONTAGNE (Mont) — une autre personne que Kotone Shiomi, malgré le
+    // prénom commun. Elle reste ici, dans son jeu.
+    "kotone_montagne_p5x.jpg",
+    "kumi_katayama_p5x.jpg",
+    "miyu_sahara_p5x.jpg",
+    "narumi_nashimoto_p5x.jpg",
+    "shoki_ikenami_p5x.jpg",
+    "shoki_ikenami_notte_p5x.jpg",
+    "wonder_joker_matching_p5x.jpg",
+    "yaoling_li_p5x.jpg",
+    "yui_comic_p5x.jpg",
+    "yui_comic_p5x_2.jpg",
+    "yumi_shiina_p5x.jpg",
+    "yumi_shiina_p5x_2.jpg",
+    "yumi_shiina_p5x_3.jpg",
   ] },
   // Persona Q / Q2 : les héros de P3, P4 et P5 dans leur habillage Etrian —
   // regroupés ici plutôt que dispersés dans le jeu d'origine de chaque personnage

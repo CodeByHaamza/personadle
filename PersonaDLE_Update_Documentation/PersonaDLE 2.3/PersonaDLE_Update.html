@@ -1263,7 +1263,85 @@
         @media (prefers-reduced-motion: reduce) {
             .kotone-ribbon { animation: none; }
         }
-    </style>
+
+        /* ═══════════════════════════════════════════════════════════════════
+           GRILLE DES NOUVEAUX PORTRAITS
+
+           Tout nouveau contenu est listé explicitement (CLAUDE.md §9) : ici,
+           chaque portrait avec son image et le personnage qu'il représente.
+           Les vignettes se chargent en `loading="lazy"` — il y en a 31, et
+           elles sont toutes sous la ligne de flottaison.
+        ════════════════════════════════════════════════════════════════════ */
+        .pfp-grid-wrap { margin: 18px 0 6px; }
+
+        .pfp-grid-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 22px 0 10px;
+            font-family: 'Montserrat', 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-h3);
+        }
+
+        .pfp-grid-badge {
+            flex: none;
+            padding: 3px 9px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            letter-spacing: 0.04em;
+            color: #fff;
+            background: linear-gradient(90deg, var(--kotone-pink-soft), var(--kotone-pink));
+        }
+
+        .pfp-grid {
+            display: grid;
+            /* `auto-fill` plutôt qu'un nombre de colonnes fixe : la grille se
+               réduit d'elle-même jusqu'au téléphone sans requête média. */
+            grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+            gap: 12px;
+            /* Sans ça, une légende qui passe à deux lignes étire toute sa rangée
+               et décale les vignettes voisines vers le bas. */
+            align-items: start;
+        }
+
+        .pfp-cell {
+            margin: 0;
+            text-align: center;
+        }
+
+        .pfp-cell img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 2px solid var(--kotone-pink-pale);
+            background: var(--card-bg);
+            transition: transform 0.18s ease, border-color 0.18s ease;
+        }
+
+        .pfp-cell img:hover {
+            transform: translateY(-3px) scale(1.03);
+            border-color: var(--kotone-pink);
+        }
+
+        .pfp-cell figcaption {
+            margin-top: 5px;
+            /* Deux lignes réservées : les noms longs (« Shoki Ikenami (Luce Notte) »)
+               passent à la ligne, et une hauteur fixe garde les rangées alignées. */
+            min-height: 2.5em;
+            font-size: 0.68rem;
+            line-height: 1.25;
+            color: var(--text-muted);
+            word-break: break-word;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .pfp-cell img { transition: none; }
+            .pfp-cell img:hover { transform: none; }
+        }
+</style>
 </head>
 <body>
 
@@ -1324,6 +1402,72 @@
     <!-- ════════════════════════════════════
          CONTENU — à remplir lot par lot (cf. DEV_CHANGELOG.md)
     ════════════════════════════════════ -->
+
+    <!-- ═══════════════════════════════════
+         NOUVEAUX PORTRAITS DE PROFIL
+    ═══════════════════════════════════ -->
+
+    <div data-i18n-block="fr"><h1>🖼️ 31 nouveaux portraits de profil</h1></div>
+    <div data-i18n-block="en"><h1>🖼️ 31 new profile pictures</h1></div>
+
+    <div data-i18n-block="fr">
+        <p>La galerie passe de 204 à 235 portraits, dont 26 venus de
+        <em>Persona 5: The Phantom X</em>. Ils sont rangés par jeu dans l'atelier de votre
+        profil, et tous disponibles dès maintenant — aucun n'est à débloquer.</p>
+    </div>
+    <div data-i18n-block="en">
+        <p>The gallery goes from 204 to 235 pictures, 26 of them from
+        <em>Persona 5: The Phantom X</em>. They're sorted by game in your profile workshop,
+        and all available right away — none of them need unlocking.</p>
+    </div>
+
+    <div class="pfp-grid-wrap">
+        <p class="pfp-grid-title"><span class="pfp-grid-badge">P5X</span> Persona 5: The Phantom X</p>
+        <div class="pfp-grid">
+            <figure class="pfp-cell"><img src="../../img/avatar/aran_hirano_p5x.jpg" alt="Aran Hirano (Anri)" loading="lazy"><figcaption>Aran Hirano (Anri)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ayaka_sakai_p5x.jpg" alt="Ayaka Sakai (Chord)" loading="lazy"><figcaption>Ayaka Sakai (Chord)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ayaka_sakai_p5x_2.jpg" alt="Ayaka Sakai (Chord)" loading="lazy"><figcaption>Ayaka Sakai (Chord)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ayaka_sakai_p5x_3.jpg" alt="Ayaka Sakai (Chord)" loading="lazy"><figcaption>Ayaka Sakai (Chord)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ayaka_sakai_p5x_4.jpg" alt="Ayaka Sakai (Chord)" loading="lazy"><figcaption>Ayaka Sakai (Chord)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ayaka_sakai_summer_p5x.jpg" alt="Ayaka Sakai — Summer" loading="lazy"><figcaption>Ayaka Sakai — Summer</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ichigo_shikano_p5x.jpg" alt="Ichigo Shikano (Berry)" loading="lazy"><figcaption>Ichigo Shikano (Berry)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kira_kitazato_p5x.jpg" alt="Kira Kitazato (Messa)" loading="lazy"><figcaption>Kira Kitazato (Messa)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kira_kitazato_p5x_2.jpg" alt="Kira Kitazato (Messa)" loading="lazy"><figcaption>Kira Kitazato (Messa)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kira_kitazato_p5x_3.jpg" alt="Kira Kitazato (Messa)" loading="lazy"><figcaption>Kira Kitazato (Messa)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kiyoshi_kurotani_p5x.jpg" alt="Kiyoshi Kurotani (Key)" loading="lazy"><figcaption>Kiyoshi Kurotani (Key)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kotone_montagne_p5x.jpg" alt="Kotone Montagne (Mont)" loading="lazy"><figcaption>Kotone Montagne (Mont)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kumi_katayama_p5x.jpg" alt="Kumi Katayama (Blitz)" loading="lazy"><figcaption>Kumi Katayama (Blitz)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/miyu_sahara_p5x.jpg" alt="Miyu Sahara (Puppet)" loading="lazy"><figcaption>Miyu Sahara (Puppet)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/narumi_nashimoto_p5x.jpg" alt="Narumi Nashimoto (Pinky)" loading="lazy"><figcaption>Narumi Nashimoto (Pinky)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/shoki_ikenami_p5x.jpg" alt="Shoki Ikenami (Luce)" loading="lazy"><figcaption>Shoki Ikenami (Luce)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/shoki_ikenami_notte_p5x.jpg" alt="Shoki Ikenami (Luce Notte)" loading="lazy"><figcaption>Shoki Ikenami (Luce Notte)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/wonder_joker_matching_p5x.jpg" alt="Wonder × Joker" loading="lazy"><figcaption>Wonder × Joker</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yaoling_li_p5x.jpg" alt="Yaoling Li (Rin)" loading="lazy"><figcaption>Yaoling Li (Rin)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yui_comic_p5x.jpg" alt="YUI (Bui)" loading="lazy"><figcaption>YUI (Bui)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yui_comic_p5x_2.jpg" alt="YUI (Bui)" loading="lazy"><figcaption>YUI (Bui)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yumi_shiina_p5x.jpg" alt="Yumi Shiina (Phoebe)" loading="lazy"><figcaption>Yumi Shiina (Phoebe)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yumi_shiina_p5x_2.jpg" alt="Yumi Shiina (Phoebe)" loading="lazy"><figcaption>Yumi Shiina (Phoebe)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yumi_shiina_p5x_3.jpg" alt="Yumi Shiina (Phoebe)" loading="lazy"><figcaption>Yumi Shiina (Phoebe)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/hatsune_miku_p5x.jpg" alt="Hatsune Miku" loading="lazy"><figcaption>Hatsune Miku</figcaption></figure>
+        </div>
+        <p class="pfp-grid-title"><span class="pfp-grid-badge">P3</span> Persona 3 Portable</p>
+        <div class="pfp-grid">
+            <figure class="pfp-cell"><img src="../../img/avatar/kotone_shiomi_p3p.jpg" alt="Kotone Shiomi" loading="lazy"><figcaption>Kotone Shiomi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kotone_shiomi_p3p_2.jpg" alt="Kotone Shiomi" loading="lazy"><figcaption>Kotone Shiomi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kotone_shiomi_p3p_3.jpg" alt="Kotone Shiomi" loading="lazy"><figcaption>Kotone Shiomi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kotone_shiomi_p5x_crossover.jpg" alt="Kotone Shiomi — P5X × P3P" loading="lazy"><figcaption>Kotone Shiomi — P5X × P3P</figcaption></figure>
+        </div>
+        <p class="pfp-grid-title"><span class="pfp-grid-badge">P4</span> Persona 4</p>
+        <div class="pfp-grid">
+            <figure class="pfp-cell"><img src="../../img/avatar/rise_kujikawa_p4.jpg" alt="Rise Kujikawa" loading="lazy"><figcaption>Rise Kujikawa</figcaption></figure>
+        </div>
+        <p class="pfp-grid-title"><span class="pfp-grid-badge">P5</span> Persona 5 Strikers</p>
+        <div class="pfp-grid">
+            <figure class="pfp-cell"><img src="../../img/avatar/sophia_p5s.jpg" alt="Sophia" loading="lazy"><figcaption>Sophia</figcaption></figure>
+        </div>
+    </div>
+
+    <hr>
 
     <!-- CORRECTIONS — section commune, alimentée par chaque lot de fix. -->
 
