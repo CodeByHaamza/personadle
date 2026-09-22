@@ -77,4 +77,6 @@ export const personas = [
   "Miku ( Hatsune Miku )",
   "Bui Cosmic ( YUI )",
   "Berry Summer ( Ichigo Shikano )",
+  "Luce Notte ( Shoki Ikenami )",
+  "Soy Pioneer ( Shun Kano )",
 ];
