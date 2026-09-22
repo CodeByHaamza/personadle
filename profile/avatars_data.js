@@ -1,47 +1,60 @@
-// Généré : mapping avatar → jeu (validé). Tri par jeu puis personnage.
-// Pour déplacer un avatar : changer son groupe ici.
+// Mapping avatar → jeu. Chaque groupe est trié PROTAGONISTE, puis CAST
+// PRINCIPAL, puis PERSONNAGES SECONDAIRES, et les portraits d'un même
+// personnage se suivent (demande Hamza du 2026-09-22 — la galerie se parcourt à
+// l'œil : on y cherche quelqu'un, pas le lot qui a livré l'image).
+//
+// L'ordre et le découpage viennent de `ROSTERS` dans scripts/avatar_census.js,
+// qui sait QUI est sur chaque image — ce que les noms de fichiers ne disent pas
+// de façon fiable (`Yuki.gif`, `makoto_yuki.jpg` et `pfp_makoto.gif` sont la
+// même personne ; `Makoto.jpg` en est une autre). Pour déplacer un portrait,
+// changer son personnage là-bas puis relancer la régénération.
+//
+// `npm run avatars:census` dit combien de portraits a chaque personnage, et
+// lesquels n'en ont aucun.
 export const AVATAR_GROUPS = [
   { game: "P1", key: "persona1", avatars: [
-    "Eriko.png",
-    "Hidehiko.png",
-    "Hidehiko.webp",
-    "Inaba.webp",
-    "Inaba2.webp",
-    "Kei.webp",
-    "Kei2.jpg",
+    // ── Protagoniste(s) ───────────────────────────────────────────────────
+    // Naoya Todou
     "Naoya.jpg",
     "Naoya1.jpg",
-    "Yuka.webp",
+    // ── Cast principal ────────────────────────────────────────────────────
+    // Masao Inaba
+    "Inaba.webp",
+    "Inaba2.webp",
+    // Kei Nanjo
+    "Kei.webp",
+    "Kei2.jpg",
+    // Hidehiko Uesugi
+    "Hidehiko.png",
+    "Hidehiko.webp",
+    // Eriko Kirishima
+    "Eriko.png",
+    // Yukino Mayuzumi
     "Yukino.webp",
+    // ── Personnages secondaires ───────────────────────────────────────────
+    // Yuka Ayase
+    "Yuka.webp",
   ] },
   { game: "P2", key: "persona2", avatars: [
-    "Ekichi.jpeg",
-    "Ekichi2.jpeg",
-    "JOKER.webp",
-    "Jun.jpg",
-    "Lisa.jpeg",
-    "Maya.jpg",
-    "Maya2.jpeg",
+    // ── Protagoniste(s) ───────────────────────────────────────────────────
+    // Tatsuya Suou
     "Tatsuya.jpg",
     "Tatsuya2.jpg",
+    // Maya Amano
+    "Maya.jpg",
+    "Maya2.jpeg",
+    // ── Cast principal ────────────────────────────────────────────────────
+    // Eikichi Mishina
+    "Ekichi.jpeg",
+    "Ekichi2.jpeg",
+    // Lisa Silverman
+    "Lisa.jpeg",
+    // Jun Kurosu
+    "Jun.jpg",
+    "JOKER.webp",
   ] },
   { game: "P3", key: "persona3", avatars: [
-    // ── Les deux protagonistes de Persona 3, en tête et chacun d'un bloc ──────
-    // Demande Hamza (2026-09-22) : Makoto puis Kotone, anciens et nouveaux
-    // portraits mêlés. La galerie se parcourt à l'œil — un joueur cherche un
-    // personnage, pas le lot qui a livré l'image.
-    //
-    // Deux exclusions volontaires, valables pour l'un comme pour l'autre :
-    //   - `makoto_yuki_pq2.jpg` et `kotone_pq.jpg` restent dans le groupe PQ,
-    //     qui est un roster COMPLET en style Persona Q (chaque personnage y a son
-    //     entrée, de makoto_yuki_pq2 à crow_pq2). Les en sortir y ferait un trou.
-    //   - `pfp_makoto.gif` et `Yuki_Zutomayo.jpeg` restent dans SPECIAL, qui
-    //     regroupe les détournements et crossovers.
-    //
-    // Le crossover P5X × P3P de Kotone est ici et non dans le groupe P5X : c'est
-    // elle qu'on cherche, pas le jeu où le dessin la place. Ses portraits ANIMÉS
-    // ne sont pas ici non plus — ils forment le pack déblocable du lot 6, et seuls
-    // les portraits libres vivent dans ce fichier.
+    // ── Protagoniste(s) ───────────────────────────────────────────────────
     // Makoto Yuki
     "makoto_yuki.jpg",
     "Yuki.gif",
@@ -58,220 +71,311 @@ export const AVATAR_GROUPS = [
     "kotone_shiomi_p3p_2.jpg",
     "kotone_shiomi_p3p_3.jpg",
     "kotone_shiomi_p5x_crossover.jpg",
-    // ─────────────────────────────────────────────────────────────────────────
+    // ── Cast principal ────────────────────────────────────────────────────
+    // Yukari Takeba
+    "Yukari.jpg",
+    "Yukari2.jpg",
+    // Junpei Iori
+    "Junpei.png",
+    "Junpei2.jpg",
+    // Akihiko Sanada
+    "Akihiko.jpg",
+    // Mitsuru Kirijo
+    "Mitsuru.jpg",
+    "Mitsuru.webp",
+    // Fuuka Yamagishi
+    "Fuuka.jpeg",
+    "Fuuka2.jpeg",
+    // Aigis
     "aigis_train.jpg",
     "aigis.gif",
     "Aigis.jpg",
     "Aigis2.jpg",
-    "Akihiko.jpg",
+    // Koromaru
+    "Koromaru.jpg",
+    "Koromaru2.jpg",
+    // Ken Amada
+    "Ken.jpeg",
+    "ken_amada_p4au.jpg",
+    // Shinjiro Aragaki
+    "Shinji.jpg",
+    "Shinji.webp",
+    // ── Personnages secondaires ───────────────────────────────────────────
+    // Chidori Yoshino
     "Chidori.jpg",
     "Chidori2.jpg",
+    // Metis
+    "Metis.jpg",
+    "Metis2.jpeg",
+    // Elisabeth
     "Elisabeth.jpeg",
     "Elisabeth2.jpeg",
+    // Theodore
     "theodore.jpeg",
     "theodore2.jpeg",
     "theodore3.jpeg",
     "theodore4.jpeg",
     "theodore5.jpeg",
-    "Fuuka.jpeg",
-    "Fuuka2.jpeg",
-    "Junpei.png",
-    "Junpei2.jpg",
-    "ken_amada_p4au.jpg",
-    "Ken.jpeg",
-    "Koromaru.jpg",
-    "Koromaru2.jpg",
-    "Metis.jpg",
-    "Metis2.jpeg",
-    "Mitsuru.jpg",
-    "Mitsuru.webp",
-    "Shinji.jpg",
-    "Shinji.webp",
-    "Yukari.jpg",
-    "Yukari2.jpg",
   ] },
   { game: "P4", key: "persona4", avatars: [
-    "Adachi.jpg",
-    "Adachi2.jpeg",
-    "chie_satonaka_icon.jpg",
-    "Chie.jpg",
-    "Chie2.jpg",
-    "chiesatonaka_revivale.jpg",
-    "Kanji.avif",
-    "Kanji.jpg",
-    "margaret.jpg",
-    "Marie.jpg",
-    "Marie2.webp",
-    "Nanako.jpg",
-    "Nanako2.jpg",
-    "naoto_shirogane_icon_revivae.jpg",
-    "Naoto.jpg",
-    "Naoto2.jpg",
-    "naotoshirogane.jpg",
-    "rise_revivale.jpg",
-    "Rise.jpg",
-    "Rise.png",
-    "Teddie.jpg",
-    "Teddie2.jpg",
-    "yosuke_hanamura_icon_1.jpg",
-    "yosuke_hanamura_icon.jpg",
-    "Yosuke.jpg",
-    "Yosuke2.jpg",
-    "yu_alt.jpg",
-    "yu_cursed.jpg",
-    "yu_narukami_mc_icon.jpg",
+    // ── Protagoniste(s) ───────────────────────────────────────────────────
+    // Yu Narukami
     "Yu.gif",
     "Yu.jpg",
     "Yu2.gif",
     "Yu2.jpg",
+    "yu_alt.jpg",
+    "yu_cursed.jpg",
+    "yu_narukami_mc_icon.jpg",
+    // ── Cast principal ────────────────────────────────────────────────────
+    // Yosuke Hanamura
+    "Yosuke.jpg",
+    "Yosuke2.jpg",
+    "yosuke_hanamura_icon.jpg",
+    "yosuke_hanamura_icon_1.jpg",
+    // Chie Satonaka
+    "Chie.jpg",
+    "Chie2.jpg",
+    "chie_satonaka_icon.jpg",
+    "chiesatonaka_revivale.jpg",
+    // Yukiko Amagi
     "Yukiko.jpg",
     "Yukiko2.jpg",
-    "hui_marie_p4r_pfp.jpg",
-    "naoto_p4r.jpg",
-    // Lot 2.3
+    // Kanji Tatsumi
+    "Kanji.jpg",
+    "Kanji.avif",
+    // Rise Kujikawa
+    "Rise.jpg",
+    "Rise.png",
+    "rise_revivale.jpg",
     "rise_kujikawa_p4.jpg",
+    // Teddie
+    "Teddie.jpg",
+    "Teddie2.jpg",
+    // Naoto Shirogane
+    "Naoto.jpg",
+    "Naoto2.jpg",
+    "naotoshirogane.jpg",
+    "naoto_shirogane_icon_revivae.jpg",
+    "naoto_p4r.jpg",
+    // ── Personnages secondaires ───────────────────────────────────────────
+    // Nanako Dojima
+    "Nanako.jpg",
+    "Nanako2.jpg",
+    // Tohru Adachi
+    "Adachi.jpg",
+    "Adachi2.jpeg",
+    // Marie
+    "Marie.jpg",
+    "Marie2.webp",
+    "hui_marie_p4r_pfp.jpg",
+    // Margaret
+    "margaret.jpg",
   ] },
   { game: "P5", key: "persona5", avatars: [
-    "akechi_alt.jpg",
-    "akechi_jazz.jpg",
-    "Akechi.jpg",
-    "Akechi2.jpg",
-    "Ann_2.jpg",
-    "ann_jazz.jpg",
-    "Ann.jpg",
-    "caroline_justine.png",
-    "futaba_alt.jpg",
-    "futaba_headphones.jpg",
-    "futaba_persona5.jpg",
-    "Futaba.jpg",
-    "Futaba.webp",
-    "Har.jpg",
-    "haru_jazz.jpg",
-    "Haru.png",
-    "joker_starlight.jpg",
+    // ── Protagoniste(s) ───────────────────────────────────────────────────
+    // Ren Amamiya (Joker)
     "Joker.jpg",
-    "Lavenza.jpg",
-    "Lavenza7.gif",
-    "makoto_nijima.jpg",
-    "Makoto.jpg",
-    "Makoto2.jpg",
-    "makotoniijima_jazz.jpg",
-    "Maruki.gif",
-    "morgana_starlight.jpg",
-    "Morgana.jpg",
-    "Morgana.png",
-    "ren_jazz.jpg",
-    "ren_t.webp",
+    "joker_starlight.jpg",
     "Ren.gif",
     "Ren.webp",
     "Ren2.gif",
-    "ryuji_jazz.jpg",
+    "ren_t.webp",
+    "ren_jazz.jpg",
+    // ── Cast principal ────────────────────────────────────────────────────
+    // Ryuji Sakamoto
     "Ryuji.jpg",
     "Ryuji.png",
-    "sumire_jazz.jpg",
-    "Sumire.jpg",
-    "Sumire2.jpg",
-    "Tae.jpg",
-    "Tae2.jpg",
+    "ryuji_jazz.jpg",
+    // Ann Takamaki
+    "Ann.jpg",
+    "Ann_2.jpg",
+    "ann_jazz.jpg",
+    // Morgana
+    "Morgana.jpg",
+    "Morgana.png",
+    "morgana_starlight.jpg",
+    "morgana_dancing.jpg",
+    // Yusuke Kitagawa
     "Yusuke.jpg",
     "Yusuke.webp",
     "yusukekitagawa_jazz.jpg",
-    "morgana_dancing.jpg",
-    // Lot 2.3 — Sophia vient de P5 Strikers, que ce groupe couvre déjà
-    // (P5 / P5R / P5S), d'où sa place ici et non dans un groupe à part.
+    // Makoto Niijima
+    "Makoto.jpg",
+    "Makoto2.jpg",
+    "makoto_nijima.jpg",
+    "makotoniijima_jazz.jpg",
+    // Futaba Sakura
+    "Futaba.jpg",
+    "Futaba.webp",
+    "futaba_alt.jpg",
+    "futaba_headphones.jpg",
+    "futaba_persona5.jpg",
+    // Haru Okumura
+    "Haru.png",
+    "Har.jpg",
+    "haru_jazz.jpg",
+    // Goro Akechi
+    "Akechi.jpg",
+    "Akechi2.jpg",
+    "akechi_alt.jpg",
+    "akechi_jazz.jpg",
+    // Sumire Yoshizawa
+    "Sumire.jpg",
+    "Sumire2.jpg",
+    "sumire_jazz.jpg",
+    // Sophia
     "sophia_p5s.jpg",
+    // ── Personnages secondaires ───────────────────────────────────────────
+    // Lavenza
+    "Lavenza.jpg",
+    "Lavenza7.gif",
+    // Caroline & Justine
+    "caroline_justine.png",
+    // Takuto Maruki
+    "Maruki.gif",
+    // Tae Takemi
+    "Tae.jpg",
+    "Tae2.jpg",
   ] },
   { game: "P5X", key: "persona5x", avatars: [
-    "Arai.png",
-    "Arai2.png",
-    "Kayo.png",
-    "Kayo2.png",
-    "luce.jpg",
-    "Lufel.png",
-    "Lufel2.png",
-    "mionatsukawa_persona_5_phantom_x.jpg",
-    "Riko.png",
-    "Riko2.png",
-    "seijishiratori_persona_5_phantom_x.jpg",
-    "Shun.png",
-    "Shun2.png",
-    "Tomoko.png",
-    "Tomoko2.png",
-    "wonder_alt.jpg",
-    "wonder_velvet.jpg",
+    // ── Protagoniste(s) ───────────────────────────────────────────────────
+    // Wonder (Nagisa Kamishiro)
     "Wonder.jpg",
     "wonder1.png",
     "wonder2.png",
+    "wonder_alt.jpg",
+    "wonder_velvet.jpg",
+    "wonder_joker_matching_p5x.jpg",
+    // ── Cast principal ────────────────────────────────────────────────────
+    // Lufel (Cattle)
+    "Lufel.png",
+    "Lufel2.png",
+    // Motoha Arai (Closer)
+    "Arai.png",
+    "Arai2.png",
+    // Kayo Tomiyama (Okyann)
+    "Kayo.png",
+    "Kayo2.png",
+    // Riko Tanemura (Wind)
+    "Riko.png",
+    "Riko2.png",
+    // Shun Kano (Soy)
+    "Shun.png",
+    "Shun2.png",
+    // Tomoko Noge (Moko)
+    "Tomoko.png",
+    "Tomoko2.png",
+    // Yaoling Li (Rin)
     "Yaoling.png",
     "Yaoling2.png",
+    "yaoling_li_p5x.jpg",
+    // YUI (Bui)
     "YUI.png",
     "YUI2.png",
-    "yukimifujikawa_persona_5_phantom_x.jpg",
-    // Lot 2.3 — Phantom Idols, skins, et le passage de Kotone Shiomi dans P5X.
-    // Noms en snake_case (CLAUDE.md §4) : les fichiers livrés portaient des emoji,
-    // des espaces multiples et des « (1) », que la liste blanche du serveur
-    // (personadle_validate_avatar) refuse — un avatar refusé reste local et
-    // disparaît au prochain pull cloud, sans le moindre message.
-    "aran_hirano_p5x.jpg",
+    "yui_comic_p5x.jpg",
+    "yui_comic_p5x_2.jpg",
+    // Shoki Ikenami (Luce)
+    "luce.jpg",
+    "shoki_ikenami_p5x.jpg",
+    "shoki_ikenami_notte_p5x.jpg",
+    // Ayaka Sakai (Chord)
     "ayaka_sakai_p5x.jpg",
     "ayaka_sakai_p5x_2.jpg",
     "ayaka_sakai_p5x_3.jpg",
     "ayaka_sakai_p5x_4.jpg",
     "ayaka_sakai_summer_p5x.jpg",
-    "hatsune_miku_p5x.jpg",
-    "ichigo_shikano_p5x.jpg",
+    // Kira Kitazato (Messa)
     "kira_kitazato_p5x.jpg",
     "kira_kitazato_p5x_2.jpg",
     "kira_kitazato_p5x_3.jpg",
-    "kiyoshi_kurotani_p5x.jpg",
-    // Kotone MONTAGNE (Mont) — une autre personne que Kotone Shiomi, malgré le
-    // prénom commun. Elle reste ici, dans son jeu.
-    "kotone_montagne_p5x.jpg",
-    "kumi_katayama_p5x.jpg",
-    "miyu_sahara_p5x.jpg",
-    "narumi_nashimoto_p5x.jpg",
-    "shoki_ikenami_p5x.jpg",
-    "shoki_ikenami_notte_p5x.jpg",
-    "wonder_joker_matching_p5x.jpg",
-    "yaoling_li_p5x.jpg",
-    "yui_comic_p5x.jpg",
-    "yui_comic_p5x_2.jpg",
+    // Yumi Shiina (Phoebe)
     "yumi_shiina_p5x.jpg",
     "yumi_shiina_p5x_2.jpg",
     "yumi_shiina_p5x_3.jpg",
+    // ── Personnages secondaires ───────────────────────────────────────────
+    // Aran Hirano (Anri)
+    "aran_hirano_p5x.jpg",
+    // Ichigo Shikano (Berry)
+    "ichigo_shikano_p5x.jpg",
+    // Kiyoshi Kurotani (Key)
+    "kiyoshi_kurotani_p5x.jpg",
+    // Kotone Montagne (Mont)
+    "kotone_montagne_p5x.jpg",
+    // Kumi Katayama (Blitz)
+    "kumi_katayama_p5x.jpg",
+    // Miyu Sahara (Puppet)
+    "miyu_sahara_p5x.jpg",
+    // Mio Natsukawa (Matoi)
+    "mionatsukawa_persona_5_phantom_x.jpg",
+    // Narumi Nashimoto (Pinky)
+    "narumi_nashimoto_p5x.jpg",
+    // Seiji Shiratori (Fleuret)
+    "seijishiratori_persona_5_phantom_x.jpg",
+    // Yukimi Fujikawa (Yuki)
+    "yukimifujikawa_persona_5_phantom_x.jpg",
+    // Hatsune Miku
+    "hatsune_miku_p5x.jpg",
   ] },
-  // Persona Q / Q2 : les héros de P3, P4 et P5 dans leur habillage Etrian —
-  // regroupés ici plutôt que dispersés dans le jeu d'origine de chaque personnage
-  // (décision Hamza du 2026-09-18 : c'est le style qu'on cherche, pas le perso).
   { game: "PQ", key: "personaq", avatars: [
+    // ── Persona 3 ─────────────────────────────────────────────────────────
+    // Makoto Yuki
     "makoto_yuki_pq2.jpg",
+    // Kotone Shiomi
     "kotone_pq.jpg",
+    // Yukari Takeba
     "yukari_pq2.jpg",
+    // Junpei Iori
     "junpei_pq.jpg",
+    // Akihiko Sanada
     "akihiko_pq2.jpg",
+    // Mitsuru Kirijo
     "mitsuru_pq2.jpg",
+    // Aigis
     "aigis_pq2.jpg",
+    // Koromaru
     "koromaru_pq2.jpg",
+    // Ken Amada
     "ken_amada_pq2.jpg",
+    // Shinjiro Aragaki
     "shinjiro_pq2.jpg",
+    // ── Persona 4 ─────────────────────────────────────────────────────────
+    // Yu Narukami
     "yu_pq.jpg",
+    // Yosuke Hanamura
     "yosuke_pq.jpg",
+    // Chie Satonaka
     "chie_pq.jpg",
+    // Yukiko Amagi
     "yukiko_pq.jpg",
+    // Kanji Tatsumi
     "kanji_pq.jpg",
+    // Rise Kujikawa
     "rise_pq.jpg",
+    // Teddie
     "teddie_pq.jpg",
+    // Naoto Shirogane
     "naoto_pq.jpg",
+    // ── Persona 5 ─────────────────────────────────────────────────────────
+    // Ren Amamiya (Joker)
     "joker_pq.jpg",
+    // Ryuji Sakamoto
     "ryuji_pq.jpg",
+    // Ann Takamaki
     "ann_pq.jpg",
+    // Morgana
     "morgana_pq.jpg",
+    // Yusuke Kitagawa
     "yusuke_pq.jpg",
+    // Makoto Niijima
     "makoto_nijima_pq.jpg",
+    // Haru Okumura
     "haru_pq.jpg",
+    // Goro Akechi (Crow)
     "crow_pq2.jpg",
   ] },
   { game: "SPECIAL", key: "special", avatars: [
+    // Détournements, crossovers et images d'anniversaire — pas de roster.
     "Anniversary.gif",
     "catlisabeth.gif",
     "jack_frost_gurren_aggan.jpg",

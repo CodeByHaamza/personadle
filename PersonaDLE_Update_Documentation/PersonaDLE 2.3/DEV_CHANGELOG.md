@@ -153,6 +153,55 @@ Deux exclusions, l'une et l'autre volontaires :
   personne que Kotone Shiomi, malgré le prénom commun. La regrouper serait une erreur de
   contenu, pas un rangement.
 
+### Galerie réordonnée : protagoniste → cast principal → secondaires
+
+Demande Hamza. Chaque groupe s'ouvre désormais sur son ou ses protagonistes, puis le cast
+principal, puis les personnages secondaires, et **les portraits d'un même personnage se
+suivent** — la galerie se parcourt à l'œil, on y cherche quelqu'un, pas le lot qui a livré
+l'image.
+
+Le blocage : `avatars_data.js` ne connaissait que des noms de fichiers. Rien n'y disait QUI
+était sur l'image, et aucune heuristique sur le nom ne tient (`Yuki.gif`, `makoto_yuki.jpg`
+et `pfp_makoto.gif` sont la même personne ; `Makoto.jpg` en est une autre). D'où
+`scripts/avatar_census.js`, qui porte le roster de chaque jeu — personnage, rôle, fichiers —
+et devient la source de l'ordre.
+
+- `npm run avatars:census` — combien de portraits par personnage, du moins fourni au mieux
+  fourni, plus la liste des personnages de cast principal qui n'en ont **aucun**.
+- `npm run avatars:sort` — régénère `avatars_data.js` depuis ce roster. Le script compare
+  l'avant et l'après groupe par groupe et **refuse d'écrire** si un portrait a disparu, est
+  apparu, ou a changé de jeu.
+
+Un portrait ajouté sans être inscrit au roster ressort en « NON RECENSÉ » : c'est voulu,
+c'est le rappel qu'il lui manque son personnage.
+
+**Exception : le groupe PQ ne se trie pas par rôle.** Son ordre est figé P3 → P4 → P5
+(protagoniste d'abord dans chaque jeu), décision Hamza du 2026-09-18, et
+`tests/avatars_gallery.test.js` le verrouille par un cas **exact**. Premier jet du tri :
+ce test est passé au rouge en remontant Yu Narukami et Joker en tête du groupe. Le roster
+porte donc un champ `section` qui signale un ordre figé, et le script ne retrie pas ces
+groupes-là.
+
+### État de la galerie après ce lot
+
+235 portraits, 79 personnages recensés, 11 images SPECIAL (détournements et crossovers, sans
+roster par conception).
+
+| Groupe | Portraits | Personnages | Moyenne |
+|---|---|---|---|
+| P1 | 11 | 7 | 1,6 |
+| P2 | 9 | 5 | 1,8 |
+| P3 | 44 | 15 | 2,9 |
+| P4 | 38 | 12 | 3,2 |
+| P5 | 46 | 15 | 3,1 |
+| P5X | 50 | 24 | 2,1 |
+| PQ | 26 | 26 | 1,0 |
+
+**20 personnages n'ont qu'un seul portrait**, dont cinq du cast principal : Eriko Kirishima
+et Yukino Mayuzumi (P1), Lisa Silverman (P2), Sophia (P5), et Akihiko Sanada (1 seul en P3).
+**31 personnages de cast principal n'en ont aucun** — la liste vit dans `ABSENTS`
+(`scripts/avatar_census.js`), à raccourcir au fur et à mesure.
+
 ### Détails techniques
 
 - `img/avatar/` — 31 fichiers ajoutés, copiés par un script qui **refuse de tourner** si le
