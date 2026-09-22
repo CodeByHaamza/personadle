@@ -26,7 +26,7 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 0 | `chore/open-2-3` | Ouverture de la version (ce document) |
 | 1 | `fix/classic_age_60_plus` | Tranche d'âge `60+` absente du barème de comparaison |
 | 2 | `fix/settings_modal_save_visible` | Bouton « Sauvegarder » hors champ dans les paramètres |
-| 3 | `feat/aoa_p5x_variants` | All-Out Attack Luce Night et Soy Pioneer |
+| 3 | `feat/aoa_p5x_variants` | All-Out Attack Luce Notte et Soy Pioneer |
 | 4 | `feat/avatars_gallery_p5x` | Nouveaux portraits de la galerie |
 | 5 | `fix/classic_elisabeth_thanatos` | Elisabeth devient utilisatrice de persona |
 | 6 | `feat/unlockable_avatars` | Avatars déblocables + pack Kotone |
@@ -175,6 +175,97 @@ produire de flèche. L'égalité stricte la couvre déjà en amont (`value === t
   `api/lib/daily_target.php` recalcule la cible du jour, pas la comparaison d'attributs.
 - Les grilles déjà affichées chez un joueur ne sont pas recalculées : la correction vaut
   pour les parties suivantes.
+
+---
+
+## 2026-09-22 — Deux All-Out Attack P5X : Luce Notte et Soy Pioneer
+
+Les deux tenues 5 étoiles livrées par Hamza dans `New Data.zip`. Chacune est une entrée
+**à part**, la tenue de base restant devinable séparément — comme tous les skins depuis
+`Wonder Summer`.
+
+### Noms : « Notte » et « Pioneer », pas ceux des fichiers source
+
+Les fichiers livrés se contredisaient. Vérifié avant d'écrire la donnée, parce que c'est
+le nom que le joueur tape dans l'autocomplétion :
+
+| Personnage | Dossier livré | Fichiers | Nom retenu | Source |
+|---|---|---|---|---|
+| Shoki Ikenami | `Luce Night` | `Luce_Notte_full_appearance`, `Shoki's_Notte_Mask` | **Luce Notte** | lufel.net → « Shoki·Notte » |
+| Shun Kano | `Soy Pioneer` | `Shun's_Pioneer_Mask` **mais** `Soy_Frontier_full_appearance` | **Soy Pioneer** | lufel.net → « Shun·Pioneer » |
+
+« Night » est une traduction de *Notte*, et « Frontier » un nom de datamine antérieur (le
+wiki décrit encore la tenue sous ce nom) que l'un des fichiers porte encore. Un cas de test
+interdit explicitement le retour en arrière sur ces deux noms.
+
+### Assets
+
+Trois fichiers par personnage, dont l'absence ne lève **rien** au build :
+
+- `database/allOutAttack/<gif>.webp` — l'animation floutée à deviner ;
+- `database/img/<gif>.webp` — le portrait masqué (autocomplétion, lignes d'essai) ;
+- `database/img/<gif>_Battle.webp` — l'illustration révélée en fin de partie.
+
+Les masques et illustrations viennent du zip tels quels. Les animations sont réencodées
+depuis les mp4 de présentation, **calées sur les entrées de base** des deux mêmes
+personnages (`Luce.webp`, `Soy.webp`) : 800 × 450, ~20 fps, `libwebp` q=65.
+
+| Fichier | Dimensions | Images | Poids |
+|---|---|---|---|
+| `Luce.webp` (existant) | 800 × 450 | 126 | 4,8 Mo |
+| `Soy.webp` (existant) | 800 × 450 | 153 | 4,7 Mo |
+| `Luce_Notte.webp` | 800 × 450 | 132 | 4,9 Mo |
+| `Soy_Pioneer.webp` | 800 × 450 | 149 | 5,7 Mo |
+
+Soy Pioneer sort 1 Mo au-dessus de sa base à qualité égale (contenu plus détaillé). Baisser
+sa qualité pour gagner ce méga aurait créé un écart de rendu entre deux fichiers voisins :
+les deux restent bien sous le lot 2.2 (`Berry_Summer` 8,5 Mo, `Bui_Cosmic` 8,7 Mo), ce qui
+suffit au regard du poids du dépôt (cf. ROADMAP).
+
+### Détails techniques
+
+- `allOutAttackMode/database/aoaCharacters.js` — section « Skins 2.3 », entrées ajoutées
+  **en fin de liste** pour ne pas décaler les index existants.
+- `allOutAttackMode/database/portraitsMap.js`, `personas_allOut.js` — les deux tables que
+  l'oubli rend silencieux : sans `portraitsMap` pas de portrait, sans `personas_allOut` le
+  personnage n'est jamais proposé à la saisie, donc injouable.
+- `api/data/daily_pools.json` — régénéré (`npm run pools:build`) : `alloutattack` passe à 77
+  entrées, les deux nouveaux noms y figurent avec leur opus.
+- `tests/content_aoa_skins_2_3.test.js` — **nouveau**. L'essentiel est un garde-fou
+  *général*, pas une vérification des deux seules entrées du lot : les trois fichiers
+  existent pour **tout** le roster, chaque nom est dans `portraitsMap` en pointant sur son
+  propre `gif`, aucun nom ni `gif` en double, et chaque animation est réellement animée
+  (chunk `ANIM` du conteneur RIFF lu à la main, pour ne pas ajouter de décodeur d'image aux
+  dépendances de test).
+- `PersonaDLE 2.3/PersonaDLE_Update.html` — deux cartes thématiques `.aoa-card-notte` et
+  `.aoa-card-pioneer`, sur le principe de `Wonder Shujin` en 2.2 : la carte emprunte la
+  palette de l'attaque. Notte en nuit vénitienne (vitrail violet, or, cramoisi, perles du
+  masque) ; Pioneer en plein jour western (trame de BD bleue, ceinturon de cuir clouté,
+  étoiles de shérif). Les deux fixent leurs couleurs dans les **deux** thèmes : une carte
+  Pioneer qui basculerait en sombre perdrait le blanc du costume, qui est le sujet.
+
+### Vérifications
+
+- Garde-fou d'assets testé **en retirant un fichier** : il échoue en nommant le fichier
+  manquant, il ne se contente pas de passer.
+- Les six assets servis en 200 `image/webp` par la stack Docker.
+- Conduit dans le navigateur : les deux noms sortent à l'autocomplétion du mode, chacun avec
+  son portrait effectivement chargé (`naturalWidth > 0`), zéro erreur d'image.
+- Cartes du changelog rendues en capture, aucune image cassée, aucune requête en erreur.
+- `npm test` ✅ · `npm run data:check` ✅ · `npm run pools:check` ✅ · `npm run lint` ✅.
+
+### Angles morts connus
+
+- Les animations portent les filigranes de la chaîne source (« Faz » + un identifiant en bas
+  de cadre). **C'est le cas de tout le roster existant** — `Luce.webp` les porte déjà aux
+  mêmes positions. Les retirer sur deux entrées sur plus de cent aurait créé l'incohérence,
+  pas l'inverse ; un nettoyage se ferait sur l'ensemble ou pas du tout.
+- Le mode masque la réponse par un flou CSS (`INITIAL_BLUR = 20`, `BLUR_STEP = 3`), pas en
+  cuisant l'effet dans les pixels — le piège « un filtre CSS ne cache rien » de CLAUDE.md §7
+  vaut donc ici aussi. Préexistant à ce lot, non traité : ce serait le pendant de
+  `js/silhouette_mask.js` pour une image animée, soit un lot à soi seul.
+- Ajouter deux entrées change le modulo du tirage quotidien : la cible du jour de
+  `alloutattack` n'est plus la même qu'avant le lot. Inhérent à tout ajout de contenu.
 
 ---
 
