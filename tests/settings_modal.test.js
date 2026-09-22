@@ -114,3 +114,51 @@ describe("modale — réglages d'autoplay", () => {
     );
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Structure — le pied de modale collant
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Signalé par Gypotre : depuis le profil, on ne voit pas le bouton « Sauvegarder ».
+ *
+ * `.sm-panel` est un conteneur défilant (`max-height: 88vh; overflow-y: auto`) et
+ * le bouton en était le dernier enfant. Sur la page profil — et seulement là — la
+ * zone de danger est montée en plus (elle dépend de `window._personadleDanger`),
+ * ce qui allonge le panneau au point de pousser le bouton sous la ligne de flottaison.
+ *
+ * jsdom ne calcule aucune mise en page : ces cas ne vérifient donc que la
+ * STRUCTURE que la règle collante suppose (bouton et indicateur dans un pied,
+ * enfant direct du conteneur défilant). La visibilité réelle est vérifiée par
+ * `tests-e2e/settings_modal.spec.js`, dans un vrai navigateur.
+ */
+describe("modale des paramètres — pied collant", () => {
+  it("place « Sauvegarder » et son indicateur dans un pied enfant direct du panneau", () => {
+    initSettingsModal();
+    openSettingsModal();
+
+    const panel = document.querySelector("#settingsModal .sm-panel");
+    const footer = panel.querySelector(":scope > .sm-footer");
+
+    expect(footer).not.toBeNull();
+    expect(footer.querySelector("#smSave")).not.toBeNull();
+    expect(footer.querySelector("#smStatus")).not.toBeNull();
+  });
+
+  it("garde le pied en dernier, après la zone de danger", () => {
+    // L'ordre compte : un pied collant placé avant la zone de danger la
+    // recouvrirait au lieu de flotter au-dessus du contenu qui défile.
+    window._personadleDanger = { reset() {}, deleteAccount() {} };
+    initSettingsModal();
+    openSettingsModal();
+
+    const panel = document.querySelector("#settingsModal .sm-panel");
+    const children = [...panel.children];
+
+    expect(children.at(-1).classList.contains("sm-footer")).toBe(true);
+    expect(children.findIndex((c) => c.id === "smDangerSection")).toBeLessThan(
+      children.length - 1
+    );
+    delete window._personadleDanger;
+  });
+});
