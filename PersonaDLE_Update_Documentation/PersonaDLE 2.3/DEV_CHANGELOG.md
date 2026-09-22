@@ -85,6 +85,107 @@ produire de flèche. L'égalité stricte la couvre déjà en amont (`value === t
 
 ---
 
+## 2026-09-22 — 31 portraits de profil importés et rangés
+
+Le dossier `NEW PFP` livré par Hamza. La galerie passe de **204 à 235** portraits.
+
+### Renommage : les noms livrés ne pouvaient pas rester
+
+Les fichiers arrivaient sous leur nom de téléchargement : emoji (`ᯓ𔘓`, `★☆`, `♡゙᷐ᩧ`),
+espaces multiples, `(1)`/`(2)`, diacritiques combinants. Au-delà de la règle snake_case
+(CLAUDE.md §4), ces noms **échouent à la liste blanche du serveur**
+(`personadle_validate_avatar`, `api/lib/validation.php`, regex
+`^[A-Za-z0-9_-]+\.(gif|png|jpe?g|webp|avif)$`). Un avatar refusé reste **local** : jamais
+persisté sur le compte, écrasé au prochain `pullProfileFromCloud`, absent sur un autre
+appareil — et sans le moindre message. C'est exactement le défaut que
+`tests/avatars_gallery.test.js` documente depuis l'import de septembre.
+
+Format retenu : `<personnage>_<opus>[_n].jpg`.
+
+### Identification : à l'œil, pas au nom de fichier
+
+Chaque portrait a été identifié **visuellement** (planche-contact numérotée) plutôt que
+déduit du nom livré, qui est souvent approximatif. Ce qui a changé le classement :
+
+- `#shokiikenami … (1).jpg` est Shoki dans sa tenue **Notte** (masque cramoisi et or), pas
+  sa tenue de base → `shoki_ikenami_notte_p5x.jpg`, cohérent avec le lot All-Out Attack ;
+- `sophia.jpg` est **Sophia de P5 Strikers** (le cœur sur la tête) — confirmé contre son
+  entrée du dataset (`opus: ["P5S"]`, arcane Hope, persona Pithos) → groupe P5, que ce
+  groupe couvre déjà (P5 / P5R / P5S) ;
+- `summer_araka_sakai.jpg` → « araka » est une coquille pour **Ayaka** Sakai ;
+- `Wonder And Joker Matching 1_2` : vérifié contre `img/avatar/Wonder.jpg` — mêmes cheveux
+  roux, mêmes yeux rouges, c'est bien Wonder.
+
+### Répartition
+
+| Groupe | Nombre |
+|---|---|
+| P5X | 25 |
+| P3 (Kotone Shiomi) | 4 |
+| P4 (Rise Kujikawa) | 1 |
+| P5 (Sophia) | 1 |
+
+### Makoto Yuki puis Kotone Shiomi, en tête du groupe P3
+
+Deux demandes de Hamza en cours de lot : regrouper **tous** les portraits de Kotone d'un
+seul bloc — anciens et nouveaux mêlés, pas un tas par lot —, puis faire de même pour Makoto
+Yuki et placer les deux protagonistes en **tête** du groupe P3, Makoto d'abord.
+
+Le groupe s'ouvre donc sur les **5** portraits de Makoto Yuki (`makoto_yuki.jpg`,
+`Yuki.gif`, `Yuki.jpeg`, `yuki.jpg`, `Yuki2.gif`) puis les **9** de Kotone
+(`Kotone.jpeg`, `Kotone2.jpeg`, `Kotone3.jpeg`, `kotone_pdp.jpg`, `kotone_shiomi.jpg`
+livrés en 2.0-2.2, plus les 4 de ce lot, crossover compris). Le reste du groupe suit,
+inchangé. La galerie se parcourt à l'œil : un joueur cherche un personnage, pas le lot qui
+a livré l'image.
+
+Le réordonnancement passe par un script qui **réécrit** le bloc P3 puis compare l'avant et
+l'après : il refuse d'écrire si un fichier a disparu ou est apparu. Un avatar retiré de la
+liste devient injouable sans que rien ne le signale.
+
+Deux exclusions, l'une et l'autre volontaires :
+
+- **`kotone_pq.jpg` et `makoto_yuki_pq2.jpg` restent dans le groupe PQ.** Ce groupe est un
+  roster **complet** en style Persona Q — chaque personnage y a son entrée, de
+  `makoto_yuki_pq2` à `crow_pq2`. Les en sortir y ferait deux trous. Même raison pour
+  `pfp_makoto.gif` et `Yuki_Zutomayo.jpeg`, qui restent dans SPECIAL (détournements et
+  crossovers). À dire si tu préfères l'inverse.
+- **`kotone_montagne_p5x.jpg` reste en P5X** : Kotone **Montagne** (Mont) est une autre
+  personne que Kotone Shiomi, malgré le prénom commun. La regrouper serait une erreur de
+  contenu, pas un rangement.
+
+### Détails techniques
+
+- `img/avatar/` — 31 fichiers ajoutés, copiés par un script qui **refuse de tourner** si le
+  nombre de sources ne correspond pas au mapping, si deux destinations portent le même nom,
+  ou si l'une écraserait un avatar existant. Écraser silencieusement un portrait de la 2.0
+  aurait été invisible jusqu'à ce qu'un joueur le remarque.
+- `profile/avatars_data.js` — les 31 entrées dans leurs groupes, avec le pourquoi du
+  classement de Sophia et du crossover Kotone en commentaire sur place.
+- `PersonaDLE 2.3/PersonaDLE_Update.html` — la grille complète des 31 vignettes avec leur
+  personnage, groupée par jeu (règle « tout nouveau contenu est listé », CLAUDE.md §9). Le
+  HTML est **généré** depuis une liste, pas tapé : 31 chemins à la main, ce sont 31 chances
+  de faire une faute qui ne casse rien au build et laisse juste une case vide.
+
+### Vérifications
+
+- `tests/avatars_gallery.test.js` était **rouge avant** (31 orphelins nommés) et passe après
+  — c'est lui qui couvre l'existence sur disque, l'absence d'orphelin, l'absence de doublon
+  entre groupes, et la liste blanche serveur. Aucun test nouveau n'était nécessaire.
+- Les 31 chemins de la grille du changelog vérifiés un par un contre `img/avatar/` : zéro
+  manquant, zéro doublon.
+- Conduit dans le navigateur : l'atelier du profil affiche **235** portraits, zéro image
+  cassée, zéro 404 sur `/img/avatar/`, les nouveaux rendus dans leurs bons groupes.
+- Grille du changelog rendue : 31 vignettes chargées, rangées alignées.
+
+### Angles morts connus
+
+- Les portraits **animés** de Kotone (dossier `Kotone PFP`) ne sont pas ici : ils forment le
+  pack déblocable du lot 6. Seuls les portraits libres vivent dans `avatars_data.js`.
+- Les fichiers restent des `.jpg` tels que livrés, sans réencodage — poids total ~3,1 Mo
+  pour 31 fichiers, du même ordre que la galerie existante.
+
+---
+
 ## 2026-09-22 — Ouverture de la v2.3
 
 Création du dossier de version, comme le veut CLAUDE.md §9 : c'est ce point de
