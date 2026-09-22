@@ -40,6 +40,51 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-09-22 — L'âge « 60+ » manquait au barème de comparaison du mode Classique
+
+Signalé par Hamza, capture à l'appui : cible Bunkichi (`80+`), essai Mutatsu (`60+`)
+affiché **en rouge**, alors que Shuji Ikutsuki (`21-40`) et Naoya Todou (`15-20`)
+sortaient bien en orange avec une flèche vers le haut sur la même grille.
+
+Le mode Classique a deux sources de vérité sur l'âge qui ne se parlaient pas :
+
+- `VALID_AGES` (`scripts/validate_characters.js`) décide quelles tranches un personnage
+  a le droit de porter — et contient `60+` depuis toujours ;
+- le barème de `convertAgeToValue()` (`classiqueMode/modeClassique.js`) décide lesquelles
+  savent se comparer — et ne l'avait **jamais** reçue.
+
+Une tranche hors barème renvoie `-1`, et `compareAttribute()` traite `-1` comme « tranche
+non reconnue » → `status: "wrong"`, donc rouge sans flèche. Mutatsu est le **seul**
+personnage du jeu sur 184 à porter `60+` : le trou est resté invisible jusqu'à ce qu'une
+partie tombe sur lui.
+
+### Détails techniques
+
+- `classiqueMode/modeClassique.js` — `"60+": 65` ajouté au barème (entre `40+` → 50 et
+  `80+` → 85), et le commentaire de `convertAgeToValue()` dit désormais explicitement que
+  ce barème doit couvrir toute tranche de `VALID_AGES` sauf `Unknown`.
+- `tests/modeComparisons.test.js` — 3 cas ajoutés. Le scénario exact rapporté, mais
+  surtout **deux garde-fous de classe** plutôt que le seul cas vécu :
+  - `covers every canonical bracket the schema validator allows` importe `VALID_AGES` et
+    échoue en nommant la tranche fautive dès qu'une tranche acceptée par le schéma n'est
+    pas au barème ;
+  - `keeps the brackets strictly ordered` vérifie que les valeurs sont strictement
+    croissantes et sans doublon — une future tranche mal placée inverserait des flèches
+    sans rien casser d'autre.
+
+`Unknown` reste volontairement hors barème : une tranche non ordonnable ne peut pas
+produire de flèche. L'égalité stricte la couvre déjà en amont (`value === targetVal`).
+
+### Angles morts connus
+
+- `convertAgeToValue()` est le **seul** barème d'âge du dépôt — vérifié par recherche sur
+  tout le code JS, PHP, JSON et HTML. Il n'existe pas de miroir PHP côté anti-triche :
+  `api/lib/daily_target.php` recalcule la cible du jour, pas la comparaison d'attributs.
+- Les grilles déjà affichées chez un joueur ne sont pas recalculées : la correction vaut
+  pour les parties suivantes.
+
+---
+
 ## 2026-09-22 — Ouverture de la v2.3
 
 Création du dossier de version, comme le veut CLAUDE.md §9 : c'est ce point de
