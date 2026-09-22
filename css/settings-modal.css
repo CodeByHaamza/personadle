@@ -66,7 +66,11 @@
   background: #fff;
   border: 1px solid #e8e8e8;
   border-radius: 18px;
-  padding: 30px 32px 26px;
+  /* Pas de padding bas : c'est `.sm-footer` qui le porte. Un élément collant est
+     borné par son bloc conteneur — la content box du panneau —, donc tant que le
+     panneau gardait ses 26 px, le pied s'arrêtait 27 px au-dessus du bord et le
+     contenu défilait visiblement dans cette bande. */
+  padding: 30px 32px 0;
   /* 420 px pour son, animations, musique, données ET zone de danger : c'était
      serré (retour Hamza du 2026-09-16). */
   width: min(560px, 94vw);
@@ -172,6 +176,36 @@
 }
 
 /* Bouton save */
+/* ── Pied collant ──────────────────────────────────────────
+   `.sm-panel` défile (max-height: 88vh; overflow-y: auto) et « Sauvegarder » en
+   était le dernier enfant : il fallait aller le chercher tout en bas. Sur la page
+   profil c'était systématique, parce que la zone de danger n'est montée que là
+   (window._personadleDanger) et rallonge le panneau d'autant — d'où un bug qui ne
+   se voyait pas depuis l'accueil (signalé par Gypotre).
+
+   Les marges latérales négatives annulent le padding du panneau pour que le pied
+   couvre toute la largeur du scrollport : sans elles, le contenu défilerait
+   visiblement de chaque côté du bouton. Elles suivent donc `.sm-panel` — y
+   compris dans la requête média à 480 px.
+
+   Le padding BAS, lui, a été déplacé du panneau vers le pied : un élément collant
+   est borné par son bloc conteneur, donc tant que le panneau gardait son
+   `padding-bottom`, le pied s'arrêtait 27 px au-dessus du bord (mesuré). Une
+   marge négative n'y change rien — la contrainte est le bloc conteneur, pas la
+   marge. Les coins arrondis du bas restent découpés par l'overflow du panneau. */
+.sm-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin: 0 -32px;
+  padding: 14px 32px 18px;
+  background: #fff;
+  border-top: 1px solid #ededed;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .sm-save {
   display: flex;
   align-items: center;
@@ -214,6 +248,15 @@
   text-align: center;
   min-height: 18px;
 }
+/* `_save()` pose et retire la classe `hidden` sur cet indicateur depuis toujours,
+   mais aucune règle ne la définissait : ni ici, ni dans global.css, qui ne
+   connaît que `.modal.hidden` et `.sm-danger.hidden`. L'indicateur était donc
+   toujours dans le flux — 18 px de vide sous le bouton en permanence, et une
+   assertion « il est visible » qui ne prouvait rien. Dans un pied collant cette
+   bande coûte de la hauteur utile à chaque ouverture. */
+.sm-save-status.hidden {
+  display: none;
+}
 
 /* Dark mode — couverture complète */
 .darkmode .sm-panel {
@@ -246,6 +289,12 @@
 }
 .darkmode .sm-save-status {
   color: #4ade80;
+}
+/* Le pied est opaque par nature : sans fond, le contenu défilerait derrière le
+   bouton. Il doit donc suivre le fond de `.sm-panel` dans les deux thèmes. */
+.darkmode .sm-footer {
+  background: #1e1e1e;
+  border-top-color: #2e2e2e;
 }
 
 /* ── Style selector (Calling Card / P4 TV) ─────────────── */
@@ -306,8 +355,15 @@
 /* Mobile */
 @media (max-width: 480px) {
   .sm-panel {
-    padding: 22px 18px 20px;
+    padding: 22px 18px 0;
     gap: 14px;
+  }
+  /* Les marges latérales du pied annulent le padding de `.sm-panel` : elles
+     doivent le suivre ici aussi, sinon le pied déborde du panneau. Et comme en
+     desktop, c'est le pied qui porte le padding bas. */
+  .sm-footer {
+    margin: 0 -18px;
+    padding: 12px 18px 16px;
   }
   .sm-title {
     font-size: 1rem;
@@ -320,7 +376,20 @@
 /* ── Identité Persona 5 ─────────────────────────────────────── */
 .sm-panel {
   border-top: 3px solid var(--color-accent, #e63946) !important;
-  overflow: hidden;
+  /* ⚠️ `overflow: hidden` ici écrasait le `overflow-y: auto` du bloc principal
+     — même sélecteur, même spécificité, déclaré plus bas donc gagnant. Le
+     panneau ne défilait plus du tout : ni barre, ni molette, ni tactile. Mesuré
+     sur une fenêtre de 720 px, profil connecté : 1054 px de contenu pour 690 px
+     visibles, soit 364 px inatteignables — « Sauvegarder », mais aussi toute la
+     zone de danger (Réinitialiser / Supprimer mon compte), 213 px sous le bord.
+     Seul `scrollTop` en JS passait encore, ce qui rendait le défaut invisible à
+     tout test qui défilait par script au lieu de la molette.
+
+     Seul l'axe horizontal a besoin d'être coupé : c'est la diagonale décorative
+     `::before` (top/right négatifs) qui déborde. `overflow-x: hidden` la clippe
+     — verticalement aussi, puisqu'un dépassement au-dessus du bord haut n'est
+     de toute façon pas atteignable au défilement. */
+  overflow-x: hidden;
 }
 /* Diagonale décorative P5 en arrière-plan du panel */
 .sm-panel::before {
