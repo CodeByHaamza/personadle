@@ -275,6 +275,24 @@
   à coordonner) pour purger le poids déjà accumulé + `.gitattributes` LFS. Réencodage AOA en
   parallèle (webp q70 : 37-81 Mo → 9-25 Mo par fichier, voir AMELIORATIONS.md §2).
 
+### 🔗 2.3 — Social Link sans plafond, visible sur Discord (idée Hamza, 2026-09-21)
+
+- [ ] **Le Social Link continue après le rang 10.** Aujourd'hui l'XP s'accumule mais le rang
+  plafonne à 10 (`personadle_sl_rank_for_xp`). Décision à prendre : garder le rang 1-10 comme
+  repère lore (« MAX » à 10, comme dans les jeux) et exposer en plus les **points de lien**
+  cumulés, sans limite — c'est ce qui rend un classement possible sans casser la lecture
+  Persona. Alternative : rangs 11+ nommés (à écarter à mon sens : Persona s'arrête à 10).
+- [ ] **Classement des Social Links** — page « Liens » du site : top des paires par points, la
+  paire la plus ancienne, la plus active de la semaine. Calcul : `social_links` déjà en base,
+  aucune migration a priori ; un cache comme `leaderboard_cache` si le volume grimpe.
+- [ ] **Sur Discord, avec l'OAuth 2.3** — `/lien @ami` (Alibaba) : rang, points, dernière
+  interaction, et l'action mutuelle du jour encore disponible ; le top 3 hebdo des liens
+  posté par Margaret avec le top 3 des joueurs. Sans compte lié, `/lien pseudo pseudo` lit
+  le profil public. Le badge `same_energy` (rang ≥ 5) reste la seule condition serveur qui
+  lit le Social Link — un classement n'y touche pas.
+- Prérequis : la connexion Discord (ci-dessus, reportée en 2.2 puis 2.3) — c'est elle qui relie
+  un membre Discord à un joueur.
+
 ## 📆 À venir — contenu conditionné à une sortie de jeu
 
 > ⚠️ **Ce n'est pas une liste de tâches à faire maintenant.** Rien à faire tant qu'aucun des
