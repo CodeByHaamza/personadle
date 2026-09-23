@@ -58,20 +58,33 @@ describe("galerie d'avatars (profile/avatars_data.js ↔ img/avatar/)", () => {
     }
   });
 
-  it("les 26 portraits Persona Q/Q2 sont regroupés dans le groupe « Persona Q », ordonnés P3 → P4 → P5", () => {
+  it("les portraits Persona Q/Q2 sont regroupés dans le groupe « Persona Q », ordonnés P3 → P4 → P5", () => {
+    // Ordre FIGÉ, décision Hamza du 2026-09-18 : ce groupe se range par jeu
+    // d'origine, pas par rôle — c'est le style Etrian qu'on y cherche. Les deux
+    // médaillons ronds `akihiko_sanada_pq` et `koromaru_pq` ont rejoint le
+    // groupe le 2026-09-23 : ils étaient classés en P3 alors que leur art est un
+    // art de Persona Q (même correction de principe).
     const pq = AVATAR_GROUPS.find((g) => g.key === "personaq");
     expect(pq).toBeTruthy();
     expect(pq.avatars).toEqual([
-      "makoto_yuki_pq2.jpg", "kotone_pq.jpg", "yukari_pq2.jpg", "junpei_pq.jpg", "akihiko_pq2.jpg",
-      "mitsuru_pq2.jpg", "aigis_pq2.jpg", "koromaru_pq2.jpg", "ken_amada_pq2.jpg", "shinjiro_pq2.jpg",
-      "yu_pq.jpg", "yosuke_pq.jpg", "chie_pq.jpg", "yukiko_pq.jpg", "kanji_pq.jpg", "rise_pq.jpg", "teddie_pq.jpg", "naoto_pq.jpg",
-      "joker_pq.jpg", "ryuji_pq.jpg", "ann_pq.jpg", "morgana_pq.jpg", "yusuke_pq.jpg", "makoto_nijima_pq.jpg", "haru_pq.jpg", "crow_pq2.jpg",
+      // Persona 3
+      "makoto_yuki_pq2.jpg", "kotone_pq.jpg", "yukari_pq2.jpg", "junpei_pq.jpg",
+      "akihiko_pq2.jpg", "akihiko_sanada_pq.jpg", "mitsuru_pq2.jpg", "aigis_pq2.jpg",
+      "koromaru_pq2.jpg", "koromaru_pq.jpg", "ken_amada_pq2.jpg", "shinjiro_pq2.jpg",
+      // Persona 4
+      "yu_pq.jpg", "yosuke_pq.jpg", "chie_pq.jpg", "yukiko_pq.jpg", "kanji_pq.jpg",
+      "rise_pq.jpg", "teddie_pq.jpg", "naoto_pq.jpg",
+      // Persona 5
+      "joker_pq.jpg", "ryuji_pq.jpg", "ann_pq.jpg", "morgana_pq.jpg", "yusuke_pq.jpg",
+      "makoto_nijima_pq.jpg", "haru_pq.jpg", "crow_pq2.jpg",
     ]);
     // Aucun portrait Q/Q2 ne traîne dans un autre groupe
     for (const g of AVATAR_GROUPS) {
       if (g.key === "personaq") continue;
       expect(g.avatars.filter((n) => /_pq2?\.jpg$/.test(n)), g.key).toEqual([]);
     }
+    // …et réciproquement, le groupe ne contient QUE des portraits de ce style.
+    expect(pq.avatars.filter((n) => !/_pq2?\.jpg$/.test(n))).toEqual([]);
   });
 
   it("les trois autres portraits du lot restent dans le jeu de leur personnage", () => {
