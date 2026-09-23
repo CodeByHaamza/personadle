@@ -4795,7 +4795,9 @@
       "Closer Radiance ( Motoha Arai )",
       "Miku ( Hatsune Miku )",
       "Bui Cosmic ( YUI )",
-      "Berry Summer ( Ichigo Shikano )"
+      "Berry Summer ( Ichigo Shikano )",
+      "Luce Notte ( Shoki Ikenami )",
+      "Soy Pioneer ( Shun Kano )"
     ],
     "opusByName": {
       "Aigis": [
@@ -5025,6 +5027,12 @@
         "P5X"
       ],
       "Miku ( Hatsune Miku )": [
+        "P5X"
+      ],
+      "Luce Notte ( Shoki Ikenami )": [
+        "P5X"
+      ],
+      "Soy Pioneer ( Shun Kano )": [
         "P5X"
       ]
     }
