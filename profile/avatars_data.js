@@ -40,6 +40,7 @@ export const AVATAR_GROUPS = [
     "yukino_mayuzumi_p1_2.jpg",
     // Maki Sonomura
     "maki_sonomura_p1.jpg",
+    "maki_sonomura_p1_2.jpg",
     // Reiji Kido
     "reiji_kido_p1.jpg",
     "reiji_kido_p1_2.jpg",
