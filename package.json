@@ -23,7 +23,9 @@
     "setup-hooks": "git config core.hooksPath .githooks && echo 'Git hooks activated (.githooks/)'",
     "format": "prettier --write \"**/*.{js,css,html,json,md}\" --ignore-path .prettierignore",
     "format:check": "prettier --check \"**/*.{js,css,html,json,md}\" --ignore-path .prettierignore",
-    "lyrics:build": "node scripts/export_expert_lyrics.js"
+    "lyrics:build": "node scripts/export_expert_lyrics.js",
+    "avatars:census": "node scripts/avatar_census.js",
+    "avatars:sort": "node scripts/sort_avatars_data.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",

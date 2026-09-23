@@ -1263,7 +1263,265 @@
         @media (prefers-reduced-motion: reduce) {
             .kotone-ribbon { animation: none; }
         }
-    </style>
+
+
+        /* ═══════════════════════════════════════════════════════════════════
+           GRILLE DES NOUVEAUX PORTRAITS
+
+           Tout nouveau contenu est listé explicitement (CLAUDE.md §9) : ici,
+           chaque portrait avec son image et le personnage qu'il représente.
+           Les vignettes se chargent en `loading="lazy"` — il y en a beaucoup, et
+           elles sont toutes sous la ligne de flottaison.
+        ════════════════════════════════════════════════════════════════════ */
+        .pfp-grid-wrap { margin: 18px 0 6px; }
+
+        .pfp-grid-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 22px 0 10px;
+            font-family: 'Montserrat', 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-h3);
+        }
+
+        .pfp-grid-badge {
+            flex: none;
+            padding: 3px 9px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            letter-spacing: 0.04em;
+            color: #fff;
+            background: linear-gradient(90deg, var(--kotone-pink-soft), var(--kotone-pink));
+        }
+
+        .pfp-grid-count {
+            font-size: 0.72rem;
+            font-weight: 800;
+            opacity: 0.6;
+        }
+
+        .pfp-grid {
+            display: grid;
+            /* `auto-fill` plutôt qu'un nombre de colonnes fixe : la grille se
+               réduit d'elle-même jusqu'au téléphone sans requête média. */
+            grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+            gap: 12px;
+            /* Sans ça, une légende qui passe à deux lignes étire toute sa rangée
+               et décale les vignettes voisines vers le bas. */
+            align-items: start;
+        }
+
+        .pfp-cell {
+            margin: 0;
+            text-align: center;
+        }
+
+        .pfp-cell img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 2px solid var(--kotone-pink-pale);
+            background: var(--card-bg);
+            transition: transform 0.18s ease, border-color 0.18s ease;
+        }
+
+        .pfp-cell img:hover {
+            transform: translateY(-3px) scale(1.03);
+            border-color: var(--kotone-pink);
+        }
+
+        .pfp-cell figcaption {
+            margin-top: 5px;
+            /* Deux lignes réservées : les noms longs passent à la ligne, et une
+               hauteur fixe garde les rangées alignées. */
+            min-height: 2.5em;
+            font-size: 0.68rem;
+            line-height: 1.25;
+            color: var(--text-muted);
+            word-break: break-word;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .pfp-cell img { transition: none; }
+            .pfp-cell img:hover { transform: none; }
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════
+           CARTES ALL-OUT ATTACK 2.3
+
+           Même principe qu'en 2.2 (Wonder Shujin) : chaque carte emprunte la
+           palette de l'attaque qu'elle présente, plutôt qu'un habillage
+           générique. Les deux variantes ci-dessous fixent leurs couleurs dans
+           les DEUX thèmes — c'est le sujet qui les impose : Notte est une
+           scène de nuit, Pioneer un plein jour de western. Une carte qui
+           basculerait en sombre perdrait le blanc du costume de Soy.
+        ════════════════════════════════════════════════════════════════════ */
+
+        /* ── Notte — Luce, Shoki Ikenami (P5X) ──────────────────────────────
+           Nuit vénitienne : verre teinté violet de sa carte de fin, or du
+           masque, cramoisi de sa doublure, et les perles cousues sur le
+           masque en guise de boutons. */
+        .aoa-card-notte {
+            position: relative;
+            border: 4px solid #0a0710;
+            background:
+                repeating-linear-gradient(60deg, rgba(160, 110, 200, 0.07) 0 1px, transparent 1px 22px),
+                repeating-linear-gradient(-60deg, rgba(160, 110, 200, 0.07) 0 1px, transparent 1px 22px),
+                radial-gradient(ellipse at 72% 18%, rgba(120, 60, 160, 0.34) 0%, transparent 58%),
+                linear-gradient(165deg, #1a1026 0%, #0d0814 52%, #1c0d18 100%);
+            animation: none;
+            box-shadow:
+                0 0 0 3px rgba(201, 162, 39, 0.62),
+                0 8px 30px rgba(86, 32, 122, 0.36),
+                0 2px 10px rgba(0, 0, 0, 0.55);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            margin-top: 20px;
+            padding-bottom: 16px;
+        }
+        .aoa-card-notte:hover {
+            transform: translateY(-6px) scale(1.006);
+            box-shadow:
+                0 0 0 4px rgba(201, 162, 39, 0.85),
+                0 14px 40px rgba(86, 32, 122, 0.48),
+                0 4px 14px rgba(0, 0, 0, 0.62);
+        }
+        /* Bandeau de vitrail : losanges violets sertis d'un plomb noir et d'un fil d'or */
+        .aoa-card-notte::after {
+            content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 16px;
+            background:
+                repeating-linear-gradient(60deg, rgba(0, 0, 0, 0.6) 0 2px, transparent 2px 18px),
+                repeating-linear-gradient(-60deg, rgba(0, 0, 0, 0.6) 0 2px, transparent 2px 18px),
+                repeating-linear-gradient(60deg, rgba(201, 162, 39, 0.45) 8px 9px, transparent 9px 18px),
+                linear-gradient(90deg, #4a1f6e 0%, #7a2a52 45%, #8e1230 100%);
+            border-top: 2px solid rgba(201, 162, 39, 0.7);
+            pointer-events: none;
+        }
+        /* Les perles du masque */
+        .aoa-card-notte .notte-pearls {
+            position: absolute; top: 14px; right: 18px; z-index: 2;
+            display: flex; gap: 7px; pointer-events: none;
+        }
+        .aoa-card-notte .notte-pearls i {
+            width: 9px; height: 9px; border-radius: 50%; display: block;
+            background: radial-gradient(circle at 32% 28%, #ffffff, #e6dcc8 48%, #9c8b6a);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.75), inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+        }
+        .aoa-card-notte .aoa-card-inner { position: relative; z-index: 1; }
+        .aoa-card-notte .aoa-portrait-col,
+        .aoa-card-notte .aoa-gif-col { border-right-color: rgba(201, 162, 39, 0.26); }
+        .aoa-card-notte .aoa-portrait-img {
+            border-color: rgba(201, 162, 39, 0.75);
+            background: rgba(0, 0, 0, 0.38);
+            box-shadow: 0 0 14px rgba(140, 70, 180, 0.28);
+        }
+        .aoa-card-notte .aoa-battle-img {
+            width: 130px; height: auto; max-width: none;
+            object-fit: contain; object-position: top;
+            display: block; margin: 0;
+            border-color: #8e1230; animation: none;
+            background: rgba(0, 0, 0, 0.38);
+            box-shadow: 0 0 16px rgba(142, 18, 48, 0.42);
+        }
+        .aoa-card-notte .card-badge {
+            background: linear-gradient(90deg, #3d1a5c, #8e1230);
+            color: #f0e6d2;
+            box-shadow: 0 2px 8px rgba(86, 32, 122, 0.5);
+        }
+        .aoa-card-notte .card-name {
+            color: #f4ecdd; animation: none;
+            text-shadow: 0 0 12px rgba(201, 162, 39, 0.38);
+        }
+        .aoa-card-notte .card-sub { color: #cbb06a; }
+        .aoa-card-notte .card-stars span:nth-child(1) { animation-delay: 0s;   color: #c9a227; }
+        .aoa-card-notte .card-stars span:nth-child(2) { animation-delay: 0.5s; color: #8e1230; }
+        .aoa-card-notte .card-stars span:nth-child(3) { animation-delay: 1s;   color: #b07ad0; }
+        .aoa-card-notte .card-stars span:nth-child(4) { animation-delay: 1.5s; color: #8e1230; }
+        .aoa-card-notte .card-stars span:nth-child(5) { animation-delay: 2s;   color: #c9a227; }
+
+        /* ── Pioneer — Soy, Shun Kano (P5X) ─────────────────────────────────
+           Plein jour de western : blanc du chapeau et du manteau, bleu du
+           ruban et de sa carte de fin en trame de BD, or du masque. Le
+           bandeau bas reprend le cuir clouté de son ceinturon. */
+        .aoa-card-pioneer {
+            position: relative;
+            border: 4px solid #1b4f9c;
+            background:
+                radial-gradient(rgba(47, 111, 208, 0.13) 1px, transparent 1.4px) 0 0 / 9px 9px,
+                linear-gradient(160deg, #fbfcfe 0%, #e9f0fa 55%, #dbe7f7 100%);
+            animation: none;
+            box-shadow:
+                0 0 0 3px rgba(212, 160, 23, 0.62),
+                0 8px 30px rgba(27, 79, 156, 0.26),
+                0 2px 10px rgba(0, 0, 0, 0.14);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            margin-top: 20px;
+            padding-bottom: 16px;
+        }
+        .aoa-card-pioneer:hover {
+            transform: translateY(-6px) scale(1.006);
+            box-shadow:
+                0 0 0 4px rgba(212, 160, 23, 0.85),
+                0 14px 40px rgba(27, 79, 156, 0.34),
+                0 4px 14px rgba(0, 0, 0, 0.2);
+        }
+        /* Ceinturon de cuir clouté — les clous sont des radial-gradients, pas des
+           bandes : en repeating-linear ils ressortaient en rayures. */
+        .aoa-card-pioneer::after {
+            content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 16px;
+            background:
+                radial-gradient(circle at 50% 50%, #ffe9a3 0 2px, rgba(122, 82, 48, 0) 2.6px) 0 0 / 22px 16px,
+                radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.35) 0 3px, transparent 3.4px) 1px 1px / 22px 16px,
+                linear-gradient(180deg, #a5743f 0%, #8a5c30 55%, #6b4526 100%);
+            border-top: 2px solid rgba(212, 160, 23, 0.8);
+            pointer-events: none;
+        }
+        /* Les étoiles de shérif du chapeau */
+        .aoa-card-pioneer .pioneer-stars {
+            position: absolute; top: 12px; right: 18px; z-index: 2;
+            display: flex; gap: 6px; pointer-events: none;
+            color: #d4a017; font-size: 14px; line-height: 1;
+            text-shadow: 0 1px 2px rgba(27, 79, 156, 0.4);
+        }
+        .aoa-card-pioneer .aoa-card-inner { position: relative; z-index: 1; }
+        .aoa-card-pioneer .aoa-portrait-col,
+        .aoa-card-pioneer .aoa-gif-col { border-right-color: rgba(27, 79, 156, 0.24); }
+        .aoa-card-pioneer .aoa-portrait-img {
+            border-color: rgba(212, 160, 23, 0.85);
+            background: rgba(255, 255, 255, 0.72);
+            box-shadow: 0 0 14px rgba(27, 79, 156, 0.2);
+        }
+        .aoa-card-pioneer .aoa-battle-img {
+            width: 130px; height: auto; max-width: none;
+            object-fit: contain; object-position: top;
+            display: block; margin: 0;
+            border-color: #2f6fd0; animation: none;
+            background: rgba(255, 255, 255, 0.72);
+            box-shadow: 0 0 16px rgba(47, 111, 208, 0.34);
+        }
+        .aoa-card-pioneer .card-badge {
+            background: linear-gradient(90deg, #1b4f9c, #2f6fd0);
+            color: #ffe9a3;
+            box-shadow: 0 2px 8px rgba(27, 79, 156, 0.4);
+        }
+        .aoa-card-pioneer .card-name {
+            color: #12305e; animation: none;
+            text-shadow: 0 0 12px rgba(212, 160, 23, 0.3);
+        }
+        .aoa-card-pioneer .card-sub { color: #1b4f9c; }
+        .aoa-card-pioneer .card-stars span:nth-child(1) { animation-delay: 0s;   color: #d4a017; }
+        .aoa-card-pioneer .card-stars span:nth-child(2) { animation-delay: 0.5s; color: #2f6fd0; }
+        .aoa-card-pioneer .card-stars span:nth-child(3) { animation-delay: 1s;   color: #7a5230; }
+        .aoa-card-pioneer .card-stars span:nth-child(4) { animation-delay: 1.5s; color: #2f6fd0; }
+        .aoa-card-pioneer .card-stars span:nth-child(5) { animation-delay: 2s;   color: #d4a017; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .aoa-card-notte, .aoa-card-pioneer,
+            .aoa-card-notte .card-stars span, .aoa-card-pioneer .card-stars span { animation: none; }
+        }
+</style>
 </head>
 <body>
 
@@ -1349,6 +1607,285 @@
         </ul>
     </div>
 
+    <!-- ═══════════════════════════════════
+         NOUVEAUX PORTRAITS DE PROFIL
+    ═══════════════════════════════════ -->
+
+    <div data-i18n-block="fr"><h1>🖼️ 146 nouveaux portraits de profil</h1></div>
+    <div data-i18n-block="en"><h1>🖼️ 146 new profile pictures</h1></div>
+
+    <div data-i18n-block="fr">
+        <p>La galerie passe de 204 à <strong>350</strong> portraits. Vingt personnages qui n'en
+        avaient aucun en ont enfin un — Maki Sonomura, Reiji Kido, Ulala, Baofu, Katsuya,
+        Ryoji, Takaya, Jin, Sae Niijima, Zenkichi, et neuf Phantom Idols de
+        <em>Persona 5: The Phantom X</em>. Chaque jeu est désormais rangé protagoniste, puis
+        cast principal, puis personnages secondaires, et les portraits d'un même personnage
+        se suivent. Tous disponibles dès maintenant — aucun n'est à débloquer.</p>
+    </div>
+    <div data-i18n-block="en">
+        <p>The gallery goes from 204 to <strong>350</strong> pictures. Twenty characters who had
+        none at all finally get one — Maki Sonomura, Reiji Kido, Ulala, Baofu, Katsuya,
+        Ryoji, Takaya, Jin, Sae Niijima, Zenkichi, and nine Phantom Idols from
+        <em>Persona 5: The Phantom X</em>. Every game is now sorted protagonist first, then
+        main cast, then supporting characters, with each character's pictures grouped
+        together. All available right away — none of them need unlocking.</p>
+    </div>
+
+    <div class="pfp-grid-wrap">
+        <p class="pfp-grid-title"><span class="pfp-grid-badge">P1</span> Persona 1 <span class="pfp-grid-count">10</span></p>
+        <div class="pfp-grid">
+            <figure class="pfp-cell"><img src="../../img/avatar/naoya_todou_p1.jpg" alt="Naoya Todou" loading="lazy"><figcaption>Naoya Todou</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/naoya_todou_p1_2.jpg" alt="Naoya Todou" loading="lazy"><figcaption>Naoya Todou</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/naoya_todou_p1_3.jpg" alt="Naoya Todou" loading="lazy"><figcaption>Naoya Todou</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kei_nanjo_p1.jpg" alt="Kei Nanjo" loading="lazy"><figcaption>Kei Nanjo</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/eriko_kirishima_p1.jpg" alt="Eriko Kirishima" loading="lazy"><figcaption>Eriko Kirishima</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yukino_mayuzumi_p1.jpg" alt="Yukino Mayuzumi" loading="lazy"><figcaption>Yukino Mayuzumi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yukino_mayuzumi_p1_2.jpg" alt="Yukino Mayuzumi" loading="lazy"><figcaption>Yukino Mayuzumi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/maki_sonomura_p1.jpg" alt="Maki Sonomura" loading="lazy"><figcaption>Maki Sonomura</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/reiji_kido_p1.jpg" alt="Reiji Kido" loading="lazy"><figcaption>Reiji Kido</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/reiji_kido_p1_2.jpg" alt="Reiji Kido" loading="lazy"><figcaption>Reiji Kido</figcaption></figure>
+        </div>
+        <p class="pfp-grid-title"><span class="pfp-grid-badge">P2</span> Persona 2 <span class="pfp-grid-count">24</span></p>
+        <div class="pfp-grid">
+            <figure class="pfp-cell"><img src="../../img/avatar/tatsuya_suou_p2.jpg" alt="Tatsuya Suou" loading="lazy"><figcaption>Tatsuya Suou</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/tatsuya_suou_p2_2.jpg" alt="Tatsuya Suou" loading="lazy"><figcaption>Tatsuya Suou</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/tatsuya_suou_p2_3.jpg" alt="Tatsuya Suou" loading="lazy"><figcaption>Tatsuya Suou</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/maya_amano_p2.jpg" alt="Maya Amano" loading="lazy"><figcaption>Maya Amano</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/maya_amano_p2_2.jpg" alt="Maya Amano" loading="lazy"><figcaption>Maya Amano</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/maya_amano_p2_3.jpg" alt="Maya Amano" loading="lazy"><figcaption>Maya Amano</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/maya_amano_p2_4.jpg" alt="Maya Amano" loading="lazy"><figcaption>Maya Amano</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/maya_amano_p2_5.jpg" alt="Maya Amano" loading="lazy"><figcaption>Maya Amano</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/eikichi_mishina_p2.jpg" alt="Eikichi Mishina" loading="lazy"><figcaption>Eikichi Mishina</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/eikichi_mishina_p2_2.jpg" alt="Eikichi Mishina" loading="lazy"><figcaption>Eikichi Mishina</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/eikichi_mishina_p2_3.jpg" alt="Eikichi Mishina" loading="lazy"><figcaption>Eikichi Mishina</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/lisa_silverman_p2.jpg" alt="Lisa Silverman" loading="lazy"><figcaption>Lisa Silverman</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/lisa_silverman_p2_2.jpg" alt="Lisa Silverman" loading="lazy"><figcaption>Lisa Silverman</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/baofu_p2.jpg" alt="Baofu" loading="lazy"><figcaption>Baofu</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/baofu_p2_2.jpg" alt="Baofu" loading="lazy"><figcaption>Baofu</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/baofu_p2_3.jpg" alt="Baofu" loading="lazy"><figcaption>Baofu</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/baofu_p2_4.jpg" alt="Baofu" loading="lazy"><figcaption>Baofu</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/katsuya_suou_p2.jpg" alt="Katsuya Suou" loading="lazy"><figcaption>Katsuya Suou</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/katsuya_suou_p2_2.jpg" alt="Katsuya Suou" loading="lazy"><figcaption>Katsuya Suou</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/katsuya_suou_p2_3.jpg" alt="Katsuya Suou" loading="lazy"><figcaption>Katsuya Suou</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/katsuya_suou_p2_4.jpg" alt="Katsuya Suou" loading="lazy"><figcaption>Katsuya Suou</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ulala_serizawa_p2.jpg" alt="Ulala Serizawa" loading="lazy"><figcaption>Ulala Serizawa</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ulala_serizawa_p2_2.jpg" alt="Ulala Serizawa" loading="lazy"><figcaption>Ulala Serizawa</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yukino_mayuzumi_p2.jpg" alt="Yukino Mayuzumi (P2)" loading="lazy"><figcaption>Yukino Mayuzumi (P2)</figcaption></figure>
+        </div>
+        <p class="pfp-grid-title"><span class="pfp-grid-badge">P3</span> Persona 3 <span class="pfp-grid-count">55</span></p>
+        <div class="pfp-grid">
+            <figure class="pfp-cell"><img src="../../img/avatar/makoto_yuki_p3.jpg" alt="Makoto Yuki" loading="lazy"><figcaption>Makoto Yuki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/makoto_yuki_p3_2.jpg" alt="Makoto Yuki" loading="lazy"><figcaption>Makoto Yuki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/makoto_yuki_p3_3.jpg" alt="Makoto Yuki" loading="lazy"><figcaption>Makoto Yuki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/makoto_yuki_p3_4.jpg" alt="Makoto Yuki" loading="lazy"><figcaption>Makoto Yuki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/makoto_yuki_p3_5.jpg" alt="Makoto Yuki" loading="lazy"><figcaption>Makoto Yuki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/makoto_yuki_p3_6.jpg" alt="Makoto Yuki" loading="lazy"><figcaption>Makoto Yuki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/makoto_yuki_p3_7.jpg" alt="Makoto Yuki" loading="lazy"><figcaption>Makoto Yuki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kotone_shiomi_p3p.jpg" alt="Kotone Shiomi" loading="lazy"><figcaption>Kotone Shiomi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kotone_shiomi_p3p_2.jpg" alt="Kotone Shiomi" loading="lazy"><figcaption>Kotone Shiomi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kotone_shiomi_p3p_3.jpg" alt="Kotone Shiomi" loading="lazy"><figcaption>Kotone Shiomi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kotone_shiomi_p5x_crossover.jpg" alt="Kotone Shiomi" loading="lazy"><figcaption>Kotone Shiomi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yukari_takeba_p3.jpg" alt="Yukari Takeba" loading="lazy"><figcaption>Yukari Takeba</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yukari_takeba_p3_2.jpg" alt="Yukari Takeba" loading="lazy"><figcaption>Yukari Takeba</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yukari_takeba_p3_3.jpg" alt="Yukari Takeba" loading="lazy"><figcaption>Yukari Takeba</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/junpei_iori_p3.jpg" alt="Junpei Iori" loading="lazy"><figcaption>Junpei Iori</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/junpei_iori_p3_2.jpg" alt="Junpei Iori" loading="lazy"><figcaption>Junpei Iori</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/junpei_iori_p3_3.jpg" alt="Junpei Iori" loading="lazy"><figcaption>Junpei Iori</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/junpei_iori_p3_4.jpg" alt="Junpei Iori" loading="lazy"><figcaption>Junpei Iori</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/akihiko_sanada_p3.jpg" alt="Akihiko Sanada" loading="lazy"><figcaption>Akihiko Sanada</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/akihiko_sanada_p3_2.jpg" alt="Akihiko Sanada" loading="lazy"><figcaption>Akihiko Sanada</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/akihiko_sanada_p3_3.jpg" alt="Akihiko Sanada" loading="lazy"><figcaption>Akihiko Sanada</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/mitsuru_kirijo_p3.jpg" alt="Mitsuru Kirijo" loading="lazy"><figcaption>Mitsuru Kirijo</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/mitsuru_kirijo_p3_2.jpg" alt="Mitsuru Kirijo" loading="lazy"><figcaption>Mitsuru Kirijo</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/mitsuru_kirijo_p3_3.jpg" alt="Mitsuru Kirijo" loading="lazy"><figcaption>Mitsuru Kirijo</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/mitsuru_kirijo_p3_4.jpg" alt="Mitsuru Kirijo" loading="lazy"><figcaption>Mitsuru Kirijo</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/mitsuru_kirijo_p3_5.jpg" alt="Mitsuru Kirijo" loading="lazy"><figcaption>Mitsuru Kirijo</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/mitsuru_kirijo_p3_6.jpg" alt="Mitsuru Kirijo" loading="lazy"><figcaption>Mitsuru Kirijo</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/fuuka_yamagishi_p3.jpg" alt="Fuuka Yamagishi" loading="lazy"><figcaption>Fuuka Yamagishi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/fuuka_yamagishi_p3_2.jpg" alt="Fuuka Yamagishi" loading="lazy"><figcaption>Fuuka Yamagishi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/fuuka_yamagishi_p3_3.jpg" alt="Fuuka Yamagishi" loading="lazy"><figcaption>Fuuka Yamagishi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/aigis_p3.jpg" alt="Aigis" loading="lazy"><figcaption>Aigis</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/aigis_p3_2.jpg" alt="Aigis" loading="lazy"><figcaption>Aigis</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/aigis_p3_3.jpg" alt="Aigis" loading="lazy"><figcaption>Aigis</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/koromaru_p3.jpg" alt="Koromaru" loading="lazy"><figcaption>Koromaru</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/koromaru_p3_2.jpg" alt="Koromaru" loading="lazy"><figcaption>Koromaru</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/koromaru_p3_3.jpg" alt="Koromaru" loading="lazy"><figcaption>Koromaru</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ken_amada_p3.jpg" alt="Ken Amada" loading="lazy"><figcaption>Ken Amada</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ken_amada_p3_2.jpg" alt="Ken Amada" loading="lazy"><figcaption>Ken Amada</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ken_amada_p3_3.jpg" alt="Ken Amada" loading="lazy"><figcaption>Ken Amada</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/shinjiro_aragaki_p3.jpg" alt="Shinjiro Aragaki" loading="lazy"><figcaption>Shinjiro Aragaki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/shinjiro_aragaki_p3_2.jpg" alt="Shinjiro Aragaki" loading="lazy"><figcaption>Shinjiro Aragaki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/shinjiro_aragaki_p3_3.jpg" alt="Shinjiro Aragaki" loading="lazy"><figcaption>Shinjiro Aragaki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/metis_p3.jpg" alt="Metis" loading="lazy"><figcaption>Metis</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/elisabeth_p3.jpg" alt="Elisabeth" loading="lazy"><figcaption>Elisabeth</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/elisabeth_p3_2.jpg" alt="Elisabeth" loading="lazy"><figcaption>Elisabeth</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/elisabeth_p3_3.jpg" alt="Elisabeth" loading="lazy"><figcaption>Elisabeth</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/elisabeth_p3_4.jpg" alt="Elisabeth" loading="lazy"><figcaption>Elisabeth</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/jin_shirato_p3.jpg" alt="Jin Shirato" loading="lazy"><figcaption>Jin Shirato</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/jin_shirato_p3_2.jpg" alt="Jin Shirato" loading="lazy"><figcaption>Jin Shirato</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ryoji_mochizuki_p3.jpg" alt="Ryoji Mochizuki" loading="lazy"><figcaption>Ryoji Mochizuki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ryoji_mochizuki_p3_2.jpg" alt="Ryoji Mochizuki" loading="lazy"><figcaption>Ryoji Mochizuki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ryoji_mochizuki_p3_3.jpg" alt="Ryoji Mochizuki" loading="lazy"><figcaption>Ryoji Mochizuki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ryoji_mochizuki_p3_4.jpg" alt="Ryoji Mochizuki" loading="lazy"><figcaption>Ryoji Mochizuki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/takaya_sakaki_p3.jpg" alt="Takaya Sakaki" loading="lazy"><figcaption>Takaya Sakaki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/takaya_sakaki_p3_2.jpg" alt="Takaya Sakaki" loading="lazy"><figcaption>Takaya Sakaki</figcaption></figure>
+        </div>
+        <p class="pfp-grid-title"><span class="pfp-grid-badge">P4</span> Persona 4 <span class="pfp-grid-count">1</span></p>
+        <div class="pfp-grid">
+            <figure class="pfp-cell"><img src="../../img/avatar/rise_kujikawa_p4.jpg" alt="Rise Kujikawa" loading="lazy"><figcaption>Rise Kujikawa</figcaption></figure>
+        </div>
+        <p class="pfp-grid-title"><span class="pfp-grid-badge">P5</span> Persona 5 <span class="pfp-grid-count">10</span></p>
+        <div class="pfp-grid">
+            <figure class="pfp-cell"><img src="../../img/avatar/futaba_sakura_p5.jpg" alt="Futaba Sakura" loading="lazy"><figcaption>Futaba Sakura</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/sophia_p5s.jpg" alt="Sophia" loading="lazy"><figcaption>Sophia</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/sophia_p5s_2.jpg" alt="Sophia" loading="lazy"><figcaption>Sophia</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/sophia_p5s_3.jpg" alt="Sophia" loading="lazy"><figcaption>Sophia</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/sophia_p5s_4.jpg" alt="Sophia" loading="lazy"><figcaption>Sophia</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/sophia_p5s_5.jpg" alt="Sophia" loading="lazy"><figcaption>Sophia</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/erina_p5t.jpg" alt="Erina" loading="lazy"><figcaption>Erina</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/sae_niijima_p5.jpg" alt="Sae Niijima" loading="lazy"><figcaption>Sae Niijima</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/sae_niijima_p5_2.jpg" alt="Sae Niijima" loading="lazy"><figcaption>Sae Niijima</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/zenkichi_hasegawa_p5s.jpg" alt="Zenkichi Hasegawa" loading="lazy"><figcaption>Zenkichi Hasegawa</figcaption></figure>
+        </div>
+        <p class="pfp-grid-title"><span class="pfp-grid-badge">P5X</span> Persona 5: The Phantom X <span class="pfp-grid-count">46</span></p>
+        <div class="pfp-grid">
+            <figure class="pfp-cell"><img src="../../img/avatar/wonder_joker_matching_p5x.jpg" alt="Wonder (Nagisa Kamishiro)" loading="lazy"><figcaption>Wonder (Nagisa Kamishiro)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/wonder_p5x.jpg" alt="Wonder (Nagisa Kamishiro)" loading="lazy"><figcaption>Wonder (Nagisa Kamishiro)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yaoling_li_p5x.jpg" alt="Yaoling Li (Rin)" loading="lazy"><figcaption>Yaoling Li (Rin)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yui_comic_p5x.jpg" alt="YUI (Bui)" loading="lazy"><figcaption>YUI (Bui)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yui_comic_p5x_2.jpg" alt="YUI (Bui)" loading="lazy"><figcaption>YUI (Bui)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/shoki_ikenami_p5x.jpg" alt="Shoki Ikenami (Luce)" loading="lazy"><figcaption>Shoki Ikenami (Luce)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/shoki_ikenami_notte_p5x.jpg" alt="Shoki Ikenami (Luce)" loading="lazy"><figcaption>Shoki Ikenami (Luce)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ayaka_sakai_p5x.jpg" alt="Ayaka Sakai (Chord)" loading="lazy"><figcaption>Ayaka Sakai (Chord)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ayaka_sakai_p5x_2.jpg" alt="Ayaka Sakai (Chord)" loading="lazy"><figcaption>Ayaka Sakai (Chord)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ayaka_sakai_p5x_3.jpg" alt="Ayaka Sakai (Chord)" loading="lazy"><figcaption>Ayaka Sakai (Chord)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ayaka_sakai_p5x_4.jpg" alt="Ayaka Sakai (Chord)" loading="lazy"><figcaption>Ayaka Sakai (Chord)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ayaka_sakai_summer_p5x.jpg" alt="Ayaka Sakai (Chord)" loading="lazy"><figcaption>Ayaka Sakai (Chord)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kira_kitazato_p5x.jpg" alt="Kira Kitazato (Messa)" loading="lazy"><figcaption>Kira Kitazato (Messa)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kira_kitazato_p5x_2.jpg" alt="Kira Kitazato (Messa)" loading="lazy"><figcaption>Kira Kitazato (Messa)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kira_kitazato_p5x_3.jpg" alt="Kira Kitazato (Messa)" loading="lazy"><figcaption>Kira Kitazato (Messa)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yumi_shiina_p5x.jpg" alt="Yumi Shiina (Phoebe)" loading="lazy"><figcaption>Yumi Shiina (Phoebe)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yumi_shiina_p5x_2.jpg" alt="Yumi Shiina (Phoebe)" loading="lazy"><figcaption>Yumi Shiina (Phoebe)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yumi_shiina_p5x_3.jpg" alt="Yumi Shiina (Phoebe)" loading="lazy"><figcaption>Yumi Shiina (Phoebe)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/aran_hirano_p5x.jpg" alt="Aran Hirano (Anri)" loading="lazy"><figcaption>Aran Hirano (Anri)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ichigo_shikano_p5x.jpg" alt="Ichigo Shikano (Berry)" loading="lazy"><figcaption>Ichigo Shikano (Berry)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kiyoshi_kurotani_p5x.jpg" alt="Kiyoshi Kurotani (Key)" loading="lazy"><figcaption>Kiyoshi Kurotani (Key)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kotone_montagne_p5x.jpg" alt="Kotone Montagne (Mont)" loading="lazy"><figcaption>Kotone Montagne (Mont)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kumi_katayama_p5x.jpg" alt="Kumi Katayama (Blitz)" loading="lazy"><figcaption>Kumi Katayama (Blitz)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/miyu_sahara_p5x.jpg" alt="Miyu Sahara (Puppet)" loading="lazy"><figcaption>Miyu Sahara (Puppet)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/mio_natsukawa_p5x.jpg" alt="Mio Natsukawa (Matoi)" loading="lazy"><figcaption>Mio Natsukawa (Matoi)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/narumi_nashimoto_p5x.jpg" alt="Narumi Nashimoto (Pinky)" loading="lazy"><figcaption>Narumi Nashimoto (Pinky)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/seiji_shiratori_p5x.jpg" alt="Seiji Shiratori (Fleuret)" loading="lazy"><figcaption>Seiji Shiratori (Fleuret)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/hatsune_miku_p5x.jpg" alt="Hatsune Miku" loading="lazy"><figcaption>Hatsune Miku</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/haruna_nishimori_p5x.jpg" alt="Haruna Nishimori (Riddle)" loading="lazy"><figcaption>Haruna Nishimori (Riddle)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/leo_kamiyama_p5x.jpg" alt="Leo Kamiyama (Leon)" loading="lazy"><figcaption>Leo Kamiyama (Leon)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/leo_kamiyama_p5x_2.jpg" alt="Leo Kamiyama (Leon)" loading="lazy"><figcaption>Leo Kamiyama (Leon)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/manaka_nagao_p5x.jpg" alt="Manaka Nagao (Ange)" loading="lazy"><figcaption>Manaka Nagao (Ange)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/manaka_nagao_p5x_2.jpg" alt="Manaka Nagao (Ange)" loading="lazy"><figcaption>Manaka Nagao (Ange)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/manaka_nagao_p5x_3.jpg" alt="Manaka Nagao (Ange)" loading="lazy"><figcaption>Manaka Nagao (Ange)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/manaka_nagao_p5x_4.jpg" alt="Manaka Nagao (Ange)" loading="lazy"><figcaption>Manaka Nagao (Ange)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/masaki_ashiya_p5x.jpg" alt="Masaki Ashiya (Cherish)" loading="lazy"><figcaption>Masaki Ashiya (Cherish)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/masaki_ashiya_p5x_2.jpg" alt="Masaki Ashiya (Cherish)" loading="lazy"><figcaption>Masaki Ashiya (Cherish)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/masaki_ashiya_p5x_3.jpg" alt="Masaki Ashiya (Cherish)" loading="lazy"><figcaption>Masaki Ashiya (Cherish)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/mayumi_hashimoto_p5x.jpg" alt="Mayumi Hashimoto (Turbo)" loading="lazy"><figcaption>Mayumi Hashimoto (Turbo)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/mayumi_hashimoto_p5x_2.jpg" alt="Mayumi Hashimoto (Turbo)" loading="lazy"><figcaption>Mayumi Hashimoto (Turbo)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/minami_miyashita_p5x.jpg" alt="Minami Miyashita (Marian)" loading="lazy"><figcaption>Minami Miyashita (Marian)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/runa_dogenzaka_p5x.jpg" alt="Runa Dogenzaka (Howler)" loading="lazy"><figcaption>Runa Dogenzaka (Howler)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/runa_dogenzaka_p5x_2.jpg" alt="Runa Dogenzaka (Howler)" loading="lazy"><figcaption>Runa Dogenzaka (Howler)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/runa_dogenzaka_p5x_3.jpg" alt="Runa Dogenzaka (Howler)" loading="lazy"><figcaption>Runa Dogenzaka (Howler)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/toshiya_sumi_p5x.jpg" alt="Toshiya Sumi (Sepia)" loading="lazy"><figcaption>Toshiya Sumi (Sepia)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/toshiya_sumi_p5x_2.jpg" alt="Toshiya Sumi (Sepia)" loading="lazy"><figcaption>Toshiya Sumi (Sepia)</figcaption></figure>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════
+         NOUVEAUX ALL-OUT ATTACK — SKINS P5X
+    ═══════════════════════════════════ -->
+
+    <div data-i18n-block="fr"><h1>💥 Deux nouveaux All-Out Attack</h1></div>
+    <div data-i18n-block="en"><h1>💥 Two new All-Out Attacks</h1></div>
+
+    <div data-i18n-block="fr">
+        <p>Deux tenues 5 étoiles de <em>Persona 5: The Phantom X</em> rejoignent le mode
+        All-Out Attack. Elles ne remplacent pas leur version de base : Luce et Soy restent
+        devinables séparément, chacun avec sa propre animation.</p>
+    </div>
+    <div data-i18n-block="en">
+        <p>Two 5-star outfits from <em>Persona 5: The Phantom X</em> join All-Out Attack mode.
+        They don't replace the base versions: Luce and Soy are still guessable on their own,
+        each with its own animation.</p>
+    </div>
+
+    <div data-i18n-block="fr">
+        <h2 class="shujin-chars-title">🎭 All-Out Attack — Luce Notte</h2>
+        <p class="shujin-intro">Masque cramoisi perlé d'or, cape noire, vitrail violet en
+        toile de fond : Shoki Ikenami troque le prince pour le bal masqué vénitien.</p>
+    </div>
+    <div data-i18n-block="en">
+        <h2 class="shujin-chars-title">🎭 All-Out Attack — Luce Notte</h2>
+        <p class="shujin-intro">A crimson mask beaded with gold, a black cape, stained glass
+        for a backdrop: Shoki Ikenami trades the prince for the Venetian masquerade.</p>
+    </div>
+
+    <div class="aoa-card aoa-card-notte vx-reveal">
+        <span class="notte-pearls" aria-hidden="true"><i></i><i></i><i></i></span>
+        <div class="aoa-card-inner">
+            <div class="aoa-portrait-col">
+                <img class="aoa-portrait-img" src="../../allOutAttackMode/database/img/Luce_Notte.webp" alt="Luce Notte portrait">
+            </div>
+            <div class="aoa-gif-col">
+                <img class="aoa-gif-img" src="../../allOutAttackMode/database/allOutAttack/Luce_Notte.webp" alt="Luce Notte All-Out Attack">
+            </div>
+            <div class="aoa-battle-col">
+                <img class="aoa-battle-img" src="../../allOutAttackMode/database/img/Luce_Notte_Battle.webp" alt="Luce Notte battle">
+                <div class="aoa-info">
+                    <div class="card-stars" aria-hidden="true">
+                        <span>✦</span><span>★</span><span>✦</span><span>★</span><span>✦</span>
+                    </div>
+                    <span class="card-badge">P5X</span>
+                    <p class="card-name">Luce Notte</p>
+                    <p class="card-sub">Shoki Ikenami — Persona 5 X</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div data-i18n-block="fr">
+        <h2 class="shujin-chars-title">🤠 All-Out Attack — Soy Pioneer</h2>
+        <p class="shujin-intro">Chapeau blanc à ruban bleu, masque doré, manteau de
+        cavalier : Shun Kano passe du cuisinier au pistolero.</p>
+    </div>
+    <div data-i18n-block="en">
+        <h2 class="shujin-chars-title">🤠 All-Out Attack — Soy Pioneer</h2>
+        <p class="shujin-intro">A white hat with a blue band, a golden mask, a rider's coat:
+        Shun Kano goes from cook to gunslinger.</p>
+    </div>
+
+    <div class="aoa-card aoa-card-pioneer vx-reveal">
+        <span class="pioneer-stars" aria-hidden="true">★ ★ ★</span>
+        <div class="aoa-card-inner">
+            <div class="aoa-portrait-col">
+                <img class="aoa-portrait-img" src="../../allOutAttackMode/database/img/Soy_Pioneer.webp" alt="Soy Pioneer portrait">
+            </div>
+            <div class="aoa-gif-col">
+                <img class="aoa-gif-img" src="../../allOutAttackMode/database/allOutAttack/Soy_Pioneer.webp" alt="Soy Pioneer All-Out Attack">
+            </div>
+            <div class="aoa-battle-col">
+                <img class="aoa-battle-img" src="../../allOutAttackMode/database/img/Soy_Pioneer_Battle.webp" alt="Soy Pioneer battle">
+                <div class="aoa-info">
+                    <div class="card-stars" aria-hidden="true">
+                        <span>✦</span><span>★</span><span>✦</span><span>★</span><span>✦</span>
+                    </div>
+                    <span class="card-badge">P5X</span>
+                    <p class="card-name">Soy Pioneer</p>
+                    <p class="card-sub">Shun Kano — Persona 5 X</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <hr>
 
     <!-- CORRECTIONS — section commune, alimentée par chaque lot de fix. -->
@@ -1358,6 +1895,13 @@
 
     <div data-i18n-block="fr">
         <ul>
+            <li><strong>Paramètres</strong> — depuis votre profil, le bouton
+                <em>Sauvegarder</em> se retrouvait sous le bas de la fenêtre : il reste
+                maintenant affiché en permanence. Au passage, le panneau ne défilait plus du
+                tout, ce qui rendait « Réinitialiser le profil » et « Supprimer mon compte »
+                tout simplement inaccessibles sur les écrans peu hauts. Merci à
+                <strong>Gypotre</strong> pour le signalement.</li>
+
             <li><strong>Mode Classique</strong> — un personnage de la tranche d'âge
                 <em>60+</em> s'affichait en rouge au lieu de l'orange avec la flèche, même
                 quand la réponse était plus âgée. Un seul personnage du jeu porte cette
@@ -1366,6 +1910,12 @@
     </div>
     <div data-i18n-block="en">
         <ul>
+            <li><strong>Settings</strong> — from your profile, the <em>Save</em> button ended
+                up below the bottom of the window; it now stays on screen at all times. Along
+                the way, the panel had stopped scrolling entirely, which made "Reset Profile"
+                and "Delete my account" simply unreachable on shorter screens. Thanks to
+                <strong>Gypotre</strong> for the report.</li>
+
             <li><strong>Classic Mode</strong> — a character in the <em>60+</em> age bracket
                 showed up red instead of orange with an arrow, even when the answer was
                 older. Only one character in the game uses that bracket, which is why it

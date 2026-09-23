@@ -195,8 +195,16 @@ function _ensureModal() {
         </button>
       </div>
 
-      <button class="sm-save" id="smSave">${t("settings.save", "Save")}</button>
-      <p class="sm-save-status hidden" id="smStatus"></p>
+      <!-- Pied COLLANT (cf. css/settings-modal.css). Le panneau défile, et sur la
+           page profil la zone de danger ci-dessus l'allonge assez pour pousser
+           « Sauvegarder » sous la ligne de flottaison — signalé par Gypotre.
+           Le pied reste donc à l'écran ; il doit rester le DERNIER enfant de
+           .sm-panel, sinon il recouvrirait la zone de danger au lieu de flotter
+           au-dessus du contenu qui défile. -->
+      <div class="sm-footer">
+        <button class="sm-save" id="smSave">${t("settings.save", "Save")}</button>
+        <p class="sm-save-status hidden" id="smStatus"></p>
+      </div>
     </div>
   `;
   document.body.appendChild(el);
