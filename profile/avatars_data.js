@@ -81,8 +81,6 @@ export const AVATAR_GROUPS = [
     // Baofu
     "baofu_p2.jpg",
     "baofu_p2_2.jpg",
-    "baofu_p2_3.jpg",
-    "baofu_p2_4.jpg",
     // Katsuya Suou
     "katsuya_suou_p2.jpg",
     "katsuya_suou_p2_2.jpg",
@@ -119,6 +117,14 @@ export const AVATAR_GROUPS = [
     "kotone_shiomi_p3p_2.jpg",
     "kotone_shiomi_p3p_3.jpg",
     "kotone_shiomi_p5x_crossover.jpg",
+    // Aigis
+    "aigis_train.jpg",
+    "aigis.gif",
+    "Aigis.jpg",
+    "Aigis2.jpg",
+    "aigis_p3.jpg",
+    "aigis_p3_2.jpg",
+    "aigis_p3_3.jpg",
     // ── Cast principal ────────────────────────────────────────────────────
     // Yukari Takeba
     "Yukari.jpg",
@@ -137,7 +143,6 @@ export const AVATAR_GROUPS = [
     "Akihiko.jpg",
     "akihiko_sanada_p3.jpg",
     "akihiko_sanada_p3_2.jpg",
-    "akihiko_sanada_p3_3.jpg",
     // Mitsuru Kirijo
     "Mitsuru.jpg",
     "Mitsuru.webp",
@@ -153,20 +158,11 @@ export const AVATAR_GROUPS = [
     "fuuka_yamagishi_p3.jpg",
     "fuuka_yamagishi_p3_2.jpg",
     "fuuka_yamagishi_p3_3.jpg",
-    // Aigis
-    "aigis_train.jpg",
-    "aigis.gif",
-    "Aigis.jpg",
-    "Aigis2.jpg",
-    "aigis_p3.jpg",
-    "aigis_p3_2.jpg",
-    "aigis_p3_3.jpg",
     // Koromaru
     "Koromaru.jpg",
     "Koromaru2.jpg",
     "koromaru_p3.jpg",
     "koromaru_p3_2.jpg",
-    "koromaru_p3_3.jpg",
     // Ken Amada
     "Ken.jpeg",
     "ken_amada_p4au.jpg",
@@ -180,13 +176,6 @@ export const AVATAR_GROUPS = [
     "shinjiro_aragaki_p3_2.jpg",
     "shinjiro_aragaki_p3_3.jpg",
     // ── Personnages secondaires ───────────────────────────────────────────
-    // Chidori Yoshino
-    "Chidori.jpg",
-    "Chidori2.jpg",
-    // Metis
-    "Metis.jpg",
-    "Metis2.jpeg",
-    "metis_p3.jpg",
     // Elisabeth
     "Elisabeth.jpeg",
     "Elisabeth2.jpeg",
@@ -200,9 +189,10 @@ export const AVATAR_GROUPS = [
     "theodore3.jpeg",
     "theodore4.jpeg",
     "theodore5.jpeg",
-    // Jin Shirato
-    "jin_shirato_p3.jpg",
-    "jin_shirato_p3_2.jpg",
+    // Metis
+    "Metis.jpg",
+    "Metis2.jpeg",
+    "metis_p3.jpg",
     // Ryoji Mochizuki
     "ryoji_mochizuki_p3.jpg",
     "ryoji_mochizuki_p3_2.jpg",
@@ -211,6 +201,12 @@ export const AVATAR_GROUPS = [
     // Takaya Sakaki
     "takaya_sakaki_p3.jpg",
     "takaya_sakaki_p3_2.jpg",
+    // Jin Shirato
+    "jin_shirato_p3.jpg",
+    "jin_shirato_p3_2.jpg",
+    // Chidori Yoshino
+    "Chidori.jpg",
+    "Chidori2.jpg",
   ] },
   { game: "P4", key: "persona4", avatars: [
     // ── Protagoniste(s) ───────────────────────────────────────────────────
@@ -330,6 +326,8 @@ export const AVATAR_GROUPS = [
     "erina_p5t.jpg",
     // Zenkichi Hasegawa
     "zenkichi_hasegawa_p5s.jpg",
+    "zenkichi_hasegawa_p5s_2.jpg",
+    "zenkichi_hasegawa_p5s_3.jpg",
     // ── Personnages secondaires ───────────────────────────────────────────
     // Lavenza
     "Lavenza.jpg",
@@ -465,12 +463,14 @@ export const AVATAR_GROUPS = [
     "junpei_pq.jpg",
     // Akihiko Sanada
     "akihiko_pq2.jpg",
+    "akihiko_sanada_pq.jpg",
     // Mitsuru Kirijo
     "mitsuru_pq2.jpg",
     // Aigis
     "aigis_pq2.jpg",
     // Koromaru
     "koromaru_pq2.jpg",
+    "koromaru_pq.jpg",
     // Ken Amada
     "ken_amada_pq2.jpg",
     // Shinjiro Aragaki
