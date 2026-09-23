@@ -29,14 +29,76 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 3 | `feat/aoa_p5x_variants` | All-Out Attack Luce Notte et Soy Pioneer |
 | 4 | `feat/avatars_gallery_p5x` | Nouveaux portraits de la galerie |
 | 5 | `fix/classic_elisabeth_thanatos` | Elisabeth devient utilisatrice de persona |
-| 6 | `feat/unlockable_avatars` | Avatars déblocables + pack Kotone |
-| 7 | `feat/avatar_frames` | Contours de profil à motifs |
+| 6 | `feat/avatars_animated_tab` | Onglet « Animés » de la galerie + 6 portraits animés |
+| ~~7~~ | ~~`feat/avatar_frames`~~ | ~~Contours de profil ornementés~~ — **abandonné** |
 | 8 | `feat/social_link_xp_uncapped` | XP de Social Link sans plafond |
 | 9 | `feat/leaderboard_friendship_tab` | Onglet Amitié du classement |
 | 10 | `feat/badges_reorder_dnd` | Réordonnancement des badges au glisser-déposer |
 | 11 | `feat/badge_inspect` | Inspection d'un badge sans l'équiper |
 | 12 | `feat/admin_unlock_picker` | Sélection et retrait de déblocages côté admin |
 | 13 | `feat/changelog_2_3_pink_ribbon` | Remplissage de la page Nouveautés |
+
+---
+
+## 2026-09-23 — Onglet « Animés » dans la galerie de portraits
+
+Six portraits animés de Kotone Shiomi et Theodore entrent dans la galerie, et la
+galerie gagne un filtre **Tous / Animés**.
+
+### Ce qui a changé de direction
+
+Ce lot était d'abord conçu comme des **portraits à débloquer** : un pack Kotone accordé
+par un rituel (jouer les six modes avec elle pour cible, porter son titre), une table
+`avatars`, une table `user_avatars`, un `condition_type` dédié et une réconciliation
+serveur. Tout cela est retiré — décision Hamza du 2026-09-23 : l'idée elle-même n'est
+pas bonne. Un portrait de profil n'est pas une récompense, c'est un moyen d'expression ;
+en verrouiller une partie punit surtout le joueur qui arrive après.
+
+Il ne reste donc **aucune logique de déblocage** : les six portraits sont dans
+`img/avatar/` comme les 351 autres, disponibles dès la première connexion.
+
+### Le filtre, et pourquoi il ne se lit pas dans l'extension
+
+La galerie compte 357 portraits dont 19 qui bougent. Sans filtre, celui qui vient
+chercher un portrait animé doit tout parcourir en guettant les pastilles.
+
+Le point délicat est de savoir **lesquels bougent**. L'ancienne pastille « GIF » se
+contentait de regarder si le nom finissait par `.gif` — faux des deux côtés : elle
+ratait les six WebP animés de Kotone, et aurait étiqueté un `.gif` fixe. La galerie
+contient par ailleurs une douzaine de `.webp` parfaitement immobiles.
+
+`scripts/sort_avatars_data.mjs` relit donc les premiers kilo-octets de chaque fichier
+et en déduit `ANIMATED_AVATARS`, exporté par `profile/avatars_data.js` :
+
+- **WebP** — conteneur RIFF portant un chunk `ANIM`/`ANMF` ;
+- **GIF** — l'extension d'application `NETSCAPE`, ou au moins deux blocs d'extension de
+  contrôle graphique (donc deux images).
+
+La liste est **générée**, jamais écrite à la main : un portrait animé importé demain y
+entre tout seul au prochain `npm run avatars:sort`.
+
+### Fichiers touchés
+
+- `scripts/avatar_census.js` — les 6 fichiers rattachés à Kotone Shiomi et Theodore (P3)
+- `scripts/sort_avatars_data.mjs` — `estAnime()` + émission de `ANIMATED_AVATARS`
+- `profile/avatars_data.js` — régénéré (357 portraits, 19 animés)
+- `profile/profile.html` — la barre de filtre dans le volet Avatar de l'atelier
+- `profile/profile-page.js` — filtrage par groupe, pastille `ANIM` lue dans la liste
+- `profile/profile-page.css` — les onglets de filtre (`min-height: 0`, cf. §7)
+- `lang/*.json` — 3 clés × 6 langues
+- `tests/avatars_gallery.test.js` — 4 cas : la liste doit être **exactement** l'ensemble
+  des fichiers qui bougent sur le disque. La vérification relit les octets au lieu
+  d'importer la fonction du générateur — sinon elle confirmerait seulement que le
+  générateur est d'accord avec lui-même.
+- `tests-e2e/avatars_animated_filter.spec.js` — un compte neuf les voit tous, le filtre
+  réduit la grille, le WebP animé se décode, et le choix est bien persisté côté serveur
+
+### Angle mort connu
+
+Les six fichiers pèsent 1,8 Mo à eux seuls (les deux Theodore en font 1 Mo). Ils sont
+chargés en `loading="lazy"` comme le reste de la galerie, donc seulement quand on
+défile jusqu'à eux, mais l'onglet « Animés » les met tous les six au premier écran. À
+surveiller si d'autres animés arrivent.
 
 ---
 
