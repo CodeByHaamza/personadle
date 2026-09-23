@@ -2,11 +2,12 @@
  * Réécrit profile/avatars_data.js dans l'ordre protagoniste → cast principal →
  * personnages secondaires, en prenant scripts/avatar_census.js pour source.
  *
- * Le fichier est régénéré plutôt que retouché, puis comparé à l'ancien : le
- * script refuse d'écrire si un portrait a disparu, est apparu, ou a changé de
- * groupe. Un avatar retiré de la liste devient injouable sans rien signaler.
+ * Le fichier est régénéré plutôt que retouché, puis comparé à l'ancien. Le
+ * script refuse d'écrire si un portrait a DISPARU ou a changé de groupe — un
+ * avatar retiré de la liste devient injouable sans que rien ne le signale. Les
+ * ajouts, eux, sont le cas normal et ne sont que signalés.
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { AVATAR_GROUPS } from "../profile/avatars_data.js";
 import { ROSTERS } from "./avatar_census.js";
 
@@ -75,28 +76,46 @@ lignes.push("];");
 
 const nouveau = lignes.join("\n") + "\n";
 
-// ── Garde-fou : le contenu doit être identique, groupe par groupe ───────────
+// ── Garde-fou : aucune perte, groupe par groupe ────────────────────────────
 const ancien = Object.fromEntries(AVATAR_GROUPS.map((g) => [g.game, [...g.avatars].sort()]));
 const blocs = [...nouveau.matchAll(/\{ game: "([^"]+)"[\s\S]*?\n  \] \},/g)];
 const apres = Object.fromEntries(
   blocs.map((m) => [m[1], [...m[0].matchAll(/^\s{4}"([^"]+)",$/gm)].map((x) => x[1]).sort()])
 );
 
-let probleme = false;
+// Une PERTE est toujours une erreur : un portrait retiré de la liste devient
+// injouable sans que rien ne le signale. Un AJOUT, lui, est le cas normal quand
+// on vient d'inscrire de nouveaux fichiers au roster — on le signale, on ne
+// bloque pas. Un fichier qui CHANGE de groupe apparaît comme une perte d'un côté
+// et un ajout de l'autre : c'est la perte qui fait échouer, et c'est voulu, un
+// déplacement se décide dans le roster, pas par accident.
+let perteDetectee = false;
+const ajouts = [];
 for (const jeu of Object.keys(ancien)) {
   const a = ancien[jeu];
   const b = apres[jeu] ?? [];
-  if (a.length !== b.length || a.some((x, i) => x !== b[i])) {
-    probleme = true;
-    console.error(
-      `ERREUR ${jeu} : ${a.length} portraits avant, ${b.length} après.`,
-      "perdus =", a.filter((x) => !b.includes(x)),
-      "| ajoutés =", b.filter((x) => !a.includes(x))
-    );
+  const perdus = a.filter((x) => !b.includes(x));
+  const nouveaux = b.filter((x) => !a.includes(x));
+  if (perdus.length) {
+    perteDetectee = true;
+    console.error(`ERREUR ${jeu} : ${perdus.length} portrait(s) perdu(s) :`, perdus);
   }
+  if (nouveaux.length) ajouts.push(`${jeu} +${nouveaux.length}`);
 }
-if (probleme) process.exit(1);
+if (perteDetectee) process.exit(1);
+
+// Ce que le roster revendique doit exister sur le disque, sinon la galerie
+// affiche un cadre vide — le test de galerie l'attraperait, autant le dire ici.
+const surDisque = new Set(readdirSync(new URL("../img/avatar/", import.meta.url)));
+const fantomes = Object.values(apres)
+  .flat()
+  .filter((f) => !surDisque.has(f));
+if (fantomes.length) {
+  console.error("ERREUR : recensés mais absents de img/avatar/ :", fantomes);
+  process.exit(1);
+}
 
 writeFileSync(CHEMIN, nouveau, "utf8");
+if (ajouts.length) console.log("ajouts :", ajouts.join(", "));
 const total = Object.values(apres).reduce((n, l) => n + l.length, 0);
-console.log(`avatars_data.js regenere : ${total} portraits, ordre role par role, contenu identique`);
+console.log(`avatars_data.js regenere : ${total} portraits, protagoniste -> principal -> secondaire`);
