@@ -113,16 +113,7 @@ export const ROSTERS = {
       ],
     },
     { nom: "Jun Kurosu", role: "principal", fichiers: ["Jun.jpg", "JOKER.webp"] },
-    {
-      nom: "Baofu",
-      role: "principal",
-      fichiers: [
-        "baofu_p2.jpg",
-        "baofu_p2_2.jpg",
-        "baofu_p2_3.jpg",
-        "baofu_p2_4.jpg",
-      ],
-    },
+    { nom: "Baofu", role: "principal", fichiers: ["baofu_p2.jpg", "baofu_p2_2.jpg"] },
     {
       nom: "Katsuya Suou",
       role: "principal",
@@ -178,6 +169,21 @@ export const ROSTERS = {
       ],
     },
     {
+      nom: "Aigis",
+      role: "protagoniste",
+      // Protagoniste de P3FES « The Answer » — d'où sa place juste
+      // après Kotone plutôt que dans le cast principal (Hamza, 2026-09-23).
+      fichiers: [
+        "aigis_train.jpg",
+        "aigis.gif",
+        "Aigis.jpg",
+        "Aigis2.jpg",
+        "aigis_p3.jpg",
+        "aigis_p3_2.jpg",
+        "aigis_p3_3.jpg",
+      ],
+    },
+    {
       nom: "Yukari Takeba",
       role: "principal",
       fichiers: [
@@ -207,7 +213,6 @@ export const ROSTERS = {
         "Akihiko.jpg",
         "akihiko_sanada_p3.jpg",
         "akihiko_sanada_p3_2.jpg",
-        "akihiko_sanada_p3_3.jpg",
       ],
     },
     {
@@ -236,19 +241,6 @@ export const ROSTERS = {
       ],
     },
     {
-      nom: "Aigis",
-      role: "principal",
-      fichiers: [
-        "aigis_train.jpg",
-        "aigis.gif",
-        "Aigis.jpg",
-        "Aigis2.jpg",
-        "aigis_p3.jpg",
-        "aigis_p3_2.jpg",
-        "aigis_p3_3.jpg",
-      ],
-    },
-    {
       nom: "Koromaru",
       role: "principal",
       fichiers: [
@@ -256,7 +248,6 @@ export const ROSTERS = {
         "Koromaru2.jpg",
         "koromaru_p3.jpg",
         "koromaru_p3_2.jpg",
-        "koromaru_p3_3.jpg",
       ],
     },
     {
@@ -281,8 +272,6 @@ export const ROSTERS = {
         "shinjiro_aragaki_p3_3.jpg",
       ],
     },
-    { nom: "Chidori Yoshino", role: "secondaire", fichiers: ["Chidori.jpg", "Chidori2.jpg"] },
-    { nom: "Metis", role: "secondaire", fichiers: ["Metis.jpg", "Metis2.jpeg", "metis_p3.jpg"] },
     {
       nom: "Elisabeth",
       role: "secondaire",
@@ -306,14 +295,7 @@ export const ROSTERS = {
         "theodore5.jpeg",
       ],
     },
-    {
-      nom: "Jin Shirato",
-      role: "secondaire",
-      fichiers: [
-        "jin_shirato_p3.jpg",
-        "jin_shirato_p3_2.jpg",
-      ],
-    },
+    { nom: "Metis", role: "secondaire", fichiers: ["Metis.jpg", "Metis2.jpeg", "metis_p3.jpg"] },
     {
       nom: "Ryoji Mochizuki",
       role: "secondaire",
@@ -332,6 +314,15 @@ export const ROSTERS = {
         "takaya_sakaki_p3_2.jpg",
       ],
     },
+    {
+      nom: "Jin Shirato",
+      role: "secondaire",
+      fichiers: [
+        "jin_shirato_p3.jpg",
+        "jin_shirato_p3_2.jpg",
+      ],
+    },
+    { nom: "Chidori Yoshino", role: "secondaire", fichiers: ["Chidori.jpg", "Chidori2.jpg"] },
   ],
   P4: [
     {
@@ -513,7 +504,17 @@ export const ROSTERS = {
         "sae_niijima_p5_2.jpg",
       ],
     },
-    { nom: "Zenkichi Hasegawa", role: "principal", fichiers: ["zenkichi_hasegawa_p5s.jpg"] },
+    {
+      nom: "Zenkichi Hasegawa",
+      role: "principal",
+      fichiers: [
+        "zenkichi_hasegawa_p5s.jpg",
+        // Identifiés à tort comme Baofu à l'import : cheveux longs, lunettes et
+        // barbe de trois jours, mais c'est bien Zenkichi (correction Hamza).
+        "zenkichi_hasegawa_p5s_2.jpg",
+        "zenkichi_hasegawa_p5s_3.jpg",
+      ],
+    },
   ],
   P5X: [
     {
@@ -695,10 +696,16 @@ export const ROSTERS = {
     { nom: "Kotone Shiomi", role: "protagoniste", fichiers: ["kotone_pq.jpg"] },
     { nom: "Yukari Takeba", role: "principal", fichiers: ["yukari_pq2.jpg"] },
     { nom: "Junpei Iori", role: "principal", fichiers: ["junpei_pq.jpg"] },
-    { nom: "Akihiko Sanada", role: "principal", fichiers: ["akihiko_pq2.jpg"] },
+    {
+      nom: "Akihiko Sanada",
+      role: "principal",
+      // Le médaillon rond est un art de Persona Q : c'est le STYLE qu'on cherche
+      // dans ce groupe, pas le jeu d'origine du personnage.
+      fichiers: ["akihiko_pq2.jpg", "akihiko_sanada_pq.jpg"],
+    },
     { nom: "Mitsuru Kirijo", role: "principal", fichiers: ["mitsuru_pq2.jpg"] },
     { nom: "Aigis", role: "principal", fichiers: ["aigis_pq2.jpg"] },
-    { nom: "Koromaru", role: "principal", fichiers: ["koromaru_pq2.jpg"] },
+    { nom: "Koromaru", role: "principal", fichiers: ["koromaru_pq2.jpg", "koromaru_pq.jpg"] },
     { nom: "Ken Amada", role: "principal", fichiers: ["ken_amada_pq2.jpg"] },
     { nom: "Shinjiro Aragaki", role: "principal", fichiers: ["shinjiro_pq2.jpg"] },
     { nom: "Yu Narukami", role: "protagoniste", section: "Persona 4", fichiers: ["yu_pq.jpg"] },

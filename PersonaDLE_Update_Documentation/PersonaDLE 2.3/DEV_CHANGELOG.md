@@ -335,6 +335,35 @@ Deux exclusions, l'une et l'autre volontaires :
   personne que Kotone Shiomi, malgré le prénom commun. La regrouper serait une erreur de
   contenu, pas un rangement.
 
+### Corrections d'identification et de classement (2026-09-23)
+
+Quatre reprises signalées par Hamza en relisant la galerie — trois erreurs de ma part :
+
+- **`baofu_p2_3/4` ne sont pas Baofu mais Zenkichi Hasegawa** (P5 Strikers). Les deux
+  personnages ont les cheveux longs, des lunettes sans monture et une barbe de trois jours ;
+  je les avais rattachés au mauvais. Renommés `zenkichi_hasegawa_p5s_2/3.jpg` et passés du
+  groupe P2 au groupe P5. Baofu retombe à 2 portraits, Zenkichi monte à 3.
+- **`akihiko_sanada_p3_3` et `koromaru_p3_3` sont des médaillons ronds de Persona Q.** Le
+  groupe PQ se range par STYLE, pas par jeu d'origine du personnage (décision Hamza du
+  2026-09-18) : ils y passent, renommés `akihiko_sanada_pq.jpg` et `koromaru_pq.jpg`.
+- **Aigis devient protagoniste de P3**, juste après Kotone : elle est l'héroïne de P3FES
+  « The Answer ». Elle quitte donc le cast principal.
+- **Ordre des secondaires de P3** : Elisabeth, Theodore, Metis, Ryoji, Takaya, Jin, Chidori.
+
+Le garde-fou du tri a d'ailleurs **refusé d'écrire** au premier essai, en signalant quatre
+portraits « perdus » — c'étaient les renommages et les deux déplacements. La règle était trop
+grossière : elle traitait toute sortie de groupe comme un oubli. Elle distingue désormais
+trois mouvements, et n'en bloque qu'un :
+
+| Mouvement | Traitement |
+|---|---|
+| Ajout dans un groupe | signalé |
+| Sortie d'un groupe, réapparition dans un autre | signalé (déplacement légitime) |
+| Sortie de la liste alors que le fichier est **toujours sur le disque** | **bloqué** — c'est l'oubli qui rend un portrait injouable en silence |
+
+Une sortie accompagnée d'une disparition du disque est un renommage volontaire ; le test de
+galerie vérifie de son côté qu'aucun orphelin ne traîne.
+
 ### Galerie réordonnée : protagoniste → cast principal → secondaires
 
 Demande Hamza. Chaque groupe s'ouvre désormais sur son ou ses protagonistes, puis le cast

@@ -83,39 +83,55 @@ const apres = Object.fromEntries(
   blocs.map((m) => [m[1], [...m[0].matchAll(/^\s{4}"([^"]+)",$/gm)].map((x) => x[1]).sort()])
 );
 
-// Une PERTE est toujours une erreur : un portrait retiré de la liste devient
-// injouable sans que rien ne le signale. Un AJOUT, lui, est le cas normal quand
-// on vient d'inscrire de nouveaux fichiers au roster — on le signale, on ne
-// bloque pas. Un fichier qui CHANGE de groupe apparaît comme une perte d'un côté
-// et un ajout de l'autre : c'est la perte qui fait échouer, et c'est voulu, un
-// déplacement se décide dans le roster, pas par accident.
+const surDisque = new Set(readdirSync(new URL("../img/avatar/", import.meta.url)));
+
+// Trois mouvements possibles, et un seul est une erreur.
+//
+//  - AJOUT : un fichier entre dans un groupe. Cas normal d'un import, signalé.
+//  - DÉPLACEMENT : un fichier quitte un groupe et réapparaît dans un autre.
+//    Légitime — on corrige régulièrement un classement (un médaillon Persona Q
+//    rangé par erreur dans Persona 3, par exemple). Signalé, pas bloqué.
+//  - PERTE : un fichier quitte la liste ET reste sur le disque. Là c'est un
+//    oubli : le portrait devient injouable sans que rien ne le signale. Bloqué.
+//
+// Un fichier qui quitte la liste ET a disparu du disque est un renommage ou une
+// suppression volontaire ; le test de galerie vérifiera de son côté qu'aucun
+// orphelin ne traîne.
+const listeApres = new Set(Object.values(apres).flat());
 let perteDetectee = false;
 const ajouts = [];
+const deplacements = [];
 for (const jeu of Object.keys(ancien)) {
   const a = ancien[jeu];
   const b = apres[jeu] ?? [];
-  const perdus = a.filter((x) => !b.includes(x));
+  const sortis = a.filter((x) => !b.includes(x));
   const nouveaux = b.filter((x) => !a.includes(x));
+
+  const deplaces = sortis.filter((f) => listeApres.has(f));
+  const perdus = sortis.filter((f) => !listeApres.has(f) && surDisque.has(f));
+
   if (perdus.length) {
     perteDetectee = true;
-    console.error(`ERREUR ${jeu} : ${perdus.length} portrait(s) perdu(s) :`, perdus);
+    console.error(
+      `ERREUR ${jeu} : ${perdus.length} portrait(s) retiré(s) de la liste mais toujours sur le disque :`,
+      perdus
+    );
   }
+  if (deplaces.length) deplacements.push(`${jeu} -${deplaces.length}`);
   if (nouveaux.length) ajouts.push(`${jeu} +${nouveaux.length}`);
 }
 if (perteDetectee) process.exit(1);
 
 // Ce que le roster revendique doit exister sur le disque, sinon la galerie
 // affiche un cadre vide — le test de galerie l'attraperait, autant le dire ici.
-const surDisque = new Set(readdirSync(new URL("../img/avatar/", import.meta.url)));
-const fantomes = Object.values(apres)
-  .flat()
-  .filter((f) => !surDisque.has(f));
+const fantomes = [...listeApres].filter((f) => !surDisque.has(f));
 if (fantomes.length) {
   console.error("ERREUR : recensés mais absents de img/avatar/ :", fantomes);
   process.exit(1);
 }
 
 writeFileSync(CHEMIN, nouveau, "utf8");
-if (ajouts.length) console.log("ajouts :", ajouts.join(", "));
+if (ajouts.length) console.log("ajouts       :", ajouts.join(", "));
+if (deplacements.length) console.log("deplacements :", deplacements.join(", "));
 const total = Object.values(apres).reduce((n, l) => n + l.length, 0);
 console.log(`avatars_data.js regenere : ${total} portraits, protagoniste -> principal -> secondaire`);
