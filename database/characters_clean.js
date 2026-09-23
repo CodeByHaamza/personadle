@@ -479,8 +479,13 @@ export const characters = [
     age: "Unknown",
     arcane: ["NONE"],
     opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R","P4AU"],
-    personaUser: false,
-    persona: "NONE",
+    // Manie Thanatos dans P4AU — ce que le mode Personae enregistre depuis la 2.1
+    // (entrée `Thanatos` fusionnée avec Makoto Yuki et Kotone Shiomi, cf. CLAUDE.md
+    // §4). Le Classique la donnait encore en non-utilisatrice : les deux datasets
+    // se contredisaient. Theodore, lui, reste non-utilisateur — il n'est pas dans
+    // P4AU et ne manie aucune persona.
+    personaUser: true,
+    persona: "Thanatos",
     emoji: ["🧢", "🛝", "📖"],
     quote: "Well then, a song to celebrate my victory... Veeelvet, oh velvet..."
   },
