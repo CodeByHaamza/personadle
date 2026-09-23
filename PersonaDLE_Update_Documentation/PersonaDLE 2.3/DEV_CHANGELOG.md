@@ -40,6 +40,56 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-09-23 — L'XP de Social Link ne se cache plus au rang 10
+
+### Ce qui était en cause
+
+Le **serveur n'a jamais plafonné l'XP**. `add_social_link_xp` (procédure stockée) et
+son équivalent PHP `personadle_sl_add_xp()` font tous deux `xp = xp + montant`, sans
+borne ; seul le RANG s'arrête à 10, parce qu'il vaut
+`MAX(rank WHERE xp_required <= xp)` et que la table `social_link_ranks` s'arrête à
+2 700. Vérifié en base : un lien poussé à 7 700 XP reste au rang 10 sans rien perdre.
+
+Le plafond était donc purement **visuel**. Une fois le rang 10 atteint,
+`_renderGauge()` remplaçait le compteur par « ✨ MAX — True Confidant » et masquait le
+bloc « comment gagner de l'XP ». Deux amitiés de 2 700 et de 50 000 XP s'affichaient à
+l'identique, et le jeu disait à ceux qui jouent le plus ensemble qu'ils n'avaient plus
+rien à gagner — alors que c'est cette XP qui départagera les amitiés dans le classement
+Amitié (lot 9).
+
+### Ce qui change
+
+- Le total d'XP reste affiché au rang 10 : « ✨ MAX — True Confidant · 7 700 XP ».
+- Une ligne dorée annonce l'XP gagnée **au-delà** du seuil : « +5 000 XP au-delà du
+  rang 10 ». Absente tant qu'on vient juste d'atteindre le rang.
+- Le mémo « comment gagner de l'XP » ne disparaît plus au rang 10.
+- Les nombres passent par `toLocaleString()` : « 7 700 » et non « 7700 ». Le séparateur
+  de milliers varie selon la langue, le coder en dur l'aurait faux dans cinq cas sur six.
+
+Le rang reste borné à 1-10 : rien n'est touché côté serveur, aucune migration.
+
+### Défaut de fond corrigé au passage
+
+Le helper `t(cle, repli, vars)` de `js/social-link.js` interpolait `{{variable}}` dans
+la **traduction** mais pas dans le **texte de repli**. Sans i18n chargé — ce qui arrive,
+la jauge pouvant se rendre avant — ou avec une clé manquante dans une langue, le joueur
+lisait littéralement « +{{xp}} XP au-delà du rang 10 ». `social.howto_done_today`
+portait déjà ce défaut depuis la 2.1.
+
+C'est le test qui l'a trouvé, pas la relecture : la première version du cas attendait
+« 5000 » et a reçu « +{{xp}}XPbeyondrank10 ».
+
+### Fichiers touchés
+
+- `js/social-link.js` — `fmtXp()`, XP au-delà du seuil, mémo conservé, repli interpolé
+- `css/social-link.css` — `.sl-xp-beyond` (or, comme les autres marqueurs de rang max)
+- `lang/*.json` — `social.xp_beyond_max` × 6 langues
+- `tests/social-link.test.js` — 6 cas : total affiché, ligne « au-delà » présente puis
+  absente au seuil exact, mémo conservé, barre pleine et rang figé à 10, et le repli
+  qui n'affiche jamais `{{`
+
+---
+
 ## 2026-09-22 — Le bouton « Sauvegarder » des paramètres était hors champ, et le panneau ne défilait plus
 
 Signalé par **Gypotre** : « quand on modifie nos paramètres depuis notre profil, on ne voit
