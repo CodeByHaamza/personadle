@@ -934,15 +934,27 @@ document.getElementById("equippedTitleBtn")?.addEventListener("click", () => {
  * mal cadrés d'origine et le joueur veut régler ça tout de suite (retour Hamza
  * du 2026-09-16). La fermer sans rien toucher garde le portrait tel quel.
  *
- * Un GIF ne passe pas par le canvas (il y perdrait son animation) : pas de
- * recadrage possible, on s'arrête à l'application.
+ * Un portrait ANIMÉ ne passe pas par le canvas : il y perdrait son animation,
+ * `toDataURL()` ne rendant qu'une image fixe. Pas de recadrage possible, on
+ * s'arrête à l'application.
+ *
+ * Deux familles d'animés : les `.gif` de la galerie libre, et les `.webp` du
+ * dossier `unlockable/` (pack Kotone, migration 054). L'extension ne suffit pas
+ * à les distinguer — un `.webp` de la galerie est fixe et se recadre très bien —
+ * d'où le test sur le dossier, qui est exactement ce que la table `avatars`
+ * appelle `is_animated`.
  *
  * @param {string} src  chemin relatif à profile/ (../img/avatar/…)
  */
+function isAnimatedAvatarPath(src) {
+  const s = String(src).toLowerCase();
+  return s.endsWith(".gif") || s.includes("/img/avatar/unlockable/");
+}
+
 function applyAvatarPreset(src) {
   selectedAvatarSrc = src;
   commitAvatar(src);
-  if (src.toLowerCase().endsWith(".gif")) return;
+  if (isAnimatedAvatarPath(src)) return;
   loadImageToCanvas(src);
   openModal("avatarCropModal");
 }
@@ -1187,6 +1199,206 @@ function setFavoriteMode(key) {
 
 
 
+// ─────────────────────────────────────────────────────────
+// PORTRAITS DÉBLOCABLES (table `avatars`, migration 054)
+// ─────────────────────────────────────────────────────────
+
+/**
+ * Échappe pour insertion en HTML. Le nom et surtout `unlock_condition` viennent
+ * de la base : c'est nous qui les écrivons, mais ils transitent par le réseau et
+ * finissent dans un `innerHTML` — les échapper coûte une ligne.
+ */
+function esc(s) {
+  return String(s ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+/**
+ * Bascule entre la galerie libre et les portraits à débloquer.
+ *
+ * Deux grilles distinctes plutôt qu'une seule filtrée : la galerie libre vient
+ * d'un fichier statique et s'affiche tout de suite, les déblocables d'un appel
+ * réseau qui peut échouer. Les mêler ferait dépendre les 350 portraits toujours
+ * disponibles d'une requête qui ne les concerne pas.
+ */
+function initAvatarSubtabs() {
+  const onglets = document.querySelectorAll(".avatar-subtab");
+  if (!onglets.length) return;
+  const grilles = {
+    gallery: document.getElementById("avatarGrid"),
+    unlockable: document.getElementById("avatarUnlockableGrid"),
+  };
+  // Chargé à la PREMIÈRE ouverture de l'onglet, pas à l'init de la page.
+  //
+  // Deux raisons. D'abord l'ordre : `initAvatarGrid()` tourne avant `initAuth()`,
+  // donc `window._currentUser` n'est pas encore posé — c'est le même piège que
+  // dans js/settings-modal.js, où l'id doit être résolu au clic et non à l'init.
+  // Charger ici donnait une grille vide et silencieuse. Ensuite l'économie : un
+  // joueur qui n'ouvre jamais cet onglet ne déclenche aucune requête.
+  let dejaCharge = false;
+  onglets.forEach((onglet) => {
+    onglet.addEventListener("click", () => {
+      const cible = onglet.dataset.subpane;
+      onglets.forEach((o) => {
+        const actif = o === onglet;
+        o.classList.toggle("avatar-subtab--active", actif);
+        o.setAttribute("aria-selected", actif ? "true" : "false");
+      });
+      for (const [nom, grille] of Object.entries(grilles)) {
+        grille?.classList.toggle("hidden", nom !== cible);
+      }
+      if (cible === "unlockable" && !dejaCharge) {
+        dejaCharge = true;
+        loadUnlockableAvatars();
+      }
+    });
+  });
+}
+
+/**
+ * Remplit l'onglet des portraits à débloquer depuis `GET /api/avatars/`.
+ *
+ * C'est le SERVEUR qui décide de ce qui est débloqué : la réponse porte déjà
+ * `is_unlocked` par portrait, réconcilié à la lecture. Le client n'évalue
+ * aucune condition — c'est précisément ce qui manquait le 2026-09-19, quand des
+ * centaines de titres et badges dus dormaient faute de client pour les demander.
+ *
+ * Un portrait verrouillé montre sa condition en clair : un pack qui ne dit pas
+ * comment on l'obtient n'existe pas pour le joueur.
+ */
+async function loadUnlockableAvatars() {
+  const grille = document.getElementById("avatarUnlockableGrid");
+  if (!grille) return;
+  const compteur = document.getElementById("avatarUnlockableCount");
+  const _t = (k, fb) => {
+    const r = window.i18n?.t?.(k);
+    return r != null && r !== k ? r : fb;
+  };
+
+  if (!window._currentUser?.id || !window._personadleApi) {
+    grille.innerHTML = `<p class="atelier-hint">${_t(
+      "profile.avatar_unlockable_guest",
+      "Sign in to see the portraits you can unlock."
+    )}</p>`;
+    return;
+  }
+
+  let liste = [];
+  try {
+    const res = await window._personadleApi.avatars.catalog();
+    liste = res?.avatars ?? res?.data?.avatars ?? [];
+  } catch {
+    // Le réseau n'est pas une erreur de l'utilisateur : on le dit et on s'arrête.
+    // La galerie libre, elle, reste utilisable — c'est pourquoi les deux grilles
+    // sont séparées.
+    grille.innerHTML = `<p class="atelier-hint">${_t(
+      "profile.avatar_unlockable_error",
+      "Couldn't load the unlockable portraits. Try again in a moment."
+    )}</p>`;
+    return;
+  }
+
+  if (compteur) {
+    const n = liste.filter((a) => a.is_unlocked).length;
+    compteur.textContent = `${n}/${liste.length}`;
+  }
+
+  if (!liste.length) {
+    grille.innerHTML = `<p class="atelier-hint">${_t(
+      "profile.avatar_unlockable_empty",
+      "Nothing to unlock yet — come back next update."
+    )}</p>`;
+    return;
+  }
+
+  // Regroupe par pack : les portraits qui tombent ensemble s'affichent ensemble,
+  // dans un DOSSIER repliable, avec UNE condition en tête plutôt que répétée six
+  // fois (demande Hamza du 2026-09-23).
+  const packs = new Map();
+  for (const a of liste) {
+    const cle = a.pack_id || `__${a.id}`;
+    if (!packs.has(cle)) packs.set(cle, []);
+    packs.get(cle).push(a);
+  }
+
+  let html = "";
+  for (const [cle, portraits] of packs) {
+    const debloque = portraits.every((a) => a.is_unlocked);
+    const estPack = !cle.startsWith("__");
+
+    // Nom et condition passent par l'i18n quand le pack en a une entrée, et
+    // retombent sur la base sinon. La colonne `unlock_condition` reste la source
+    // de vérité en anglais — c'est elle qui sert de repli, exactement comme
+    // `t(key) ?? fallback` ne marche pas ici (t() renvoie la clé si absente,
+    // d'où le helper `_t` avec son test explicite, cf. CLAUDE.md §5).
+    const cleI18n = estPack ? `profile.avatar_pack_${cle}` : null;
+    // Un pack peut mêler plusieurs personnages — celui de Kotone contient deux
+    // portraits de Theodore. Prendre le nom du premier aurait affiché « Kotone
+    // Shiomi » au-dessus d'une grille où il est aussi.
+    const noms = [...new Set(portraits.map((a) => a.name).filter(Boolean))].join(" · ");
+    const titre = cleI18n ? _t(cleI18n, noms) : noms;
+    const condition = cleI18n
+      ? _t(`${cleI18n}_hint`, portraits.find((a) => a.unlock_condition)?.unlock_condition ?? "")
+      : (portraits.find((a) => a.unlock_condition)?.unlock_condition ?? "");
+
+    const etat = debloque
+      ? _t("profile.avatar_pack_unlocked", "Unlocked")
+      : _t("profile.avatar_pack_locked", "Locked");
+
+    // `<details>` plutôt qu'un repli maison : ouverture au clavier, à la souris
+    // et au lecteur d'écran sans une ligne de JS. Un pack déjà débloqué s'ouvre
+    // d'office — c'est ce qu'on vient chercher ; un pack verrouillé reste fermé
+    // pour que la liste tienne à l'écran.
+    html +=
+      `<details class="avatar-pack${debloque ? " avatar-pack--unlocked" : ""}"${debloque ? " open" : ""}>` +
+      `<summary class="avatar-pack-summary">` +
+      `<span class="avatar-pack-icon" aria-hidden="true">${debloque ? "📂" : "🔒"}</span>` +
+      `<span class="avatar-pack-name">${esc(titre)}</span>` +
+      `<span class="avatar-pack-state">${esc(etat)}</span>` +
+      `<span class="avatar-group-count">${portraits.filter((a) => a.is_unlocked).length}/${portraits.length}</span>` +
+      `</summary>`;
+
+    if (!debloque && condition) {
+      html += `<p class="avatar-unlock-condition">${esc(condition)}</p>`;
+    }
+
+    html +=
+      `<div class="avatar-group-grid">` +
+      portraits
+        .map((a) => {
+          const chemin = `../${a.image_path}`;
+          if (!a.is_unlocked) {
+            // Verrouillé : pas de `data-src`, donc aucun gestionnaire de clic ne
+            // s'y attache — le portrait n'est pas seulement grisé, il est inerte.
+            return (
+              `<div class="avatar-cell avatar-cell--locked" title="${esc(condition)}">` +
+              `<span class="avatar-lock" aria-hidden="true">🔒</span>` +
+              `<img src="${esc(chemin)}" loading="lazy" alt="" aria-hidden="true" /></div>`
+            );
+          }
+          return (
+            `<div class="avatar-cell">` +
+            (a.is_animated
+              ? `<span class="avatar-tag avatar-tag--gif">${esc(_t("profile.avatar_tag_animated", "ANIM"))}</span>`
+              : "") +
+            `<img src="${esc(chemin)}" data-src="${esc(chemin)}" loading="lazy" alt="${esc(a.name)}" /></div>`
+          );
+        })
+        .join("") +
+      `</div></details>`;
+  }
+  grille.innerHTML = html;
+
+  grille.querySelectorAll(".avatar-cell img[data-src]").forEach((img) => {
+    img.onclick = () => applyAvatarPreset(img.dataset.src);
+  });
+  _markSelectedAvatarCell();
+}
+
 /**
  * Construit la grille de sélection d'avatars dans la modale crop.
  * Les chemins sont relatifs à profile/ (../img/avatar/).
@@ -1239,6 +1451,11 @@ function initAvatarGrid() {
     img.onclick = () => applyAvatarPreset(img.dataset.src);
   });
   _markSelectedAvatarCell();
+
+  const galleryCount = document.getElementById("avatarGalleryCount");
+  if (galleryCount) {
+    galleryCount.textContent = String(AVATAR_GROUPS.reduce((n, g) => n + g.avatars.length, 0));
+  }
 
   // Option NONE → vider l'avatar
   const noneOption = avatarGrid.querySelector(".avatar-none");
@@ -1487,6 +1704,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderBorderPicker();
   renderFavoriteModePicker();
   initAvatarGrid();
+  initAvatarSubtabs();
   // L'atelier : onglets + indicateur d'enregistrement branché sur l'envoi complet.
   initAtelier();
   initSaveStatus(() => {

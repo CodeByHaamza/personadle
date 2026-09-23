@@ -714,7 +714,46 @@
                   ✂ <span data-i18n="profile.avatar_adjust">Adjust framing</span>
                 </button>
               </div>
+              <!-- Deux sous-onglets : la galerie libre, et les portraits qui se
+                   méritent. Les déblocables vivent en base (table `avatars`) et
+                   sont accordés par le SERVEUR (api/lib/unlock_reconcile.php) —
+                   le client ne fait que les afficher. -->
+              <div class="avatar-subtabs" role="tablist" aria-label="Avatar source">
+                <button
+                  class="avatar-subtab avatar-subtab--active"
+                  role="tab"
+                  type="button"
+                  data-subpane="gallery"
+                  aria-selected="true"
+                  aria-controls="avatarGrid"
+                  id="subtab-avatar-gallery"
+                >
+                  <span data-i18n="profile.avatar_tab_gallery">Gallery</span>
+                  <span class="avatar-subtab-count" id="avatarGalleryCount"></span>
+                </button>
+                <button
+                  class="avatar-subtab"
+                  role="tab"
+                  type="button"
+                  data-subpane="unlockable"
+                  aria-selected="false"
+                  aria-controls="avatarUnlockableGrid"
+                  id="subtab-avatar-unlockable"
+                >
+                  <span aria-hidden="true">🔒</span>
+                  <span data-i18n="profile.avatar_tab_unlockable">To unlock</span>
+                  <span class="avatar-subtab-count" id="avatarUnlockableCount"></span>
+                </button>
+              </div>
+
               <div id="avatarGrid" class="crop-avatar-grid atelier-avatar-grid"></div>
+
+              <div
+                id="avatarUnlockableGrid"
+                class="crop-avatar-grid atelier-avatar-grid hidden"
+                role="tabpanel"
+                aria-labelledby="subtab-avatar-unlockable"
+              ></div>
             </div>
 
             <!-- Bordure : la couleur autour de l'avatar, partout -->

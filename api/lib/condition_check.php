@@ -339,6 +339,13 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
             // (ou l'inverse) — voir personadle_same_energy_partners().
             return personadle_same_energy_partners($pdo, $userId) !== [];
 
+        case 'avatar_pack_kotone':
+            // Condition composite du pack d'avatars Kotone (migration 054).
+            // Voir personadle_kotone_ritual_met() : la part « parties gagnées » est
+            // l'ensemble `kotone_ritual`, complétée par deux conditions d'ÉTAT
+            // COURANT — titre équipé et bordure rose portée.
+            return personadle_kotone_ritual_met($pdo, $userId);
+
         case 'expert_modes_mastered':
             // condition_value victoires EN EXPERT dans chacun des 6 modes (badge Denial of Self).
             // Pas besoin de vérifier en plus que les 6 gates sont franchis : le serveur
@@ -384,6 +391,8 @@ function personadle_known_condition_types(): array
         'expert_modes_mastered', 'expert_wins_total',
         // Lot du 2026-09-18 (migration 046)
         'mode_expert_perfect_wins', 'targets_found', 'same_energy',
+        // Lot du 2026-09-23 (migration 054) — pack d'avatars Kotone
+        'avatar_pack_kotone',
     ];
 }
 
@@ -665,12 +674,99 @@ const PERSONADLE_TARGET_SETS = [
             'Shadow Loop', 'Wake Up Your Hero', 'Wonder Light', 'Show Stealer',
         ], 8],
     ],
+    // Pack d'avatars Kotone (migration 054) — la part VÉRIFIABLE DEPUIS LES PARTIES.
+    // Les deux conditions d'état courant (titre équipé, bordure rose portée) ne sont
+    // pas ici : elles se lisent dans `profiles`, pas dans `game_sessions`, et sont
+    // vérifiées par `avatar_pack_kotone` juste après cet ensemble.
+    //
+    // ⚠️ Les cinq musiques sont FIGÉES nommément, et non calculées comme « tout ce
+    // qui porte l'opus P3P ». Hamza prévoit d'ajouter des musiques P5X remakées pour
+    // P3 : un ensemble calculé durcirait rétroactivement le pack pour qui ne l'a pas
+    // encore débloqué, ce que la règle de monotonie interdit (CLAUDE.md §7).
+    //
+    // ⚠️ En mode Personae, `target_name` est le PERSONNAGE et non la persona
+    // (modePersonae.js enregistre `target.user[0]`). « Kotone Shiomi » couvre donc
+    // ses deux personas exclusives — Orpheus ( Female ) et Orpheus Picaro ( Female ).
+    // Orpheus Telos et Thanatos, qu'elle partage, s'enregistrent sous « Makoto Yuki »
+    // et ne comptent pas : la donnée ne permet pas de viser une persona précise.
+    'kotone_ritual' => [
+        ['alloutattack', 0, ['Kotone Shiomi'], 1],
+        ['alloutattack', 1, ['Kotone Shiomi'], 1],
+        ['personae',     0, ['Kotone Shiomi'], 1],
+        ['personae',     1, ['Kotone Shiomi'], 1],
+        ['silhouette',   0, ['Kotone Shiomi', 'Theodore'], 2],
+        ['music', 0, [
+            'A Way of Life', 'Danger Zone', 'Soul Phrase', 'Time', 'Wiping All Out',
+        ], 5],
+        ['music', 1, [
+            'A Way of Life', 'Danger Zone', 'Soul Phrase', 'Time', 'Wiping All Out',
+        ], 5],
+    ],
 ];
 
 /** Clés d'ensembles connues (pour les tests et la validation d'une migration). */
 function personadle_target_set_keys(): array
 {
     return array_keys(PERSONADLE_TARGET_SETS);
+}
+
+/** Slug du titre à porter pour le pack Kotone. */
+const PERSONADLE_KOTONE_TITLE_SLUG = 'kotone_not_a_princess';
+
+/**
+ * Bordure d'avatar à porter pour le pack Kotone.
+ *
+ * C'est la pastille rose de la palette de l'atelier (`BORDER_PRESETS`,
+ * profile/profile-page.js) — celle qu'un joueur peut réellement cliquer. Viser
+ * une teinte absente de la palette rendrait la condition atteignable seulement
+ * par le sélecteur de couleur libre, ce que personne ne devinerait.
+ */
+const PERSONADLE_KOTONE_BORDER = '#ff6b9d';
+
+/**
+ * Le « rituel Kotone » est-il accompli À CET INSTANT ?
+ *
+ * Deux moitiés, et c'est la seconde qui fait la particularité du pack :
+ *
+ *   1. l'ensemble `kotone_ritual` — ce qui se lit dans `game_sessions`, donc
+ *      cumulatif et définitivement acquis ;
+ *   2. deux conditions d'ÉTAT COURANT lues dans `profiles` : porter son titre ET
+ *      sa bordure rose, en même temps.
+ *
+ * La seconde moitié n'est pas monotone en elle-même — déséquiper le titre la rend
+ * fausse. Ce qui rend l'ensemble conforme à la règle « un accès gagné ne se
+ * reperd jamais » (CLAUDE.md §7), c'est que le déblocage est MATÉRIALISÉ par une
+ * ligne dans `user_avatars` que rien ne supprime : une fois le rituel accompli au
+ * moment d'une réconciliation, le pack reste acquis quoi que le joueur porte
+ * ensuite. Décision Hamza du 2026-09-22, assumée comme un rituel.
+ */
+function personadle_kotone_ritual_met(PDO $pdo, int $userId): bool
+{
+    if (!personadle_target_set_met($pdo, $userId, 'kotone_ritual')) {
+        return false;
+    }
+
+    $stmt = $pdo->prepare(
+        'SELECT t.slug AS title_slug, p.avatar_border_color
+           FROM profiles p
+           LEFT JOIN titles t ON t.id = p.equipped_title_id
+          WHERE p.user_id = ?
+          LIMIT 1'
+    );
+    $stmt->execute([$userId]);
+    $row = $stmt->fetch();
+    if (!$row) {
+        return false;
+    }
+
+    if (($row['title_slug'] ?? '') !== PERSONADLE_KOTONE_TITLE_SLUG) {
+        return false;
+    }
+
+    // Comparaison en minuscules : la couleur vient du client (pastille ou
+    // sélecteur libre) et rien ne garantit sa casse.
+    return strtolower(trim((string) ($row['avatar_border_color'] ?? '')))
+        === PERSONADLE_KOTONE_BORDER;
 }
 
 /**

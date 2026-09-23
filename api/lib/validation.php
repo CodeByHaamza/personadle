@@ -127,8 +127,15 @@ function personadle_validate_avatar(?string $avatar, string $galleryDir = __DIR_
     }
     // `avif` : Kanji.avif est dans la galerie depuis la 2.0 et était refusé ici —
     // choisi, il restait local et disparaissait au prochain pull cloud.
-    if (preg_match('#^\.\./img/avatar/([A-Za-z0-9_\-]+\.(?:gif|png|jpe?g|webp|avif))$#', $avatar, $m)) {
-        return is_file($galleryDir . '/' . $m[1]) ? null : 'Unknown gallery avatar';
+    //
+    // `unlockable/` (migration 054) est le SEUL sous-dossier admis, et il est écrit
+    // en toutes lettres : pas de `[^/]+/` générique, donc pas de traversée possible
+    // et pas de nouveau dossier accepté par accident. Sans cette branche, un
+    // portrait déblocable subissait exactement le défaut décrit ci-dessus —
+    // accepté par l'UI, refusé par le serveur, disparu au pull suivant.
+    if (preg_match('#^\.\./img/avatar/(unlockable/)?([A-Za-z0-9_\-]+\.(?:gif|png|jpe?g|webp|avif))$#', $avatar, $m)) {
+        $relatif = ($m[1] ?? '') . $m[2];
+        return is_file($galleryDir . '/' . $relatif) ? null : 'Unknown gallery avatar';
     }
     return 'Invalid avatar format';
 }

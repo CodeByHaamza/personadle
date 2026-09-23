@@ -1016,6 +1016,63 @@ CREATE TABLE user_wallpapers (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =============================================================================
+-- 18bis. AVATARS — Portraits de profil à DÉBLOQUER (migration 054)
+-- =============================================================================
+-- Ne contient QUE les portraits déblocables. Les ~350 portraits libres restent
+-- dans profile/avatars_data.js, côté client : aucune migration de l'existant,
+-- donc aucun risque de régression sur ce qui marche déjà.
+CREATE TABLE avatars (
+    id                  VARCHAR(64)         NOT NULL PRIMARY KEY,
+    -- Un nom de portrait est un nom de personnage : il ne se traduit pas
+    -- (CLAUDE.md §5), d'où l'absence de colonnes name_fr/name_es/…
+    name                VARCHAR(200)        NOT NULL DEFAULT '',
+    game                VARCHAR(16),                      -- clé de groupe de la galerie
+    image_path          VARCHAR(255)        NOT NULL DEFAULT '',
+    is_animated         TINYINT(1)          NOT NULL DEFAULT 0,
+    pack_id             VARCHAR(64)         NULL,         -- portraits débloqués ensemble
+    unlock_condition    VARCHAR(500)        NULL,         -- texte affiché sur une vignette verrouillée
+    -- condition_type/mode/value : voir la table `badges` — même vocabulaire,
+    -- vérifié par api/lib/condition_check.php.
+    condition_type      VARCHAR(50)         NULL,
+    condition_mode      VARCHAR(30)         NULL,
+    condition_value     INT                 NULL,
+    sort_order          INT                 NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================================================
+-- 18ter. USER_AVATARS — Portraits débloqués par utilisateur
+-- =============================================================================
+-- Une ligne ici est ACQUISE À VIE : rien ne la retire. C'est ce qui rend le pack
+-- Kotone monotone malgré deux conditions d'état courant (titre équipé, bordure
+-- portée) — cf. CLAUDE.md §7, « un accès gagné ne doit jamais se reperdre ».
+CREATE TABLE user_avatars (
+    user_id             BIGINT UNSIGNED     NOT NULL,
+    avatar_id           VARCHAR(64)         NOT NULL,
+    unlocked_at         TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, avatar_id),
+    CONSTRAINT fk_ua_user   FOREIGN KEY (user_id)   REFERENCES users(id)   ON DELETE CASCADE,
+    CONSTRAINT fk_ua_avatar FOREIGN KEY (avatar_id) REFERENCES avatars(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Pack Kotone Shiomi — six portraits animés, condition composite `avatar_pack_kotone`.
+INSERT INTO avatars
+    (id, name, game, image_path, is_animated, pack_id, unlock_condition, condition_type, condition_mode, condition_value, sort_order)
+VALUES
+    ('kotone_listening',   'Kotone Shiomi', 'persona3', 'img/avatar/unlockable/kotone_listening.webp',   1, 'kotone',
+     'Kotone''s ritual: her All-Out Attack (normal + Expert), her persona in Personae (normal + Expert), all five P3P-only songs (normal + Expert), Kotone and Theodore in Silhouette — then equip her title and wear the pink profile border (#ff6b9d) at the same time.',
+     'avatar_pack_kotone', NULL, NULL, 1),
+    ('kotone_butterfly',   'Kotone Shiomi', 'persona3', 'img/avatar/unlockable/kotone_butterfly.webp',   1, 'kotone',
+     'Unlocked with the Kotone pack.', 'avatar_pack_kotone', NULL, NULL, 2),
+    ('kotone_orpheus',     'Kotone Shiomi', 'persona3', 'img/avatar/unlockable/kotone_orpheus.webp',     1, 'kotone',
+     'Unlocked with the Kotone pack.', 'avatar_pack_kotone', NULL, NULL, 3),
+    ('kotone_pink_shot',   'Kotone Shiomi', 'persona3', 'img/avatar/unlockable/kotone_pink_shot.webp',   1, 'kotone',
+     'Unlocked with the Kotone pack.', 'avatar_pack_kotone', NULL, NULL, 4),
+    ('theodore_elevator',  'Theodore',      'persona3', 'img/avatar/unlockable/theodore_elevator.webp',  1, 'kotone',
+     'Unlocked with the Kotone pack.', 'avatar_pack_kotone', NULL, NULL, 5),
+    ('theodore_look_back', 'Theodore',      'persona3', 'img/avatar/unlockable/theodore_look_back.webp', 1, 'kotone',
+     'Unlocked with the Kotone pack.', 'avatar_pack_kotone', NULL, NULL, 6);
+
+-- =============================================================================
 -- 19. MESSAGES — Messages et défis entre amis
 -- =============================================================================
 CREATE TABLE messages (

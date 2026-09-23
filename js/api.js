@@ -603,6 +603,22 @@ export const api = {
     unlock: (wallpaperId) => post("/wallpapers/unlock", { wallpaper_id: wallpaperId }),
   },
 
+  // ── Avatars déblocables ───────────────────────────────
+  avatars: {
+    /**
+     * Catalogue des portraits DÉBLOCABLES, avec `is_unlocked` pour le joueur
+     * courant et `granted` = ce que le serveur vient d'accorder à cet appel.
+     *
+     * Les ~350 portraits libres ne passent pas par là : ils vivent dans
+     * `profile/avatars_data.js` et n'ont jamais eu besoin du serveur.
+     *
+     * ⚠️ Le slash final n'est pas décoratif : sans lui, Apache (mod_dir) renvoie
+     * un 301 vers l'URL avec slash (cf. CLAUDE.md §7). Inoffensif pour un GET,
+     * destructeur pour un POST — autant ne pas prendre l'habitude.
+     */
+    catalog: () => get("/avatars/"),
+  },
+
   // ── Titles ────────────────────────────────────────────
   titles: {
     /**

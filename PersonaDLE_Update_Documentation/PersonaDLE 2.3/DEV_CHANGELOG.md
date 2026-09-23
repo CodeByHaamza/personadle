@@ -178,6 +178,137 @@ produire de flèche. L'égalité stricte la couvre déjà en amont (`value === t
 
 ---
 
+## 2026-09-23 — Avatars déblocables et pack Kotone (migration 054)
+
+Premier contenu de profil qui se **mérite**. Jusqu'ici la galerie vivait entièrement
+côté client (`profile/avatars_data.js`, ~350 fichiers offerts à tout le monde, rien en
+base) : un portrait à débloquer ne pouvait pas en sortir, parce que le client ne peut
+pas décider de ce qu'un joueur a gagné.
+
+### Modèle : calqué sur `wallpapers`, pas une refonte
+
+- `avatars` ne contient **que** les portraits déblocables. Les ~350 libres restent dans
+  `avatars_data.js` — aucune migration de l'existant, donc aucun risque de régression sur
+  ce qui marche déjà.
+- `user_avatars` : une ligne = un portrait acquis **à vie**. Rien ne la retire.
+- `GET /api/avatars/` réconcilie à la lecture, comme `titles` et `badges` : le serveur
+  accorde ce qui est dû plutôt que d'attendre que le client pense à le demander. C'est la
+  leçon du 2026-09-19 (~290 titres et ~100 badges dormaient en prod, personne ne frappait).
+- **Pas de `POST /unlock`**, volontairement : aucun portrait ne s'obtient sur déclaration
+  du client. Ouvrir une porte que personne n'emprunte serait une surface gratuite.
+
+### La condition `avatar_pack_kotone`
+
+Deux moitiés, et c'est leur mélange qui est nouveau :
+
+| Ce qu'il faut | Source | Nature |
+|---|---|---|
+| AOA Kotone (normal + Expert), sa persona (normal + Expert), les 5 musiques P3P (normal + Expert), Kotone **et** Theodore en Silhouette | `game_sessions` | cumulatif |
+| titre `kotone_not_a_princess` **équipé**, bordure **#ff6b9d portée** | `profiles` | état courant |
+
+La seconde moitié n'est pas monotone : déséquiper le titre la rend fausse. Ce qui rend
+l'ensemble conforme à CLAUDE.md §7, c'est que le déblocage est **matérialisé** par une
+ligne dans `user_avatars` que rien ne supprime — on n'évalue la condition que pour
+accorder, jamais pour retirer. Rituel assumé (décision Hamza du 2026-09-22), et vérifié
+par un cas de test dédié.
+
+Trois précisions que la donnée impose :
+
+- **Les cinq musiques sont figées nommément**, pas calculées depuis l'opus P3P. Hamza
+  prévoit d'ajouter des musiques P5X remakées pour P3 : un ensemble calculé durcirait le
+  pack rétroactivement pour qui ne l'a pas encore débloqué.
+- **En mode Personae, `target_name` est le PERSONNAGE**, pas la persona
+  (`modePersonae.js` enregistre `target.user[0]`). « Kotone Shiomi » couvre donc ses deux
+  personas exclusives — Orpheus ( Female ) et Orpheus Picaro ( Female ). Orpheus Telos et
+  Thanatos, qu'elle partage, s'enregistrent sous « Makoto Yuki ». Viser une persona
+  précise est impossible sans changer ce que le mode enregistre.
+- La bordure visée est **#ff6b9d**, la pastille rose de `BORDER_PRESETS` — celle qu'un
+  joueur peut réellement cliquer. Une teinte hors palette n'aurait été atteignable que par
+  le sélecteur libre, ce que personne ne devine.
+
+### Deux pièges trouvés en chemin, tous deux silencieux
+
+1. **La liste blanche serveur refusait les sous-dossiers.** `personadle_validate_avatar`
+   n'acceptait qu'un nom de fichier sans aucun `/`. Un portrait de `unlockable/` aurait été
+   accepté par l'interface puis refusé par le serveur : choix resté local, écrasé au
+   prochain `pullProfileFromCloud`, absent sur un autre appareil — **sans le moindre
+   message**. Exactement le défaut que `tests/avatars_gallery.test.js` documente depuis
+   `Kanji.avif`. Le motif accepte désormais `unlockable/` **écrit en toutes lettres** :
+   pas de segment générique, donc ni traversée ni nouveau dossier admis par accident.
+2. **Le recadrage aurait aplati les animations.** `applyAvatarPreset()` n'évitait le canvas
+   que pour les `.gif`. Un `.webp` animé y serait passé et en serait ressorti en PNG fixe.
+   L'extension ne suffit pas à trancher (un `.webp` de la galerie est fixe et se recadre
+   très bien) : le test porte donc sur le dossier, ce que la table appelle `is_animated`.
+
+### Détails techniques
+
+- `sql/migrations/054_unlockable_avatars.sql` + miroir dans `sql/bdd_mysql.sql` (29 → 31
+  tables). Idempotente : `CREATE TABLE IF NOT EXISTS` + `INSERT IGNORE`.
+- `api/lib/condition_check.php` — ensemble `kotone_ritual`, type `avatar_pack_kotone`,
+  `personadle_kotone_ritual_met()`, constantes du titre et de la bordure.
+- `api/lib/unlock_reconcile.php` — `personadle_reconcile_avatars()`.
+- `api/avatars/index.php` — **nouveau**. Pas de `RewriteRule` à ajouter : c'est un dossier
+  avec `index.php`, comme `wallpapers` (la règle du `.htaccess` vise `api/user/` et
+  `api/admin/`).
+- `js/api.js` — `avatars.catalog()`, avec le **slash final** (piège CLAUDE.md §7).
+- `profile/profile.html`, `profile-page.js`, `profile-page.css` — deux sous-onglets dans le
+  volet Avatar. Le contenu déblocable se charge à la **première ouverture de l'onglet**,
+  pas à l'init : `initAvatarGrid()` tourne avant `initAuth()`, donc `window._currentUser`
+  n'existe pas encore — même piège que `js/settings-modal.js`. Premier jet : grille vide et
+  silencieuse. Au passage, un joueur qui n'ouvre jamais l'onglet ne déclenche aucun appel.
+- `lang/*.json` — **10 clés × 6 langues**. Les noms de PERSONNAGES ne se traduisent pas
+  (CLAUDE.md §5) : « Kotone Shiomi » et « Theodore » restent tels quels partout. Ce qui se
+  traduit, c'est la CONDITION — la phrase que le joueur lit sur un pack verrouillé — et les
+  deux étiquettes d'état. La colonne `avatars.unlock_condition` reste la source de vérité
+  en anglais et sert de repli si une clé manque, avec le test explicite de CLAUDE.md §5
+  (`t()` renvoie la clé quand elle est absente, donc `??` ne se déclencherait jamais).
+- **Un pack s'affiche comme un dossier repliable** (demande Hamza du 2026-09-23) :
+  `<details>` natif plutôt qu'un repli maison — ouverture au clavier, à la souris et au
+  lecteur d'écran sans une ligne de JS. Un pack déjà débloqué s'ouvre d'office (c'est ce
+  qu'on vient chercher) ; un pack verrouillé reste fermé pour que la liste tienne à
+  l'écran, avec sa condition en clair une fois déplié.
+- `img/avatar/unlockable/` — 6 portraits animés, **réencodés en 320 px de haut (q=65)** :
+  **10,5 Mo → 1,9 Mo**. Tels que livrés, un seul pesait 2,8 Mo, rechargés à chaque
+  affichage de profil pour une image rendue en ~64 px.
+
+### Tests
+
+- `tests/php/UnlockableAvatarsTest.php` — **nouveau**, 15 cas. Les deux moitiés de la
+  condition prises séparément (aucune ne suffit), une couleur de bordure différente, un
+  autre titre équipé, la casse de la couleur, une seule musique manquante, Theodore oublié,
+  la réconciliation qui accorde les six d'un bloc et n'en accorde pas deux fois — et **le
+  cas qui justifie tout le reste** : après déséquipement, la condition redevient fausse
+  mais les six portraits restent.
+- `tests/php/ValidationTest.php` — 4 cas sur le sous-dossier : accepté, fichier inconnu
+  refusé, autre dossier / imbrication / traversée refusés, et `avatar_src` aligné.
+- `tests/avatars_gallery.test.js` — le dossier `unlockable/` ne compte plus comme orphelin
+  (`withFileTypes`), aucun portrait déblocable ne fuite dans la galerie libre, et un
+  garde-fou confronte la migration au disque dans les deux sens.
+
+### Vérifications
+
+- Rituel **conduit de bout en bout** sur la base de dev : 16 parties posées → 0 débloqué ;
+  titre + bordure ajoutés → les 6 accordés d'un coup ; titre retiré → toujours 6.
+- Validation de chemin passée sur 7 cas (traversée, autre dossier, imbrication, URL) :
+  les 2 légitimes acceptés, les 5 autres refusés.
+- Conduit dans le navigateur : onglet verrouillé (6 vignettes grisées, 0 cliquable,
+  condition affichée) puis débloqué (6/6, en-tête « Kotone Shiomi · Theodore », plus de
+  condition), clic sur un animé → **le recadrage ne s'ouvre pas**, et le chemin avec
+  sous-dossier est bien persisté en base.
+- `npm test` ✅ 1448 · PHPUnit ✅ 397 · `npm run lint` ✅ · `npm run i18n:check` ✅.
+
+### Angles morts connus
+
+- La migration 054 **n'est pas jouée en prod**. `sql/migrations/` n'est pas le reflet de la
+  prod (CLAUDE.md §7) : à jouer avant la release, avec `npm run schema:check-prod`.
+- Aucun test E2E : le rituel demande 16 parties gagnées, ce qu'un scénario Playwright ne
+  peut pas produire sans écrire directement en base — ce que fait déjà, mieux, le test
+  PHPUnit. L'onglet lui-même a été conduit à la main dans le navigateur.
+- Les six portraits sont des `.webp` animés : l'étiquette « GIF » de la vignette est donc
+  un abus de langage assumé, c'est le marqueur « animé » existant.
+
+---
+
 ## 2026-09-22 — Ouverture de la v2.3
 
 Création du dossier de version, comme le veut CLAUDE.md §9 : c'est ce point de

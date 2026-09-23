@@ -137,7 +137,62 @@ final class ValidationTest extends TestCase
             touch($dir . '/Kanji.avif');
             touch($dir . '/Caroline&justine.png');
         }
+        // Portraits DÉBLOCABLES (migration 054) : seul sous-dossier admis.
+        if (!is_dir($dir . '/unlockable')) {
+            mkdir($dir . '/unlockable');
+            touch($dir . '/unlockable/kotone_listening.webp');
+        }
         return $dir;
+    }
+
+    // ── Sous-dossier `unlockable/` (migration 054) ───────────────────────────
+    // Le pack Kotone vit dans img/avatar/unlockable/. Sans branche dédiée dans
+    // personadle_validate_avatar, un portrait du pack était accepté par l'UI puis
+    // refusé par le serveur : le choix restait local et disparaissait au prochain
+    // pull cloud, sans le moindre message — exactement le défaut que ce fichier
+    // documente depuis Kanji.avif.
+
+    public function testAvatarAcceptsTheUnlockableSubdirectory(): void
+    {
+        $this->assertNull(
+            personadle_validate_avatar('../img/avatar/unlockable/kotone_listening.webp', $this->galleryDir())
+        );
+    }
+
+    public function testAvatarRejectsAnUnknownFileInsideUnlockable(): void
+    {
+        $this->assertSame(
+            'Unknown gallery avatar',
+            personadle_validate_avatar('../img/avatar/unlockable/inexistant.webp', $this->galleryDir())
+        );
+    }
+
+    public function testAvatarRejectsAnyOtherSubdirectoryOrNesting(): void
+    {
+        // `unlockable` est écrit en toutes lettres dans le motif, pas `[^/]+` :
+        // aucun autre dossier ne passe, et aucune imbrication non plus.
+        foreach ([
+            '../img/avatar/autre/x.webp',
+            '../img/avatar/unlockable/sous/x.webp',
+            '../img/avatar/unlockable/../../../api/config.php',
+            '../img/avatar/../../api/config.php',
+        ] as $bad) {
+            $this->assertSame(
+                'Invalid avatar format',
+                personadle_validate_avatar($bad, $this->galleryDir()),
+                $bad
+            );
+        }
+    }
+
+    public function testAvatarSrcAcceptsAnUnlockablePortrait(): void
+    {
+        // `avatar_src` dit QUI le joueur porte (migration 052) : il doit accepter
+        // les mêmes chemins que `avatar_data`, sous-dossier compris, sinon un
+        // portrait débloqué serait porté sans que le serveur sache lequel.
+        $this->assertNull(
+            personadle_validate_avatar_src('../img/avatar/unlockable/kotone_listening.webp', $this->galleryDir())
+        );
     }
 
     public function testAvatarNullMeansRemoveAndIsValid(): void

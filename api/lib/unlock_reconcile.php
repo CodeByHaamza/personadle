@@ -130,3 +130,47 @@ function personadle_reconcile_badges(PDO $pdo, int $userId): array
     }
     return $granted;
 }
+
+/**
+ * Même chose pour les portraits déblocables (migration 054).
+ *
+ * Particularité du pack Kotone : sa condition mêle du cumulatif (parties gagnées)
+ * et de l'état courant (titre équipé, bordure portée). Elle peut donc redevenir
+ * fausse — mais la ligne posée dans `user_avatars` ne bouge plus, et c'est elle qui
+ * fait foi. C'est ce qui rend le pack conforme à la règle « un accès gagné ne se
+ * reperd jamais » (CLAUDE.md §7) : on n'évalue la condition que pour ACCORDER,
+ * jamais pour retirer.
+ *
+ * Les six portraits du pack partagent la même condition : ils s'accordent donc
+ * d'un bloc, en une passe, comme voulu.
+ *
+ * @return list<string> ids accordés à cet appel
+ */
+function personadle_reconcile_avatars(PDO $pdo, int $userId): array
+{
+    $stmt = $pdo->prepare(
+        'SELECT a.id, a.condition_type, a.condition_mode, a.condition_value
+         FROM avatars a
+         WHERE a.condition_type IS NOT NULL AND a.condition_type <> \'\'
+           AND NOT EXISTS (SELECT 1 FROM user_avatars ua WHERE ua.user_id = ? AND ua.avatar_id = a.id)'
+    );
+    $stmt->execute([$userId]);
+    $grant   = $pdo->prepare('INSERT IGNORE INTO user_avatars (user_id, avatar_id) VALUES (?, ?)');
+    $granted = [];
+    foreach ($stmt->fetchAll() as $a) {
+        if (in_array($a['condition_type'], PERSONADLE_DECLARATIVE_CONDITION_TYPES, true)) {
+            continue;
+        }
+        if (!personadle_condition_allows_unlock_safely(
+            $pdo, $userId, 'avatars', (string) $a['id'], $a['condition_type'], $a['condition_mode'] ?? null,
+            isset($a['condition_value']) ? (int) $a['condition_value'] : null
+        )) {
+            continue;
+        }
+        $grant->execute([$userId, (string) $a['id']]);
+        if ($grant->rowCount() > 0) {
+            $granted[] = (string) $a['id'];
+        }
+    }
+    return $granted;
+}
