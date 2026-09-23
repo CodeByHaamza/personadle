@@ -102,4 +102,12 @@ export const aoaCharacters = [
 
   // === P5X — Collaboration Hatsune Miku ===
   { nom: "Miku ( Hatsune Miku )", gif: "Miku", opus: ["P5X"] },
+
+  // === P5X — Skins 2.3 (lot du 2026-09-22) ===
+  // Noms officiels vérifiés : « Notte » (et non « Night ») et « Pioneer » (et non
+  // « Frontier », nom daté d'un datamine antérieur qu'un des fichiers source porte
+  // encore). Sources : lufel.net/en/character/luce-notte/ → « Shoki·Notte », et
+  // lufel.net/en/character/soy-pioneer/ → « Shun·Pioneer ».
+  { nom: "Luce Notte ( Shoki Ikenami )", gif: "Luce_Notte", opus: ["P5X"] },
+  { nom: "Soy Pioneer ( Shun Kano )", gif: "Soy_Pioneer", opus: ["P5X"] },
 ];

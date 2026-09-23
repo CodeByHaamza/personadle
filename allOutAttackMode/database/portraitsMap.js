@@ -86,4 +86,7 @@ export const portraitsMap = {
   "Miku ( Hatsune Miku )": "Miku",
   "Bui Cosmic ( YUI )": "Bui_Cosmic",
   "Berry Summer ( Ichigo Shikano )": "Berry_Summer",
+  // Skins 2.3
+  "Luce Notte ( Shoki Ikenami )": "Luce_Notte",
+  "Soy Pioneer ( Shun Kano )": "Soy_Pioneer",
 };
