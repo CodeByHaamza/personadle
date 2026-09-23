@@ -57,7 +57,7 @@ export const ROSTERS = {
       ],
     },
     { nom: "Yuka Ayase", role: "secondaire", fichiers: ["Yuka.webp"] },
-    { nom: "Maki Sonomura", role: "principal", fichiers: ["maki_sonomura_p1.jpg"] },
+    { nom: "Maki Sonomura", role: "principal", fichiers: ["maki_sonomura_p1.jpg", "maki_sonomura_p1_2.jpg"] },
     {
       nom: "Reiji Kido",
       role: "principal",
