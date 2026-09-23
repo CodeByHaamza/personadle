@@ -25,26 +25,142 @@ import { AVATAR_GROUPS } from "../profile/avatars_data.js";
  */
 export const ROSTERS = {
   P1: [
-    { nom: "Naoya Todou", role: "protagoniste", fichiers: ["Naoya.jpg", "Naoya1.jpg"] },
+    {
+      nom: "Naoya Todou",
+      role: "protagoniste",
+      fichiers: [
+        "Naoya.jpg",
+        "Naoya1.jpg",
+        "naoya_todou_p1.jpg",
+        "naoya_todou_p1_2.jpg",
+        "naoya_todou_p1_3.jpg",
+      ],
+    },
     { nom: "Masao Inaba", role: "principal", fichiers: ["Inaba.webp", "Inaba2.webp"] },
-    { nom: "Kei Nanjo", role: "principal", fichiers: ["Kei.webp", "Kei2.jpg"] },
+    { nom: "Kei Nanjo", role: "principal", fichiers: ["Kei.webp", "Kei2.jpg", "kei_nanjo_p1.jpg"] },
     { nom: "Hidehiko Uesugi", role: "principal", fichiers: ["Hidehiko.png", "Hidehiko.webp"] },
-    { nom: "Eriko Kirishima", role: "principal", fichiers: ["Eriko.png"] },
-    { nom: "Yukino Mayuzumi", role: "principal", fichiers: ["Yukino.webp"] },
+    {
+      nom: "Eriko Kirishima",
+      role: "principal",
+      fichiers: [
+        "Eriko.png",
+        "eriko_kirishima_p1.jpg",
+      ],
+    },
+    {
+      nom: "Yukino Mayuzumi",
+      role: "principal",
+      fichiers: [
+        "Yukino.webp",
+        "yukino_mayuzumi_p1.jpg",
+        "yukino_mayuzumi_p1_2.jpg",
+      ],
+    },
     { nom: "Yuka Ayase", role: "secondaire", fichiers: ["Yuka.webp"] },
+    { nom: "Maki Sonomura", role: "principal", fichiers: ["maki_sonomura_p1.jpg"] },
+    {
+      nom: "Reiji Kido",
+      role: "principal",
+      fichiers: [
+        "reiji_kido_p1.jpg",
+        "reiji_kido_p1_2.jpg",
+      ],
+    },
   ],
   P2: [
-    { nom: "Tatsuya Suou", role: "protagoniste", fichiers: ["Tatsuya.jpg", "Tatsuya2.jpg"] },
-    { nom: "Maya Amano", role: "protagoniste", fichiers: ["Maya.jpg", "Maya2.jpeg"] },
-    { nom: "Eikichi Mishina", role: "principal", fichiers: ["Ekichi.jpeg", "Ekichi2.jpeg"] },
-    { nom: "Lisa Silverman", role: "principal", fichiers: ["Lisa.jpeg"] },
+    {
+      nom: "Tatsuya Suou",
+      role: "protagoniste",
+      fichiers: [
+        "Tatsuya.jpg",
+        "Tatsuya2.jpg",
+        "tatsuya_suou_p2.jpg",
+        "tatsuya_suou_p2_2.jpg",
+        "tatsuya_suou_p2_3.jpg",
+      ],
+    },
+    {
+      nom: "Maya Amano",
+      role: "protagoniste",
+      fichiers: [
+        "Maya.jpg",
+        "Maya2.jpeg",
+        "maya_amano_p2.jpg",
+        "maya_amano_p2_2.jpg",
+        "maya_amano_p2_3.jpg",
+        "maya_amano_p2_4.jpg",
+        "maya_amano_p2_5.jpg",
+      ],
+    },
+    {
+      nom: "Eikichi Mishina",
+      role: "principal",
+      fichiers: [
+        "Ekichi.jpeg",
+        "Ekichi2.jpeg",
+        "eikichi_mishina_p2.jpg",
+        "eikichi_mishina_p2_2.jpg",
+        "eikichi_mishina_p2_3.jpg",
+      ],
+    },
+    {
+      nom: "Lisa Silverman",
+      role: "principal",
+      fichiers: [
+        "Lisa.jpeg",
+        "lisa_silverman_p2.jpg",
+        "lisa_silverman_p2_2.jpg",
+      ],
+    },
     { nom: "Jun Kurosu", role: "principal", fichiers: ["Jun.jpg", "JOKER.webp"] },
+    {
+      nom: "Baofu",
+      role: "principal",
+      fichiers: [
+        "baofu_p2.jpg",
+        "baofu_p2_2.jpg",
+        "baofu_p2_3.jpg",
+        "baofu_p2_4.jpg",
+      ],
+    },
+    {
+      nom: "Katsuya Suou",
+      role: "principal",
+      fichiers: [
+        "katsuya_suou_p2.jpg",
+        "katsuya_suou_p2_2.jpg",
+        "katsuya_suou_p2_3.jpg",
+        "katsuya_suou_p2_4.jpg",
+      ],
+    },
+    {
+      nom: "Ulala Serizawa",
+      role: "principal",
+      fichiers: [
+        "ulala_serizawa_p2.jpg",
+        "ulala_serizawa_p2_2.jpg",
+      ],
+    },
+    { nom: "Yukino Mayuzumi (P2)", role: "principal", fichiers: ["yukino_mayuzumi_p2.jpg"] },
   ],
   P3: [
     {
       nom: "Makoto Yuki",
       role: "protagoniste",
-      fichiers: ["makoto_yuki.jpg", "Yuki.gif", "Yuki.jpeg", "yuki.jpg", "Yuki2.gif"],
+      fichiers: [
+        "makoto_yuki.jpg",
+        "Yuki.gif",
+        "Yuki.jpeg",
+        "yuki.jpg",
+        "Yuki2.gif",
+        "makoto_yuki_p3.jpg",
+        "makoto_yuki_p3_2.jpg",
+        "makoto_yuki_p3_3.jpg",
+        "makoto_yuki_p3_4.jpg",
+        "makoto_yuki_p3_5.jpg",
+        "makoto_yuki_p3_6.jpg",
+        "makoto_yuki_p3_7.jpg",
+      ],
     },
     {
       nom: "Kotone Shiomi",
@@ -61,22 +177,124 @@ export const ROSTERS = {
         "kotone_shiomi_p5x_crossover.jpg",
       ],
     },
-    { nom: "Yukari Takeba", role: "principal", fichiers: ["Yukari.jpg", "Yukari2.jpg"] },
-    { nom: "Junpei Iori", role: "principal", fichiers: ["Junpei.png", "Junpei2.jpg"] },
-    { nom: "Akihiko Sanada", role: "principal", fichiers: ["Akihiko.jpg"] },
-    { nom: "Mitsuru Kirijo", role: "principal", fichiers: ["Mitsuru.jpg", "Mitsuru.webp"] },
-    { nom: "Fuuka Yamagishi", role: "principal", fichiers: ["Fuuka.jpeg", "Fuuka2.jpeg"] },
+    {
+      nom: "Yukari Takeba",
+      role: "principal",
+      fichiers: [
+        "Yukari.jpg",
+        "Yukari2.jpg",
+        "yukari_takeba_p3.jpg",
+        "yukari_takeba_p3_2.jpg",
+        "yukari_takeba_p3_3.jpg",
+      ],
+    },
+    {
+      nom: "Junpei Iori",
+      role: "principal",
+      fichiers: [
+        "Junpei.png",
+        "Junpei2.jpg",
+        "junpei_iori_p3.jpg",
+        "junpei_iori_p3_2.jpg",
+        "junpei_iori_p3_3.jpg",
+        "junpei_iori_p3_4.jpg",
+      ],
+    },
+    {
+      nom: "Akihiko Sanada",
+      role: "principal",
+      fichiers: [
+        "Akihiko.jpg",
+        "akihiko_sanada_p3.jpg",
+        "akihiko_sanada_p3_2.jpg",
+        "akihiko_sanada_p3_3.jpg",
+      ],
+    },
+    {
+      nom: "Mitsuru Kirijo",
+      role: "principal",
+      fichiers: [
+        "Mitsuru.jpg",
+        "Mitsuru.webp",
+        "mitsuru_kirijo_p3.jpg",
+        "mitsuru_kirijo_p3_2.jpg",
+        "mitsuru_kirijo_p3_3.jpg",
+        "mitsuru_kirijo_p3_4.jpg",
+        "mitsuru_kirijo_p3_5.jpg",
+        "mitsuru_kirijo_p3_6.jpg",
+      ],
+    },
+    {
+      nom: "Fuuka Yamagishi",
+      role: "principal",
+      fichiers: [
+        "Fuuka.jpeg",
+        "Fuuka2.jpeg",
+        "fuuka_yamagishi_p3.jpg",
+        "fuuka_yamagishi_p3_2.jpg",
+        "fuuka_yamagishi_p3_3.jpg",
+      ],
+    },
     {
       nom: "Aigis",
       role: "principal",
-      fichiers: ["aigis_train.jpg", "aigis.gif", "Aigis.jpg", "Aigis2.jpg"],
+      fichiers: [
+        "aigis_train.jpg",
+        "aigis.gif",
+        "Aigis.jpg",
+        "Aigis2.jpg",
+        "aigis_p3.jpg",
+        "aigis_p3_2.jpg",
+        "aigis_p3_3.jpg",
+      ],
     },
-    { nom: "Koromaru", role: "principal", fichiers: ["Koromaru.jpg", "Koromaru2.jpg"] },
-    { nom: "Ken Amada", role: "principal", fichiers: ["Ken.jpeg", "ken_amada_p4au.jpg"] },
-    { nom: "Shinjiro Aragaki", role: "principal", fichiers: ["Shinji.jpg", "Shinji.webp"] },
+    {
+      nom: "Koromaru",
+      role: "principal",
+      fichiers: [
+        "Koromaru.jpg",
+        "Koromaru2.jpg",
+        "koromaru_p3.jpg",
+        "koromaru_p3_2.jpg",
+        "koromaru_p3_3.jpg",
+      ],
+    },
+    {
+      nom: "Ken Amada",
+      role: "principal",
+      fichiers: [
+        "Ken.jpeg",
+        "ken_amada_p4au.jpg",
+        "ken_amada_p3.jpg",
+        "ken_amada_p3_2.jpg",
+        "ken_amada_p3_3.jpg",
+      ],
+    },
+    {
+      nom: "Shinjiro Aragaki",
+      role: "principal",
+      fichiers: [
+        "Shinji.jpg",
+        "Shinji.webp",
+        "shinjiro_aragaki_p3.jpg",
+        "shinjiro_aragaki_p3_2.jpg",
+        "shinjiro_aragaki_p3_3.jpg",
+      ],
+    },
     { nom: "Chidori Yoshino", role: "secondaire", fichiers: ["Chidori.jpg", "Chidori2.jpg"] },
-    { nom: "Metis", role: "secondaire", fichiers: ["Metis.jpg", "Metis2.jpeg"] },
-    { nom: "Elisabeth", role: "secondaire", fichiers: ["Elisabeth.jpeg", "Elisabeth2.jpeg"] },
+    { nom: "Metis", role: "secondaire", fichiers: ["Metis.jpg", "Metis2.jpeg", "metis_p3.jpg"] },
+    {
+      nom: "Elisabeth",
+      role: "secondaire",
+      fichiers: [
+        "Elisabeth.jpeg",
+        "Elisabeth2.jpeg",
+        "elisabeth_p3.jpg",
+        "elisabeth_p3_2.jpg",
+        "elisabeth_p3_3.jpg",
+        "elisabeth_p3_4.jpg",
+      ],
+    },
     {
       nom: "Theodore",
       role: "secondaire",
@@ -86,6 +304,32 @@ export const ROSTERS = {
         "theodore3.jpeg",
         "theodore4.jpeg",
         "theodore5.jpeg",
+      ],
+    },
+    {
+      nom: "Jin Shirato",
+      role: "secondaire",
+      fichiers: [
+        "jin_shirato_p3.jpg",
+        "jin_shirato_p3_2.jpg",
+      ],
+    },
+    {
+      nom: "Ryoji Mochizuki",
+      role: "secondaire",
+      fichiers: [
+        "ryoji_mochizuki_p3.jpg",
+        "ryoji_mochizuki_p3_2.jpg",
+        "ryoji_mochizuki_p3_3.jpg",
+        "ryoji_mochizuki_p3_4.jpg",
+      ],
+    },
+    {
+      nom: "Takaya Sakaki",
+      role: "secondaire",
+      fichiers: [
+        "takaya_sakaki_p3.jpg",
+        "takaya_sakaki_p3_2.jpg",
       ],
     },
   ],
@@ -116,14 +360,24 @@ export const ROSTERS = {
     {
       nom: "Chie Satonaka",
       role: "principal",
-      fichiers: ["Chie.jpg", "Chie2.jpg", "chie_satonaka_icon.jpg", "chiesatonaka_revivale.jpg"],
+      fichiers: [
+        "Chie.jpg",
+        "Chie2.jpg",
+        "chie_satonaka_icon.jpg",
+        "chiesatonaka_revivale.jpg",
+      ],
     },
     { nom: "Yukiko Amagi", role: "principal", fichiers: ["Yukiko.jpg", "Yukiko2.jpg"] },
     { nom: "Kanji Tatsumi", role: "principal", fichiers: ["Kanji.jpg", "Kanji.avif"] },
     {
       nom: "Rise Kujikawa",
       role: "principal",
-      fichiers: ["Rise.jpg", "Rise.png", "rise_revivale.jpg", "rise_kujikawa_p4.jpg"],
+      fichiers: [
+        "Rise.jpg",
+        "Rise.png",
+        "rise_revivale.jpg",
+        "rise_kujikawa_p4.jpg",
+      ],
     },
     { nom: "Teddie", role: "principal", fichiers: ["Teddie.jpg", "Teddie2.jpg"] },
     {
@@ -142,7 +396,11 @@ export const ROSTERS = {
     {
       nom: "Marie",
       role: "secondaire",
-      fichiers: ["Marie.jpg", "Marie2.webp", "hui_marie_p4r_pfp.jpg"],
+      fichiers: [
+        "Marie.jpg",
+        "Marie2.webp",
+        "hui_marie_p4r_pfp.jpg",
+      ],
     },
     { nom: "Margaret", role: "secondaire", fichiers: ["margaret.jpg"] },
   ],
@@ -160,22 +418,44 @@ export const ROSTERS = {
         "ren_jazz.jpg",
       ],
     },
-    { nom: "Ryuji Sakamoto", role: "principal", fichiers: ["Ryuji.jpg", "Ryuji.png", "ryuji_jazz.jpg"] },
+    {
+      nom: "Ryuji Sakamoto",
+      role: "principal",
+      fichiers: [
+        "Ryuji.jpg",
+        "Ryuji.png",
+        "ryuji_jazz.jpg",
+      ],
+    },
     { nom: "Ann Takamaki", role: "principal", fichiers: ["Ann.jpg", "Ann_2.jpg", "ann_jazz.jpg"] },
     {
       nom: "Morgana",
       role: "principal",
-      fichiers: ["Morgana.jpg", "Morgana.png", "morgana_starlight.jpg", "morgana_dancing.jpg"],
+      fichiers: [
+        "Morgana.jpg",
+        "Morgana.png",
+        "morgana_starlight.jpg",
+        "morgana_dancing.jpg",
+      ],
     },
     {
       nom: "Yusuke Kitagawa",
       role: "principal",
-      fichiers: ["Yusuke.jpg", "Yusuke.webp", "yusukekitagawa_jazz.jpg"],
+      fichiers: [
+        "Yusuke.jpg",
+        "Yusuke.webp",
+        "yusukekitagawa_jazz.jpg",
+      ],
     },
     {
       nom: "Makoto Niijima",
       role: "principal",
-      fichiers: ["Makoto.jpg", "Makoto2.jpg", "makoto_nijima.jpg", "makotoniijima_jazz.jpg"],
+      fichiers: [
+        "Makoto.jpg",
+        "Makoto2.jpg",
+        "makoto_nijima.jpg",
+        "makotoniijima_jazz.jpg",
+      ],
     },
     {
       nom: "Futaba Sakura",
@@ -186,24 +466,54 @@ export const ROSTERS = {
         "futaba_alt.jpg",
         "futaba_headphones.jpg",
         "futaba_persona5.jpg",
+        "futaba_sakura_p5.jpg",
       ],
     },
     { nom: "Haru Okumura", role: "principal", fichiers: ["Haru.png", "Har.jpg", "haru_jazz.jpg"] },
     {
       nom: "Goro Akechi",
       role: "principal",
-      fichiers: ["Akechi.jpg", "Akechi2.jpg", "akechi_alt.jpg", "akechi_jazz.jpg"],
+      fichiers: [
+        "Akechi.jpg",
+        "Akechi2.jpg",
+        "akechi_alt.jpg",
+        "akechi_jazz.jpg",
+      ],
     },
     {
       nom: "Sumire Yoshizawa",
       role: "principal",
-      fichiers: ["Sumire.jpg", "Sumire2.jpg", "sumire_jazz.jpg"],
+      fichiers: [
+        "Sumire.jpg",
+        "Sumire2.jpg",
+        "sumire_jazz.jpg",
+      ],
     },
-    { nom: "Sophia", role: "principal", fichiers: ["sophia_p5s.jpg"] },
+    {
+      nom: "Sophia",
+      role: "principal",
+      fichiers: [
+        "sophia_p5s.jpg",
+        "sophia_p5s_2.jpg",
+        "sophia_p5s_3.jpg",
+        "sophia_p5s_4.jpg",
+        "sophia_p5s_5.jpg",
+      ],
+    },
     { nom: "Lavenza", role: "secondaire", fichiers: ["Lavenza.jpg", "Lavenza7.gif"] },
     { nom: "Caroline & Justine", role: "secondaire", fichiers: ["caroline_justine.png"] },
     { nom: "Takuto Maruki", role: "secondaire", fichiers: ["Maruki.gif"] },
     { nom: "Tae Takemi", role: "secondaire", fichiers: ["Tae.jpg", "Tae2.jpg"] },
+    { nom: "Erina", role: "principal", fichiers: ["erina_p5t.jpg"] },
+    {
+      nom: "Sae Niijima",
+      role: "secondaire",
+      fichiers: [
+        "sae_niijima_p5.jpg",
+        "sae_niijima_p5_2.jpg",
+      ],
+    },
+    { nom: "Zenkichi Hasegawa", role: "principal", fichiers: ["zenkichi_hasegawa_p5s.jpg"] },
   ],
   P5X: [
     {
@@ -216,6 +526,7 @@ export const ROSTERS = {
         "wonder_alt.jpg",
         "wonder_velvet.jpg",
         "wonder_joker_matching_p5x.jpg",
+        "wonder_p5x.jpg",
       ],
     },
     { nom: "Lufel (Cattle)", role: "principal", fichiers: ["Lufel.png", "Lufel2.png"] },
@@ -227,17 +538,30 @@ export const ROSTERS = {
     {
       nom: "Yaoling Li (Rin)",
       role: "principal",
-      fichiers: ["Yaoling.png", "Yaoling2.png", "yaoling_li_p5x.jpg"],
+      fichiers: [
+        "Yaoling.png",
+        "Yaoling2.png",
+        "yaoling_li_p5x.jpg",
+      ],
     },
     {
       nom: "YUI (Bui)",
       role: "principal",
-      fichiers: ["YUI.png", "YUI2.png", "yui_comic_p5x.jpg", "yui_comic_p5x_2.jpg"],
+      fichiers: [
+        "YUI.png",
+        "YUI2.png",
+        "yui_comic_p5x.jpg",
+        "yui_comic_p5x_2.jpg",
+      ],
     },
     {
       nom: "Shoki Ikenami (Luce)",
       role: "principal",
-      fichiers: ["luce.jpg", "shoki_ikenami_p5x.jpg", "shoki_ikenami_notte_p5x.jpg"],
+      fichiers: [
+        "luce.jpg",
+        "shoki_ikenami_p5x.jpg",
+        "shoki_ikenami_notte_p5x.jpg",
+      ],
     },
     {
       nom: "Ayaka Sakai (Chord)",
@@ -253,24 +577,106 @@ export const ROSTERS = {
     {
       nom: "Kira Kitazato (Messa)",
       role: "principal",
-      fichiers: ["kira_kitazato_p5x.jpg", "kira_kitazato_p5x_2.jpg", "kira_kitazato_p5x_3.jpg"],
+      fichiers: [
+        "kira_kitazato_p5x.jpg",
+        "kira_kitazato_p5x_2.jpg",
+        "kira_kitazato_p5x_3.jpg",
+      ],
     },
     {
       nom: "Yumi Shiina (Phoebe)",
       role: "principal",
-      fichiers: ["yumi_shiina_p5x.jpg", "yumi_shiina_p5x_2.jpg", "yumi_shiina_p5x_3.jpg"],
+      fichiers: [
+        "yumi_shiina_p5x.jpg",
+        "yumi_shiina_p5x_2.jpg",
+        "yumi_shiina_p5x_3.jpg",
+      ],
     },
-    { nom: "Aran Hirano (Anri)", role: "secondaire", fichiers: ["aran_hirano_p5x.jpg"] },
-    { nom: "Ichigo Shikano (Berry)", role: "secondaire", fichiers: ["ichigo_shikano_p5x.jpg"] },
-    { nom: "Kiyoshi Kurotani (Key)", role: "secondaire", fichiers: ["kiyoshi_kurotani_p5x.jpg"] },
-    { nom: "Kotone Montagne (Mont)", role: "secondaire", fichiers: ["kotone_montagne_p5x.jpg"] },
-    { nom: "Kumi Katayama (Blitz)", role: "secondaire", fichiers: ["kumi_katayama_p5x.jpg"] },
-    { nom: "Miyu Sahara (Puppet)", role: "secondaire", fichiers: ["miyu_sahara_p5x.jpg"] },
-    { nom: "Mio Natsukawa (Matoi)", role: "secondaire", fichiers: ["mionatsukawa_persona_5_phantom_x.jpg"] },
-    { nom: "Narumi Nashimoto (Pinky)", role: "secondaire", fichiers: ["narumi_nashimoto_p5x.jpg"] },
-    { nom: "Seiji Shiratori (Fleuret)", role: "secondaire", fichiers: ["seijishiratori_persona_5_phantom_x.jpg"] },
-    { nom: "Yukimi Fujikawa (Yuki)", role: "secondaire", fichiers: ["yukimifujikawa_persona_5_phantom_x.jpg"] },
+    { nom: "Aran Hirano (Anri)", role: "principal", fichiers: ["aran_hirano_p5x.jpg"] },
+    { nom: "Ichigo Shikano (Berry)", role: "principal", fichiers: ["ichigo_shikano_p5x.jpg"] },
+    { nom: "Kiyoshi Kurotani (Key)", role: "principal", fichiers: ["kiyoshi_kurotani_p5x.jpg"] },
+    { nom: "Kotone Montagne (Mont)", role: "principal", fichiers: ["kotone_montagne_p5x.jpg"] },
+    { nom: "Kumi Katayama (Blitz)", role: "principal", fichiers: ["kumi_katayama_p5x.jpg"] },
+    { nom: "Miyu Sahara (Puppet)", role: "principal", fichiers: ["miyu_sahara_p5x.jpg"] },
+    {
+      nom: "Mio Natsukawa (Matoi)",
+      role: "principal",
+      fichiers: [
+        "mionatsukawa_persona_5_phantom_x.jpg",
+        "mio_natsukawa_p5x.jpg",
+      ],
+    },
+    { nom: "Narumi Nashimoto (Pinky)", role: "principal", fichiers: ["narumi_nashimoto_p5x.jpg"] },
+    {
+      nom: "Seiji Shiratori (Fleuret)",
+      role: "principal",
+      fichiers: [
+        "seijishiratori_persona_5_phantom_x.jpg",
+        "seiji_shiratori_p5x.jpg",
+      ],
+    },
+    {
+      nom: "Yukimi Fujikawa (Yuki)",
+      role: "principal",
+      fichiers: [
+        "yukimifujikawa_persona_5_phantom_x.jpg",
+      ],
+    },
     { nom: "Hatsune Miku", role: "secondaire", fichiers: ["hatsune_miku_p5x.jpg"] },
+    { nom: "Haruna Nishimori (Riddle)", role: "principal", fichiers: ["haruna_nishimori_p5x.jpg"] },
+    {
+      nom: "Leo Kamiyama (Leon)",
+      role: "principal",
+      fichiers: [
+        "leo_kamiyama_p5x.jpg",
+        "leo_kamiyama_p5x_2.jpg",
+      ],
+    },
+    {
+      nom: "Manaka Nagao (Ange)",
+      role: "principal",
+      fichiers: [
+        "manaka_nagao_p5x.jpg",
+        "manaka_nagao_p5x_2.jpg",
+        "manaka_nagao_p5x_3.jpg",
+        "manaka_nagao_p5x_4.jpg",
+      ],
+    },
+    {
+      nom: "Masaki Ashiya (Cherish)",
+      role: "principal",
+      fichiers: [
+        "masaki_ashiya_p5x.jpg",
+        "masaki_ashiya_p5x_2.jpg",
+        "masaki_ashiya_p5x_3.jpg",
+      ],
+    },
+    {
+      nom: "Mayumi Hashimoto (Turbo)",
+      role: "principal",
+      fichiers: [
+        "mayumi_hashimoto_p5x.jpg",
+        "mayumi_hashimoto_p5x_2.jpg",
+      ],
+    },
+    { nom: "Minami Miyashita (Marian)", role: "principal", fichiers: ["minami_miyashita_p5x.jpg"] },
+    {
+      nom: "Runa Dogenzaka (Howler)",
+      role: "principal",
+      fichiers: [
+        "runa_dogenzaka_p5x.jpg",
+        "runa_dogenzaka_p5x_2.jpg",
+        "runa_dogenzaka_p5x_3.jpg",
+      ],
+    },
+    {
+      nom: "Toshiya Sumi (Sepia)",
+      role: "principal",
+      fichiers: [
+        "toshiya_sumi_p5x.jpg",
+        "toshiya_sumi_p5x_2.jpg",
+      ],
+    },
   ],
   // ⚠️ PQ ne se trie PAS par rôle comme les autres : son ordre est figé
   // P3 → P4 → P5 (et protagoniste d'abord dans chaque jeu), décision Hamza du
@@ -278,8 +684,14 @@ export const ROSTERS = {
   // C'est le style Etrian qu'on y cherche, jeu par jeu. Le champ `section`
   // marque le début de chaque bloc ; l'ordre de cette liste fait foi.
   PQ: [
-    // ── Persona 3
-    { nom: "Makoto Yuki", role: "protagoniste", section: "Persona 3", fichiers: ["makoto_yuki_pq2.jpg"] },
+    {
+      nom: "Makoto Yuki",
+      role: "protagoniste",
+      section: "Persona 3",
+      fichiers: [
+        "makoto_yuki_pq2.jpg",
+      ],
+    },
     { nom: "Kotone Shiomi", role: "protagoniste", fichiers: ["kotone_pq.jpg"] },
     { nom: "Yukari Takeba", role: "principal", fichiers: ["yukari_pq2.jpg"] },
     { nom: "Junpei Iori", role: "principal", fichiers: ["junpei_pq.jpg"] },
@@ -289,7 +701,6 @@ export const ROSTERS = {
     { nom: "Koromaru", role: "principal", fichiers: ["koromaru_pq2.jpg"] },
     { nom: "Ken Amada", role: "principal", fichiers: ["ken_amada_pq2.jpg"] },
     { nom: "Shinjiro Aragaki", role: "principal", fichiers: ["shinjiro_pq2.jpg"] },
-    // ── Persona 4
     { nom: "Yu Narukami", role: "protagoniste", section: "Persona 4", fichiers: ["yu_pq.jpg"] },
     { nom: "Yosuke Hanamura", role: "principal", fichiers: ["yosuke_pq.jpg"] },
     { nom: "Chie Satonaka", role: "principal", fichiers: ["chie_pq.jpg"] },
@@ -298,8 +709,14 @@ export const ROSTERS = {
     { nom: "Rise Kujikawa", role: "principal", fichiers: ["rise_pq.jpg"] },
     { nom: "Teddie", role: "principal", fichiers: ["teddie_pq.jpg"] },
     { nom: "Naoto Shirogane", role: "principal", fichiers: ["naoto_pq.jpg"] },
-    // ── Persona 5
-    { nom: "Ren Amamiya (Joker)", role: "protagoniste", section: "Persona 5", fichiers: ["joker_pq.jpg"] },
+    {
+      nom: "Ren Amamiya (Joker)",
+      role: "protagoniste",
+      section: "Persona 5",
+      fichiers: [
+        "joker_pq.jpg",
+      ],
+    },
     { nom: "Ryuji Sakamoto", role: "principal", fichiers: ["ryuji_pq.jpg"] },
     { nom: "Ann Takamaki", role: "principal", fichiers: ["ann_pq.jpg"] },
     { nom: "Morgana", role: "principal", fichiers: ["morgana_pq.jpg"] },
@@ -311,7 +728,8 @@ export const ROSTERS = {
   // SPECIAL n'a pas de roster : ce sont des détournements, des crossovers et des
   // images d'anniversaire, pas des portraits de personnages. Le recensement les
   // compte à part et n'en attend rien.
-  SPECIAL: [],
+  SPECIAL: [
+  ],
 };
 
 /**
@@ -323,28 +741,12 @@ export const ROSTERS = {
  * jeu — retirer une ligne quand le portrait arrive.
  */
 export const ABSENTS = {
-  P1: ["Maki Sonomura", "Reiji Kido", "Ayase Yuka (2e portrait)"],
-  P2: [
-    "Yukino Mayuzumi (P2)",
-    "Ulala Serizawa",
-    "Baofu",
-    "Katsuya Suou",
-    "Eriko Kirishima (P2)",
-  ],
-  P3: ["Ryoji Mochizuki", "Takaya Sakaki", "Jin Shirato", "Chihiro Fushimi", "Igor"],
+  P1: [],
+  P2: ["Eriko Kirishima (P2)"],
+  P3: ["Chihiro Fushimi", "Igor"],
   P4: ["Ryotaro Dojima", "Ai Ebihara", "Naoki Konishi", "Igor"],
-  P5: ["Sae Niijima", "Sojiro Sakura", "Sadayo Kawakami", "Igor", "Zenkichi Hasegawa"],
-  P5X: [
-    "Masaki Ashiya (Cherish)",
-    "Runa Dogenzaka (Howler)",
-    "Mayumi Hashimoto (Turbo)",
-    "Manaka Nagao (Ange)",
-    "Haruna Nishimori (Riddle)",
-    "Leo Kamiyama (Leon)",
-    "Toshiya Sumi (Sepia)",
-    "Chizuko Nagao (Vino)",
-    "Minami Miyashita (Marian)",
-  ],
+  P5: ["Sojiro Sakura", "Sadayo Kawakami", "Igor"],
+  P5X: ["Chizuko Nagao (Vino)"],
 };
 
 const ORDRE_ROLES = { protagoniste: 0, principal: 1, secondaire: 2 };
