@@ -41,7 +41,7 @@ Le hook de pre-commit lance déjà i18n + tests. Détail :
 | Commande | Vérifie |
 |---|---|
 <<<<<<< HEAD
-| `make test` / `npm test` | 1457 tests JS (Vitest) |
+| `make test` / `npm test` | 1462 tests JS (Vitest) |
 =======
 | `make test` / `npm test` | 1453 tests JS (Vitest) |
 >>>>>>> origin/develop
