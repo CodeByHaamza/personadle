@@ -40,6 +40,58 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-09-24 — Ouvrir une page effaçait les choix de profil du serveur
+
+### Le bug
+
+`_syncLocalProfileToCloud()` (js/auth.js) poussait les champs de présentation —
+avatar, couleur de bordure, wallpaper, musique, **badges épinglés**, titre équipé
+— vers la base à **chaque chargement de page, sur toutes les pages**, et **avant
+tout pull**.
+
+Sur un appareil dont le profil local est vide, elle envoyait donc
+`selected_badges: []`, `avatar_border_color: '#ffffff'` et le reste par défaut.
+Le serveur perdait les choix du joueur.
+
+Ce n'est pas un cas de laboratoire : c'est un **second appareil**, un navigateur
+neuf, un cache vidé, une fenêtre privée. Reproduit en local — badges épinglés en
+base, ouverture de la page profil sur un navigateur neuf, badges effacés en moins
+de trois secondes, sans la moindre action du joueur.
+
+Et c'est silencieux : aucune erreur, aucun signe. Le joueur constate juste, un
+jour, que ses badges sont dépinglés.
+
+### Comment il a été trouvé
+
+Par accident, en écrivant le test E2E du réordonnancement des badges : le scénario
+épinglait trois badges par l'API puis ouvrait la page, et la page ne les
+affichait pas. Le serveur les avait bien — jusqu'à ce que la page les efface.
+
+### Le correctif
+
+La fonction lit désormais le profil du serveur **d'abord**, et ne propose que les
+champs qu'il n'a pas encore, avec une vraie valeur en local. Le serveur gagne
+toujours ; le local ne fait que combler les trous.
+
+La raison d'être de cette fonction reste couverte : un joueur qui a personnalisé
+son profil **avant** de créer son compte retrouve ses choix à la connexion. La
+retirer purement et simplement aurait été jeter le bébé avec l'eau du bain.
+
+Cas particulier assumé : `#ffffff` est la valeur par défaut du serveur, pas un
+choix. Une couleur locale peut donc la remplacer — sans quoi la migration d'une
+bordure ne marcherait jamais.
+
+Si le serveur est injoignable, **rien n'est poussé** : pousser à l'aveugle est
+exactement ce qui causait le problème.
+
+### Fichiers touchés
+
+- `js/auth.js` — `_syncLocalProfileToCloud()` réécrite, `_valeurUtile()`
+- `tests-e2e/profile_no_overwrite.spec.js` — nouveau, les deux côtés : le serveur
+  n'est plus écrasé, et la migration d'un profil local marche toujours
+
+---
+
 ## 2026-09-24 — Consulter la fiche d'un badge sans l'épingler
 
 Dans la grille, un clic sur un badge l'ÉPINGLE ou le DÉPINGLE. Le seul moyen d'en
