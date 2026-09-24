@@ -40,6 +40,67 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-09-24 — Huit fiches de lore Expert donnaient la réponse
+
+### Ce qui fuitait
+
+La fiche anglaise de **Terpsichore**, en mode Personae Expert, se terminait par :
+
+> « Her name survives in English as *terpsichorean*, meaning anything pertaining
+> to dance. »
+
+La réponse, à deux lettres près, en clair, dans le mode dont tout l'intérêt est
+de ne pas la donner. Même défaut pour **Moros / « morose »** en cinq langues et
+pour Terpsichore en français et en allemand : **huit fiches**.
+
+`maskTerms()` (js/gameCore.js) masque des **mots entiers** — sa frontière de fin
+est `(?=$|[^\w])`. Un mot dérivé du nom passe donc à travers : les lettres en
+plus font échouer la frontière. À l'inverse, l'allemand « morös » était déjà
+masqué, parce qu'il se replie exactement sur « moros » (foldText retire le
+tréma) et reste un mot entier.
+
+### Pourquoi ça a dormi si longtemps
+
+Le test E2E `expert-personae.spec.js` ne regarde que **la cible du jour**. La
+fuite n'était donc visible que le jour où le tirage tombait sur Terpsichore —
+elle a attendu que la CI tombe dessus, le 2026-09-24, sur une branche qui n'avait
+rien à voir (l'onglet « Animés »).
+
+### Correctif
+
+Les mots dérivés entrent dans la liste `mask` de leur fiche : `terpsichorean`
+(en), `terpsichoréen` (fr), `terpsichoreisch` (de), `morose` (en/fr), `moroso`
+(es/it/pt). La phrase reste lisible, le mot devient `▮▮▮`.
+
+Non touchés, et volontairement : `terpsicoreo` (es), `tersicoreo` (it),
+`terpsicoreano` (pt) ne contiennent pas littéralement le nom.
+
+### Le test qui manquait
+
+`tests/expertLoreMasking.test.js` audite les **936 fiches des six langues**, tous
+les jours, masquage appliqué.
+
+La règle demandait un peu de soin : une recherche de sous-chaîne nue produit des
+faux positifs — « Nella » (it) contient « Ella », « inúmeros » (pt) contient
+« Eros », et aucun des deux ne donne quoi que ce soit. Le critère retenu est
+donc : **le nom fuit s'il apparaît à une position non précédée d'une lettre**.
+C'est ce qui sépare un dérivé (`terpsichore|an`, le nom ouvre le mot) d'une
+coïncidence de fin (`N|ella`).
+
+Le même critère remplace la comparaison naïve du test E2E, qui aurait échoué les
+jours où la cible s'appelle Ella ou Eros — un deuxième piège de calendrier, resté
+invisible pour la même raison que le premier.
+
+Trois garde-fous en plus : chaque fiche doit avoir au moins un terme à masquer,
+le masquage doit laisser une trace visible quand il agit (sinon les deux premiers
+tests passeraient au vert pour de mauvaises raisons), et la règle elle-même est
+vérifiée sur les trois cas réels.
+
+### Fichiers touchés
+
+- `personaeMode/database/expert_lore/{en,fr,de,es,it,pt}.json` — 8 termes ajoutés
+- `tests/expertLoreMasking.test.js` — nouveau, 5 cas
+- `tests-e2e/expert-personae.spec.js` — critère aligné
 ## 2026-09-23 — L'XP de Social Link ne se cache plus au rang 10
 
 ### Ce qui était en cause

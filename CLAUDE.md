@@ -43,7 +43,7 @@ personadle/
 ├── profile/             ← profile-page.js, badges/, friends/, leaderboard/
 ├── api/                 ← PHP REST (auth/, user/, messages/, social-links/, leaderboard/…)
 <<<<<<< HEAD
-├── tests/               ← 79 suites Vitest (1463 tests) + tests/php/ (PHPUnit)
+├── tests/               ← 80 suites Vitest (1468 tests) + tests/php/ (PHPUnit)
 =======
 ├── tests/               ← 78 suites Vitest (1453 tests) + tests/php/ (PHPUnit)
 >>>>>>> origin/develop
@@ -230,7 +230,7 @@ Utiliser `min()`, `clamp()`, `vw`/`vh`. Éviter les largeurs fixes en `px` sur l
 
 - `npm test` · `npm run test:watch` · `npm run test:coverage`
 <<<<<<< HEAD
-- **1463 tests** (Vitest + jsdom), 79 suites dans `tests/` (`gameCore`, `backend`, `auth`, `i18n`,
+- **1468 tests** (Vitest + jsdom), 80 suites dans `tests/` (`gameCore`, `backend`, `auth`, `i18n`,
 =======
 - **1453 tests** (Vitest + jsdom), 78 suites dans `tests/` (`gameCore`, `backend`, `auth`, `i18n`,
 >>>>>>> origin/develop
