@@ -15,7 +15,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Vanilla%20JS-no%20framework-F7DF1E?style=flat-square&logo=javascript&logoColor=black" alt="Vanilla JS">
   <img src="https://img.shields.io/badge/PHP%208.2-PDO-8892BF?style=flat-square&logo=php&logoColor=white" alt="PHP 8.2">
-  <img src="https://img.shields.io/badge/MariaDB-29%20tables-003545?style=flat-square&logo=mariadb&logoColor=white" alt="MariaDB">
+  <img src="https://img.shields.io/badge/MariaDB-30%20tables-003545?style=flat-square&logo=mariadb&logoColor=white" alt="MariaDB">
   <img src="https://img.shields.io/badge/i18n-EN%20FR%20ES%20DE%20IT%20PT-8E44AD?style=flat-square" alt="6 languages">
   <a href="https://discord.gg/wpMdGGDp3y"><img src="https://img.shields.io/badge/Discord-join%20the%20Velvet%20Room-5865F2?style=flat-square&logo=discord&logoColor=white" alt="Discord"></a>
 </p>
@@ -132,7 +132,7 @@ No framework, no bundler, no build step. The front end is plain ES modules; the 
 prepared statements only; the database is the source of truth.
 
 ```
-Browser ── ES modules ──► /api (PHP 8.2, PDO) ──► MariaDB 10.6+ → 29-table relational schema
+Browser ── ES modules ──► /api (PHP 8.2, PDO) ──► MariaDB 10.6+ → 30-table relational schema
    │                          │
    │  localStorage            │  sessions httpOnly · bcrypt · CSRF · rate limiting
    │  (offline-first)         │  CSP · HSTS · exact-origin CORS · Psalm taint analysis
@@ -144,8 +144,8 @@ Service worker              Cron: leaderboard cache, Discord daily & weekly post
 |---|---|
 | **Front end** | HTML5 · CSS3 (one file per component, dark mode) · Vanilla JavaScript ES6+ |
 | **Back end** | PHP 8.2 REST API — `GET/POST/PATCH/DELETE /api/{resource}`, JSON, proper status codes |
-| **Database** | MariaDB 10.6+ / MySQL 8.0 — 29-table relational schema, 1498+ unit tests keep the contract honest |
-| **i18n** | EN · FR · ES · DE · IT · PT (1299 keys each), `en.json` is the source of truth |
+| **Database** | MariaDB 10.6+ / MySQL 8.0 — 30-table relational schema, 1498+ unit tests keep the contract honest |
+| **i18n** | EN · FR · ES · DE · IT · PT (1311 keys each), `en.json` is the source of truth |
 | **Hosting** | Hostinger, auto-deploy on push to `main`; SQL migrations applied by hand *before* the merge |
 
 ### Quality gates

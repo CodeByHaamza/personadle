@@ -78,12 +78,43 @@ export const TARGET_SETS = {
     ["emoji", ["Nagisa Kamishiro"], 1],
     ["personae", ["Nagisa Kamishiro"], 1],
   ],
+  // ── Lot du 2026-09-23 (migration 054) ─────────────────────────────────────
+  birds_different_feather: [
+    ["silhouette", ["Goro Akechi", "Kira Kitazato"], 2],
+    ["alloutattack", ["Crow ( Goro Akechi )", "Messa ( Kira Kitazato )"], 2],
+  ],
+  // Comme Go Beyond : seule la partie visible dans characterModeMap est ici. Les
+  // quatre musiques (Mass Destruction, Wiping All Out, Danger Zone, It's Going
+  // Down Now) n'y figurent pas — c'est le serveur qui les vérifie.
+  memento_vivere_mori: [
+    ["classic", ["Makoto Yuki", "Kotone Shiomi"], 2],
+    ["emoji", ["Makoto Yuki", "Kotone Shiomi"], 2],
+    ["silhouette", ["Makoto Yuki", "Kotone Shiomi"], 2],
+    ["alloutattack", ["Makoto Yuki", "Kotone Shiomi"], 2],
+    ["personae", ["Makoto Yuki", "Kotone Shiomi"], 2],
+  ],
+  // Titre Déjà Vu.
+  p2_deja_vu: [
+    ["classic", ["Tatsuya Suou", "Maya Amano"], 2],
+    ["silhouette", ["Tatsuya Suou", "Maya Amano"], 2],
+  ],
 };
 
-/** Toutes les exigences d'un ensemble TARGET_SETS sont-elles visibles dans characterModeMap ? */
+/**
+ * Toutes les exigences d'un ensemble TARGET_SETS sont-elles visibles dans
+ * characterModeMap ?
+ *
+ * Un ensemble INCONNU renvoie `false`, jamais `true`. Ça paraît évident, mais la
+ * version précédente faisait `(TARGET_SETS[cle] || []).every(...)` — et
+ * `[].every()` vaut `true`. Un badge dont l'ensemble n'était pas encore déclaré
+ * ici se débloquait donc tout seul, sur un profil vierge. Attrapé par
+ * tests/badgesConditions.test.js en ajoutant les badges de la 2.3.
+ */
 export function targetSetMet(profile, setKey) {
+  const exigences = TARGET_SETS[setKey];
+  if (!Array.isArray(exigences) || exigences.length === 0) return false;
   const map = profile?.characterModeMap || {};
-  return (TARGET_SETS[setKey] || []).every(
+  return exigences.every(
     ([mode, names, min]) => names.filter((n) => (map[n] || []).includes(mode)).length >= min
   );
 }
@@ -1002,6 +1033,62 @@ export const badgesList = [
     // Posé par badgesManager.checkSocialBadges() (il faut la liste d'amis) ;
     // le serveur vérifie la paire et accorde le badge aux DEUX d'un coup.
     check: (stats, profile) => Boolean(profile?.sameEnergyWith),
+  },
+  // ── Lot du 2026-09-23 (migration 054) — contenu 2.3 ───────────────────────
+  // Comme ceux de la 046, ces badges sont tranchés par le SERVEUR. Le `check()`
+  // client n'est que le retour immédiat en fin de partie : c'est la
+  // réconciliation (api/lib/unlock_reconcile.php) qui accorde pour de bon, en
+  // relisant game_sessions et challenge_wins.
+  {
+    id: "chord_progression",
+    name: "Chord Progression",
+    category: BADGE_CATEGORIES.SOCIAL,
+    img: BADGE_IMG_BASE + "Badge_Chord_Progression.webp",
+    condition: "Beat 10 friend challenges in Music mode",
+    description:
+      "Rise holds the mic, Chord holds the guitar, and you held the tune ten times over. Ten challenges sent your way in Music mode, ten answered.",
+    secret: false,
+    // Aucun `check()` local possible : les défis relevés sont comptés par le
+    // serveur dans `challenge_wins`, et le client ne tient pas ce registre. Un
+    // compteur local serait faux dès le deuxième appareil — et surtout, il
+    // pourrait REPERDRE le badge, ce que le serveur, lui, ne fait jamais.
+    check: () => false,
+  },
+  {
+    id: "birds_different_feather",
+    name: "Birds of a Different Feather",
+    category: BADGE_CATEGORIES.ACHIEVEMENT,
+    img: BADGE_IMG_BASE + "Badge_Birds_Of_A_Different_Feather.webp",
+    condition:
+      "Find Goro Akechi and Kira Kitazato in Silhouette, and Crow and Messa in All-Out Attack",
+    description:
+      "Two masks, two beaks, two very different birds. One plays the prince, the other doesn't bother pretending — you saw through both.",
+    secret: false,
+    check: (stats, profile) => targetSetMet(profile, "birds_different_feather"),
+  },
+  {
+    id: "memento_vivere_mori",
+    name: "Memento Vivere, Memento Mori",
+    category: BADGE_CATEGORIES.ACHIEVEMENT,
+    img: BADGE_IMG_BASE + "Badge_Memento_Vivere_Memento_Mori.webp",
+    condition: "Find Makoto Yuki and Kotone Shiomi in every mode, and their four themes in Music",
+    description:
+      "The same year, the same dorm, the same ending — told twice. Remember to live, remember to die: you found them both, everywhere there was to look.",
+    secret: false,
+    check: (stats, profile) => targetSetMet(profile, "memento_vivere_mori"),
+  },
+  {
+    id: "her_own_orpheus",
+    name: "Her Own Orpheus",
+    category: BADGE_CATEGORIES.SECRET,
+    img: BADGE_IMG_BASE + "Badge_Kotone_Orpheus.webp",
+    condition: "???",
+    description:
+      "Same arcana, same dorm, a different song. Makoto has his Orpheus; she has hers — and she carries it through fire.",
+    secret: true,
+    // Badge adossé à un code événement : seul POST /api/badges/redeem l'accorde
+    // (le garde de route de api/badges/index.php refuse /unlock pour ceux-là).
+    check: () => false,
   },
   {
     id: "report",
