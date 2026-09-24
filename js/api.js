@@ -437,9 +437,15 @@ export const api = {
       offset = 0,
       friends_only = 0,
       expert = 0,
+      view = "",
     } = {}) =>
       get(
-        `/leaderboard/?mode=${mode}&period=${period}&metric=${metric}&limit=${limit}&offset=${offset}&friends_only=${friends_only}&expert=${expert}`
+        `/leaderboard/?mode=${mode}&period=${period}&metric=${metric}&limit=${limit}&offset=${offset}` +
+          `&friends_only=${friends_only}&expert=${expert}` +
+          // `view=bonds` classe des AMITIÉS et non des joueurs : mode, période et
+          // métrique y sont ignorés côté serveur, mais restent envoyés — la
+          // signature de l'appel ne change pas selon la dimension choisie.
+          (view ? `&view=${encodeURIComponent(view)}` : "")
       ),
   },
 
