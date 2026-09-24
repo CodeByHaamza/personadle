@@ -7,13 +7,64 @@
  * avatar retiré de la liste devient injouable sans que rien ne le signale. Les
  * ajouts, eux, sont le cas normal et ne sont que signalés.
  */
-import { readFileSync, writeFileSync, readdirSync } from "node:fs";
+import {
+  readFileSync,
+  writeFileSync,
+  readdirSync,
+  openSync,
+  readSync,
+  closeSync,
+} from "node:fs";
 import { AVATAR_GROUPS } from "../profile/avatars_data.js";
 import { ROSTERS } from "./avatar_census.js";
 
 const CHEMIN = new URL("../profile/avatars_data.js", import.meta.url);
 
 const ORDRE = { protagoniste: 0, principal: 1, secondaire: 2 };
+
+/**
+ * Un portrait est-il ANIMÉ ? La réponse se lit dans l'en-tête du FICHIER, jamais
+ * dans son extension : la plupart des `.webp` de la galerie sont des images
+ * fixes, alors que ceux de Kotone bougent. Se fier au suffixe mettrait une
+ * douzaine de portraits fixes dans l'onglet « Animés » et en oublierait six.
+ *
+ *  - WebP : conteneur RIFF étendu, reconnaissable à son chunk `ANIM`/`ANMF`.
+ *  - GIF  : soit l'extension d'application `NETSCAPE` (la boucle), soit au moins
+ *           deux blocs d'extension de contrôle graphique — donc deux images.
+ *
+ * Seuls les premiers kilo-octets sont lus : ces marqueurs vivent tous en tête de
+ * fichier, et la galerie en compte plusieurs centaines.
+ */
+function estAnime(chemin) {
+  const tete = Buffer.alloc(8192);
+  let fd;
+  try {
+    fd = openSync(chemin, "r");
+  } catch {
+    return false; // fichier absent : le garde-fou des fantômes le signalera
+  }
+  let lus = 0;
+  try {
+    lus = readSync(fd, tete, 0, tete.length, 0);
+  } finally {
+    closeSync(fd);
+  }
+  const buf = tete.subarray(0, lus);
+
+  if (buf.subarray(0, 4).toString("latin1") === "RIFF") {
+    return buf.includes("ANIM") || buf.includes("ANMF");
+  }
+  if (buf.subarray(0, 3).toString("latin1") === "GIF") {
+    if (buf.includes("NETSCAPE")) return true;
+    let blocs = 0;
+    for (let i = 0; i < buf.length - 2; i++) {
+      if (buf[i] === 0x21 && buf[i + 1] === 0xf9 && buf[i + 2] === 0x04 && ++blocs >= 2) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
 const TITRES = {
   protagoniste: "Protagoniste(s)",
   principal: "Cast principal",
@@ -36,6 +87,8 @@ const ENTETE = `// Mapping avatar → jeu. Chaque groupe est trié PROTAGONISTE,
 export const AVATAR_GROUPS = [`;
 
 const lignes = [ENTETE];
+/** Tous les noms de fichiers émis, dans l'ordre — sert à bâtir ANIMATED_AVATARS. */
+const emis = [];
 
 for (const groupe of AVATAR_GROUPS) {
   const roster = ROSTERS[groupe.game] ?? [];
@@ -44,7 +97,10 @@ for (const groupe of AVATAR_GROUPS) {
   if (!roster.length) {
     // SPECIAL : détournements et crossovers, pas des portraits de personnages.
     lignes.push("    // Détournements, crossovers et images d'anniversaire — pas de roster.");
-    for (const a of groupe.avatars) lignes.push(`    "${a}",`);
+    for (const a of groupe.avatars) {
+      lignes.push(`    "${a}",`);
+      emis.push(a);
+    }
   } else {
     // Un roster dont une entrée porte `section` a un ordre FIGÉ : il n'est pas
     // retrié par rôle. C'est le cas de PQ, ordonné par jeu d'origine (P3 → P4 →
@@ -67,12 +123,38 @@ for (const groupe of AVATAR_GROUPS) {
         lignes.push(`    // ── ${titre} ${"─".repeat(Math.max(2, 66 - titre.length))}`);
       }
       lignes.push(`    // ${perso.nom}`);
-      for (const f of perso.fichiers) lignes.push(`    "${f}",`);
+      for (const f of perso.fichiers) {
+        lignes.push(`    "${f}",`);
+        emis.push(f);
+      }
     }
   }
   lignes.push("  ] },");
 }
 lignes.push("];");
+
+// ── Portraits ANIMÉS ────────────────────────────────────────────────────────
+// Émis comme une liste à part plutôt qu'en drapeau sur chaque entrée : la
+// galerie reste une simple liste de noms, et l'onglet « Animés » n'a besoin que
+// d'un test d'appartenance. La liste est DÉDUITE du contenu des fichiers, jamais
+// écrite à la main — un portrait animé importé demain y entre tout seul, au
+// premier `npm run avatars:sort`.
+const animes = [...new Set(emis)]
+  .filter((f) => estAnime(new URL(`../img/avatar/${f}`, import.meta.url)))
+  .sort();
+
+lignes.push("");
+lignes.push("/**");
+lignes.push(" * Portraits ANIMÉS de la galerie (GIF animés et WebP animés).");
+lignes.push(" *");
+lignes.push(" * GÉNÉRÉE : `npm run avatars:sort` relit l'en-tête de chaque fichier et retient");
+lignes.push(" * ceux qui bougent réellement. Ne pas l'éditer à la main — l'extension ne suffit");
+lignes.push(" * pas à trancher (la plupart des `.webp` de la galerie sont fixes, ceux de");
+lignes.push(" * Kotone sont animés).");
+lignes.push(" */");
+lignes.push("export const ANIMATED_AVATARS = new Set([");
+for (const f of animes) lignes.push(`  "${f}",`);
+lignes.push("]);");
 
 const nouveau = lignes.join("\n") + "\n";
 

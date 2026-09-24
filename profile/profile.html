@@ -714,6 +714,33 @@
                   ✂ <span data-i18n="profile.avatar_adjust">Adjust framing</span>
                 </button>
               </div>
+              <!-- Filtre de la galerie. « Animés » regroupe les portraits qui
+                   bougent réellement (GIF et WebP animés) : ils étaient jusqu'ici
+                   noyés dans 357 images, alors que ce sont justement ceux qu'un
+                   joueur vient chercher. Aucun n'est à débloquer — c'est un
+                   filtre d'affichage, pas une catégorie à part. -->
+              <div class="avatar-filter" role="tablist" aria-label="Gallery filter">
+                <button
+                  type="button"
+                  class="avatar-filter-tab"
+                  role="tab"
+                  data-filter="all"
+                  aria-selected="true"
+                  data-i18n="profile.avatar_filter_all"
+                >
+                  All
+                </button>
+                <button
+                  type="button"
+                  class="avatar-filter-tab"
+                  role="tab"
+                  data-filter="animated"
+                  aria-selected="false"
+                  data-i18n="profile.avatar_filter_animated"
+                >
+                  Animated
+                </button>
+              </div>
               <div id="avatarGrid" class="crop-avatar-grid atelier-avatar-grid"></div>
             </div>
 
