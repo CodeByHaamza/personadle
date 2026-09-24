@@ -656,6 +656,26 @@
       "condition": "Erreiche Sozialverbindungs-Rang 5 mit einem Freund, während einer von euch Motoha Arai trägt und der andere Chie Satonaka",
       "description": "Zwei Kung-Fu-Mädchen, zwei Spiele, eine Energie. Wenn ein Rang-5-Freund als Chie auftaucht, während du Arai trägst — oder umgekehrt —, bekommt ihr dieses Abzeichen beide, im selben Moment."
     },
+    "chord_progression": {
+      "name": "Chord Progression",
+      "condition": "Bestehe 10 Freundes-Herausforderungen im Musik-Modus",
+      "description": "Rise hält das Mikro, Chord hält die Gitarre, und du hieltest den Ton zehnmal. Zehn Herausforderungen im Musik-Modus, zehn beantwortet."
+    },
+    "birds_different_feather": {
+      "name": "Zwei Vögel, zwei Gefieder",
+      "condition": "Finde Goro Akechi und Kira Kitazato in Silhouette sowie Crow und Messa in All-Out Attack",
+      "description": "Zwei Masken, zwei Schnäbel, zwei grundverschiedene Vögel. Der eine spielt den Prinzen, der andere gibt sich nicht mal die Mühe — du hast beide durchschaut."
+    },
+    "memento_vivere_mori": {
+      "name": "Memento Vivere, Memento Mori",
+      "condition": "Finde Makoto Yuki und Kotone Shiomi in jedem Modus und ihre vier Themen in Musik",
+      "description": "Dasselbe Jahr, dasselbe Wohnheim, dasselbe Ende — zweimal erzählt. Denk ans Leben, denk ans Sterben: du hast beide gefunden, überall, wo es zu suchen gab."
+    },
+    "soul_phrase": {
+      "name": "Soul Phrase",
+      "condition": "???",
+      "description": "Ihr Lied, ihr Orpheus, ihre Geschichte. Manches findet man nur, weil jemand verraten hat, wo man suchen muss."
+    },
     "velvet_regular": {
       "name": "Stammgast im Velvet",
       "condition": "An 50 einzigartigen Tagen spielen",

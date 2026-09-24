@@ -15,6 +15,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 -- Drop dans l'ordre inverse des dépendances
 DROP TABLE IF EXISTS rate_limits;
+DROP TABLE IF EXISTS challenge_wins;
 DROP TABLE IF EXISTS social_link_rankup_notifs;
 DROP TABLE IF EXISTS event_codes;
 DROP TABLE IF EXISTS messages;
@@ -534,7 +535,28 @@ INSERT INTO titles (slug, image_path, name_en, name_fr, name_es, name_de, name_i
  'targets_found',
  'wonder_go_beyond',
  NULL,
- 'legendary');
+ 'legendary'),
+
+-- Lot du 2026-09-23 (migration 054). Persona 2 est une duologie où le même duo
+-- revient d'un jeu à l'autre : le titre demande littéralement de LES RETROUVER.
+('tatsuya_maya_deja_vu',
+ 'profile/titles/tatsuya_maya_deja_vu.webp',
+ 'Déjà Vu',
+ 'Déjà Vu',
+ 'Déjà Vu',
+ 'Déjà Vu',
+ 'Déjà Vu',
+ 'Déjà Vu',
+ 'Find Tatsuya Suou and Maya Amano in both Classic and Silhouette. The same two, twice — as Persona 2 would have it.',
+ 'Trouve Tatsuya Suou et Maya Amano en Classique ET en Silhouette. Les deux mêmes, deux fois — comme Persona 2 l''entend.',
+ 'Encuentra a Tatsuya Suou y Maya Amano en Clásico Y en Silueta. Los dos mismos, dos veces — como manda Persona 2.',
+ 'Finde Tatsuya Suou und Maya Amano in Klassik UND in Silhouette. Dieselben zwei, zweimal — ganz wie Persona 2 es will.',
+ 'Trova Tatsuya Suou e Maya Amano in Classico E in Silhouette. Gli stessi due, due volte — come vuole Persona 2.',
+ 'Encontra Tatsuya Suou e Maya Amano no Clássico E na Silhueta. Os mesmos dois, duas vezes — como manda Persona 2.',
+ 'targets_found',
+ 'p2_deja_vu',
+ NULL,
+ 'epic');
 
 
 -- =============================================================================
@@ -765,6 +787,28 @@ CREATE TABLE event_codes (
 
     PRIMARY KEY (code),
     INDEX idx_event_codes_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Défis d'ami RELEVÉS, en ajout seul (migration 054 ; badge Chord Progression).
+--
+-- La donnée existe aussi dans `messages` (status='beaten'), mais pas de façon
+-- durable : un joueur peut supprimer ses messages, et un badge gagné se
+-- reperdrait quand il range sa boîte (CLAUDE.md §7). Écrite par le serveur au
+-- moment où il valide la transition accepted → beaten, seul endroit où il SAIT.
+CREATE TABLE challenge_wins (
+    id          BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    user_id     BIGINT UNSIGNED  NOT NULL,
+    mode        VARCHAR(30)      NOT NULL,
+    is_expert   TINYINT(1)       NOT NULL DEFAULT 0,
+    -- Volontairement SANS clé étrangère : le message peut disparaître alors que
+    -- le fait reste acquis. Une cascade réintroduirait le problème résolu ici.
+    message_id  BIGINT UNSIGNED  NULL,
+    won_at      TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_challenge_win (user_id, message_id),
+    KEY idx_challenge_wins_user_mode (user_id, mode),
+    CONSTRAINT fk_cw_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Rate-limiting persistant (helper rateLimit() dans bootstrap.php).
@@ -1240,7 +1284,12 @@ INSERT IGNORE INTO badges (slug, name_en, category, rarity, image_path, conditio
 ('shujin_outlaws',        'Shujin Outlaws',             'achievement', 'rare',      'profile/badges/images/Badge_Shujin_Outlaws.webp',        'Find Wonder''s Shujin All-Out Attack, then Ren and Wonder in Silhouette mode', 'targets_found', 'shujin_outlaws', NULL, 0),
 ('absolute_authority',    'Absolute Authority',         'achievement', 'rare',      'profile/badges/images/Badge_Absolute_Authority.webp',    'Find Mitsuru Kirijo and Makoto Niijima in Classic mode', 'targets_found', 'absolute_authority', NULL, 0),
 ('dont_waste_your_breath','Don''t Waste Your Breath',   'achievement', 'epic',      'profile/badges/images/Badge_Dont_Waste_Your_Breath.webp', 'Win 5 Classic Expert games on the very first guess', 'mode_expert_perfect_wins', 'classic', 5, 0),
-('same_energy',           'Same Energy',                'social',      'epic',      'profile/badges/images/Badge_Same_Energy.webp',           'Reach Social Link rank 5 with a friend while one of you wears Motoha Arai and the other Chie Satonaka', 'same_energy', NULL, NULL, 0);
+('same_energy',           'Same Energy',                'social',      'epic',      'profile/badges/images/Badge_Same_Energy.webp',           'Reach Social Link rank 5 with a friend while one of you wears Motoha Arai and the other Chie Satonaka', 'same_energy', NULL, NULL, 0),
+-- Lot du 2026-09-23 (migration 054) — contenu 2.3.
+('chord_progression',       'Chord Progression',            'social',      'epic',      'profile/badges/images/Badge_Chord_Progression.webp',           'Beat 10 friend challenges in Music mode', 'mode_challenge_wins', 'music', 10, 0),
+('birds_different_feather', 'Birds of a Different Feather',  'achievement', 'rare',      'profile/badges/images/Badge_Birds_Of_A_Different_Feather.webp', 'Find Goro Akechi and Kira Kitazato in Silhouette, and Crow and Messa in All-Out Attack', 'targets_found', 'birds_different_feather', NULL, 0),
+('memento_vivere_mori',     'Memento Vivere, Memento Mori',  'achievement', 'legendary', 'profile/badges/images/Badge_Memento_Vivere_Memento_Mori.webp',  'Find Makoto Yuki and Kotone Shiomi in every mode, and their four themes in Music', 'targets_found', 'memento_vivere_mori', NULL, 0),
+('soul_phrase',             'Soul Phrase',                   'secret',      'epic',      'profile/badges/images/Badge_Kotone_Orpheus.webp',              '???', 'manual', NULL, NULL, 1);
 
 INSERT IGNORE INTO wallpapers (id, game, is_default, unlock_condition, condition_type, condition_mode, condition_value, name, image_path) VALUES
 ('kamoshida_palace',       'P5', 0, 'Play at least 1 game in each of the 6 modes',                     'all_modes_won',        NULL,     NULL, 'Kamoshida''s Palace',    'profile/Wallpaper/unlockable/kamoshida_palace.webp'),
@@ -1264,7 +1313,8 @@ INSERT IGNORE INTO event_codes (code, badge_id, start_date, end_date, is_permane
   ('DZULIAN',     'dzulian',               NULL, NULL, 1, 1, 'Secret — Dzulian'),
   ('GOURMET',     'chef',                  NULL, NULL, 1, 1, 'Secret — Chef'),
   ('LOBSTER',     'lobster',               NULL, NULL, 1, 1, 'Secret — Lobster'),
-  ('GYOTRE',      'gyotre',                NULL, NULL, 1, 1, 'Secret — Gyotre');
+  ('GYOTRE',      'gyotre',                NULL, NULL, 1, 1, 'Secret — Gyotre'),
+  ('SOULPHRASE',  'soul_phrase',           NULL, NULL, 1, 1, 'Secret 2.3 — Kotone (annonce Discord)');
 
 
 -- =============================================================================

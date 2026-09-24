@@ -347,6 +347,31 @@ if ($method === 'PATCH') {
         $senderId   = (int) $msg['sender_id'];
         $receiverId = (int) $msg['receiver_id'];
 
+        // Trace DURABLE du défi relevé (migration 054). C'est ici, et nulle part
+        // ailleurs, que le serveur SAIT qu'un défi vient d'être relevé : il a
+        // déjà vérifié plus haut que l'appelant est bien le destinataire et que
+        // la transition part de `accepted`. Rien n'est cru sur parole du client.
+        //
+        // Pourquoi ne pas simplement compter les `messages` au moment de vérifier
+        // la condition : un joueur peut SUPPRIMER ses messages, et le badge se
+        // reperdrait quand il range sa boîte (CLAUDE.md §7). `challenge_wins` ne
+        // fait qu'ajouter, et sa clé unique absorbe un PATCH rejoué par la file
+        // de relance du client.
+        try {
+            $pdo->prepare('
+                INSERT IGNORE INTO challenge_wins (user_id, mode, is_expert, message_id)
+                VALUES (?, ?, ?, ?)
+            ')->execute([
+                $receiverId,
+                strtolower((string) ($msg['challenge_mode'] ?? '')),
+                (int) ($msg['challenge_is_expert'] ?? 0),
+                $msgId,
+            ]);
+        } catch (Throwable) {
+            // Un défi relevé ne doit jamais échouer parce qu'un compteur de badge
+            // n'a pas pu s'écrire : le joueur a gagné, c'est ce qui compte.
+        }
+
         personadle_pusher_trigger("private-user-{$senderId}", 'challenge_beaten', []);
 
         try {
