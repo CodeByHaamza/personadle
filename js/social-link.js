@@ -21,10 +21,39 @@ import { parisDateKey } from "./gameCore.js";
 /** Cache linkId par friendId pour la session. */
 const _linkCache = new Map();
 
-/** Traduit une clé i18n ou renvoie le fallback. */
+/**
+ * Traduit une clé i18n, ou rend le texte de repli.
+ *
+ * Le repli interpole lui aussi `{{variable}}`. Sans ça, dès que `window.i18n`
+ * n'est pas encore chargé — ou que la clé manque dans une langue — le joueur lit
+ * littéralement « +{{xp}} XP au-delà du rang 10 ». Le cas n'est pas théorique :
+ * la jauge se rend parfois avant i18n, et `howto_done_today` portait déjà ce
+ * défaut.
+ */
 function t(key, fallback, vars) {
   const v = window.i18n?.t?.(key, vars);
-  return v != null && v !== key ? v : fallback;
+  if (v != null && v !== key) return v;
+  if (!vars) return fallback;
+  return String(fallback).replace(/\{\{\s*(\w+)\s*\}\}/g, (m, nom) =>
+    Object.hasOwn(vars, nom) ? String(vars[nom]) : m
+  );
+}
+
+/**
+ * Nombre d'XP lisible, groupé par milliers selon la langue de la page.
+ *
+ * L'XP n'est plafonnée nulle part côté serveur : une amitié très active dépasse
+ * largement les 2 700 du rang 10, et « 18450 XP » ne se lit plus. `Intl` met le
+ * séparateur du pays (espace fine en français, virgule en anglais) — codé en dur,
+ * on l'aurait faux dans cinq langues sur six.
+ */
+function fmtXp(n) {
+  const v = Number(n) || 0;
+  try {
+    return v.toLocaleString(document.documentElement.lang || "en");
+  } catch {
+    return String(v);
+  }
 }
 
 // Rank names hardcoded (fixed game constants from social_link_ranks table)
@@ -123,6 +152,13 @@ function _renderGauge(data, friendId, container) {
       ? Math.min(100, Math.round(((xp - xpCurrent) / (xpNext - xpCurrent)) * 100))
       : 0;
 
+  // XP au-delà du dernier rang. Le serveur n'a JAMAIS plafonné l'XP (elle
+  // s'additionne sans borne, seul le rang s'arrête à 10) — mais la jauge, elle,
+  // masquait complètement le total une fois le rang 10 atteint. Deux amitiés de
+  // 2 700 et de 50 000 XP s'affichaient donc à l'identique, et le jeu disait à
+  // ceux qui jouent le plus ensemble qu'ils n'avaient plus rien à gagner.
+  const xpBeyond = isMax ? Math.max(0, xp - xpCurrent) : 0;
+
   const todayActions = (data.today_interactions ?? [])
     .filter((i) => i.initiator_id === window._currentUser?.id)
     .map((i) => i.action_type);
@@ -152,14 +188,20 @@ function _renderGauge(data, friendId, container) {
       <span class="sl-xp-label">
         ${
           isMax
-            ? t("social.max_rank", "✨ MAX — True Confidant")
-            : `${xp} XP / ${xpNext ?? "?"} XP (${pct}%)`
+            ? `${t("social.max_rank", "✨ MAX — True Confidant")} · ${fmtXp(xp)} XP`
+            : `${fmtXp(xp)} XP / ${xpNext != null ? fmtXp(xpNext) : "?"} XP (${pct}%)`
         }
       </span>
       ${
-        isMax
-          ? ""
-          : `
+        isMax && xpBeyond > 0
+          ? `<span class="sl-xp-beyond">${t("social.xp_beyond_max", "+{{xp}} XP beyond rank 10", { xp: fmtXp(xpBeyond) })}</span>`
+          : ""
+      }
+      ${
+        // Le mémo « comment gagner de l'XP » reste affiché au rang 10 : l'XP
+        // continue de compter (classement Amitié), donc le masquer reviendrait à
+        // dire « c'est fini » à ceux qui jouent le plus.
+        `
       <div class="sl-howto" tabindex="0" role="button"
            aria-label="${t("social.howto_aria", "How to gain Social Link XP")}">
         <span class="sl-howto-trigger">ℹ️ <span>${t("social.howto_trigger", "How to gain XP?")}</span></span>
