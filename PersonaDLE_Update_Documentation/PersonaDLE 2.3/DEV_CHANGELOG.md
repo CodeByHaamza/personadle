@@ -147,6 +147,51 @@ exactement ce qui causait le problème.
 
 ---
 
+## 2026-09-24 — Consulter la fiche d'un badge sans l'épingler
+
+Dans la grille, un clic sur un badge l'ÉPINGLE ou le DÉPINGLE. Le seul moyen d'en
+lire la condition et la description était la bulle d'info **au survol** — et le
+survol n'existe pas au doigt.
+
+Sur mobile, un joueur qui voulait simplement savoir à quoi correspond un badge
+n'avait donc qu'une option : le toucher, donc modifier ses badges épinglés pour
+lire une phrase. Un œil sur chaque carte ouvre la fiche, et ne touche à rien.
+
+### Ce qu'une fiche montre, et surtout ce qu'elle ne montre pas
+
+Un badge **secret encore verrouillé** n'affiche ni son nom, ni sa condition, ni sa
+description — « ??? » partout. Sans ça, l'œil serait devenu un moyen commode de
+lire toutes les réponses, soit l'inverse exact de ce que « secret » veut dire.
+
+Un badge verrouillé mais **non secret**, lui, montre sa condition : c'est tout
+l'intérêt de la fiche, savoir ce qu'il reste à faire. Son image est grisée — la
+fiche dit quoi faire, elle ne donne pas le visuel comme s'il était déjà gagné.
+
+### Le piège
+
+L'œil vit SUR la carte, qui porte un `onclick` qui épingle. Il arrête donc la
+propagation de `click` **et** de `pointerdown`. Deux tests tiennent les deux
+bouts : l'œil n'épingle jamais, et un clic sur la carte épingle toujours — le
+second existe pour que le correctif du premier ne neutralise pas le comportement
+normal.
+
+Autre détail : le bouton reste **visible en permanence sans pointeur fin**
+(`@media (hover: none)`). Une opacité 0 par défaut l'aurait rendu introuvable
+exactement dans le cas d'usage qui a motivé le lot.
+
+### Fichiers touchés
+
+- `profile/badges/badge_inspect.js` — nouveau, `construireFiche()` + panneau
+- `profile/badges/badgesManager.js` — branché après les clics de carte
+- `profile/badges/badges.css` — l'œil et la fiche
+- `lang/*.json` — 3 clés × 6 langues
+- `tests/badgeInspect.test.js` — 16 cas, dont le secret verrouillé et
+  l'échappement du contenu
+- `tests-e2e/badge_inspect.spec.js` — l'œil n'épingle pas, la carte épingle
+  toujours, Échap ferme la fiche sans fermer la modale derrière
+
+---
+
 ## 2026-09-24 — Huit fiches de lore Expert donnaient la réponse
 
 ### Ce qui fuitait

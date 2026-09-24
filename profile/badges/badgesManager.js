@@ -4,6 +4,7 @@
 
 import { badgesList, BADGE_CATEGORIES, getBadgeById, SAME_ENERGY_AVATARS, wearsAvatar } from "./badgesData.js";
 import { initBadgeReorder } from "./badges_reorder.js";
+import { initBadgeInspect } from "./badge_inspect.js";
 import { normalizeModeKey } from "../../js/gameCore.js";
 import { statsForUnlocks } from "../profile-format.js";
 import { openAtelier } from "../atelier.js";
@@ -998,6 +999,24 @@ export function renderBadgesModal(profile, saveProfile) {
 
   // Attacher les événements de clic
   attachBadgeClickEvents(profile, saveProfile, grid);
+
+  // L'œil : consulter la fiche d'un badge SANS l'épingler. Posé après les clics
+  // de carte, et il arrête leur propagation — sinon regarder un badge
+  // reviendrait à le modifier.
+  initBadgeInspect(grid, (id) => {
+    const badge = badgesList.find((b) => b.id === id);
+    if (!badge) return null;
+    const debloque = profile.badges.includes(badge.id);
+    return {
+      badge,
+      debloque,
+      textes: {
+        name: getBadgeName(badge),
+        condition: getBadgeCondition(badge, debloque),
+        description: getBadgeDescription(badge),
+      },
+    };
+  });
 
   // Configurer l'ouverture/fermeture de la modal
   setupModalControls(openBtn, closeBtn, modal);
