@@ -1112,3 +1112,54 @@ body:not(.darkmode) .info-tooltip-ai strong {
     transform 0.2s ease,
     box-shadow 0.2s ease;
 }
+
+/* ── Réordonnancement des badges épinglés (2.3) ─────────────────────────────
+   `profile.selectedBadges` a toujours été un tableau ordonné ; le joueur peut
+   enfin en changer l'ordre. Piloté aux Pointer Events (souris, doigt, stylet) —
+   le glisser-déposer HTML5 ne se déclenche pas au doigt. */
+.pin-slot--movable {
+  cursor: grab;
+  touch-action: none; /* sinon le doigt fait défiler la page au lieu de glisser */
+  user-select: none;
+}
+
+/* Le navigateur rend les <img> déplaçables NATIVEMENT : un appui sur l'image
+   démarre son propre glisser, qui annule nos événements de pointeur
+   (`pointercancel`) et fait échouer le réordonnancement sans rien signaler.
+   Constaté : le glissement marchait au clavier et pas à la souris. */
+.pin-slot--movable img {
+  -webkit-user-drag: none;
+  user-select: none;
+  pointer-events: none; /* l'image ne capte rien : c'est la case qui écoute */
+  transition:
+    transform 0.14s ease,
+    opacity 0.14s ease;
+}
+.pin-slot--movable:focus-visible {
+  outline: 2px solid var(--accent, #e63946);
+  outline-offset: 3px;
+}
+
+/* En cours de déplacement : la case suit le doigt du regard, sans quitter la
+   rangée — un fantôme flottant demanderait de gérer une couche par-dessus, pour
+   un gain nul sur quatre cases côte à côte. */
+.pin-slot--dragging {
+  cursor: grabbing;
+  opacity: 0.55;
+  transform: scale(1.08);
+  z-index: 2;
+}
+
+/* La case visée s'écarte : c'est ce qui dit où le badge va tomber. */
+.pin-slot--target {
+  transform: translateY(-6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pin-slot--movable,
+  .pin-slot--dragging,
+  .pin-slot--target {
+    transition: none;
+  }
+}
