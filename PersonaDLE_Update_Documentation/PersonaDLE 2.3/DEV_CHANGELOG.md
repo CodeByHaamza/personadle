@@ -49,7 +49,7 @@ Visuels fournis par Hamza. Conditions arrêtées avec lui le 2026-09-23.
 | `chord_progression` | 10 défis d'ami relevés en mode Musique | epic |
 | `birds_different_feather` | Akechi + Kitazato en Silhouette, Crow + Messa en All-Out Attack | rare |
 | `memento_vivere_mori` | Makoto et Kotone dans les 6 modes + leurs 4 thèmes | **legendary** |
-| `soul_phrase` | secret — code `SOULPHRASE`, dévoilé à l'annonce Discord | epic |
+| `her_own_orpheus` | secret — code `IAMNOTAPRINCESS`, dévoilé à l'annonce Discord | epic |
 | `tatsuya_maya_deja_vu` *(titre)* | Tatsuya et Maya en Classique ET en Silhouette | epic |
 
 `memento_vivere_mori` est le deuxième badge **legendary** du catalogue, après
@@ -130,10 +130,17 @@ réconciliation au seuil exact (CLAUDE.md §7).
 - `tests/php/` — catalogue (73 badges, 23 titres), vocabulaire, semis du nouveau type
 - `tests/` — parité, i18n, conditions, miroir client ↔ serveur
 
-### Reste à faire
+### Nom du badge secret
 
-Le badge `soul_phrase` est seedé avec le code **`SOULPHRASE`**. Hamza doit
-confirmer le mot exact avant la sortie — c'est lui qui rédige l'annonce Discord.
+D'abord nommé « Soul Phrase », refusé par Hamza : c'est l'**opening de Persona 3
+Portable**, pas un nom disponible. Renommé **« Her Own Orpheus »**, qui décrit ce
+que montre l'image — Kotone avec SA version d'Orpheus, distincte de celle de
+Makoto — et ne reprend le titre d'aucune chanson.
+
+Contrairement à « Soul Phrase », ce nom se traduit : il sort donc de
+`KEEP_ORIGINAL` dans `badgesI18n.test.js` et a ses six traductions.
+
+Code du badge : **`IAMNOTAPRINCESS`** (choisi par Hamza).
 
 ---
 

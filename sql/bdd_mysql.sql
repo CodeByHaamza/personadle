@@ -1289,7 +1289,7 @@ INSERT IGNORE INTO badges (slug, name_en, category, rarity, image_path, conditio
 ('chord_progression',       'Chord Progression',            'social',      'epic',      'profile/badges/images/Badge_Chord_Progression.webp',           'Beat 10 friend challenges in Music mode', 'mode_challenge_wins', 'music', 10, 0),
 ('birds_different_feather', 'Birds of a Different Feather',  'achievement', 'rare',      'profile/badges/images/Badge_Birds_Of_A_Different_Feather.webp', 'Find Goro Akechi and Kira Kitazato in Silhouette, and Crow and Messa in All-Out Attack', 'targets_found', 'birds_different_feather', NULL, 0),
 ('memento_vivere_mori',     'Memento Vivere, Memento Mori',  'achievement', 'legendary', 'profile/badges/images/Badge_Memento_Vivere_Memento_Mori.webp',  'Find Makoto Yuki and Kotone Shiomi in every mode, and their four themes in Music', 'targets_found', 'memento_vivere_mori', NULL, 0),
-('soul_phrase',             'Soul Phrase',                   'secret',      'epic',      'profile/badges/images/Badge_Kotone_Orpheus.webp',              '???', 'manual', NULL, NULL, 1);
+('her_own_orpheus',         'Her Own Orpheus',               'secret',      'epic',      'profile/badges/images/Badge_Kotone_Orpheus.webp',              '???', 'manual', NULL, NULL, 1);
 
 INSERT IGNORE INTO wallpapers (id, game, is_default, unlock_condition, condition_type, condition_mode, condition_value, name, image_path) VALUES
 ('kamoshida_palace',       'P5', 0, 'Play at least 1 game in each of the 6 modes',                     'all_modes_won',        NULL,     NULL, 'Kamoshida''s Palace',    'profile/Wallpaper/unlockable/kamoshida_palace.webp'),
@@ -1314,7 +1314,7 @@ INSERT IGNORE INTO event_codes (code, badge_id, start_date, end_date, is_permane
   ('GOURMET',     'chef',                  NULL, NULL, 1, 1, 'Secret — Chef'),
   ('LOBSTER',     'lobster',               NULL, NULL, 1, 1, 'Secret — Lobster'),
   ('GYOTRE',      'gyotre',                NULL, NULL, 1, 1, 'Secret — Gyotre'),
-  ('SOULPHRASE',  'soul_phrase',           NULL, NULL, 1, 1, 'Secret 2.3 — Kotone (annonce Discord)');
+  ('IAMNOTAPRINCESS', 'her_own_orpheus',   NULL, NULL, 1, 1, 'Secret 2.3 — Kotone (annonce Discord)');
 
 
 -- =============================================================================

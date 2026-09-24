@@ -138,7 +138,7 @@ final class BadgeWallpaperCatalogTest extends TestCase
             // supprimer, et le badge se reperdrait.
             'chord_progression'       => ['mode_challenge_wins', 'music', 10],
             // Secret : accordé UNIQUEMENT par /redeem (code dévoilé à la sortie).
-            'soul_phrase'             => ['manual', null, null],
+            'her_own_orpheus'         => ['manual', null, null],
             'easter_2026'    => ['played_on_easter', null, null],
         ];
 
