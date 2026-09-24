@@ -135,9 +135,28 @@ test.describe("Personae Expert — le lore", () => {
     const texte = (await page.locator("#expertLoreText").textContent()).toLowerCase();
     const base = t.persona.replace(/\s*\(.*?\)\s*/g, " ").trim().toLowerCase();
     if (base.length >= 4) {
-      expect(texte, `« ${t.persona} » ne doit pas apparaître`).not.toContain(base);
+      // Le nom fuit s'il apparaît à une position qui n'est PAS précédée d'une
+      // lettre : c'est ce qui distingue un mot DÉRIVÉ (terpsichore|an, le nom
+      // ouvre le mot — une vraie fuite, corrigée le 2026-09-24) d'une simple
+      // coïncidence de fin (N|ella, « Nella » en italien), qui ne donne rien au
+      // joueur. Une recherche de sous-chaîne nue faisait échouer ce test les
+      // jours où la cible s'appelait Ella ou Eros.
+      let i = texte.indexOf(base);
+      let fuite = null;
+      while (i !== -1 && fuite === null) {
+        if (i === 0 || !/[a-z0-9]/.test(texte[i - 1])) {
+          fuite = texte.slice(Math.max(0, i - 40), i + base.length + 40);
+        }
+        i = texte.indexOf(base, i + 1);
+      }
+      expect(fuite, `« ${t.persona} » ne doit pas apparaître : …${fuite}…`).toBeNull();
     }
     expect(texte).toContain("▮");
+
+    // L'audit EXHAUSTIF des 936 fiches vit dans tests/expertLoreMasking.test.js :
+    // ici on ne voit que la cible du jour, et c'est précisément ce qui avait
+    // laissé la fuite de Terpsichore dormir jusqu'à ce que le tirage tombe
+    // dessus.
   });
 
   test("la cible du jour a toujours une fiche", async ({ page }) => {
