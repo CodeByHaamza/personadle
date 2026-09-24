@@ -166,6 +166,12 @@ export const ROSTERS = {
         "kotone_shiomi_p3p_2.jpg",
         "kotone_shiomi_p3p_3.jpg",
         "kotone_shiomi_p5x_crossover.jpg",
+        // Animés (2.3) — le suffixe `_anim_` les fait remonter dans l'onglet
+        // « Animés » de la galerie, cf. scripts/sort_avatars_data.mjs.
+        "kotone_shiomi_p3_anim_butterfly.webp",
+        "kotone_shiomi_p3_anim_listening.webp",
+        "kotone_shiomi_p3_anim_orpheus.webp",
+        "kotone_shiomi_p3_anim_pink.webp",
       ],
     },
     {
@@ -293,6 +299,8 @@ export const ROSTERS = {
         "theodore3.jpeg",
         "theodore4.jpeg",
         "theodore5.jpeg",
+        "theodore_p3_anim_elevator.webp",
+        "theodore_p3_anim_look_back.webp",
       ],
     },
     { nom: "Metis", role: "secondaire", fichiers: ["Metis.jpg", "Metis2.jpeg", "metis_p3.jpg"] },
