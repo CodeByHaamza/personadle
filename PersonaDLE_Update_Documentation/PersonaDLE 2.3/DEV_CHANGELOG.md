@@ -413,6 +413,110 @@ surveiller si d'autres animés arrivent.
 
 ---
 
+## 2026-09-24 — Quatre badges, un titre, et une table pour les défis relevés
+
+Visuels fournis par Hamza. Conditions arrêtées avec lui le 2026-09-23.
+
+| Slug | Condition | Rareté |
+|---|---|---|
+| `chord_progression` | 10 défis d'ami relevés en mode Musique | epic |
+| `birds_different_feather` | Akechi + Kitazato en Silhouette, Crow + Messa en All-Out Attack | rare |
+| `memento_vivere_mori` | Makoto et Kotone dans les 6 modes + leurs 4 thèmes | **legendary** |
+| `her_own_orpheus` | secret — code `IAMNOTAPRINCESS`, dévoilé à l'annonce Discord | epic |
+| `tatsuya_maya_deja_vu` *(titre)* | Tatsuya et Maya en Classique ET en Silhouette | epic |
+
+`memento_vivere_mori` est le deuxième badge **legendary** du catalogue, après
+`wonder_go_beyond` côté titres : c'est son pendant Persona 3.
+
+### Pourquoi une table `challenge_wins`
+
+Le badge Chord Progression compte des défis relevés. La donnée existe déjà dans
+`messages` (`type='challenge'`, `status='beaten'`) — mais elle n'y est pas
+**durable** : `DELETE /api/messages/:id` autorise un joueur à supprimer ses
+messages. Compter les lignes vivantes ferait reperdre le badge à qui range sa
+boîte de réception, ce que la règle de monotonie interdit (CLAUDE.md §7).
+
+`game_sessions` ne pouvait pas servir non plus : aucune colonne n'y dit qu'une
+partie venait d'un défi, et la session est enregistrée par un appel séparé de
+celui qui marque le défi relevé.
+
+D'où une table minuscule, **en ajout seul**, écrite dans `api/messages/index.php`
+au moment exact où le serveur valide la transition `accepted → beaten`. C'est le
+seul endroit où il *sait* : il y vérifie déjà que seul le destinataire peut
+marquer un défi relevé, et depuis quel état. Rien n'est cru sur parole du client.
+Sa clé unique `(user_id, message_id)` absorbe un PATCH rejoué par la file de
+relance. Pas de clé étrangère vers `messages` : le message peut disparaître, le
+fait reste acquis — une cascade réintroduirait le problème qu'on résout.
+
+### Deux défauts trouvés PAR les tests
+
+**1. `targetSetMet()` accordait les ensembles inconnus.** Le helper client
+faisait `(TARGET_SETS[cle] || []).every(...)` — et `[].every()` vaut `true`. Un
+badge dont l'ensemble n'était pas encore déclaré côté client se débloquait donc
+tout seul, sur un profil vierge. Les deux nouveaux badges `targets_found` se sont
+allumés immédiatement, et `badgesConditions.test.js` (« aucun badge ne se
+débloque sur un profil VIERGE ») l'a signalé. Le helper est désormais fermé.
+
+Un test l'affirmait pourtant explicitement (`unlocks_wonder_shujin.test.js`,
+« aucune exigence → vrai côté client, le serveur refuse »). Deux tests se
+contredisaient ; le principe anti-« always true » l'emporte, et pour une raison
+concrète : côté joueur, l'ancien comportement voulait dire voir le badge
+s'allumer en fin de partie puis disparaître au rechargement.
+
+**2. Une apostrophe cassait le miroir client ↔ serveur.** `It's Going Down Now`
+avait d'abord été écrit entre guillemets doubles en PHP. L'extracteur de
+`unlocks_wonder_shujin.test.js` ne lit que les chaînes à apostrophes simples :
+l'apostrophe non échappée lui faisait avaler tout le texte suivant, et les cibles
+d'après passaient pour absentes. Écrite `'It's Going Down Now'`, tout rentre
+dans l'ordre — et le commentaire sur place explique pourquoi.
+
+### Nouveau garde-fou : les cibles doivent être TIRABLES
+
+`ConditionVocabularyTest::testEveryTargetSetNameCanActuallyBeDrawn` confronte
+chaque nom de `PERSONADLE_TARGET_SETS` à `api/data/daily_pools.json`.
+
+Une faute de frappe dans un nom de cible ne casse rien de visible : le badge se
+contente de n'être jamais accordé, à personne, pour toujours. Ni la
+réconciliation ni le test de catalogue ne le verraient — ce dernier **sème** les
+sessions avec les noms du set, donc il confirme seulement que le set est d'accord
+avec lui-même. Ici on repart de ce que le jeu peut réellement tirer. Le test
+couvre les cinq ensembles, les anciens compris (242 assertions).
+
+Il refuse aussi un ensemble qui exigerait plus de cibles qu'il n'en nomme.
+
+### Nouveau `condition_type` : `mode_challenge_wins`
+
+`condition_value` défis relevés dans `condition_mode`. Comme tout nouveau type :
+un `case` serveur, une entrée au vocabulaire, et un cas de semis dans
+`BadgeWallpaperCatalogTest` — qui prouve que le badge est bien accordé par la
+réconciliation au seuil exact (CLAUDE.md §7).
+
+### Fichiers touchés
+
+- `sql/migrations/054_badges_titles_2_3.sql` — table + 4 badges + 1 titre + code
+- `sql/bdd_mysql.sql` — miroir (rejoué sur base vierge, puis 054 par-dessus : no-op)
+- `api/lib/condition_check.php` — 3 ensembles, `mode_challenge_wins`, vocabulaire
+- `api/messages/index.php` — écriture dans `challenge_wins` sur `beaten`
+- `profile/badges/badgesData.js` — 4 entrées, 3 ensembles clients, helper fermé
+- `profile/badges/images/` + `profile/titles/` — 5 visuels
+- `lang/*.json` — 4 badges × nom/condition/description × 6 langues
+- `tests/php/` — catalogue (73 badges, 23 titres), vocabulaire, semis du nouveau type
+- `tests/` — parité, i18n, conditions, miroir client ↔ serveur
+
+### Nom du badge secret
+
+D'abord nommé « Soul Phrase », refusé par Hamza : c'est l'**opening de Persona 3
+Portable**, pas un nom disponible. Renommé **« Her Own Orpheus »**, qui décrit ce
+que montre l'image — Kotone avec SA version d'Orpheus, distincte de celle de
+Makoto — et ne reprend le titre d'aucune chanson.
+
+Contrairement à « Soul Phrase », ce nom se traduit : il sort donc de
+`KEEP_ORIGINAL` dans `badgesI18n.test.js` et a ses six traductions.
+
+Code du badge : **`IAMNOTAPRINCESS`** (choisi par Hamza).
+
+---
+
 ## 2026-09-22 — Le bouton « Sauvegarder » des paramètres était hors champ, et le panneau ne défilait plus
 
 Signalé par **Gypotre** : « quand on modifie nos paramètres depuis notre profil, on ne voit
