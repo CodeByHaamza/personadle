@@ -124,6 +124,48 @@ essayant le panneau pour de vrai ; aucun test unitaire ne l'aurait vu.
 
 ---
 
+## 2026-09-24 — La page Nouveautés 2.3 est remplie
+
+La palette **Pink Ribbon** était déjà en place (ouverture de la version) ; il
+manquait le contenu des lots livrés depuis.
+
+Trois sections ajoutées, toutes bilingues (`data-i18n-block`) :
+
+- **🏅 Quatre badges et un titre** — chaque entrée avec son image, son nom et sa
+  condition exacte, règle Hamza du 2026-09-19 : tout nouveau contenu est listé
+  explicitement, pas de section « sans spoiler ». Le badge secret affiche
+  « ??? — condition dévoilée sur le Discord à la sortie ».
+- **🤝 Le classement des amitiés** — la troisième dimension du classement, et
+  l'XP de Social Link qui ne se cache plus au rang 10.
+- **🎖️ Vos badges, dans votre ordre** — réordonnancement et inspection, chacun
+  présenté par le problème qu'il résout plutôt que par la fonctionnalité.
+
+Deux correctifs ajoutés à la section Corrections, parce qu'ils sont visibles du
+joueur : les fiches de lore qui donnaient la réponse, et surtout la perte des
+badges épinglés sur un second appareil — celui-là, un joueur a pu le subir sans
+comprendre.
+
+### Un défaut trouvé en regardant la page
+
+**Quatre images cassées** dans la grille des 146 portraits, déjà en ligne :
+`baofu_p2_3`, `baofu_p2_4`, `akihiko_sanada_p3_3` et `koromaru_p3_3`. Ces
+portraits ont été RÉIDENTIFIÉS après coup (les deux « Baofu » sont Zenkichi
+Hasegawa, les deux médaillons sont Persona Q) : les fichiers ont été renommés et
+déplacés dans la galerie, mais la page Nouveautés pointait encore les anciens
+noms. Corrigé, avec les bons noms ET les bonnes légendes.
+
+Deux styles de carte ajoutés au passage : `badge-card.rarity-legendary` — Memento
+Vivere est le premier badge de cette rareté, seules les cartes de TITRE en
+avaient un — et `badge-card.rarity-secret`.
+
+### Vérification
+
+Page ouverte dans un navigateur : **aucune image manquante**, 4 cartes de badge
+et 1 carte de titre, les images de badge décodées, 24 blocs `fr` pour 24 blocs
+`en`, structure équilibrée (76 `div`, 11 commentaires).
+
+---
+
 ## 2026-09-24 — Ouvrir une page effaçait les choix de profil du serveur
 
 ### Le bug
