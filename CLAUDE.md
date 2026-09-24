@@ -38,12 +38,12 @@ personadle/
 ├── js/                  ← gameCore.js, api.js, auth.js, i18n.js, cloud-sync.js…
 ├── css/                 ← global.css + un CSS par composant
 ├── database/            ← characters_clean.js, personas.js, quotes.js, portraits/
-├── lang/                ← en.json (source de vérité, 1287 clés), fr/es/de/it/pt.json
+├── lang/                ← en.json (source de vérité, 1288 clés), fr/es/de/it/pt.json
 ├── classiqueMode/  emojiMode/  allOutAttackMode/  silhouetteMode/  personaeMode/  musicsMode/
 ├── profile/             ← profile-page.js, badges/, friends/, leaderboard/
 ├── api/                 ← PHP REST (auth/, user/, messages/, social-links/, leaderboard/…)
 <<<<<<< HEAD
-├── tests/               ← 80 suites Vitest (1462 tests) + tests/php/ (PHPUnit)
+├── tests/               ← 80 suites Vitest (1468 tests) + tests/php/ (PHPUnit)
 =======
 ├── tests/               ← 78 suites Vitest (1453 tests) + tests/php/ (PHPUnit)
 >>>>>>> origin/develop
@@ -230,7 +230,7 @@ Utiliser `min()`, `clamp()`, `vw`/`vh`. Éviter les largeurs fixes en `px` sur l
 
 - `npm test` · `npm run test:watch` · `npm run test:coverage`
 <<<<<<< HEAD
-- **1462 tests** (Vitest + jsdom), 80 suites dans `tests/` (`gameCore`, `backend`, `auth`, `i18n`,
+- **1468 tests** (Vitest + jsdom), 80 suites dans `tests/` (`gameCore`, `backend`, `auth`, `i18n`,
 =======
 - **1453 tests** (Vitest + jsdom), 78 suites dans `tests/` (`gameCore`, `backend`, `auth`, `i18n`,
 >>>>>>> origin/develop

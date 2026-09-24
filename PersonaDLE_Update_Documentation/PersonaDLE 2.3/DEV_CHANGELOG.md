@@ -101,6 +101,53 @@ vérifiée sur les trois cas réels.
 - `personaeMode/database/expert_lore/{en,fr,de,es,it,pt}.json` — 8 termes ajoutés
 - `tests/expertLoreMasking.test.js` — nouveau, 5 cas
 - `tests-e2e/expert-personae.spec.js` — critère aligné
+## 2026-09-23 — L'XP de Social Link ne se cache plus au rang 10
+
+### Ce qui était en cause
+
+Le **serveur n'a jamais plafonné l'XP**. `add_social_link_xp` (procédure stockée) et
+son équivalent PHP `personadle_sl_add_xp()` font tous deux `xp = xp + montant`, sans
+borne ; seul le RANG s'arrête à 10, parce qu'il vaut
+`MAX(rank WHERE xp_required <= xp)` et que la table `social_link_ranks` s'arrête à
+2 700. Vérifié en base : un lien poussé à 7 700 XP reste au rang 10 sans rien perdre.
+
+Le plafond était donc purement **visuel**. Une fois le rang 10 atteint,
+`_renderGauge()` remplaçait le compteur par « ✨ MAX — True Confidant » et masquait le
+bloc « comment gagner de l'XP ». Deux amitiés de 2 700 et de 50 000 XP s'affichaient à
+l'identique, et le jeu disait à ceux qui jouent le plus ensemble qu'ils n'avaient plus
+rien à gagner — alors que c'est cette XP qui départagera les amitiés dans le classement
+Amitié (lot 9).
+
+### Ce qui change
+
+- Le total d'XP reste affiché au rang 10 : « ✨ MAX — True Confidant · 7 700 XP ».
+- Une ligne dorée annonce l'XP gagnée **au-delà** du seuil : « +5 000 XP au-delà du
+  rang 10 ». Absente tant qu'on vient juste d'atteindre le rang.
+- Le mémo « comment gagner de l'XP » ne disparaît plus au rang 10.
+- Les nombres passent par `toLocaleString()` : « 7 700 » et non « 7700 ». Le séparateur
+  de milliers varie selon la langue, le coder en dur l'aurait faux dans cinq cas sur six.
+
+Le rang reste borné à 1-10 : rien n'est touché côté serveur, aucune migration.
+
+### Défaut de fond corrigé au passage
+
+Le helper `t(cle, repli, vars)` de `js/social-link.js` interpolait `{{variable}}` dans
+la **traduction** mais pas dans le **texte de repli**. Sans i18n chargé — ce qui arrive,
+la jauge pouvant se rendre avant — ou avec une clé manquante dans une langue, le joueur
+lisait littéralement « +{{xp}} XP au-delà du rang 10 ». `social.howto_done_today`
+portait déjà ce défaut depuis la 2.1.
+
+C'est le test qui l'a trouvé, pas la relecture : la première version du cas attendait
+« 5000 » et a reçu « +{{xp}}XPbeyondrank10 ».
+
+### Fichiers touchés
+
+- `js/social-link.js` — `fmtXp()`, XP au-delà du seuil, mémo conservé, repli interpolé
+- `css/social-link.css` — `.sl-xp-beyond` (or, comme les autres marqueurs de rang max)
+- `lang/*.json` — `social.xp_beyond_max` × 6 langues
+- `tests/social-link.test.js` — 6 cas : total affiché, ligne « au-delà » présente puis
+  absente au seuil exact, mémo conservé, barre pleine et rang figé à 10, et le repli
+  qui n'affiche jamais `{{`
 
 ---
 
@@ -242,47 +289,6 @@ produire de flèche. L'égalité stricte la couvre déjà en amont (`value === t
 
 ---
 
-<<<<<<< HEAD
-## 2026-09-22 — Elisabeth devient utilisatrice de persona en mode Classique
-
-Demande Hamza. Les deux datasets se contredisaient : le mode **Personae** enregistre depuis
-la 2.1 qu'Elisabeth manie **Thanatos** dans P4AU — entrée fusionnée avec Makoto Yuki et
-Kotone Shiomi, cf. CLAUDE.md §4 « personas multi-wielders » — tandis que le mode
-**Classique** la donnait encore en `personaUser: false`, `persona: "NONE"`.
-
-C'est le Classique qui perdait : c'est lui que le joueur voit dans sa grille de comparaison,
-et il affirmait le contraire de ce que le jeu enregistre ailleurs.
-
-### Ce qui ne change pas
-
-`arcane` reste `["NONE"]` et `age` reste `"Unknown"` — décision Hamza, seuls `personaUser` et
-`persona` bougent. **Theodore n'est pas touché** : il n'apparaît pas dans P4AU et ne manie
-aucune persona. C'est la moitié du lot qu'il serait le plus facile de « corriger » par
-symétrie un jour, d'où un cas de test qui le dit explicitement.
-
-### Détails techniques
-
-- `database/characters_clean.js` — `personaUser: true`, `persona: "Thanatos"`, avec le
-  pourquoi en commentaire sur place plutôt que seulement ici.
-- `tests/content_velvet_persona_users.test.js` — **nouveau**. Quatre cas : Elisabeth manie
-  Thanatos ; le mode Personae la compte bien parmi les manieurs de cette entrée (si elle en
-  disparaissait, le Classique affirmerait seul quelque chose que plus rien ne soutient) ;
-  Theodore reste non-utilisateur ; ni l'un ni l'autre ne gagne d'arcane ou d'âge.
-
-### Pourquoi pas un invariant général
-
-L'idée d'exiger que tout `personaUser: true` du Classique ait une entrée correspondante en
-mode Personae a été mesurée avant d'être écartée : **19 personnages** seraient en faute
-aujourd'hui (Ryoji Mochizuki, Izanami, les Shadows de boss — Kamoshida/Asmodeus,
-Madarame/Azazel, Shido/Samael…). Ce sont des exclusions **légitimes** — un Shadow de boss
-n'a pas à être devinable en mode Personae. Un tel test serait rouge à tort dès sa création.
-
-### Angles morts connus
-
-- Le tirage quotidien n'est pas affecté : `personaUser`/`persona` n'entrent pas dans
-  `api/data/daily_pools.json`, seuls les noms et opus y figurent (`npm run pools:check` ✅).
-- Les grilles déjà affichées chez un joueur ne sont pas recalculées.
-=======
 ## 2026-09-22 — Deux All-Out Attack P5X : Luce Notte et Soy Pioneer
 
 Les deux tenues 5 étoiles livrées par Hamza dans `New Data.zip`. Chacune est une entrée
@@ -548,7 +554,48 @@ et Yukino Mayuzumi (P1), Lisa Silverman (P2), Sophia (P5), et Akihiko Sanada (1 
   pack déblocable du lot 6. Seuls les portraits libres vivent dans `avatars_data.js`.
 - Les fichiers restent des `.jpg` tels que livrés, sans réencodage — poids total ~3,1 Mo
   pour 31 fichiers, du même ordre que la galerie existante.
->>>>>>> origin/develop
+
+---
+
+## 2026-09-22 — Elisabeth devient utilisatrice de persona en mode Classique
+
+Demande Hamza. Les deux datasets se contredisaient : le mode **Personae** enregistre depuis
+la 2.1 qu'Elisabeth manie **Thanatos** dans P4AU — entrée fusionnée avec Makoto Yuki et
+Kotone Shiomi, cf. CLAUDE.md §4 « personas multi-wielders » — tandis que le mode
+**Classique** la donnait encore en `personaUser: false`, `persona: "NONE"`.
+
+C'est le Classique qui perdait : c'est lui que le joueur voit dans sa grille de comparaison,
+et il affirmait le contraire de ce que le jeu enregistre ailleurs.
+
+### Ce qui ne change pas
+
+`arcane` reste `["NONE"]` et `age` reste `"Unknown"` — décision Hamza, seuls `personaUser` et
+`persona` bougent. **Theodore n'est pas touché** : il n'apparaît pas dans P4AU et ne manie
+aucune persona. C'est la moitié du lot qu'il serait le plus facile de « corriger » par
+symétrie un jour, d'où un cas de test qui le dit explicitement.
+
+### Détails techniques
+
+- `database/characters_clean.js` — `personaUser: true`, `persona: "Thanatos"`, avec le
+  pourquoi en commentaire sur place plutôt que seulement ici.
+- `tests/content_velvet_persona_users.test.js` — **nouveau**. Quatre cas : Elisabeth manie
+  Thanatos ; le mode Personae la compte bien parmi les manieurs de cette entrée (si elle en
+  disparaissait, le Classique affirmerait seul quelque chose que plus rien ne soutient) ;
+  Theodore reste non-utilisateur ; ni l'un ni l'autre ne gagne d'arcane ou d'âge.
+
+### Pourquoi pas un invariant général
+
+L'idée d'exiger que tout `personaUser: true` du Classique ait une entrée correspondante en
+mode Personae a été mesurée avant d'être écartée : **19 personnages** seraient en faute
+aujourd'hui (Ryoji Mochizuki, Izanami, les Shadows de boss — Kamoshida/Asmodeus,
+Madarame/Azazel, Shido/Samael…). Ce sont des exclusions **légitimes** — un Shadow de boss
+n'a pas à être devinable en mode Personae. Un tel test serait rouge à tort dès sa création.
+
+### Angles morts connus
+
+- Le tirage quotidien n'est pas affecté : `personaUser`/`persona` n'entrent pas dans
+  `api/data/daily_pools.json`, seuls les noms et opus y figurent (`npm run pools:check` ✅).
+- Les grilles déjà affichées chez un joueur ne sont pas recalculées.
 
 ---
 
