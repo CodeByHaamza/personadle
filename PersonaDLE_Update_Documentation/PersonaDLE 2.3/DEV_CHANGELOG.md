@@ -40,6 +40,49 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-09-24 — Le badge d'un code événement se choisit dans une liste
+
+La création d'un code événement demandait le **slug du badge dans un champ
+libre**. Une faute de frappe ne se voit nulle part : le code est créé, il
+apparaît actif dans le panneau, et il ne donnera jamais rien. Le joueur qui le
+saisit reçoit « Code mal configuré — contacte un admin », et personne ne sait
+pourquoi tant qu'on n'a pas relu la ligne en base.
+
+C'est exactement le garde-fou que `api/badges/index.php` avait dû se donner : il
+refuse la redemption **sans la consommer** quand le `badge_id` ne correspond à
+rien. Autant empêcher l'erreur à la source.
+
+### Ce qui change
+
+Un bouton « Choisir… » ouvre la liste des 73 badges, avec image, nom, catégorie
+et slug, et un filtre qui cherche dans les trois. Le catalogue est celui que
+`admin/catalogs.js` charge déjà pour les onglets de détail utilisateur : rien de
+nouveau à aller chercher.
+
+Le champ reste affiché, en lecture seule, plutôt que remplacé par un `<select>` :
+il montre le **slug exact** qui partira en base, ce qu'un admin doit pouvoir
+relire. Et la création refuse désormais de partir sans badge choisi.
+
+### Le piège de mise en page
+
+Le bouton se retrouvait **sous** le champ de la colonne suivante, donc
+inatteignable au clic — `min-width: auto` est la valeur par défaut d'un enfant de
+flex : le champ refusait de descendre sous sa taille intrinsèque, la rangée
+débordait de sa cellule de grille. `min-width: 0` règle le cas. Trouvé en
+essayant le panneau pour de vrai ; aucun test unitaire ne l'aurait vu.
+
+### Fichiers touchés
+
+- `admin/badge_picker.js` — nouveau, `filtrerBadges()` + la modale
+- `admin/event-codes.js` — bouton de choix, champ en lecture seule, garde-fou
+- `admin/admin.css` — le sélecteur
+- `tests/adminBadgePicker.test.js` — 9 cas sur le filtre (nom, slug, catégorie,
+  sous-chaîne, ordre conservé, entrées incomplètes)
+
+`admin/` reste hors périmètre i18n (outil interne, français, CLAUDE.md §5).
+
+---
+
 ## 2026-09-24 — La page Nouveautés 2.3 est remplie
 
 La palette **Pink Ribbon** était déjà en place (ouverture de la version) ; il
