@@ -662,6 +662,26 @@
       "condition": "Alcanza el rango 5 de vínculo social con un amigo mientras uno lleva a Motoha Arai y el otro a Chie Satonaka",
       "description": "Dos chicas de kung-fu, dos juegos, una sola energía. Cuando un amigo de rango 5 aparece como Chie mientras tú llevas a Arai, o al revés, los dos recibís esta insignia en el mismo instante."
     },
+    "chord_progression": {
+      "name": "Chord Progression",
+      "condition": "Supera 10 desafíos de amigos en modo Música",
+      "description": "Rise sostiene el micrófono, Chord sostiene la guitarra, y tú sostuviste la nota diez veces seguidas. Diez desafíos recibidos en modo Música, diez superados."
+    },
+    "birds_different_feather": {
+      "name": "Dos aves de distinto plumaje",
+      "condition": "Encuentra a Goro Akechi y Kira Kitazato en Silueta, y a Crow y Messa en All-Out Attack",
+      "description": "Dos máscaras, dos picos, dos aves que no se parecen en nada. Uno juega al príncipe, el otro ni se molesta — los calaste a los dos."
+    },
+    "memento_vivere_mori": {
+      "name": "Memento Vivere, Memento Mori",
+      "condition": "Encuentra a Makoto Yuki y Kotone Shiomi en todos los modos, y sus cuatro temas en Música",
+      "description": "El mismo año, la misma residencia, el mismo final — contado dos veces. Recuerda vivir, recuerda morir: los encontraste a ambos, en todos los rincones."
+    },
+    "her_own_orpheus": {
+      "name": "Su propio Orpheus",
+      "condition": "???",
+      "description": "El mismo arcano, la misma residencia, otra canción. Makoto tiene su Orpheus; ella tiene el suyo — y lo lleva entre las llamas."
+    },
     "velvet_regular": {
       "name": "Cliente Habitual del Velvet",
       "condition": "Jugar en 50 días únicos",
