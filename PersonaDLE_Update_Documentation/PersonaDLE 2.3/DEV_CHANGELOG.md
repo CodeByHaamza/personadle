@@ -40,6 +40,55 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-09-24 — « Sun » (Persona 3 Portable) entre en mode Musique
+
+Piste fournie par Hamza. Titre confirmé sur la source (« Persona 3 Portable:
+Sun ») plutôt que déduit du nom de fichier : un titre approximatif serait une
+mauvaise réponse dans un jeu de devinette.
+
+### Instrumentale : jouable en Musique, PAS en Expert
+
+`vocalist: ""`, comme *Aria Of The Soul*. Le mode Expert fait deviner une chanson
+par ses **paroles** (`musicsMode/database/expert_lyrics.js`) : une piste sans
+paroles y serait une cible impossible à trouver.
+
+Rien à faire pour l'exclure — le pool Expert se dérive des paroles
+(`songs.filter((s) => expertLyrics[s.titre])` dans `scripts/export-daily-pools.js`),
+donc une chanson sans entrée dans `expert_lyrics.js` en sort d'elle-même.
+Vérifié après régénération : `music` 99 → **100**, `music_expert` inchangé à
+**78**.
+
+C'est la règle déjà notée pour `expert_mode_content.md` : les instrumentales sont
+des absences VOULUES du contenu Expert, pas des oublis.
+
+### Vérification
+
+Fichier servi en `audio/mpeg` (200, 812 Ko) et **décodé par le navigateur**
+(34 s) — un mp3 corrompu passerait les tests unitaires sans broncher et ne se
+verrait qu'en jouant.
+
+### Angle mort repéré au passage — à traiter à part
+
+`musicsMode/database/musicTitles.js` a **18 entrées de retard** sur `songs.js`
+(Danger Zone, Soul Phrase, Time, Wait and See… et Sun). Sans conséquence pour le
+joueur : `modeMusic.js` lit `songs.js` directement, et c'est lui qui alimente la
+saisie.
+
+Mais **deux tests** s'appuient dessus, dont un qui affirme littéralement
+« est devinable (présente dans musicTitles.js) » — l'affirmation porte sur un
+fichier que le jeu ne lit pas. Deux sources de vérité dont une dérive depuis
+longtemps, et un test qui vérifie la mauvaise. À nettoyer dans son propre lot :
+soit `musicTitles.js` disparaît, soit il est généré depuis `songs.js`.
+
+### Fichiers touchés
+
+- `musicsMode/database/music/song/Sun.mp3` — la piste
+- `musicsMode/database/songs.js` — l'entrée, commentée sur le pourquoi du
+  `vocalist` vide
+- `api/data/daily_pools.json` — régénéré (`npm run pools:build`)
+
+---
+
 ## 2026-09-24 — Le badge d'un code événement se choisit dans une liste
 
 La création d'un code événement demandait le **slug du badge dans un champ
