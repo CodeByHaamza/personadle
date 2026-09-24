@@ -1271,6 +1271,7 @@
     "done_today": "Feito hoje",
     "rank_up": "🎉 Social Link — Nível {{rank}}: {{name}}",
     "max_rank": "✨ MÁX — True Confidant",
+    "xp_beyond_max": "+{{xp}} XP para além do nível 10",
     "howto_aria": "Como ganhar XP de Social Link",
     "howto_trigger": "Como ganhar XP?",
     "howto_title": "Passem tempo juntos — o XP é automático:",
