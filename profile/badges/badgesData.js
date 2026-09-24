@@ -1078,13 +1078,13 @@ export const badgesList = [
     check: (stats, profile) => targetSetMet(profile, "memento_vivere_mori"),
   },
   {
-    id: "soul_phrase",
-    name: "Soul Phrase",
+    id: "her_own_orpheus",
+    name: "Her Own Orpheus",
     category: BADGE_CATEGORIES.SECRET,
     img: BADGE_IMG_BASE + "Badge_Kotone_Orpheus.webp",
     condition: "???",
     description:
-      "Her song, her Orpheus, her story. Some things you only find because someone told you where to look.",
+      "Same arcana, same dorm, a different song. Makoto has his Orpheus; she has hers — and she carries it through fire.",
     secret: true,
     // Badge adossé à un code événement : seul POST /api/badges/redeem l'accorde
     // (le garde de route de api/badges/index.php refuse /unlock pour ceux-là).

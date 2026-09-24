@@ -72,7 +72,7 @@ VALUES
     -- sortie (décision Hamza du 2026-09-23). Même schéma que gyotre/alibaba —
     -- `manual`, et seul /redeem l'accorde (le garde de route de
     -- api/badges/index.php refuse /unlock pour tout badge adossé à un code).
-    ('soul_phrase', 'Soul Phrase', 'secret', 'epic',
+    ('her_own_orpheus', 'Her Own Orpheus', 'secret', 'epic',
      'profile/badges/images/Badge_Kotone_Orpheus.webp',
      '???',
      'manual', NULL, NULL, 1);
@@ -80,7 +80,7 @@ VALUES
 INSERT IGNORE INTO event_codes
     (code, badge_id, start_date, end_date, is_permanent, is_active, description)
 VALUES
-    ('SOULPHRASE', 'soul_phrase', NULL, NULL, 1, 1, 'Secret 2.3 — Kotone (annonce Discord)');
+    ('IAMNOTAPRINCESS', 'her_own_orpheus', NULL, NULL, 1, 1, 'Secret 2.3 — Kotone (annonce Discord)');
 
 -- ── Le titre Déjà Vu ────────────────────────────────────────────────────────
 -- Persona 2 est une duologie où le même duo revient d'un jeu à l'autre : le

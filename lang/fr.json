@@ -671,10 +671,10 @@
       "condition": "Trouve Makoto Yuki et Kotone Shiomi dans tous les modes, et leurs quatre thèmes en Musique",
       "description": "La même année, le même dortoir, la même fin — racontée deux fois. Souviens-toi de vivre, souviens-toi que tu meurs : tu les as trouvés tous les deux, partout où il y avait à chercher."
     },
-    "soul_phrase": {
-      "name": "Soul Phrase",
+    "her_own_orpheus": {
+      "name": "Son propre Orpheus",
       "condition": "???",
-      "description": "Sa chanson, son Orpheus, son histoire. Il y a des choses qu'on ne trouve que parce que quelqu'un a dit où regarder."
+      "description": "Même arcane, même dortoir, une autre chanson. Makoto a son Orpheus ; elle a le sien — et elle le porte à travers les flammes."
     },
     "velvet_regular": {
       "name": "Habitué du Velvet",
