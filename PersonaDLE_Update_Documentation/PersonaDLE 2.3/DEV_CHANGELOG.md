@@ -89,6 +89,47 @@ soit `musicTitles.js` disparaît, soit il est généré depuis `songs.js`.
 
 ---
 
+## 2026-09-24 — `musicTitles.js` supprimé : une seule liste de chansons
+
+Repéré en ajoutant « Sun ».
+
+### Le problème
+
+`musicsMode/database/musicTitles.js` doublait la liste des chansons et avait fini
+avec **18 entrées de retard** sur `songs.js` — Danger Zone, Soul Phrase, Time,
+Wait and See, et d'autres livrées depuis longtemps.
+
+Sans conséquence pour le joueur : `modeMusic.js` construit son autocomplétion
+depuis `originalSongs` (c'est-à-dire `songs.js`), et n'a jamais lu l'autre
+fichier. Personne ne pouvait donc voir la dérive.
+
+Mais **deux tests** s'appuyaient dessus, dont un qui affirmait littéralement
+« est devinable (présente dans musicTitles.js) ». L'affirmation portait sur un
+fichier que le jeu ne lit pas : une chanson pouvait être « devinable » selon le
+test et absente du jeu, ou l'inverse.
+
+### Le correctif
+
+Les deux tests consultent désormais `songs.js` — ce que le jeu lit réellement —
+et `musicTitles.js` est supprimé. Rien d'autre ne l'importait (vérifié sur tout
+le dépôt, `.js`, `.html`, `.json`, `.mjs`).
+
+Deux garde-fous ajoutés dans `tests/contentP4AU.test.js` :
+
+- **`songs.js` est la seule liste de chansons du dépôt** — le fichier ne doit pas
+  réapparaître. Une liste parallèle finit toujours par diverger en silence.
+- **Aucun titre en double** — le titre est la CLÉ : la réponse du joueur, l'entrée
+  d'`expertLyrics`, le nom dans les ensembles de badges. Deux entrées de même
+  titre rendraient le comportement dépendant de laquelle est trouvée en premier.
+
+### Fichiers touchés
+
+- `musicsMode/database/musicTitles.js` — **supprimé**
+- `tests/contentP4AU.test.js` — cible corrigée, +2 garde-fous
+- `tests/unlocks_wonder_shujin.test.js` — cible corrigée
+
+---
+
 ## 2026-09-24 — Le badge d'un code événement se choisit dans une liste
 
 La création d'un code événement demandait le **slug du badge dans un champ
