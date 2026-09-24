@@ -40,6 +40,55 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-09-24 — « Sun » (Persona 3 Portable) entre en mode Musique
+
+Piste fournie par Hamza. Titre confirmé sur la source (« Persona 3 Portable:
+Sun ») plutôt que déduit du nom de fichier : un titre approximatif serait une
+mauvaise réponse dans un jeu de devinette.
+
+### Instrumentale : jouable en Musique, PAS en Expert
+
+`vocalist: ""`, comme *Aria Of The Soul*. Le mode Expert fait deviner une chanson
+par ses **paroles** (`musicsMode/database/expert_lyrics.js`) : une piste sans
+paroles y serait une cible impossible à trouver.
+
+Rien à faire pour l'exclure — le pool Expert se dérive des paroles
+(`songs.filter((s) => expertLyrics[s.titre])` dans `scripts/export-daily-pools.js`),
+donc une chanson sans entrée dans `expert_lyrics.js` en sort d'elle-même.
+Vérifié après régénération : `music` 99 → **100**, `music_expert` inchangé à
+**78**.
+
+C'est la règle déjà notée pour `expert_mode_content.md` : les instrumentales sont
+des absences VOULUES du contenu Expert, pas des oublis.
+
+### Vérification
+
+Fichier servi en `audio/mpeg` (200, 812 Ko) et **décodé par le navigateur**
+(34 s) — un mp3 corrompu passerait les tests unitaires sans broncher et ne se
+verrait qu'en jouant.
+
+### Angle mort repéré au passage — à traiter à part
+
+`musicsMode/database/musicTitles.js` a **18 entrées de retard** sur `songs.js`
+(Danger Zone, Soul Phrase, Time, Wait and See… et Sun). Sans conséquence pour le
+joueur : `modeMusic.js` lit `songs.js` directement, et c'est lui qui alimente la
+saisie.
+
+Mais **deux tests** s'appuient dessus, dont un qui affirme littéralement
+« est devinable (présente dans musicTitles.js) » — l'affirmation porte sur un
+fichier que le jeu ne lit pas. Deux sources de vérité dont une dérive depuis
+longtemps, et un test qui vérifie la mauvaise. À nettoyer dans son propre lot :
+soit `musicTitles.js` disparaît, soit il est généré depuis `songs.js`.
+
+### Fichiers touchés
+
+- `musicsMode/database/music/song/Sun.mp3` — la piste
+- `musicsMode/database/songs.js` — l'entrée, commentée sur le pourquoi du
+  `vocalist` vide
+- `api/data/daily_pools.json` — régénéré (`npm run pools:build`)
+
+---
+
 ## 2026-09-24 — Ouvrir son profil coûtait 125 Mo sur mobile
 
 Mesuré en vérifiant le poids des portraits animés du lot 6 — qui, eux, ne
@@ -184,6 +233,61 @@ avaient un — et `badge-card.rarity-secret`.
 Page ouverte dans un navigateur : **aucune image manquante**, 4 cartes de badge
 et 1 carte de titre, les images de badge décodées, 24 blocs `fr` pour 24 blocs
 `en`, structure équilibrée (76 `div`, 11 commentaires).
+
+---
+
+## 2026-09-24 — Réordonner ses badges épinglés
+
+`profile.selectedBadges` est un tableau ORDONNÉ depuis toujours, et
+`renderBadgesPreview()` le rend dans cet ordre. Le joueur n'avait simplement
+aucun moyen d'en changer : l'ordre était celui dans lequel il avait épinglé, et
+le corriger demandait de tout dépingler pour recommencer. Aucune migration n'a
+donc été nécessaire — c'est le même champ.
+
+### Pointer Events, pas glisser-déposer HTML5
+
+L'API `dragstart`/`dragover`/`drop` **ne se déclenche pas au doigt** : sur mobile
+elle ne fait rien du tout. Le jeu est très joué sur mobile — le dépôt a une suite
+E2E entière à 390 px. Les Pointer Events couvrent souris, doigt et stylet avec le
+même code, et le test tactile de ce lot est là précisément pour empêcher un
+retour en arrière.
+
+### Ce qui a demandé du soin
+
+- **Le ✕ ne doit pas être avalé.** Un glissement ne démarre qu'après un seuil de
+  6 px : en deçà, c'est un clic, et dépingler reste dépingler. Sans ce seuil, le
+  ✕ serait devenu un jeu d'adresse.
+- **Le navigateur rend les `<img>` déplaçables nativement.** Un appui sur l'image
+  démarre son propre glisser, qui annule nos événements (`pointercancel`). Le
+  réordonnancement marchait au clavier et pas à la souris, sans rien signaler.
+  Neutralisé en CSS (`-webkit-user-drag`, `pointer-events: none` sur l'image) et
+  par l'attribut `draggable="false"`.
+- **Le clavier.** Les flèches gauche/droite déplacent le badge qui a le focus. Un
+  réordonnancement au seul glissement aurait été inaccessible, alors que la
+  rangée est atteignable en tabulation. Effet de bord utile : le `tabindex` rend
+  aussi le ✕ atteignable au doigt via `:focus-within`.
+
+### Le bug que ce lot a fait sortir
+
+Le test E2E épinglait trois badges par l'API puis ouvrait la page — qui n'en
+affichait aucun. Le serveur les avait, jusqu'à ce que la page les efface : c'est
+ainsi qu'a été trouvé le bug de perte de données corrigé plus haut.
+
+### Fichiers touchés
+
+- `profile/badges/badges_reorder.js` — nouveau, `deplacerBadge()` + branchement
+- `profile/badges/badgesManager.js` — branché après chaque rendu de la rangée
+- `profile/badges/badges.css` — case déplaçable, cible, glisser natif neutralisé
+- `tests/badgesReorder.test.js` — 10 cas sur `deplacerBadge()`, dont l'invariant
+  « aucun badge perdu » vérifié sur TOUS les couples d'index, y compris hors bornes
+- `tests-e2e/badges_reorder.spec.js` — souris, doigt, clavier, et le ✕ intact
+
+### Deux pièges rencontrés dans les tests eux-mêmes
+
+- `page.mouse` travaille en coordonnées de **fenêtre** : la rangée est sous la
+  ligne de flottaison, le pointeur ne la touchait jamais. Le test accusait le code.
+- Le contexte Playwright a besoin de `hasTouch: true`, sinon les événements
+  tactiles ne partent pas du tout.
 
 ---
 
