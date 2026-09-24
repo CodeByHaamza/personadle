@@ -556,10 +556,44 @@ function setupLogoutButton() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Lit le profil depuis localStorage et pousse les champs de présentation
- * (avatar, bordure, wallpaper, musique, badges) vers la BDD via PATCH.
- * Appelé sur chaque page après résolution de l'auth, pas seulement profile.html.
- * Fire-and-forget — les erreurs réseau sont silencieuses.
+ * Une valeur locale vaut-elle la peine d'être proposée au serveur ?
+ *
+ * Une chaîne vide, un tableau vide, `null` : ce n'est pas un choix du joueur,
+ * c'est l'absence de choix. La pousser écraserait ce que le serveur sait.
+ */
+function _valeurUtile(v) {
+  if (v === null || v === undefined || v === "") return false;
+  if (Array.isArray(v)) return v.length > 0;
+  return true;
+}
+
+/**
+ * Migre un profil local vers le compte — SANS JAMAIS écraser ce que le serveur
+ * a déjà.
+ *
+ * ── Ce que faisait la version précédente ────────────────────────────────────
+ * Elle poussait les champs de présentation (avatar, bordure, wallpaper, musique,
+ * badges épinglés, titre) à CHAQUE chargement de page, sur toutes les pages, et
+ * avant tout pull. Sur un appareil dont le profil local est vide — un second
+ * appareil, un navigateur neuf, un cache vidé, une fenêtre privée — elle envoyait
+ * donc `selected_badges: []`, `avatar_border_color: '#ffffff'` et le reste par
+ * défaut, et le serveur perdait les choix du joueur.
+ *
+ * Reproduit le 2026-09-24 : badges épinglés côté serveur, ouverture de la page
+ * profil sur un navigateur neuf, badges effacés en base en moins de trois
+ * secondes, sans la moindre action du joueur. Silencieux, et contraire à la règle
+ * qui gouverne tout le reste de la synchronisation — le backend est la vérité
+ * (CLAUDE.md, js/cloud-sync.js).
+ *
+ * ── Ce qu'elle fait maintenant ──────────────────────────────────────────────
+ * Elle lit d'abord le profil du serveur, puis ne propose QUE les champs que le
+ * serveur n'a pas encore, et seulement s'ils ont une vraie valeur en local. Le
+ * cas qui justifiait cette fonction reste couvert : un joueur qui a personnalisé
+ * son profil avant de créer son compte retrouve ses choix à la connexion. Le cas
+ * qui cassait ne peut plus se produire : sur un serveur déjà renseigné, il n'y a
+ * rien à proposer, et l'appel n'est même pas émis.
+ *
+ * Fire-and-forget — les erreurs réseau sont silencieuses, le pull fera foi.
  */
 async function _syncLocalProfileToCloud(userId) {
   const api = window._personadleApi;
@@ -574,24 +608,55 @@ async function _syncLocalProfileToCloud(userId) {
     return;
   }
 
-  const fields = {
-    avatar_border_color: profile.avatarBorderColor || "#ffffff",
+  // Le serveur d'abord. Sans cette lecture, impossible de savoir ce qu'on
+  // écraserait — c'est exactement ce qui manquait.
+  let distant = null;
+  try {
+    distant = (await api.user.get(userId))?.profile ?? null;
+  } catch {
+    return; // serveur injoignable : on ne pousse rien à l'aveugle
+  }
+  if (!distant) return;
+
+  const candidats = {
+    avatar_border_color:
+      profile.avatarBorderColor && profile.avatarBorderColor !== "#ffffff"
+        ? profile.avatarBorderColor
+        : null,
     wallpaper_id:
       profile.profileTheme === "custom"
         ? `custom:${profile.profileCustomColor || "#e63946"}`
         : profile.profileTheme || null,
     profile_music_id: profile.profileSong?.fichier || profile.profileMusicId || null,
-    selected_badges: profile.selectedBadges || [],
+    selected_badges: Array.isArray(profile.selectedBadges) ? profile.selectedBadges : [],
+    equipped_title_id: profile.equippedTitleId ?? null,
+    // Un ancien chemin v1 (./img/…, stocké depuis la racine) est ramené à la
+    // forme que le serveur accepte (cf. personadle_validate_avatar).
+    avatar_data: profile.avatar ? profile.avatar.replace(/^\.\/img\//, "../img/") : null,
   };
-  // Un ancien chemin v1 (./img/…, stocké depuis la racine) est renvoyé sous la
-  // forme que le serveur accepte (../img/avatar/…, cf. personadle_validate_avatar).
-  if (profile.avatar) fields.avatar_data = profile.avatar.replace(/^\.\/img\//, "../img/");
-  if (profile.equippedTitleId != null) fields.equipped_title_id = profile.equippedTitleId;
+
+  // Le serveur gagne toujours : on ne comble que les trous.
+  const fields = {};
+  for (const [cle, valeur] of Object.entries(candidats)) {
+    if (!_valeurUtile(valeur)) continue;
+    if (_valeurUtile(distant[cle])) continue;
+    fields[cle] = valeur;
+  }
+  // `#ffffff` est la valeur par défaut du serveur, pas un choix : un joueur qui a
+  // vraiment choisi une couleur en local doit pouvoir la migrer.
+  if (
+    candidats.avatar_border_color &&
+    (!distant.avatar_border_color || distant.avatar_border_color === "#ffffff")
+  ) {
+    fields.avatar_border_color = candidats.avatar_border_color;
+  }
+
+  if (Object.keys(fields).length === 0) return;
 
   try {
     await api.user.update(userId, fields);
   } catch {
-    // Silencieux — le sync se retente à chaque chargement de page
+    // Silencieux — le sync se retente au prochain chargement de page
   }
 }
 
