@@ -40,6 +40,68 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-09-24 — Ouvrir son profil coûtait 125 Mo sur mobile
+
+Mesuré en vérifiant le poids des portraits animés du lot 6 — qui, eux, ne
+posaient aucun problème.
+
+### Ce qui se passait
+
+Sur un écran de 390 px, ouvrir `/profile/profile.html` transférait **125,6 Mo** :
+
+| Dossier | Images | Transféré |
+|---|---|---|
+| `profile/badges/images` | 61 | **85,9 Mo** |
+| `profile/Wallpaper/unlockable` | 7 | 28,5 Mo |
+| `img/avatar` | 110 | 11,1 Mo |
+
+La grille de la modale des badges est rendue dans le DOM **dès le chargement de
+la page**, et son `<img>` n'avait pas `loading="lazy"` — contrairement à celui de
+la rangée des badges épinglés, juste au-dessus dans le même fichier. Les 73
+images partaient donc alors que la modale était **fermée**, et qu'elle ne serait
+peut-être jamais ouverte.
+
+Sur un forfait mobile, consulter son profil coûtait plus de 100 Mo. Invisible en
+développement : le cache local et la fibre l'effacent complètement.
+
+### Le correctif
+
+`loading="lazy"` et `decoding="async"` sur la grille. **125,6 Mo → 13,5 Mo.**
+
+Les badges se chargent à l'ouverture de la modale, au fur et à mesure du
+défilement : 30 images pour le premier écran au lieu de 73 d'un coup.
+
+`tests-e2e/profile_payload.spec.js` mesure ce que le **navigateur** dit avoir
+transféré (`transferSize`) : zéro octet de badge tant que la modale est fermée,
+et des images qui arrivent bien — non cassées — dès qu'on l'ouvre.
+
+### Le vrai problème, lui, reste entier
+
+Les badges sont des **PNG 2048×2048** affichés en 96 px. Cinq exemples :
+
+```
+Chinesse_new_year.png       2048x2048   7834 Ko
+Badges_Best_bro.png         2048x2048   6682 Ko
+Badges_velvet_headache.png  2048x2048   6667 Ko
+```
+
+Ré-encodés en WebP 256×256 (qualité 88), ces cinq fichiers passent de **33,7 Mo
+à 173 Ko**, soit 99,5 % de moins, pour un rendu identique à l'écran — 256 px
+couvre largement l'affichage en 96 px, écrans haute densité compris.
+
+Ouvrir la modale des badges coûte encore 47,6 Mo pour 30 images.
+
+**Non fait ici** : c'est un changement de 61 fichiers visuels, avec les
+`image_path` en base à suivre, et ça se décide avant une release, pas pendant.
+À traiter dans son propre lot.
+
+### Fichiers touchés
+
+- `profile/badges/badgesManager.js` — deux attributs sur la grille
+- `tests-e2e/profile_payload.spec.js` — nouveau
+
+---
+
 ## 2026-09-24 — Le badge d'un code événement se choisit dans une liste
 
 La création d'un code événement demandait le **slug du badge dans un champ
