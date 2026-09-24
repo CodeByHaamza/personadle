@@ -262,6 +262,71 @@ final class ConditionVocabularyTest extends TestCase
         $this->assertTrue(personadle_condition_allows_unlock($pdo, 1, 'joker_profile', null, null));
     }
 
+    /**
+     * Chaque cible nommée dans PERSONADLE_TARGET_SETS doit exister dans le pool
+     * de tirage de son mode.
+     *
+     * ── Pourquoi ce test compte ─────────────────────────────────────────────
+     * Une faute de frappe dans un nom de cible ne casse RIEN de visible : le
+     * badge se contente de n'être jamais accordé, à personne, pour toujours. Ni
+     * la réconciliation ni les tests de catalogue ne le verraient — ces
+     * derniers SEMENT les sessions avec les noms du set, donc ils confirment
+     * seulement que le set est d'accord avec lui-même.
+     *
+     * Ici on repart de `api/data/daily_pools.json`, c'est-à-dire de ce que le jeu
+     * peut réellement tirer. Un personnage renommé dans un dataset se signale
+     * donc ici, et pas trois mois plus tard par un joueur qui trouve le badge
+     * introuvable.
+     */
+    public function testEveryTargetSetNameCanActuallyBeDrawn(): void
+    {
+        $brut = file_get_contents(__DIR__ . '/../../api/data/daily_pools.json');
+        $this->assertNotFalse($brut, 'api/data/daily_pools.json illisible — lance `npm run pools:build`');
+        $pools = json_decode($brut, true);
+        $this->assertIsArray($pools);
+
+        /** Noms tirables d'un mode. En Personae la partie enregistre le PORTEUR. */
+        $tirables = static function (string $mode) use ($pools): array {
+            $brut = $pools[$mode]['pool'] ?? $pools[$mode] ?? null;
+            if (!is_array($brut)) return [];
+            $noms = [];
+            foreach ($brut as $entree) {
+                $noms[] = is_array($entree) ? (string) ($entree['user'] ?? '') : (string) $entree;
+            }
+            return $noms;
+        };
+
+        $introuvables = [];
+        foreach (PERSONADLE_TARGET_SETS as $cle => $entrees) {
+            foreach ($entrees as [$mode, $expert, $cibles, $combien]) {
+                $dispo = $tirables($mode);
+                $this->assertNotEmpty($dispo, "pool « $mode » vide ou inconnu (set $cle)");
+
+                foreach ($cibles as $cible) {
+                    if (!in_array($cible, $dispo, true)) {
+                        $introuvables[] = "$cle / $mode : « $cible »";
+                    }
+                }
+                // Un set qui demande plus de cibles qu'il n'en nomme serait
+                // impossible à remplir, sans que rien ne le dise.
+                $this->assertLessThanOrEqual(
+                    count($cibles),
+                    (int) $combien,
+                    "$cle / $mode : demande $combien cibles mais n'en nomme que " . count($cibles)
+                );
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $introuvables,
+            "cible(s) jamais tirable(s) — le badge ou le titre serait inatteignable :
+  "
+            . implode("
+  ", $introuvables)
+        );
+    }
+
     public function testThreeUnlockEndpointsShareTheSameDoor(): void
     {
         // Le trou d'origine : wallpapers était fail-closed dans son coin, badges et

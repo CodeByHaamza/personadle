@@ -662,6 +662,26 @@
       "condition": "Atteindre le rang 5 de lien social avec un ami pendant que l'un porte Motoha Arai et l'autre Chie Satonaka",
       "description": "Deux filles de kung-fu, deux jeux, une seule énergie. Quand un ami de rang 5 arrive en Chie pendant que tu portes Arai — ou l'inverse —, vous recevez ce badge tous les deux, au même instant."
     },
+    "chord_progression": {
+      "name": "Chord Progression",
+      "condition": "Relève 10 défis d'amis en mode Musique",
+      "description": "Rise tient le micro, Chord tient la guitare, et toi tu as tenu la note dix fois de suite. Dix défis reçus en mode Musique, dix relevés."
+    },
+    "birds_different_feather": {
+      "name": "Deux oiseaux, deux plumages",
+      "condition": "Trouve Goro Akechi et Kira Kitazato en Silhouette, puis Crow et Messa en All-Out Attack",
+      "description": "Deux masques, deux becs, deux oiseaux que tout oppose. L'un joue au prince, l'autre ne se donne même pas cette peine — tu as percé les deux."
+    },
+    "memento_vivere_mori": {
+      "name": "Memento Vivere, Memento Mori",
+      "condition": "Trouve Makoto Yuki et Kotone Shiomi dans tous les modes, et leurs quatre thèmes en Musique",
+      "description": "La même année, le même dortoir, la même fin — racontée deux fois. Souviens-toi de vivre, souviens-toi que tu meurs : tu les as trouvés tous les deux, partout où il y avait à chercher."
+    },
+    "her_own_orpheus": {
+      "name": "Son propre Orpheus",
+      "condition": "???",
+      "description": "Même arcane, même dortoir, une autre chanson. Makoto a son Orpheus ; elle a le sien — et elle le porte à travers les flammes."
+    },
     "velvet_regular": {
       "name": "Habitué du Velvet",
       "condition": "Jouer 50 jours uniques",
