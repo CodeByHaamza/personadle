@@ -1288,6 +1288,7 @@
     "done_today": "Ya hecho hoy",
     "rank_up": "🎉 Social Link — Rango {{rank}}: {{name}}",
     "max_rank": "✨ MÁX — True Confidant",
+    "xp_beyond_max": "+{{xp}} XP más allá del rango 10",
     "howto_aria": "Cómo ganar XP de Vínculo Social",
     "howto_trigger": "¿Cómo ganar XP?",
     "howto_title": "Pasad tiempo juntos — la XP es automática:",

@@ -3,6 +3,7 @@
 # pre-commit — Vérifications avant chaque commit
 #
 # Checks effectués :
+#   0. Marqueurs de conflit dans les fichiers stagés (bloquant)
 #   1. Cohérence des clés i18n (scripts/check-i18n.js)
 #   2. Valeurs i18n identiques à l'anglais (avertissement, scripts/check-i18n-untranslated.js)
 #   3. Présence de console.log dans les fichiers JS stagés
@@ -20,6 +21,25 @@ NC='\033[0m'
 
 echo ""
 echo "🔍  Pre-commit checks..."
+
+# ─────────────────────────────────────────────────────────
+# 0. Marqueurs de conflit — bloquant, et en PREMIER
+# ─────────────────────────────────────────────────────────
+# Un `git add -A` après une résolution partielle suffit à indexer un fichier qui
+# porte encore ses marqueurs : c'est arrivé deux fois pendant la 2.3, et la
+# seconde a mis des marqueurs dans le CLAUDE.md de `develop`. Rien d'autre ne
+# l'attrapait — ni les tests, ni le lint, ni les chiffres de doc, puisqu'un
+# Markdown cassé reste un Markdown valide.
+echo "  ▸ Conflict markers..."
+MARQUEURS=$(git diff --cached --name-only --diff-filter=ACM -z   | xargs -0 -r grep -lE '^(<{7} |={7}$|>{7} )' 2>/dev/null || true)
+if [ -n "$MARQUEURS" ]; then
+  echo -e "${RED}✗ marqueur(s) de conflit dans les fichiers stagés :${NC}"
+  echo "$MARQUEURS" | sed 's/^/     /'
+  echo -e "${YELLOW}  Résous le conflit avant de committer.${NC}"
+  echo -e "${YELLOW}  Pour le changelog dev : npm run changelog:resolve${NC}"
+  exit 1
+fi
+echo -e "${GREEN}✓ pas de marqueur de conflit${NC}"
 
 # ─────────────────────────────────────────────────────────
 # 1. Vérification i18n — cohérence des clés lang/
