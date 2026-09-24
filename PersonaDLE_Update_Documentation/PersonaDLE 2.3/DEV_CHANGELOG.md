@@ -125,6 +125,61 @@ et 1 carte de titre, les images de badge décodées, 24 blocs `fr` pour 24 blocs
 
 ---
 
+## 2026-09-24 — Réordonner ses badges épinglés
+
+`profile.selectedBadges` est un tableau ORDONNÉ depuis toujours, et
+`renderBadgesPreview()` le rend dans cet ordre. Le joueur n'avait simplement
+aucun moyen d'en changer : l'ordre était celui dans lequel il avait épinglé, et
+le corriger demandait de tout dépingler pour recommencer. Aucune migration n'a
+donc été nécessaire — c'est le même champ.
+
+### Pointer Events, pas glisser-déposer HTML5
+
+L'API `dragstart`/`dragover`/`drop` **ne se déclenche pas au doigt** : sur mobile
+elle ne fait rien du tout. Le jeu est très joué sur mobile — le dépôt a une suite
+E2E entière à 390 px. Les Pointer Events couvrent souris, doigt et stylet avec le
+même code, et le test tactile de ce lot est là précisément pour empêcher un
+retour en arrière.
+
+### Ce qui a demandé du soin
+
+- **Le ✕ ne doit pas être avalé.** Un glissement ne démarre qu'après un seuil de
+  6 px : en deçà, c'est un clic, et dépingler reste dépingler. Sans ce seuil, le
+  ✕ serait devenu un jeu d'adresse.
+- **Le navigateur rend les `<img>` déplaçables nativement.** Un appui sur l'image
+  démarre son propre glisser, qui annule nos événements (`pointercancel`). Le
+  réordonnancement marchait au clavier et pas à la souris, sans rien signaler.
+  Neutralisé en CSS (`-webkit-user-drag`, `pointer-events: none` sur l'image) et
+  par l'attribut `draggable="false"`.
+- **Le clavier.** Les flèches gauche/droite déplacent le badge qui a le focus. Un
+  réordonnancement au seul glissement aurait été inaccessible, alors que la
+  rangée est atteignable en tabulation. Effet de bord utile : le `tabindex` rend
+  aussi le ✕ atteignable au doigt via `:focus-within`.
+
+### Le bug que ce lot a fait sortir
+
+Le test E2E épinglait trois badges par l'API puis ouvrait la page — qui n'en
+affichait aucun. Le serveur les avait, jusqu'à ce que la page les efface : c'est
+ainsi qu'a été trouvé le bug de perte de données corrigé plus haut.
+
+### Fichiers touchés
+
+- `profile/badges/badges_reorder.js` — nouveau, `deplacerBadge()` + branchement
+- `profile/badges/badgesManager.js` — branché après chaque rendu de la rangée
+- `profile/badges/badges.css` — case déplaçable, cible, glisser natif neutralisé
+- `tests/badgesReorder.test.js` — 10 cas sur `deplacerBadge()`, dont l'invariant
+  « aucun badge perdu » vérifié sur TOUS les couples d'index, y compris hors bornes
+- `tests-e2e/badges_reorder.spec.js` — souris, doigt, clavier, et le ✕ intact
+
+### Deux pièges rencontrés dans les tests eux-mêmes
+
+- `page.mouse` travaille en coordonnées de **fenêtre** : la rangée est sous la
+  ligne de flottaison, le pointeur ne la touchait jamais. Le test accusait le code.
+- Le contexte Playwright a besoin de `hasTouch: true`, sinon les événements
+  tactiles ne partent pas du tout.
+
+---
+
 ## 2026-09-24 — Ouvrir une page effaçait les choix de profil du serveur
 
 ### Le bug
