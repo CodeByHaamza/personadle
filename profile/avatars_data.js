@@ -117,6 +117,10 @@ export const AVATAR_GROUPS = [
     "kotone_shiomi_p3p_2.jpg",
     "kotone_shiomi_p3p_3.jpg",
     "kotone_shiomi_p5x_crossover.jpg",
+    "kotone_shiomi_p3_anim_butterfly.webp",
+    "kotone_shiomi_p3_anim_listening.webp",
+    "kotone_shiomi_p3_anim_orpheus.webp",
+    "kotone_shiomi_p3_anim_pink.webp",
     // Aigis
     "aigis_train.jpg",
     "aigis.gif",
@@ -189,6 +193,8 @@ export const AVATAR_GROUPS = [
     "theodore3.jpeg",
     "theodore4.jpeg",
     "theodore5.jpeg",
+    "theodore_p3_anim_elevator.webp",
+    "theodore_p3_anim_look_back.webp",
     // Metis
     "Metis.jpg",
     "Metis2.jpeg",
@@ -525,3 +531,33 @@ export const AVATAR_GROUPS = [
     "jojo_frost.jpg",
   ] },
 ];
+
+/**
+ * Portraits ANIMÉS de la galerie (GIF animés et WebP animés).
+ *
+ * GÉNÉRÉE : `npm run avatars:sort` relit l'en-tête de chaque fichier et retient
+ * ceux qui bougent réellement. Ne pas l'éditer à la main — l'extension ne suffit
+ * pas à trancher (la plupart des `.webp` de la galerie sont fixes, ceux de
+ * Kotone sont animés).
+ */
+export const ANIMATED_AVATARS = new Set([
+  "Anniversary.gif",
+  "Lavenza7.gif",
+  "Maruki.gif",
+  "Ren.gif",
+  "Ren2.gif",
+  "Yu.gif",
+  "Yu2.gif",
+  "Yuki.gif",
+  "Yuki2.gif",
+  "aigis.gif",
+  "catlisabeth.gif",
+  "kotone_shiomi_p3_anim_butterfly.webp",
+  "kotone_shiomi_p3_anim_listening.webp",
+  "kotone_shiomi_p3_anim_orpheus.webp",
+  "kotone_shiomi_p3_anim_pink.webp",
+  "luix-dextructor-aigis.gif",
+  "pfp_makoto.gif",
+  "theodore_p3_anim_elevator.webp",
+  "theodore_p3_anim_look_back.webp",
+]);
