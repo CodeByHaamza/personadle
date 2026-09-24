@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 import { badgesList, BADGE_CATEGORIES, getBadgeById, SAME_ENERGY_AVATARS, wearsAvatar } from "./badgesData.js";
+import { initBadgeReorder } from "./badges_reorder.js";
 import { initBadgeInspect } from "./badge_inspect.js";
 import { normalizeModeKey } from "../../js/gameCore.js";
 import { statsForUnlocks } from "../profile-format.js";
@@ -827,6 +828,15 @@ export function renderBadgesPreview(profile) {
     empty.onclick = () => openAtelier("badges");
     preview.appendChild(empty);
   }
+
+  // Réordonnancement : posé APRÈS le rendu, puisque la rangée est reconstruite à
+  // chaque fois. Le nouvel ordre passe par le même chemin de sauvegarde que
+  // l'épinglage — c'est le même champ.
+  initBadgeReorder(preview, profile, (ordre) => {
+    profile.selectedBadges = ordre;
+    _lastSaveProfile?.();
+    renderBadgesPreview(profile);
+  });
 
   window.dispatchEvent(new CustomEvent("badgesRendered"));
 }

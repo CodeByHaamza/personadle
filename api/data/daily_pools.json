@@ -2884,7 +2884,8 @@
       "Wait and See",
       "Heartful Cry",
       "Kimi no Tonari",
-      "Memories of You"
+      "Memories of You",
+      "Sun"
     ],
     "opusByName": {
       "A Lone Prayer": [
@@ -3198,6 +3199,9 @@
       ],
       "Memories of You": [
         "P3R"
+      ],
+      "Sun": [
+        "P3P"
       ]
     }
   },
