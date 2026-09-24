@@ -151,6 +151,67 @@ C'est le test qui l'a trouvé, pas la relecture : la première version du cas at
 
 ---
 
+## 2026-09-24 — Le classement gagne une dimension « Social Link »
+
+Une troisième pastille à côté de Normal et Expert — et la seule qui change la
+**nature** de la ligne : on n'y classe plus des joueurs mais des **amitiés**. Un
+rang y décrit une relation, pas une performance.
+
+### Pourquoi l'XP et pas le rang
+
+Le rang s'arrête à 10 (2 700 XP) et beaucoup de paires actives y sont déjà : les
+départager par le rang donnerait des dizaines d'ex æquo. L'XP, elle, n'a jamais
+été plafonnée côté serveur — c'est le lot 8 qui l'a rendue visible, et c'est ici
+qu'elle sert. Sur la base de dev, les rangs 2 à 5 sont tous au rang 10 et ne se
+distinguent que par 30 XP d'écart.
+
+### Ce qui est exposé, et ce qui ne l'est pas
+
+Pseudo et avatar des deux joueurs — exactement ce qu'un profil public montre
+déjà. **Pas de code ami** : il sert à ajouter quelqu'un, il n'a rien à faire dans
+une liste publique (le classement normal ne le donne qu'aux utilisateurs
+authentifiés, et c'est déjà une exception). Un test E2E le verrouille.
+
+Les liens à **0 XP sont exclus** : sans ça le classement se remplirait de paires
+qui viennent de s'ajouter et n'ont rien fait ensemble. Jointure stricte sur
+`is_deleted = 0` des deux côtés — un lien qui n'a plus ses deux joueurs n'est
+plus une amitié.
+
+### Choix d'implémentation
+
+- **`renderBonds()` est une fonction séparée**, pas `renderLeaderboard()`
+  paramétré : la ligne n'a ni la même structure (deux avatars, deux pseudos, un
+  lien au centre) ni le même sens. Fondre les deux en branches aurait rendu les
+  deux illisibles.
+- **Pas de podium.** Un top 3 en marches récompense des individus ; ce classement
+  n'en récompense aucun.
+- **Les filtres sans objet sont MASQUÉS**, pas grisés : un groupe grisé laisse
+  croire qu'il s'appliquera peut-être.
+- Le bandeau de filtres dit ce que le classement range au lieu de rappeler
+  « tous les modes · tout temps · victoires », qui serait faux ici.
+
+### Un défaut trouvé en vérifiant dans le navigateur
+
+Les groupes de filtres restaient affichés alors que la classe `hidden` était bien
+posée : **`.hidden` n'est pas une classe utilitaire globale** sur cette page —
+seules `.modal.hidden` et `.lb-pagination.hidden` existaient. La classe était
+appliquée et ne peignait rien. Une règle `.lb-filter-group.hidden` explicite
+règle le cas. Invisible en test unitaire : jsdom ne calcule pas les styles.
+
+### Fichiers touchés
+
+- `api/leaderboard/index.php` — `buildBondsLeaderboard()`, branche `view=bonds`
+- `js/api.js` — paramètre `view` optionnel
+- `profile/leaderboard/leaderboard.js` — état `bonds`, `renderBonds()`, `fmtXp()`,
+  bandeau dédié, masquage des filtres
+- `profile/leaderboard/leaderboard.html` — la pastille
+- `profile/leaderboard/leaderboard.css` — pastille rose, ligne d'amitié, mobile
+- `lang/*.json` — 5 clés × 6 langues
+- `tests-e2e/leaderboard_bonds.spec.js` — tri par XP, aucun code ami, lien à 0 XP
+  exclu, paires affichées, filtres masqués puis rendus au retour sur Normal
+
+---
+
 ## 2026-09-24 — Quatre badges, un titre, et une table pour les défis relevés
 
 Visuels fournis par Hamza. Conditions arrêtées avec lui le 2026-09-23.
