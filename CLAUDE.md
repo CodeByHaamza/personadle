@@ -38,7 +38,7 @@ personadle/
 ├── js/                  ← gameCore.js, api.js, auth.js, i18n.js, cloud-sync.js…
 ├── css/                 ← global.css + un CSS par composant
 ├── database/            ← characters_clean.js, personas.js, quotes.js, portraits/
-├── lang/                ← en.json (source de vérité, 1287 clés), fr/es/de/it/pt.json
+├── lang/                ← en.json (source de vérité, 1299 clés), fr/es/de/it/pt.json
 ├── classiqueMode/  emojiMode/  allOutAttackMode/  silhouetteMode/  personaeMode/  musicsMode/
 ├── profile/             ← profile-page.js, badges/, friends/, leaderboard/
 ├── api/                 ← PHP REST (auth/, user/, messages/, social-links/, leaderboard/…)
@@ -47,7 +47,7 @@ personadle/
 =======
 ├── tests/               ← 78 suites Vitest (1453 tests) + tests/php/ (PHPUnit)
 >>>>>>> origin/develop
-└── sql/                 ← bdd_mysql.sql (29 tables)
+└── sql/                 ← bdd_mysql.sql (30 tables)
 ```
 
 **Fichiers clés :**

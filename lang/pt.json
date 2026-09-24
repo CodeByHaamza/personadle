@@ -656,6 +656,26 @@
       "condition": "Alcance o rank 5 de vínculo social com um amigo enquanto um de vocês usa Motoha Arai e o outro Chie Satonaka",
       "description": "Duas garotas do kung-fu, dois jogos, uma só energia. Quando um amigo de rank 5 aparece como Chie enquanto você usa Arai — ou o contrário —, os dois recebem esta insígnia no mesmo instante."
     },
+    "chord_progression": {
+      "name": "Chord Progression",
+      "condition": "Vence 10 desafios de amigos no modo Música",
+      "description": "A Rise segura o microfone, a Chord segura a guitarra, e tu seguraste a nota dez vezes seguidas. Dez desafios recebidos no modo Música, dez vencidos."
+    },
+    "birds_different_feather": {
+      "name": "Dois pássaros, duas plumagens",
+      "condition": "Encontra Goro Akechi e Kira Kitazato na Silhueta, e Crow e Messa no All-Out Attack",
+      "description": "Duas máscaras, dois bicos, dois pássaros em tudo diferentes. Um finge ser príncipe, o outro nem se dá ao trabalho — desmascaraste os dois."
+    },
+    "memento_vivere_mori": {
+      "name": "Memento Vivere, Memento Mori",
+      "condition": "Encontra Makoto Yuki e Kotone Shiomi em todos os modos, e os seus quatro temas na Música",
+      "description": "O mesmo ano, o mesmo dormitório, o mesmo fim — contado duas vezes. Lembra-te de viver, lembra-te de morrer: encontraste os dois, em todos os sítios onde havia para procurar."
+    },
+    "soul_phrase": {
+      "name": "Soul Phrase",
+      "condition": "???",
+      "description": "A canção dela, o Orpheus dela, a história dela. Há coisas que só se encontram porque alguém disse onde olhar."
+    },
     "velvet_regular": {
       "name": "Cliente Habitual Velvet",
       "condition": "Joga em 50 dias diferentes",
