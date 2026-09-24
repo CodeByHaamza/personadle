@@ -40,6 +40,52 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-09-24 — Le classement des amitiés a son podium
+
+Retour Hamza : « le top 3 est trop petit, on devait faire comme pour les autres
+rankings ».
+
+### J'avais tranché dans le mauvais sens
+
+Le lot 9 n'avait **pas** de podium, délibérément — j'avais écrit qu'« un top 3 en
+marches vient récompenser des individus, et ce classement n'en récompense
+aucun ».
+
+C'était un raisonnement sur le principe, pas sur ce que le joueur voit. À
+l'écran, l'écart de traitement avec les autres classements saute aux yeux : deux
+dimensions ont un podium, la troisième non, sans raison apparente. Et une amitié
+au sommet mérite la même mise en avant qu'un joueur.
+
+### Ce qui a été fait
+
+`renderBondsPodium()` — même forme que le podium des joueurs (2 — 1 — 3, la
+première marche plus haute, mêmes couleurs de médaille) mais **deux visages par
+carte**, le lien au centre, les deux pseudos et l'XP.
+
+Écrit à part de `renderPodium()` plutôt que paramétré, pour la même raison que
+`renderBonds()` : une carte d'amitié n'a pas le même contenu, et fondre les deux
+aurait demandé une branche à chaque ligne.
+
+### Un défaut attrapé en capturant à 390 px
+
+J'avais dimensionné les visages en **supposant** que les cartes passaient en
+colonne sous 480 px. Elles n'y passent pas : le podium garde ses trois colonnes,
+une carte fait alors ~95 px de contenu, et deux avatars de 50 px **débordaient
+par-dessus ses bordures**.
+
+Corrigé à 30 px (38 px sur la première marche), cœur et pseudos réduits en
+proportion. Le test E2E mesure désormais les rectangles : aucun visage ne doit
+sortir de sa carte. Invisible en test unitaire — jsdom ne calcule pas les tailles.
+
+### Fichiers touchés
+
+- `profile/leaderboard/leaderboard.js` — `renderBondsPodium()` + branchement
+- `profile/leaderboard/leaderboard.css` — podium d'amitiés, desktop et mobile
+- `tests-e2e/leaderboard_bonds.spec.js` — +2 cas : 3 marches et 6 visages, la
+  première plus grande que la deuxième, et aucun débordement à 390 px
+
+---
+
 ## 2026-09-24 — « Sun » (Persona 3 Portable) entre en mode Musique
 
 Piste fournie par Hamza. Titre confirmé sur la source (« Persona 3 Portable:
