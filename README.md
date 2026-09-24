@@ -8,7 +8,7 @@
   <a href="https://personadle.net"><img src="https://img.shields.io/badge/▶%20Play-personadle.net-E60012?style=for-the-badge" alt="Play at personadle.net"></a>
   <a href="https://github.com/CodeByHaamza/personadle/releases"><img src="https://img.shields.io/github/v/release/CodeByHaamza/personadle?style=for-the-badge&label=Release&color=1E3A8A" alt="Latest release"></a>
   <a href="https://github.com/CodeByHaamza/personadle/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/CodeByHaamza/personadle/ci.yml?branch=develop&style=for-the-badge&label=CI" alt="CI"></a>
-  <img src="https://img.shields.io/badge/Tests-1488%20passing-2ECC71?style=for-the-badge&logo=vitest&logoColor=white" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-1497%20passing-2ECC71?style=for-the-badge&logo=vitest&logoColor=white" alt="Tests">
   <a href="LICENSE.txt"><img src="https://img.shields.io/badge/License-MIT%20(code)-blue?style=for-the-badge" alt="MIT (code only)"></a>
 </p>
 
@@ -144,7 +144,7 @@ Service worker              Cron: leaderboard cache, Discord daily & weekly post
 |---|---|
 | **Front end** | HTML5 · CSS3 (one file per component, dark mode) · Vanilla JavaScript ES6+ |
 | **Back end** | PHP 8.2 REST API — `GET/POST/PATCH/DELETE /api/{resource}`, JSON, proper status codes |
-| **Database** | MariaDB 10.6+ / MySQL 8.0 — 30-table relational schema, 1488+ unit tests keep the contract honest |
+| **Database** | MariaDB 10.6+ / MySQL 8.0 — 30-table relational schema, 1497+ unit tests keep the contract honest |
 | **i18n** | EN · FR · ES · DE · IT · PT (1311 keys each), `en.json` is the source of truth |
 | **Hosting** | Hostinger, auto-deploy on push to `main`; SQL migrations applied by hand *before* the merge |
 
@@ -153,7 +153,7 @@ Service worker              Cron: leaderboard cache, Discord daily & weekly post
 Every pull request runs the whole thing; `main` only receives releases from `develop`.
 
 ```
-Vitest + jsdom → 1488 tests unitaires (logique de jeu, backend, streak, i18n, validation données)
+Vitest + jsdom → 1497 tests unitaires (logique de jeu, backend, streak, i18n, validation données)
 PHPUnit        → tests de logique pure + intégration DB (contrat de schéma)
 Playwright     → 267 E2E sur la stack Docker complète (smoke, API, Social Link)
 PHPStan        → analyse statique PHP niveau 5 · Psalm → taint analysis
@@ -171,7 +171,7 @@ git clone https://github.com/CodeByHaamza/personadle.git && cd personadle
 npm install
 
 make up          # MariaDB + PHP + phpMyAdmin in Docker, schema and seed loaded → http://localhost:8080
-npm test         # 1488 unit tests
+npm test         # 1497 unit tests
 make test-php    # PHPUnit, inside the container
 npm run test:e2e # Playwright against the Docker stack
 make check       # lint + data + i18n + doc numbers + daily pools
