@@ -150,9 +150,20 @@ describe("check() des cinq badges", () => {
     expect(c({}, { sameEnergyWith: 77 })).toBe(true);
   });
 
-  it("targetSetMet ignore une clé inconnue (false) et un profil sans characterModeMap", () => {
+  it("targetSetMet refuse une clé inconnue ET un profil sans characterModeMap", () => {
     expect(targetSetMet({}, "starlight_trio")).toBe(false);
-    expect(targetSetMet({ characterModeMap: {} }, "ensemble_inconnu")).toBe(true); // aucune exigence → vrai côté client, le serveur refuse (fail-closed)
+
+    // Un ensemble INCONNU vaut `false`. Ce cas répondait `true` jusqu'à la 2.3 :
+    // `(TARGET_SETS[cle] || []).every(...)` sur un tableau vide vaut `true`, et
+    // le commentaire d'alors s'en remettait au refus du serveur.
+    //
+    // Sauf que côté joueur, ça voulait dire voir le badge s'allumer en fin de
+    // partie puis disparaître au rechargement. Et surtout, ça entrait en
+    // contradiction directe avec la règle « aucun badge ne se débloque sur un
+    // profil vierge » (tests/badgesConditions.test.js) : les deux badges de la
+    // 2.3 s'y sont allumés tout seuls tant que leurs ensembles n'étaient pas
+    // déclarés ici. Le client doit être aussi fermé que le serveur.
+    expect(targetSetMet({ characterModeMap: {} }, "ensemble_inconnu")).toBe(false);
   });
 
   it("wearsAvatar : chemin galerie exact, pas une data URL ni un nom voisin", () => {
