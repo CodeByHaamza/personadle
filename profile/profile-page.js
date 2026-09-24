@@ -37,7 +37,7 @@ import { openModal, closeModal } from "../js/modal.js";
 import { pullProfileFromCloud, pushLangToCloud } from "../js/cloud-sync.js";
 import { formatPlayTime } from "./formatPlayTime.js";
 import { MODES, modeLabel, normalizeModeKey } from "../js/gameCore.js";
-import { AVATAR_GROUPS } from "./avatars_data.js";
+import { AVATAR_GROUPS, ANIMATED_AVATARS } from "./avatars_data.js";
 import {
   getStreakTier,
   formatSongTime,
@@ -1188,6 +1188,12 @@ function setFavoriteMode(key) {
 
 
 /**
+ * Filtre courant de la galerie : "all" ou "animated". Mémorisé pour la durée de
+ * la page seulement — un filtre est un geste de navigation, pas une préférence.
+ */
+let avatarFilter = "all";
+
+/**
  * Construit la grille de sélection d'avatars dans la modale crop.
  * Les chemins sont relatifs à profile/ (../img/avatar/).
  */
@@ -1207,23 +1213,34 @@ function initAvatarGrid() {
     personaq: "Persona Q",
     special: _t("profile.avatar_group_special", "Special"),
   };
+  // La pastille ANIM se pose sur ce qui BOUGE vraiment, d'après
+  // `ANIMATED_AVATARS` (généré en relisant l'en-tête des fichiers). L'ancienne
+  // règle « le nom finit par .gif » était fausse des deux côtés : elle ratait les
+  // WebP animés de Kotone et n'aurait rien dit d'un .gif fixe.
   const themeBadge = (name) => {
-    const n = name.toLowerCase();
-    if (n.endsWith(".gif")) return `<span class="avatar-tag avatar-tag--gif">GIF</span>`;
-    if (n.includes("jazz")) return `<span class="avatar-tag avatar-tag--jazz">JAZZ</span>`;
+    if (ANIMATED_AVATARS.has(name))
+      return `<span class="avatar-tag avatar-tag--gif">ANIM</span>`;
+    if (name.toLowerCase().includes("jazz"))
+      return `<span class="avatar-tag avatar-tag--jazz">JAZZ</span>`;
     return "";
   };
 
   let html = `<div class="avatar-none" data-src="none">NONE</div>`;
+  let visibles = 0;
   for (const grp of AVATAR_GROUPS) {
-    if (!grp.avatars.length) continue;
+    // Le filtre s'applique DANS chaque groupe : un joueur qui cherche un portrait
+    // animé veut quand même savoir de quel jeu il vient.
+    const liste =
+      avatarFilter === "animated" ? grp.avatars.filter((n) => ANIMATED_AVATARS.has(n)) : grp.avatars;
+    if (!liste.length) continue;
+    visibles += liste.length;
     html +=
       `<div class="avatar-group-header avatar-group--${grp.key}">` +
       `<span>${GAME_LABEL[grp.key] ?? grp.game}</span>` +
-      `<span class="avatar-group-count">${grp.avatars.length}</span></div>`;
+      `<span class="avatar-group-count">${liste.length}</span></div>`;
     html +=
       `<div class="avatar-group-grid">` +
-      grp.avatars
+      liste
         .map(
           (name) =>
             `<div class="avatar-cell">${themeBadge(name)}` +
@@ -1234,11 +1251,38 @@ function initAvatarGrid() {
   }
   avatarGrid.innerHTML = html;
 
+  if (!visibles) {
+    // `textContent` plutôt qu'une interpolation : la chaîne vient des fichiers de
+    // langue et n'a pas été échappée.
+    const vide = document.createElement("p");
+    vide.className = "atelier-hint";
+    vide.textContent = _t("profile.avatar_filter_empty", "Nothing here yet.");
+    avatarGrid.appendChild(vide);
+  }
+
   // Clic sur un portrait → appliqué tout de suite (plus d'étape « Appliquer »)
   avatarGrid.querySelectorAll(".avatar-cell img").forEach((img) => {
     img.onclick = () => applyAvatarPreset(img.dataset.src);
   });
   _markSelectedAvatarCell();
+
+  // Onglets de filtre. Le listener est posé une seule fois : `initAvatarGrid()`
+  // se rappelle lui-même à chaque changement de filtre pour reconstruire la
+  // grille, et empiler un listener par passage ferait grossir la note à chaque
+  // clic (CLAUDE.md §4).
+  const filtres = document.querySelector(".avatar-filter");
+  if (filtres && !filtres._avatarFilterBound) {
+    filtres._avatarFilterBound = true;
+    filtres.addEventListener("click", (e) => {
+      const onglet = e.target.closest(".avatar-filter-tab");
+      if (!onglet || onglet.dataset.filter === avatarFilter) return;
+      avatarFilter = onglet.dataset.filter === "animated" ? "animated" : "all";
+      initAvatarGrid();
+    });
+  }
+  filtres?.querySelectorAll(".avatar-filter-tab").forEach((b) => {
+    b.setAttribute("aria-selected", String(b.dataset.filter === avatarFilter));
+  });
 
   // Option NONE → vider l'avatar
   const noneOption = avatarGrid.querySelector(".avatar-none");
