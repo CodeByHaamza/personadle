@@ -5,7 +5,6 @@ import { fileURLToPath } from "node:url";
 import { silhouetteCharacters } from "../silhouetteMode/database/silhouetteCharacters.js";
 import { portraitsMapSilhouette } from "../silhouetteMode/database/portraitsMapSilhouette.js";
 import { songs } from "../musicsMode/database/songs.js";
-import { musicTitles } from "../musicsMode/database/musicTitles.js";
 import { expertLyrics } from "../musicsMode/database/expert_lyrics.js";
 import { badgesList } from "../profile/badges/badgesData.js";
 
@@ -103,8 +102,13 @@ describe("musique — Memories of You (P3R)", () => {
     expect(existsSync(repoPath(`musicsMode/database/music/song/${song.fichier}`))).toBe(true);
   });
 
-  it("est devinable (présente dans musicTitles.js)", () => {
-    expect(musicTitles).toContain("Memories of You");
+  it("est devinable — l'autocomplétion se sert dans songs.js", () => {
+    // Ce cas visait `musicTitles.js` jusqu'au 2026-09-24. C'était le mauvais
+    // fichier : `modeMusic.js` construit sa liste depuis `songs.js`, et
+    // `musicTitles.js` avait 18 entrées de retard sans que rien ne le signale.
+    // Une chanson pouvait donc être « devinable » selon le test et absente du
+    // jeu, ou l'inverse.
+    expect(songs.map((s) => s.titre)).toContain("Memories of You");
   });
 
   it("a des paroles, donc entre dans le pool du Mode Expert", () => {
@@ -117,6 +121,25 @@ describe("musique — Memories of You (P3R)", () => {
       .filter((s) => !existsSync(repoPath(`musicsMode/database/music/song/${s.fichier}`)))
       .map((s) => s.titre);
     expect(missing).toEqual([]);
+  });
+
+  it("songs.js est la SEULE liste de chansons du dépôt", () => {
+    // `musicTitles.js` doublait cette liste et avait fini avec 18 entrées de
+    // retard — Danger Zone, Soul Phrase, Time… Sans conséquence pour le joueur
+    // (`modeMusic.js` lit songs.js), mais deux tests s'appuyaient dessus, dont
+    // un qui affirmait « est devinable » en consultant un fichier que le jeu ne
+    // lit pas. Une liste parallèle finit toujours par diverger en silence ;
+    // celle-ci est supprimée, et ce cas empêche qu'elle revienne.
+    expect(existsSync(repoPath("musicsMode/database/musicTitles.js"))).toBe(false);
+  });
+
+  it("aucun titre de chanson n'est en double", () => {
+    // Le titre est la CLÉ : la réponse du joueur, l'entrée d'expertLyrics, le
+    // nom dans les ensembles de badges. Deux entrées de même titre rendraient
+    // le comportement dépendant de laquelle est trouvée en premier.
+    const titres = songs.map((s) => s.titre);
+    const doublons = titres.filter((t, i) => titres.indexOf(t) !== i);
+    expect([...new Set(doublons)]).toEqual([]);
   });
 });
 
