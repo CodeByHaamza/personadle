@@ -296,7 +296,8 @@
   "Moros": {
     "text": "Moros es la personificación griega de la fatalidad — del destino que llega, del final ya fijado para cada vida. Hijo de Nix, hermano del Sueño, de la Retribución y de la Muerte, y hermano mayor y guía de las tres Moiras. No tiene forma alguna: un espíritu informe cuya tarea es revelar a un mortal el día de su propia muerte. Como ese saber es insoportable, se convirtió también en espíritu de la desesperación, pues las almas que visita quedan roídas por el espanto. Su nombre está en la raíz de la palabra «moroso» en el sentido de sombrío.",
     "mask": [
-      "Moros"
+      "Moros",
+      "moroso"
     ]
   },
   "Psyche": {
