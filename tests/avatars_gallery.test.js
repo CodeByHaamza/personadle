@@ -12,9 +12,9 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { readdirSync, existsSync } from "node:fs";
+import { readdirSync, existsSync, openSync, readSync, closeSync } from "node:fs";
 import { join } from "node:path";
-import { AVATAR_GROUPS } from "../profile/avatars_data.js";
+import { AVATAR_GROUPS, ANIMATED_AVATARS } from "../profile/avatars_data.js";
 import { shareWallpapers } from "../profile/share-card.js";
 import { UNLOCKABLE_WALLPAPERS } from "../profile/wallpapers-ui.js";
 import { normalizeAvatarPath } from "../profile/profile-format.js";
@@ -148,5 +148,71 @@ describe("fonds de la carte de partage (profile/share-card.js)", () => {
   it("chaque fond déblocable existe aussi sur le disque", () => {
     const missing = UNLOCKABLE_WALLPAPERS.filter((w) => !existsSync(join(ROOT, "profile", w.src)));
     expect(missing.map((w) => w.src)).toEqual([]);
+  });
+});
+
+/**
+ * Relit l'en-tête d'un fichier pour dire s'il est animé — même logique que
+ * `scripts/sort_avatars_data.mjs`, réécrite ici volontairement. Un test qui
+ * importerait la fonction du générateur ne prouverait rien : il confirmerait que
+ * le générateur est d'accord avec lui-même. Ici on repart des OCTETS.
+ */
+function bougeVraiment(chemin) {
+  const tete = Buffer.alloc(8192);
+  const fd = openSync(chemin, "r");
+  let lus = 0;
+  try {
+    lus = readSync(fd, tete, 0, tete.length, 0);
+  } finally {
+    closeSync(fd);
+  }
+  const buf = tete.subarray(0, lus);
+  if (buf.subarray(0, 4).toString("latin1") === "RIFF") {
+    return buf.includes("ANIM") || buf.includes("ANMF");
+  }
+  if (buf.subarray(0, 3).toString("latin1") === "GIF") {
+    if (buf.includes("NETSCAPE")) return true;
+    let blocs = 0;
+    for (let i = 0; i < buf.length - 2; i++) {
+      if (buf[i] === 0x21 && buf[i + 1] === 0xf9 && buf[i + 2] === 0x04 && ++blocs >= 2) return true;
+    }
+  }
+  return false;
+}
+
+describe("portraits animés (ANIMATED_AVATARS)", () => {
+  it("la liste est exactement l'ensemble des portraits qui bougent sur le disque", () => {
+    // Le filtre « Animés » de l'atelier se lit UNIQUEMENT dans cette liste. Si
+    // elle dérive du disque, le joueur voit soit des portraits fixes dans
+    // l'onglet, soit des animés introuvables — et rien ne lèverait d'erreur.
+    const reels = listed.filter((n) => bougeVraiment(join(AVATAR_DIR, n))).sort();
+    expect([...ANIMATED_AVATARS].sort()).toEqual(reels);
+  });
+
+  it("chaque portrait animé est bien proposé dans un groupe", () => {
+    // Un animé listé mais absent des groupes serait invisible partout : le
+    // filtre parcourt les groupes, il ne lit pas la liste directement.
+    const horsGroupes = [...ANIMATED_AVATARS].filter((n) => !listed.includes(n));
+    expect(horsGroupes, "animés absents de tout groupe de la galerie").toEqual([]);
+  });
+
+  it("l'extension ne suffisait pas à trancher — c'est bien pour ça qu'on lit les octets", () => {
+    // Ce test documente la raison d'être du mécanisme, et se casserait si
+    // quelqu'un revenait à un test sur `.gif`. Les WebP de Kotone sont animés,
+    // et la galerie contient par ailleurs des .webp parfaitement fixes.
+    const animesNonGif = [...ANIMATED_AVATARS].filter((n) => !n.toLowerCase().endsWith(".gif"));
+    expect(animesNonGif.length, "des animés qui ne sont pas des .gif").toBeGreaterThan(0);
+
+    const webpFixes = listed.filter(
+      (n) => n.toLowerCase().endsWith(".webp") && !ANIMATED_AVATARS.has(n)
+    );
+    expect(webpFixes.length, "des .webp fixes dans la galerie").toBeGreaterThan(0);
+  });
+
+  it("les portraits animés passent la liste blanche du serveur", () => {
+    // Même piège que `Kanji.avif` en 2.2 : un portrait choisissable mais refusé
+    // à l'enregistrement reste local et disparaît au prochain pull cloud.
+    const refuses = [...ANIMATED_AVATARS].filter((n) => !SERVER_GALLERY_NAME.test(n));
+    expect(refuses, "animés que personadle_validate_avatar refuserait").toEqual([]);
   });
 });
