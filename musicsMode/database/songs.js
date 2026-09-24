@@ -898,5 +898,18 @@ export const songs = [
     vocalist: "Yumi Kawamura",
     proprietaire: "ATLUS",
     lien: "https://youtu.be/H5Qtu8fCycE"
+  },
+  {
+    // Instrumentale : `vocalist` vide, comme Aria Of The Soul. Elle n'entre donc
+    // PAS dans le mode Expert, qui fait deviner une chanson par ses paroles
+    // (musicsMode/database/expert_lyrics.js) — une piste sans paroles y serait
+    // une cible impossible.
+    titre: "Sun",
+    fichier: "Sun.mp3",
+    opus: ["P3P"],
+    image: "P3P.webp",
+    vocalist: "",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=zXX94yJgTz4"
   }
 ];
