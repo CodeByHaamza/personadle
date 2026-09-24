@@ -3717,6 +3717,84 @@ body.darkmode .cny-theme .version-header:hover {
 }
 
 /* =====================================================
+   THÈME 2.3 — Pink Ribbon (Kotone Shiomi, Persona 3 Portable)
+   -----------------------------------------------------
+   La palette de la page Nouveautés 2.3 : le rose du ruban de Kotone, et le
+   bleu du papillon de Nyx en accent. Même langage que
+   PersonaDLE_Update_Documentation/PersonaDLE 2.3/.
+   ===================================================== */
+
+.pink-ribbon-theme {
+  border: 2px solid #e8447e !important;
+  background-color: #fff5f9;
+}
+
+.pink-ribbon-theme .version-header {
+  background: linear-gradient(135deg, #c9184a 0%, #7a0e3c 100%);
+  color: #ffd9e8;
+  border-bottom: 1px solid #ff8fb5;
+}
+
+.pink-ribbon-theme .version-title {
+  color: #ffd9e8 !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.pink-ribbon-theme .version-date {
+  color: #ffc2d8 !important;
+}
+
+.pink-ribbon-theme .version-arrow {
+  color: #ffd9e8 !important;
+}
+
+.pink-ribbon-theme .version-content ul li strong {
+  color: #c9184a;
+}
+
+.pink-btn {
+  background-color: #c9184a !important;
+  color: #fff !important;
+  border: 1px solid #a3123c !important;
+}
+
+.pink-btn:hover {
+  background-color: #a3123c !important;
+  box-shadow: 0 0 10px rgba(201, 24, 74, 0.4);
+}
+
+.pink-ribbon-theme .version-header:hover {
+  background: linear-gradient(135deg, #e8447e 0%, #9a1146 100%) !important;
+  /* Le liseré bleu au survol : le papillon de Nyx, seule note froide d'une
+     palette entièrement rose — c'est ce qui l'empêche d'être mièvre. */
+  box-shadow: inset 0 0 15px rgba(111, 168, 220, 0.3) !important;
+  transform: scale(1.01);
+  transition: all 0.2s ease-in-out;
+}
+
+.pink-ribbon-theme .version-header:hover .version-arrow {
+  transform: translateX(3px);
+}
+
+body.darkmode .pink-ribbon-theme {
+  background-color: #2a0d1c;
+  border-color: #ff6b9d !important;
+}
+
+body.darkmode .pink-ribbon-theme .version-header {
+  background: linear-gradient(135deg, #7a0e3c 0%, #43061f 100%);
+}
+
+body.darkmode .pink-ribbon-theme .version-content ul li strong {
+  color: #ff8fb5;
+}
+
+body.darkmode .pink-ribbon-theme .version-header:hover {
+  background: linear-gradient(135deg, #9a1146 0%, #5c0a2b 100%) !important;
+  box-shadow: inset 0 0 10px rgba(111, 168, 220, 0.18) !important;
+}
+
+/* =====================================================
    10. THÈME v2.0 — Major Update (Sophia / Backend)
    ===================================================== */
 
