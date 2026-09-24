@@ -662,6 +662,26 @@
       "condition": "Raggiungi il rango 5 di legame sociale con un amico mentre uno di voi indossa Motoha Arai e l'altro Chie Satonaka",
       "description": "Due ragazze del kung-fu, due giochi, una sola energia. Quando un amico di rango 5 compare come Chie mentre tu indossi Arai — o viceversa — ricevete questo badge entrambi, nello stesso istante."
     },
+    "chord_progression": {
+      "name": "Chord Progression",
+      "condition": "Supera 10 sfide degli amici in modalità Musica",
+      "description": "Rise tiene il microfono, Chord tiene la chitarra, e tu hai tenuto la nota dieci volte. Dieci sfide ricevute in modalità Musica, dieci superate."
+    },
+    "birds_different_feather": {
+      "name": "Due uccelli, due piumaggi",
+      "condition": "Trova Goro Akechi e Kira Kitazato in Silhouette, e Crow e Messa in All-Out Attack",
+      "description": "Due maschere, due becchi, due uccelli agli antipodi. Uno gioca al principe, l'altro non si sforza nemmeno — li hai smascherati entrambi."
+    },
+    "memento_vivere_mori": {
+      "name": "Memento Vivere, Memento Mori",
+      "condition": "Trova Makoto Yuki e Kotone Shiomi in ogni modalità, e i loro quattro temi in Musica",
+      "description": "Lo stesso anno, lo stesso dormitorio, lo stesso finale — raccontato due volte. Ricorda di vivere, ricorda che morirai: li hai trovati entrambi, ovunque ci fosse da cercare."
+    },
+    "her_own_orpheus": {
+      "name": "Il suo Orpheus",
+      "condition": "???",
+      "description": "Stesso arcano, stesso dormitorio, un'altra canzone. Makoto ha il suo Orpheus; lei ha il proprio — e lo porta tra le fiamme."
+    },
     "velvet_regular": {
       "name": "Cliente Fisso del Velvet",
       "condition": "Giocare in 50 giorni unici",
