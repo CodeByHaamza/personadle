@@ -145,7 +145,7 @@ Service worker              Cron: leaderboard cache, Discord daily & weekly post
 | **Front end** | HTML5 · CSS3 (one file per component, dark mode) · Vanilla JavaScript ES6+ |
 | **Back end** | PHP 8.2 REST API — `GET/POST/PATCH/DELETE /api/{resource}`, JSON, proper status codes |
 | **Database** | MariaDB 10.6+ / MySQL 8.0 — 29-table relational schema, 1457+ unit tests keep the contract honest |
-| **i18n** | EN · FR · ES · DE · IT · PT (1287 keys each), `en.json` is the source of truth |
+| **i18n** | EN · FR · ES · DE · IT · PT (1292 keys each), `en.json` is the source of truth |
 | **Hosting** | Hostinger, auto-deploy on push to `main`; SQL migrations applied by hand *before* the merge |
 
 ### Quality gates
@@ -155,7 +155,7 @@ Every pull request runs the whole thing; `main` only receives releases from `dev
 ```
 Vitest + jsdom → 1457 tests unitaires (logique de jeu, backend, streak, i18n, validation données)
 PHPUnit        → tests de logique pure + intégration DB (contrat de schéma)
-Playwright     → 258 E2E sur la stack Docker complète (smoke, API, Social Link)
+Playwright     → 261 E2E sur la stack Docker complète (smoke, API, Social Link)
 PHPStan        → analyse statique PHP niveau 5 · Psalm → taint analysis
 ESLint+Prettier→ lint + format · i18n / data / daily-pool consistency checks
 ```

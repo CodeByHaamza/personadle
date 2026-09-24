@@ -70,6 +70,17 @@ $friendsOnly = (bool) ($_GET['friends_only'] ?? 0) && $myId > 0;
 // Un bool ne peut rien injecter ; une chaîne venue de $_GET, si.
 $expertOnly = ($_GET['expert'] ?? '0') === '1';
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// CAS : LIENS SOCIAUX — on ne classe plus des JOUEURS mais des PAIRES
+// ═══════════════════════════════════════════════════════════════════════════════
+// Une troisième dimension à côté de Normal et Expert, et la seule qui change la
+// NATURE de la ligne : ici un rang décrit une amitié, pas une performance. Les
+// filtres mode / période / métrique n'ont donc aucun sens et sont ignorés — le
+// front masque leurs groupes quand cette dimension est choisie.
+if (($_GET['view'] ?? '') === 'bonds') {
+    buildBondsLeaderboard($pdo, $limit, $offset, $myId, $friendsOnly);
+}
+
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CAS : EVER — lecture directe sur user_stats (rapide, précis)
@@ -88,6 +99,104 @@ if ($period === 'ever') {
 // ═══════════════════════════════════════════════════════════════════════════════
 buildPeriodLeaderboard($pdo, $mode, $period, $metric, $limit, $offset, $myId, $friendsOnly, $expertOnly);
 
+
+/**
+ * Classement des LIENS SOCIAUX : les amitiés les plus fortes du site, par XP.
+ *
+ * ── Pourquoi l'XP et pas le rang ────────────────────────────────────────────
+ * Le rang s'arrête à 10 (2 700 XP) et beaucoup de paires actives y sont. Les
+ * départager par le rang seul donnerait des dizaines d'ex æquo. L'XP, elle, n'a
+ * jamais été plafonnée côté serveur — c'est elle qui raconte la suite, et c'est
+ * précisément ce que la jauge affiche depuis la 2.3.
+ *
+ * ── Ce qui est exposé ───────────────────────────────────────────────────────
+ * Pseudo et avatar des deux joueurs : exactement ce qu'un profil public montre
+ * déjà. Pas de code ami (il sert à ajouter quelqu'un, il n'a rien à faire dans
+ * une liste publique), pas d'e-mail, pas d'identifiant de session.
+ *
+ * Un compte supprimé fait disparaître le lien du classement (jointures strictes
+ * sur `is_deleted = 0`) : le lien n'a plus deux côtés, il n'est plus une amitié.
+ */
+function buildBondsLeaderboard(PDO $pdo, int $limit, int $offset, int $myId, bool $friendsOnly): never
+{
+    // `friends_only` garde son sens : « seulement les liens qui me concernent ».
+    // Sans authentification il est déjà neutralisé plus haut.
+    $filtreMoi = $friendsOnly ? 'AND (sl.user_a_id = :moi1 OR sl.user_b_id = :moi2)' : '';
+
+    // Les profils sont en LEFT JOIN : un joueur sans profil (compte tout neuf)
+    // reste visible, avec l'avatar par défaut. Les users, eux, sont en jointure
+    // stricte sur `is_deleted = 0` — un lien qui n'a plus ses deux côtés n'est
+    // plus une amitié et sort du classement.
+    $sqlBase = "
+        FROM social_links sl
+        JOIN users ua ON ua.id = sl.user_a_id AND ua.is_deleted = 0
+        JOIN users ub ON ub.id = sl.user_b_id AND ub.is_deleted = 0
+        LEFT JOIN profiles pa ON pa.user_id = sl.user_a_id
+        LEFT JOIN profiles pb ON pb.user_id = sl.user_b_id
+        WHERE sl.xp > 0 {$filtreMoi}
+    ";
+
+    $params = $friendsOnly ? ['moi1' => $myId, 'moi2' => $myId] : [];
+
+    $stmtTotal = $pdo->prepare("SELECT COUNT(*) {$sqlBase}");
+    $stmtTotal->execute($params);
+    $total = (int) $stmtTotal->fetchColumn();
+
+    // `rank` est un mot réservé MySQL 8.0 — backticks obligatoires (CLAUDE.md §7).
+    // LIMIT/OFFSET interpolés : ce sont des entiers déjà bornés plus haut
+    // (min/max), jamais des chaînes venues de $_GET.
+    $stmt = $pdo->prepare("
+        SELECT sl.id, sl.xp, sl.`rank`,
+               ua.id AS a_id, ua.pseudo AS a_pseudo,
+               pa.avatar_data AS a_avatar, pa.avatar_border_color AS a_border,
+               ub.id AS b_id, ub.pseudo AS b_pseudo,
+               pb.avatar_data AS b_avatar, pb.avatar_border_color AS b_border
+        {$sqlBase}
+        ORDER BY sl.xp DESC, sl.id ASC
+        LIMIT {$limit} OFFSET {$offset}
+    ");
+    $stmt->execute($params);
+    $rows = $stmt->fetchAll();
+
+    $entries = [];
+    $myRank  = null;
+    foreach ($rows as $i => $r) {
+        $rang = $offset + $i + 1;
+        if ($myId && ($myRank === null)
+            && ((int) $r['a_id'] === $myId || (int) $r['b_id'] === $myId)) {
+            // Le MEILLEUR lien du joueur, pas le dernier rencontré : les lignes
+            // arrivent déjà triées par XP décroissante.
+            $myRank = ['rank' => $rang, 'score' => (int) $r['xp']];
+        }
+        $entries[] = [
+            'rank'      => $rang,
+            'link_id'   => (int) $r['id'],
+            'xp'        => (int) $r['xp'],
+            'sl_rank'   => (int) $r['rank'],
+            'a' => [
+                'user_id'             => (int) $r['a_id'],
+                'pseudo'              => $r['a_pseudo'],
+                'avatar_data'         => $r['a_avatar'],
+                'avatar_border_color' => $r['a_border'] ?? '#ffffff',
+            ],
+            'b' => [
+                'user_id'             => (int) $r['b_id'],
+                'pseudo'              => $r['b_pseudo'],
+                'avatar_data'         => $r['b_avatar'],
+                'avatar_border_color' => $r['b_border'] ?? '#ffffff',
+            ],
+        ];
+    }
+
+    jsonSuccess([
+        'view'    => 'bonds',
+        'entries' => $entries,
+        'my_rank' => $myRank,
+        'total'   => $total,
+        'limit'   => $limit,
+        'offset'  => $offset,
+    ]);
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPERS

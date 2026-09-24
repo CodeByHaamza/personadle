@@ -746,6 +746,126 @@
   box-shadow: 0 2px 12px rgba(150, 70, 255, 0.4);
 }
 
+/* `.hidden` n'est pas une classe utilitaire globale sur cette page : seules
+   `.modal.hidden` et `.lb-pagination.hidden` existaient. Sans cette règle, les
+   groupes de filtres sans objet en mode Amitiés restaient affichés — la classe
+   était bien posée, mais ne peignait rien. */
+.lb-filter-group.hidden {
+  display: none;
+}
+
+/* Pastille « Social Link » du bandeau de filtres, assortie à celle du sélecteur. */
+.lb-fn-chip--bonds {
+  background: linear-gradient(135deg, #d0507a, #ff8fb5);
+  border-color: rgba(232, 115, 154, 0.8);
+  color: #fff;
+}
+
+/* Pastille Social Link : même principe que l'Expert (lisible inactive), mais en
+   rose Kotone plutôt qu'en violet — c'est une autre dimension, pas une variante
+   plus dure. */
+.lb-pill--bonds {
+  border-color: rgba(232, 115, 154, 0.45);
+  color: #d0507a;
+}
+.lb-pill--bonds:hover {
+  border-color: rgba(232, 115, 154, 0.75);
+  color: #c9184a;
+}
+.lb-pill--bonds.active {
+  background: linear-gradient(135deg, #d0507a, #ff8fb5);
+  border-color: rgba(232, 115, 154, 0.85);
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(232, 115, 154, 0.4);
+}
+
+/* ── Ligne d'AMITIÉ ─────────────────────────────────────────────────────────
+   Deux joueurs face à face, le lien au milieu, l'XP au bout. Le lien est au
+   centre parce que c'est LUI le sujet de la ligne : ni l'un ni l'autre des deux
+   joueurs n'est classé ici. */
+.lb-bond-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.lb-bond-side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 0;
+}
+/* Le second joueur regarde vers le centre : la ligne se lit depuis le lien. */
+.lb-bond-side:nth-of-type(2) {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+.lb-bond-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  flex-shrink: 0;
+}
+.lb-bond-name {
+  font-weight: 700;
+  font-size: 0.86rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lb-bond-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  flex-shrink: 0;
+}
+.lb-bond-heart {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+.lb-bond-rank {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted, #888);
+}
+.lb-bond-xp {
+  flex-shrink: 0;
+  font-weight: 800;
+  font-size: 0.82rem;
+  color: #c8960c;
+  min-width: 72px;
+  text-align: right;
+}
+body.darkmode .lb-bond-xp {
+  color: #f0c14b;
+}
+
+/* Sous 480 px, deux avatars + deux pseudos + l'XP ne tiennent plus sur une
+   ligne : les pseudos passent dessous, le lien reste au milieu. */
+@media (max-width: 480px) {
+  .lb-bond-side {
+    flex-direction: column;
+    gap: 3px;
+  }
+  .lb-bond-side:nth-of-type(2) {
+    flex-direction: column;
+    text-align: center;
+  }
+  .lb-bond-name {
+    font-size: 0.72rem;
+    max-width: 82px;
+  }
+  .lb-bond-xp {
+    min-width: 0;
+    font-size: 0.74rem;
+  }
+}
+
 /* Carte des filtres en mode Expert : un liseré et un fond à peine teinté.
    Volontairement discret — le tableau juste en dessous doit rester le sujet,
    contrairement à la notification de défi, qui est un événement. */
