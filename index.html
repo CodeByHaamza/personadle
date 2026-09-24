@@ -806,7 +806,25 @@
                le bleu du papillon de Nyx en accent au survol) ── -->
           <div class="version-item pink-ribbon-theme">
             <div class="version-header">
+              <!-- Décor : son ruban (l'objet qui donne son nom au thème), ses notes
+                   de musique — le lecteur MP3 est sa marque de fabrique dans P3P —
+                   et quelques pétales. La lune de la Dark Hour a été retirée : à
+                   48 px elle ne se lisait pas et encombrait le nœud. -->
+              <span class="pink-ornament pink-ornament--tl" aria-hidden="true">♪</span>
+              <span class="pink-ornament pink-ornament--br" aria-hidden="true">♪</span>
+              <span class="pink-petals" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+
               <div class="v2-header-inner">
+                <svg class="pink-ribbon-mark" viewBox="0 0 120 100" aria-hidden="true" focusable="false">
+                  <!-- Le nœud de Kotone : deux boucles, deux pans, un centre. -->
+                  <g fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+                    <path d="M56 46C42 24 16 18 9 31c-7 13 9 29 31 27 7-1 13-5 16-12z" />
+                    <path d="M64 46c14-22 40-28 47-15 7 13-9 29-31 27-7-1-13-5-16-12z" />
+                    <path d="M52 52C40 70 33 88 41 95c8 7 18-8 21-24" />
+                    <path d="M68 52c12 18 19 36 11 43-8 7-18-8-21-24" />
+                  </g>
+                  <ellipse cx="60" cy="47" rx="11" ry="9" fill="currentColor" />
+                </svg>
                 <div>
                   <div class="version-title" data-i18n-block="en">🎀 Version 2.3 — Kotone Shiomi</div>
                   <div class="version-date" data-i18n-block="en">September 2026</div>

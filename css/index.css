@@ -3776,6 +3776,109 @@ body.darkmode .cny-theme .version-header:hover {
   transform: translateX(3px);
 }
 
+/* ── Décor de l'en-tête 2.3 ─────────────────────────────────────────────────
+   Les autres versions ont leur identité visuelle (pentacle et ❦ pour la Velvet
+   Room, dorures pour le Nouvel An chinois). La 2.3 a la sienne : le ruban de
+   Kotone, ses notes de musique, et les pétales du printemps de Gekkoukan. */
+.pink-ribbon-theme .version-header {
+  position: relative;
+  overflow: hidden;
+}
+
+.pink-ribbon-theme .v2-header-inner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Le nœud, en SVG : c'est lui qui donne son nom au thème. */
+.pink-ribbon-mark {
+  flex-shrink: 0;
+  width: 48px;
+  height: 40px;
+  color: #ffd9e8;
+  filter: drop-shadow(0 0 6px rgba(255, 143, 181, 0.55));
+  animation: pinkRibbonGlow 4s ease-in-out infinite;
+}
+
+@keyframes pinkRibbonGlow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 4px rgba(255, 143, 181, 0.35));
+  }
+  50% {
+    filter: drop-shadow(0 0 9px rgba(255, 143, 181, 0.7));
+  }
+}
+
+/* Les notes : son lecteur MP3 est sa marque de fabrique dans P3P. */
+.pink-ornament {
+  position: absolute;
+  font-size: 1.15rem;
+  line-height: 1;
+  color: #ffc2d8;
+  opacity: 0.75;
+  text-shadow: 0 0 6px rgba(255, 143, 181, 0.55);
+  pointer-events: none;
+}
+.pink-ornament--tl {
+  top: 6px;
+  left: 10px;
+}
+.pink-ornament--br {
+  bottom: 6px;
+  right: 10px;
+  transform: scale(-1);
+}
+
+/* Quatre pétales qui descendent lentement en fond. Volontairement discrets
+   (opacité 0.35) : l'en-tête doit rester lisible, c'est un décor, pas un motif. */
+.pink-petals {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.pink-petals i {
+  position: absolute;
+  top: -10px;
+  width: 7px;
+  height: 7px;
+  border-radius: 60% 0 60% 0;
+  background: #ffc2d8;
+  opacity: 0.35;
+  animation: pinkPetalFall 9s linear infinite;
+}
+.pink-petals i:nth-child(1) { left: 18%; animation-delay: 0s; }
+.pink-petals i:nth-child(2) { left: 42%; animation-delay: 2.4s; }
+.pink-petals i:nth-child(3) { left: 67%; animation-delay: 4.8s; }
+.pink-petals i:nth-child(4) { left: 86%; animation-delay: 7.1s; }
+
+@keyframes pinkPetalFall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translateY(90px) rotate(220deg);
+    opacity: 0;
+  }
+}
+
+/* Un décor animé n'apporte rien à qui a demandé moins de mouvement. */
+@media (prefers-reduced-motion: reduce) {
+  .pink-ribbon-mark,
+  .pink-petals i {
+    animation: none;
+  }
+  .pink-petals {
+    display: none;
+  }
+}
+
 body.darkmode .pink-ribbon-theme {
   background-color: #2a0d1c;
   border-color: #ff6b9d !important;
