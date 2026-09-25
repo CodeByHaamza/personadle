@@ -548,11 +548,58 @@ function initializeProfileBadgesData(profile) {
  * @param {Object} profile - Le profil utilisateur
  * @param {Function} saveProfile - Fonction de sauvegarde
  */
-function checkAndUnlockBadges(profile, saveProfile) {
+/**
+ * Le serveur accorde-t-il ce badge ?
+ *
+ * ── Pourquoi on lui demande AVANT d'annoncer quoi que ce soit ───────────────
+ * `badge.check()` décide depuis `profile.characterModeMap`, un objet qui ne vit
+ * que dans le localStorage du joueur : écrit en ajout seul à chaque victoire,
+ * jamais synchronisé, il n'existe dans aucune colonne de `profiles`. Le serveur,
+ * lui, décide depuis `game_sessions`. Les deux dérivent dès qu'une session
+ * n'arrive pas — 409, hors ligne, autre appareil — et rien ne les recale.
+ *
+ * L'ancienne version poussait le badge dans le profil, jouait l'animation, PUIS
+ * appelait le serveur en `.catch(() => {})`. Le refus partait à la poubelle :
+ * le joueur voyait une fête pour un badge qu'il n'aurait jamais, qui disparaissait
+ * au `pullProfileFromCloud` suivant et qu'il ne pouvait pas équiper. Signalé en
+ * production le 2026-09-25 (Memento Vivere / Déjà Vu).
+ *
+ * ── Refus ≠ silence ─────────────────────────────────────────────────────────
+ * Un 4xx veut dire que le serveur a REGARDÉ et dit non. Une panne réseau ou un
+ * 5xx veut dire qu'on n'a pas pu lui demander : on ne conclut alors rien contre
+ * le joueur, sans quoi une connexion instable lui coûterait des badges gagnés.
+ * La réconciliation serveur (`api/lib/unlock_reconcile.php`) rattrapera de toute
+ * façon ce qui lui est dû au prochain `GET /api/badges`.
+ *
+ * Hors ligne ou non connecté, il n'y a pas de vérité serveur à opposer : le
+ * badge reste local, comme avant.
+ *
+ * @param {string} badgeId
+ * @returns {Promise<boolean>} false UNIQUEMENT si le serveur a refusé
+ */
+async function serveurAccordeBadge(badgeId) {
+  const unlock = window._personadleApi?.badges?.unlock;
+  if (typeof unlock !== "function") return true;
+  try {
+    await unlock(badgeId);
+    return true;
+  } catch (error) {
+    const code = Number(error?.status);
+    // 401 = pas connecté. Ce n'est pas un refus mais une absence d'interlocuteur :
+    // le badge reste local, comme pour un invité, et la réconciliation tranchera
+    // à la connexion.
+    if (code === 401) return true;
+    const refus = code >= 400 && code < 500;
+    if (refus) console.warn(`⛔ Badge refusé par le serveur : ${badgeId} (HTTP ${code})`);
+    return !refus;
+  }
+}
+
+async function checkAndUnlockBadges(profile, saveProfile) {
   // Normal + Expert : une victoire Expert est une victoire (2026-09-19) — le serveur
   // compte pareil (condition_check.php), on tente donc l'unlock au même moment que lui.
   const stats = statsForUnlocks(profile.stats);
-  const newlyUnlocked = [];
+  const candidats = [];
 
   badgesList.forEach((badge) => {
     // Si déjà débloqué, on passe
@@ -561,23 +608,30 @@ function checkAndUnlockBadges(profile, saveProfile) {
     }
 
     try {
-      // Vérifier la condition de déblocage
-      const isUnlocked = badge.check(stats, profile);
-
-      if (isUnlocked) {
-        console.log(`🎉 Badge unlocked: ${badge.name} (${badge.id})`);
-        profile.badges.push(badge.id);
-        newlyUnlocked.push(badge);
-      }
+      // La condition locale ne fait que PROPOSER : elle n'accorde plus rien.
+      if (badge.check(stats, profile)) candidats.push(badge);
     } catch (error) {
       console.error(`❌ Error checking badge ${badge.id}:`, error);
     }
   });
 
-  // Sauvegarder et notifier
-  if (newlyUnlocked.length > 0) {
+  if (candidats.length === 0) return;
+
+  // Un par un : un badge refusé ne doit pas emporter avec lui ceux de la même
+  // fournée qui sont réellement gagnés.
+  const accordes = [];
+  for (const badge of candidats) {
+    if (await serveurAccordeBadge(badge.id)) {
+      console.log(`🎉 Badge unlocked: ${badge.name} (${badge.id})`);
+      profile.badges.push(badge.id);
+      accordes.push(badge);
+    }
+  }
+
+  // Sauvegarder et notifier — uniquement ce que le serveur a laissé passer.
+  if (accordes.length > 0) {
     saveProfile();
-    console.log(`✅ ${newlyUnlocked.length} new badge(s) unlocked!`);
+    console.log(`✅ ${accordes.length} new badge(s) unlocked!`);
 
     // Afficher les notifications uniquement pour les badges jamais montrés
     let seenAnims = [];
@@ -585,14 +639,13 @@ function checkAndUnlockBadges(profile, saveProfile) {
       seenAnims = JSON.parse(localStorage.getItem("_seenBadgeAnimIds") || "[]");
     } catch {}
     let delay = 0;
-    newlyUnlocked.forEach((badge) => {
+    accordes.forEach((badge) => {
       if (!seenAnims.includes(badge.id)) {
         seenAnims.push(badge.id);
         const d = delay;
         setTimeout(() => showBadgeNotification(badge), d);
         delay += 500;
       }
-      window._personadleApi?.badges?.unlock(badge.id).catch(() => {});
     });
     localStorage.setItem("_seenBadgeAnimIds", JSON.stringify(seenAnims));
   }
@@ -1680,8 +1733,29 @@ export function initEventBadgesCheck() {
 export function checkBadgesAfterGame() {
   const p = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
   if (!p.badges) p.badges = [];
-  const save = () => localStorage.setItem("personaUserProfile", JSON.stringify(p));
-  checkAndUnlockBadges(p, save);
+
+  // La sauvegarde RELIT le profil et n'y fusionne que les badges accordés, au
+  // lieu de réécrire l'objet lu au départ.
+  //
+  // Depuis que le serveur est consulté avant d'accorder, il s'écoule un aller-
+  // retour réseau entre la lecture et l'écriture. Réécrire `p` tel quel
+  // effacerait tout ce qu'un autre bout de code (stats de fin de partie, streak)
+  // aurait écrit entre-temps — un badge gagné coûterait une partie de stats.
+  const save = () => {
+    let frais;
+    try {
+      frais = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
+    } catch {
+      frais = {};
+    }
+    if (!Array.isArray(frais.badges)) frais.badges = [];
+    for (const id of p.badges) if (!frais.badges.includes(id)) frais.badges.push(id);
+    localStorage.setItem("personaUserProfile", JSON.stringify(frais));
+  };
+
+  // La promesse est RENDUE : les modes de jeu appellent sans attendre, ce qui ne
+  // change rien pour eux, mais un appelant qui a besoin du verdict peut l'attendre.
+  return checkAndUnlockBadges(p, save);
 }
 
 // Unlock reborn_phoenix when streak-recovery fires, regardless of which page is loaded

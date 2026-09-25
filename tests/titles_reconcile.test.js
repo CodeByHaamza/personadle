@@ -182,15 +182,23 @@ describe("le scénario complet « badge oui, titre non »", () => {
     );
   });
 
-  it("invité (pas de compte) : le titre se pose en local et s'annonce, sans serveur", async () => {
+  it("invité (pas de compte) : le serveur répond 401, le titre se pose quand même", async () => {
+    // Avant, le client décidait lui-même qu'il avait affaire à un invité en
+    // regardant `window._currentUser` — et se trompait sur une page de mode, où
+    // l'authentification n'est pas encore résolue : un joueur CONNECTÉ passait
+    // pour un invité et son titre s'annonçait sans que personne n'ait demandé au
+    // serveur (constaté en production le 2026-09-25). C'est donc le serveur qui
+    // dit s'il nous connaît, et son 401 vaut « pas de compte » : l'acquis local
+    // tient, exactement comme avant, mais pour une raison vérifiée.
     delete window._currentUser;
+    unlock.mockRejectedValue(Object.assign(new Error("Unauthorized"), { status: 401 }));
     localStorage.setItem(
       "personaUserProfile",
       JSON.stringify({ stats: { modeWins: { Classic: 50 } }, badges: [], unlockedTitles: [] })
     );
     checkTitlesAfterGame();
     await new Promise((r) => setTimeout(r, 10));
-    expect(unlock).not.toHaveBeenCalled();
+    expect(unlock).toHaveBeenCalled();
     expect(JSON.parse(localStorage.getItem("personaUserProfile")).unlockedTitles).toContain(
       "aigis_i_am_not_afraid"
     );

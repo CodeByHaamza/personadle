@@ -70,7 +70,7 @@ describe("data_mining — condition de déblocage", () => {
     expect(badge.check({}, { visitedProfileIds: visited })).toBe(false);
   });
 
-  it("checkBadgesAfterGame() le débloque depuis localStorage après la 5e visite", () => {
+  it("checkBadgesAfterGame() le débloque depuis localStorage après la 5e visite", async () => {
     localStorage.setItem(
       "personaUserProfile",
       JSON.stringify({
@@ -82,7 +82,7 @@ describe("data_mining — condition de déblocage", () => {
       })
     );
 
-    badgesManager.checkBadgesAfterGame();
+    await badgesManager.checkBadgesAfterGame();
 
     const saved = JSON.parse(localStorage.getItem("personaUserProfile"));
     expect(saved.badges).toContain("data_mining");

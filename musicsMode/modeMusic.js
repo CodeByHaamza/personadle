@@ -203,7 +203,8 @@ let attempts = 0;
 let gameOver = false;
 
 /** Cibles possibles d'un défi : pool filtré de la page, chanson du jour exclue. Calculé au clic. */
-const challengePool = () => filteredSongs.filter((s) => s.titre !== target?.titre).map((s) => s.titre);
+const challengePool = () =>
+  filteredSongs.filter((s) => s.titre !== target?.titre).map((s) => s.titre);
 
 /** Timestamp when the game session started (for stats). */
 let sessionStartTime = Date.now();
@@ -411,8 +412,6 @@ function pickSong(random = false) {
   localStorage.setItem(`${KEY_PREFIX}GameOver`, "false");
 }
 
-
-
 /**
  * Bascule la page entre habillage normal et habillage Expert.
  *
@@ -615,14 +614,18 @@ function showVictory(force = false) {
     }
   }
 
-  // 🎭 SHAPESHIFTER — track character-per-mode (music targets may have a character field)
-  if (target?.character) {
-    const cmap = JSON.parse(localStorage.getItem("characterModeMap") || "{}");
-    const char = target.character;
-    if (!cmap[char]) cmap[char] = [];
-    if (!cmap[char].includes("music")) cmap[char].push("music");
-    localStorage.setItem("characterModeMap", JSON.stringify(cmap));
-  }
+  // Pas de characterModeMap ici, et ce n'est pas un oubli.
+  //
+  // Ce bloc écrivait dans une clé localStorage `characterModeMap` À PART, que
+  // rien ne lisait : les conditions lisent `profile.characterModeMap`. C'était
+  // donc une écriture morte, qui donnait surtout l'illusion que le mode Musique
+  // alimentait la carte.
+  //
+  // Le brancher aurait été pire que l'effacer : la part musicale des ensembles
+  // de cibles est délibérément vérifiée par le SEUL serveur (cf. `TARGET_SETS`
+  // dans badgesData.js et `PERSONADLE_TARGET_SETS` côté PHP), parce que le titre
+  // d'une chanson n'est pas un nom de personnage. L'ajouter au client aurait
+  // recréé exactement la divergence qu'on vient de corriger.
 
   trackUniqueDay(profile, () =>
     localStorage.setItem("personaUserProfile", JSON.stringify(profile))
@@ -1105,21 +1108,21 @@ function initCustomPlayer() {
 
   audioPlayer.addEventListener("play", () => {
     playIcon.textContent = "⏸";
-  playIcon.classList.add("is-pause");
+    playIcon.classList.add("is-pause");
     playBtn.classList.remove("idle");
     soundBars?.classList.add("playing");
   });
 
   audioPlayer.addEventListener("pause", () => {
     playIcon.textContent = "▶";
-  playIcon.classList.remove("is-pause");
+    playIcon.classList.remove("is-pause");
     playBtn.classList.add("idle");
     soundBars?.classList.remove("playing");
   });
 
   audioPlayer.addEventListener("ended", () => {
     playIcon.textContent = "▶";
-  playIcon.classList.remove("is-pause");
+    playIcon.classList.remove("is-pause");
     playBtn.classList.add("idle");
     soundBars?.classList.remove("playing");
     if (progressFill) progressFill.style.width = "0%";
@@ -1233,4 +1236,3 @@ function applyDarkModeStyles() {
 // ─────────────────────────────────────────────────────────────────────────────
 // DEBUG
 // ─────────────────────────────────────────────────────────────────────────────
-
