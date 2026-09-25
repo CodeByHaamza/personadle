@@ -21,7 +21,7 @@
 // Sans bump, `activate` ne purge rien et les assets servis en cache-first
 // (images, sons) restent ceux de la version précédente — invisible en test,
 // puisque c'est justement le cache des joueurs DÉJÀ venus qui est concerné.
-const CACHE_VERSION = "personadle-v103";
+const CACHE_VERSION = "personadle-v104";
 
 // Préfixe du sous-dossier : '/personadle' en dev local, '' en production (racine).
 // Calculé depuis l'URL du SW lui-même (ex: /personadle/sw.js → /personadle).
