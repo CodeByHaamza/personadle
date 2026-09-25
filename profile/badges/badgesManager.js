@@ -973,6 +973,8 @@ export function renderBadgesModal(profile, saveProfile) {
                 <img
                   src="${badge.img}"
                   alt="${name}"
+                  loading="lazy"
+                  decoding="async"
                   onerror="this.src=new URL('./images/default.png',import.meta.url).href"
                 >
                 <p>${name}</p>
