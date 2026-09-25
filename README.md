@@ -119,6 +119,7 @@ the Persona's real myth with its name masked. Expert keeps its own targets, stat
 - **Badges**: reorder your pinned ones by drag, click one to read its details, and an eye on every badge in the workshop. Five new badges and the _Déjà Vu_ title.
 - **146 new profile pictures** (204 → 350), an _Animated_ tab, and _Sun_ from Persona 3 Portable in Music mode.
 - **Lighter**: opening your profile went from 125.6 MB to 13.5 MB, and the heaviest All-Out Attack round from 80.2 MB to 3.2 MB.
+- 2.3.1: badge and title unlocks are decided by the server, an Expert friend challenge no longer wins itself, Kotone's animated pictures stay animated, and the Classic page starts as high as the other modes on mobile.
 
 <details>
 <summary>2.2 — Profile showcase &amp; Compendium</summary>
