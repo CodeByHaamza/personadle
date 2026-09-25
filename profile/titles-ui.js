@@ -15,26 +15,117 @@ import { statsForUnlocks } from "./profile-format.js";
 
 /** Définitions locales des titres — toujours disponibles ; l'API enrichit avec le statut par utilisateur. */
 export const TITLES_LOCAL = [
-  { slug: "velvet_room_thou_art_i", name: "Thou Art I", rarity: "legendary", condition_type: "badges_count", condition_value: 20 },
-  { slug: "joker_looking_cool", name: "Looking Cool", rarity: "legendary", condition_type: "joker_profile", condition_value: 0, is_hidden: true },
-  { slug: "makoto_yuki_memento_mori", name: "Memento Mori", rarity: "epic", condition_type: "unique_days", condition_value: 100 },
-  { slug: "akechi_pancakes", name: "Pancakes?", rarity: "epic", condition_type: "weekly_clean_modes", condition_value: 3 },
-  { slug: "yu_reach_out_to_the_truth", name: "Reach Out to the Truth", rarity: "epic", condition_type: "all_modes_won", condition_value: 1 },
-  { slug: "aigis_i_am_not_afraid", name: "I Am Not Afraid", rarity: "rare", condition_type: "mode_wins", condition_value: 50 },
-  { slug: "marie_i_remembered", name: "I Remembered", rarity: "rare", condition_type: "badges_count", condition_value: 15 },
-  { slug: "yosuke_ride_the_wind", name: "Ride the Wind", rarity: "rare", condition_type: "friends_count", condition_value: 5 },
-  { slug: "naoya_first_awakening", name: "The First Awakening", rarity: "rare", condition_type: "classic_p1_wins", condition_value: 15 },
-  { slug: "adachi_boring_isnt_it", name: "Boring, Isn't It?", rarity: "common", condition_type: "giveups_total", condition_value: 50 },
-  { slug: "maya_always_be_positive", name: "Always Be Positive", rarity: "common", condition_type: "emoji_p2_wins", condition_value: 10 },
-  { slug: "investigation_team", name: "Investigation Team", rarity: "epic", condition_type: "mode_wins", condition_mode: "personae", condition_value: 8 },
-  { slug: "junes", name: "Junes", rarity: "rare", condition_type: "mode_wins", condition_mode: "music", condition_value: 15 },
-  { slug: "shadows_converge", name: "Shadows Converge", rarity: "legendary", condition_type: "expert_wins_total", condition_value: 50 },
+  {
+    slug: "velvet_room_thou_art_i",
+    name: "Thou Art I",
+    rarity: "legendary",
+    condition_type: "badges_count",
+    condition_value: 20,
+  },
+  {
+    slug: "joker_looking_cool",
+    name: "Looking Cool",
+    rarity: "legendary",
+    condition_type: "joker_profile",
+    condition_value: 0,
+    is_hidden: true,
+  },
+  {
+    slug: "makoto_yuki_memento_mori",
+    name: "Memento Mori",
+    rarity: "epic",
+    condition_type: "unique_days",
+    condition_value: 100,
+  },
+  {
+    slug: "akechi_pancakes",
+    name: "Pancakes?",
+    rarity: "epic",
+    condition_type: "weekly_clean_modes",
+    condition_value: 3,
+  },
+  {
+    slug: "yu_reach_out_to_the_truth",
+    name: "Reach Out to the Truth",
+    rarity: "epic",
+    condition_type: "all_modes_won",
+    condition_value: 1,
+  },
+  {
+    slug: "aigis_i_am_not_afraid",
+    name: "I Am Not Afraid",
+    rarity: "rare",
+    condition_type: "mode_wins",
+    condition_value: 50,
+  },
+  {
+    slug: "marie_i_remembered",
+    name: "I Remembered",
+    rarity: "rare",
+    condition_type: "badges_count",
+    condition_value: 15,
+  },
+  {
+    slug: "yosuke_ride_the_wind",
+    name: "Ride the Wind",
+    rarity: "rare",
+    condition_type: "friends_count",
+    condition_value: 5,
+  },
+  {
+    slug: "naoya_first_awakening",
+    name: "The First Awakening",
+    rarity: "rare",
+    condition_type: "classic_p1_wins",
+    condition_value: 15,
+  },
+  {
+    slug: "adachi_boring_isnt_it",
+    name: "Boring, Isn't It?",
+    rarity: "common",
+    condition_type: "giveups_total",
+    condition_value: 50,
+  },
+  {
+    slug: "maya_always_be_positive",
+    name: "Always Be Positive",
+    rarity: "common",
+    condition_type: "emoji_p2_wins",
+    condition_value: 10,
+  },
+  {
+    slug: "investigation_team",
+    name: "Investigation Team",
+    rarity: "epic",
+    condition_type: "mode_wins",
+    condition_mode: "personae",
+    condition_value: 8,
+  },
+  {
+    slug: "junes",
+    name: "Junes",
+    rarity: "rare",
+    condition_type: "mode_wins",
+    condition_mode: "music",
+    condition_value: 15,
+  },
+  {
+    slug: "shadows_converge",
+    name: "Shadows Converge",
+    rarity: "legendary",
+    condition_type: "expert_wins_total",
+    condition_value: 50,
+  },
 ];
 
 /** Mappe un condition_mode (BDD, minuscule) vers la clé de stats.modeWins (capitalisée). */
 const _MODEWINS_KEY = {
-  classic: "Classic", emoji: "Emoji", silhouette: "Silhouette",
-  alloutattack: "AllOutAttack", personae: "Personae", music: "Music",
+  classic: "Classic",
+  emoji: "Emoji",
+  silhouette: "Silhouette",
+  alloutattack: "AllOutAttack",
+  personae: "Personae",
+  music: "Music",
 };
 
 // Chemin relatif à profile.html → toujours correct quelle que soit la config serveur
@@ -62,7 +153,15 @@ export function _resetTitlesData() {
  * @param {object} ctx - { profile, stats, friendCount, allModesWon, giveups, totalWins, streakRecord }
  */
 export function isTitleConditionMet(title, ctx) {
-  const { profile, stats = {}, friendCount = 0, allModesWon, giveups, totalWins, streakRecord } = ctx;
+  const {
+    profile,
+    stats = {},
+    friendCount = 0,
+    allModesWon,
+    giveups,
+    totalWins,
+    streakRecord,
+  } = ctx;
   const v = title.condition_value;
   switch (title.condition_type) {
     case "wins_total":
@@ -119,12 +218,18 @@ export function isTitleConditionMet(title, ctx) {
       const song = profile.profileSong?.fichier || profile.profileMusicId || "";
       if (profile.profileTheme === "all_out" && jokerSongs.includes(song)) return true;
       const jokerAvatarFiles = [
-        "JOKER.webp", "Joker.jpg", "joker_starlight.jpg",
-        "Ren.webp", "Ren.gif", "Ren2.gif", "ren_t.webp", "ren_jazz.jpg",
+        "JOKER.webp",
+        "Joker.jpg",
+        "joker_starlight.jpg",
+        "Ren.webp",
+        "Ren.gif",
+        "Ren2.gif",
+        "ren_t.webp",
+        "ren_jazz.jpg",
       ];
-      const avatarRef = profile.avatarSrc ||
-        (!profile.avatar?.startsWith("data:") ? profile.avatar ?? "" : "");
-      return jokerAvatarFiles.some(f => avatarRef.includes(f));
+      const avatarRef =
+        profile.avatarSrc || (!profile.avatar?.startsWith("data:") ? (profile.avatar ?? "") : "");
+      return jokerAvatarFiles.some((f) => avatarRef.includes(f));
     }
     default:
       return false;
@@ -272,16 +377,24 @@ async function checkAndUnlockTitles(profile, saveProfile) {
     // titre revenait donc en « nouveau » à CHAQUE visite du profil — « la notif
     // de I Remembered à chaque fois que je vais sur mon profil » (Hamza).
     const api = window._personadleApi;
-    let confirmed = !api?.titles?.unlock || !window._currentUser; // invité / hors bridge : local fait foi
+    // On ne se fie PLUS à `window._currentUser` pour décider s'il faut demander :
+    // sur une page de mode, l'authentification n'est pas toujours résolue au
+    // moment où la vérification tourne, et un joueur connecté passait alors pour
+    // un invité — le titre s'annonçait sans que personne n'ait demandé au
+    // serveur. C'est le serveur qui dit s'il nous connaît : un 401 est sa façon
+    // de répondre « tu n'es pas connecté ».
+    let confirmed = !api?.titles?.unlock; // hors bridge : local fait foi
     if (!confirmed) {
       try {
         await api.titles.unlock(title.slug);
         confirmed = true;
       } catch (err) {
-        // 4xx = le serveur dit non (ou ne connaît pas le titre) : on n'insiste
-        // pas et on n'annonce rien. Réseau/5xx : on garde l'acquis local, la
-        // réconciliation (syncTitlesWithBackend) le repoussera.
-        confirmed = !(Number(err?.status) >= 400 && Number(err?.status) < 500);
+        const code = Number(err?.status);
+        // 401 = pas connecté : aucune vérité serveur à opposer, l'acquis local
+        // vaut, comme pour un invité. 4xx = le serveur a REGARDÉ et dit non : on
+        // n'annonce rien. Réseau/5xx = on n'a pas pu demander, on garde l'acquis
+        // local et la réconciliation (syncTitlesWithBackend) tranchera.
+        confirmed = code === 401 || !(code >= 400 && code < 500);
       }
     }
     if (!confirmed) continue;

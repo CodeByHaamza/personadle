@@ -285,7 +285,6 @@ function initializeAutocomplete(element, sourceArray) {
 // UI HELPERS
 // ─────────────────────────────────────────────────────────────────────────────
 
-
 /**
  * Émojis affichés pour la cible : les vrais en mode normal, un leurre glissé
  * parmi eux en Expert.
@@ -344,11 +343,11 @@ function updateEmojiHint() {
   displayedEmojis()
     .slice(0, attempts)
     .forEach((e) => {
-    const span = document.createElement("span");
-    span.textContent = e;
-    span.classList.add("emoji-unit");
-    displayZone.appendChild(span);
-  });
+      const span = document.createElement("span");
+      span.textContent = e;
+      span.classList.add("emoji-unit");
+      displayZone.appendChild(span);
+    });
 }
 
 /** Updates the give-up counter display and activates it at the threshold. */
@@ -440,7 +439,12 @@ function checkEmojiGuess(name, forceReveal = false) {
     showCommunityStats(modeName, target.nom);
 
     // 🎭 SHAPESHIFTER — track character per mode (write into personaUserProfile.characterModeMap)
-    if (!forceReveal && target.nom) {
+    // `wasChallengePlay` est capturé plus haut, AVANT que checkChallengeCompletion
+    // ne consomme le défi : un défi ami n'entre pas dans la carte, le serveur ne
+    // l'enregistrant pas en session (`condition_check.php` : « elle ne compte pas
+    // — voulu »). L'y mettre ferait croire au client qu'une condition est remplie
+    // quand elle ne l'est pas. Signalé en production le 2026-09-25.
+    if (!forceReveal && target.nom && !wasChallengePlay) {
       const _pShape = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
       if (!_pShape.characterModeMap) _pShape.characterModeMap = {};
       if (!_pShape.characterModeMap[target.nom]) _pShape.characterModeMap[target.nom] = [];
@@ -469,7 +473,7 @@ function checkEmojiGuess(name, forceReveal = false) {
         buildGameSession({
           mode: modeName,
           targetName: target.nom,
-        isExpert: EXPERT.isExpert,
+          isExpert: EXPERT.isExpert,
           result,
           attempts,
           timeMs: timeSpent * 1000,
@@ -578,7 +582,10 @@ function applyDarkModeStyles() {
   applyDarkModeOverrides([
     {
       selector: ".emoji-hint-zone",
-      styles: { background: "rgba(20, 20, 20, 0.7)", boxShadow: "0 0 12px rgba(255, 255, 255, 0.2)" },
+      styles: {
+        background: "rgba(20, 20, 20, 0.7)",
+        boxShadow: "0 0 12px rgba(255, 255, 255, 0.2)",
+      },
     },
     {
       id: "victoryBox",

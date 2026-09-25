@@ -339,24 +339,28 @@ describe("checkBadgesAfterGame", () => {
     expect(document.querySelector(".badge-notification")).toBeNull();
   });
 
-  it("unlocks a newly-qualifying badge read straight from localStorage", () => {
+  it("unlocks a newly-qualifying badge read straight from localStorage", async () => {
     localStorage.setItem(
       "personaUserProfile",
       JSON.stringify(baseProfile({ stats: { giveups: 10 } })) // ace_defective: giveups_total >= 10
     );
 
-    checkBadgesAfterGame();
+    await checkBadgesAfterGame();
 
     const saved = JSON.parse(localStorage.getItem("personaUserProfile"));
     expect(saved.badges).toContain("ace_defective");
   });
 
-  it("les stats Expert comptent : 6 victoires normales + 4 Expert débloquent « Win 10 games » (2026-09-19)", () => {
+  it("les stats Expert comptent : 6 victoires normales + 4 Expert débloquent « Win 10 games » (2026-09-19)", async () => {
     localStorage.setItem(
       "personaUserProfile",
-      JSON.stringify(baseProfile({ stats: { wins: 6, modeWins: { Music: 6 }, expert: { wins: 4, modeWins: { Music: 4 } } } }))
+      JSON.stringify(
+        baseProfile({
+          stats: { wins: 6, modeWins: { Music: 6 }, expert: { wins: 4, modeWins: { Music: 4 } } },
+        })
+      )
     );
-    checkBadgesAfterGame();
+    await checkBadgesAfterGame();
     const saved = JSON.parse(localStorage.getItem("personaUserProfile"));
     expect(saved.badges).toContain("first_win");
     expect(saved.badges).toContain("ace_detective"); // Win 10 games
@@ -499,7 +503,10 @@ describe("syncBadgesWithBackend — un badge refusé par le serveur ne reste pas
 
   it("403 « Condition not met » → retiré de profile.badges et de la sélection épinglée, profil sauvé", async () => {
     const saveProfile = vi.fn();
-    const profile = baseProfile({ badges: ["velvet_regular", "first_win"], selectedBadges: ["velvet_regular"] });
+    const profile = baseProfile({
+      badges: ["velvet_regular", "first_win"],
+      selectedBadges: ["velvet_regular"],
+    });
     globalThis.window._personadleApi = {
       badges: {
         catalog: vi.fn().mockResolvedValue([
@@ -537,7 +544,9 @@ describe("syncBadgesWithBackend — un badge refusé par le serveur ne reste pas
     globalThis.window._personadleApi = {
       badges: {
         catalog: vi.fn().mockResolvedValue([{ slug: "christmas_2025", is_unlocked: 0 }]),
-        unlock: vi.fn().mockRejectedValue(apiError(403, "This badge can only be unlocked with its event code")),
+        unlock: vi
+          .fn()
+          .mockRejectedValue(apiError(403, "This badge can only be unlocked with its event code")),
       },
     };
     await syncBadgesWithBackend(profile, saveProfile);
@@ -580,7 +589,10 @@ describe("checkSocialBadges — Best Bro se débloque et se pousse à la PREMIÈ
     const unlock = vi.fn().mockResolvedValue({ success: true });
     globalThis.window._personadleApi = {
       friends: { list: vi.fn().mockResolvedValue({ friends: [{ user_id: 1 }, { user_id: 2 }] }) },
-      badges: { catalog: vi.fn().mockResolvedValue([{ slug: "best_bro", is_unlocked: 0 }]), unlock },
+      badges: {
+        catalog: vi.fn().mockResolvedValue([{ slug: "best_bro", is_unlocked: 0 }]),
+        unlock,
+      },
     };
     const saveProfile = vi.fn();
     const profile = baseProfile();
@@ -601,5 +613,132 @@ describe("checkSocialBadges — Best Bro se débloque et se pousse à la PREMIÈ
     await checkSocialBadges(profile, vi.fn());
     expect(profile.hasTwoFriends).toBeFalsy();
     expect(unlock).not.toHaveBeenCalled();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Le serveur tranche — pas le client
+//
+// Signalé en production le 2026-09-25 par Colonel-Maskou : animation de
+// déblocage pour « Memento Vivere, Memento Mori » et le titre « Déjà Vu » sans
+// avoir rempli la condition, puis badge inéquipable.
+//
+// La cause : `badge.check()` décide depuis `profile.characterModeMap`, un objet
+// qui ne vit QUE dans le localStorage du joueur, écrit en ajout seul, jamais
+// synchronisé ni recalé sur le serveur — il n'existe dans aucune colonne de
+// `profiles`. Le serveur, lui, décide depuis `game_sessions`. Les deux dérivent
+// dès qu'une session n'arrive pas (409, hors ligne, autre appareil), et le
+// client s'accordait alors le badge, jouait l'animation, puis jetait le refus
+// du serveur avec un `.catch(() => {})`.
+//
+// Au `pullProfileFromCloud` suivant le badge disparaissait, d'où le
+// « débloqué, finalement non, finalement oui » du joueur.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("checkBadgesAfterGame — le serveur a le dernier mot", () => {
+  /** Profil dont la condition locale d'`ace_defective` est remplie. */
+  const profilQuiQualifie = () =>
+    localStorage.setItem(
+      "personaUserProfile",
+      JSON.stringify(baseProfile({ stats: { giveups: 10 } }))
+    );
+
+  const badgesEnregistres = () => JSON.parse(localStorage.getItem("personaUserProfile")).badges;
+
+  afterEach(() => {
+    delete globalThis.window._personadleApi;
+  });
+
+  it("n'accorde PAS un badge que le serveur refuse", async () => {
+    // 403 « Condition not met » : le serveur a regardé game_sessions et dit non.
+    const refus = Object.assign(new Error("Condition not met"), { status: 403 });
+    const unlock = vi.fn().mockRejectedValue(refus);
+    window._personadleApi = { badges: { unlock } };
+    profilQuiQualifie();
+
+    await checkBadgesAfterGame();
+
+    expect(unlock).toHaveBeenCalledWith("ace_defective");
+    expect(badgesEnregistres(), "le badge refusé ne doit pas rester en local").not.toContain(
+      "ace_defective"
+    );
+  });
+
+  it("ne joue PAS l'animation d'un badge que le serveur refuse", async () => {
+    // C'est le symptôme que le joueur voit : une fête pour rien.
+    const refus = Object.assign(new Error("Condition not met"), { status: 403 });
+    window._personadleApi = { badges: { unlock: vi.fn().mockRejectedValue(refus) } };
+    profilQuiQualifie();
+
+    await checkBadgesAfterGame();
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(document.querySelector(".badge-notification")).toBeNull();
+  });
+
+  it("accorde le badge quand le serveur l'accepte", async () => {
+    const unlock = vi.fn().mockResolvedValue({ ok: true });
+    window._personadleApi = { badges: { unlock } };
+    profilQuiQualifie();
+
+    await checkBadgesAfterGame();
+
+    expect(unlock).toHaveBeenCalledWith("ace_defective");
+    expect(badgesEnregistres()).toContain("ace_defective");
+  });
+
+  it("garde le badge quand on n'a PAS PU demander — une panne réseau n'est pas un refus", async () => {
+    // Distinction qui compte : punir une connexion instable comme un tricheur
+    // ferait perdre des badges réellement gagnés. Sans `status`, on n'a pas
+    // l'avis du serveur, donc on ne conclut rien.
+    const panne = new TypeError("Failed to fetch");
+    window._personadleApi = { badges: { unlock: vi.fn().mockRejectedValue(panne) } };
+    profilQuiQualifie();
+
+    await checkBadgesAfterGame();
+
+    expect(badgesEnregistres()).toContain("ace_defective");
+  });
+
+  it("garde le badge sur une erreur serveur (5xx), qui n'est pas un avis non plus", async () => {
+    const plante = Object.assign(new Error("Server error"), { status: 500 });
+    window._personadleApi = { badges: { unlock: vi.fn().mockRejectedValue(plante) } };
+    profilQuiQualifie();
+
+    await checkBadgesAfterGame();
+
+    expect(badgesEnregistres()).toContain("ace_defective");
+  });
+
+  it("hors ligne / non connecté : le comportement local d'origine est conservé", async () => {
+    // Sans API il n'y a pas de vérité serveur à opposer : le badge est local, et
+    // la réconciliation le confirmera ou non à la prochaine connexion.
+    delete globalThis.window._personadleApi;
+    profilQuiQualifie();
+
+    await checkBadgesAfterGame();
+
+    expect(badgesEnregistres()).toContain("ace_defective");
+  });
+
+  it("un refus n'empêche pas les autres badges d'être accordés", async () => {
+    // Un badge dont la condition locale ment ne doit pas emporter avec lui ceux
+    // qui sont réellement gagnés dans la même fournée.
+    const unlock = vi.fn((id) =>
+      id === "ace_defective"
+        ? Promise.reject(Object.assign(new Error("Condition not met"), { status: 403 }))
+        : Promise.resolve({ ok: true })
+    );
+    window._personadleApi = { badges: { unlock } };
+    localStorage.setItem(
+      "personaUserProfile",
+      JSON.stringify(baseProfile({ stats: { giveups: 10, wins: 1, modeWins: { Music: 1 } } }))
+    );
+
+    await checkBadgesAfterGame();
+
+    const b = badgesEnregistres();
+    expect(b).not.toContain("ace_defective");
+    expect(b).toContain("first_win");
   });
 });
