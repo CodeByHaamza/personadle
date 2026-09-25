@@ -62,34 +62,42 @@ que rien ne distingue à l'œil au moment de répondre.
 | | Avant ce correctif | Après |
 |---|---|---|
 | Entrées | `Kotone Shiomi` (P3P) + `Kotone Shiomi ( P5X )` (P5X) | **`Kotone Shiomi`** (P3P) |
-| `gif` | `Kotone` + `Kotone_P5X` | `Kotone_P5X` |
+| `gif` | `Kotone` + `Kotone_P5X` | **`Kotone`** |
 | Pool `alloutattack` | 78 | **77** |
 
-Le `gif` garde son suffixe alors que l'entrée n'en a plus : il dit d'où vient l'animation,
-et surtout **il ne se confond pas avec le fichier `Kotone.webp` déjà présent sur le CDN**,
-qui contient l'ANCIENNE animation. Réutiliser ce nom aurait servi la mauvaise vidéo en
-production jusqu'au téléversement — un défaut silencieux, là où un nom neuf donne une image
-qui ne charge pas, donc visible.
+### Les fichiers gardent le nom `Kotone`
 
-### Fichiers supprimés
+Un personnage, un fichier — ici comme sur le CDN (demande de Hamza). Les trois assets du
+lot précédent sont donc **renommés** et écrasent ceux de l'ancienne animation :
 
-Plus rien ne les référence :
+| Fichier | Avant | Après |
+|---|---|---|
+| `allOutAttack/Kotone.webp` | 67 Mo, 1920 × 1080 | **2,4 Mo**, 800 × 450 |
+| `img/Kotone.webp` | rendu P3P pleine hauteur, 640 × 1947 | buste P5X, 640 × 680 |
+| `img/Kotone_Battle.webp` | illustration P3P | render P5X à la naginata |
 
-| Fichier | Poids |
-|---|---|
-| `allOutAttackMode/database/allOutAttack/Kotone.webp` | **67 Mo** |
-| `allOutAttackMode/database/img/Kotone.webp` | 72 Ko |
-| `allOutAttackMode/database/img/Kotone_Battle.webp` | 544 Ko |
+Les 67 Mo étaient le calibre des entrées P3, dix fois plus lourdes que celles de P5X
+(cf. entrée précédente). Les anciennes versions restent dans l'historique git ; c'est
+l'arbre de travail qui s'allège.
 
-Les 67 Mo sont l'ancienne animation, en 1080p — le calibre des entrées P3, dix fois plus
-lourdes que celles de P5X (cf. entrée précédente). Elles restent dans l'historique git ;
-c'est l'arbre de travail qui s'allège.
+> ### ⚠️ Conséquence directe sur le déploiement
+>
+> `Kotone.webp` **existe déjà sur R2, avec l'ANCIENNE animation** (vérifié : 200). Le
+> téléversement n'est donc pas un ajout mais un **écrasement**, et son oubli ne se voit
+> pas : en production, le mode servirait l'ancienne vidéo, sans erreur ni image manquante.
+>
+> C'est le prix assumé du nom unique. Un nom neuf aurait donné une image qui ne charge
+> pas — visible immédiatement — mais deux fichiers pour un personnage.
+>
+> À vérifier après téléversement : le poids servi par le CDN doit être de ~2,4 Mo, pas
+> de 67 Mo.
 
 ### Détails
 
-- `aoaCharacters.js` — l'entrée P3P porte désormais `gif: "Kotone_P5X"`, le bloc de
-  collaboration P5X est retiré.
-- `portraitsMap.js` — `"Kotone Shiomi"` pointe sur `Kotone_P5X` ; la ligne suffixée saute.
+- `aoaCharacters.js` — l'entrée P3P garde `gif: "Kotone"`, le bloc de collaboration P5X
+  est retiré.
+- `portraitsMap.js` — la ligne suffixée saute, `"Kotone Shiomi"` pointe toujours sur
+  `Kotone`.
 - `personas_allOut.js` — le nom suffixé saute, donc n'est plus proposé à la saisie.
 - `api/data/daily_pools.json` — régénéré, `alloutattack` 78 → **77**.
 - `PersonaDLE_Update.html` — la section ne parle plus de trois *attaques* ajoutées mais de
@@ -259,9 +267,10 @@ l'image à deviner et aurait bouclé en plein milieu de l'attaque.
 
 ### Fichiers touchés
 
-- `allOutAttackMode/database/allOutAttack/Kotone_P5X.webp` — **nouveau**, l'animation.
-- `allOutAttackMode/database/img/Kotone_P5X.webp` et `Kotone_P5X_Battle.webp` —
-  **nouveaux**, le portrait et l'illustration de fin (`Kotone_p5x_render.webp` livré).
+- `allOutAttackMode/database/allOutAttack/Kotone_P5X.webp` — l'animation. *(Renommée en
+  `Kotone.webp` par l'entrée suivante, comme les deux fichiers ci-dessous.)*
+- `allOutAttackMode/database/img/Kotone_P5X.webp` et `Kotone_P5X_Battle.webp` — le portrait
+  et l'illustration de fin (`Kotone_p5x_render.webp` livré).
 - `allOutAttackMode/database/img/Kotone.webp`, `database/portraits/Kotone.webp` —
   **remplacés** par le nouveau portrait.
 - `aoaCharacters.js`, `portraitsMap.js`, `personas_allOut.js` — les trois tables. Les deux
@@ -285,9 +294,10 @@ l'image à deviner et aurait bouclé en plein milieu de l'attaque.
 
 ### ⚠️ À faire avant la release
 
-`Kotone_P5X.webp` doit être **téléversé sur R2** (`allOutAttack/`). En production, le mode
-ne lit pas le fichier du dépôt : `cdn()` bascule sur le CDN Cloudflare. Sans téléversement,
-la cible existe mais son image ne charge jamais.
+L'animation doit être **téléversée sur R2** (`allOutAttack/`). En production, le mode ne lit
+pas le fichier du dépôt : `cdn()` bascule sur le CDN Cloudflare. *(Elle s'appelle
+`Kotone.webp` depuis l'entrée suivante, qui écrase donc l'ancienne — voir l'avertissement
+de déploiement qui s'y trouve.)*
 
 Vérifié à l'instant sur le CDN — et `Luce_Notte.webp` **manque toujours** :
 
@@ -296,7 +306,7 @@ Vérifié à l'instant sur le CDN — et `Luce_Notte.webp` **manque toujours** :
 | `Soy_Pioneer.webp` | 200 |
 | `Kotone.webp` | 200 |
 | `Luce_Notte.webp` | **404** |
-| `Kotone_P5X.webp` | **404** |
+| `Kotone.webp` (nouvelle animation) | à écraser |
 
 ---
 ## 2026-09-24 — L'entrée 2.3 du modal « Nouveautés »

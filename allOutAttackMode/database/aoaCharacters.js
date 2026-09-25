@@ -16,13 +16,12 @@ export const aoaCharacters = [
   { nom: "Metis", gif: "Metis", opus: ["P3", "P3FES"] },
 
   // === Persona 3 Portable (P3P) ===
-  // Son animation est celle de *Persona 5: The Phantom X* (version 4.10), où elle
-  // débarque en 5 étoiles — d'où le `gif` suffixé. Elle reste rangée en P3P : c'est
-  // le jeu dont elle vient, et c'est là que le joueur la cherche dans les filtres.
-  // Décision Hamza du 2026-09-25 : UNE SEULE entrée. La version précédente de ce lot
-  // en gardait deux (l'attaque P3 d'origine + la P5X) ; les deux auraient été
-  // devinables séparément sous le même nom de personnage.
-  { nom: "Kotone Shiomi", gif: "Kotone_P5X", opus: ["P3P"] },
+  // Une seule entrée (décision Hamza du 2026-09-25), rangée en P3P : c'est le jeu
+  // dont elle vient, et c'est là que le joueur la cherche dans les filtres. Son
+  // animation, elle, est celle de *Persona 5: The Phantom X* (version 4.10), où elle
+  // débarque en 5 étoiles — les fichiers gardent le nom `Kotone`, pour qu'un
+  // personnage reste un seul fichier ici comme sur le CDN.
+  { nom: "Kotone Shiomi", gif: "Kotone", opus: ["P3P"] },
 
   // === Persona 5 (base / Strikers / Tactica) ===
   { nom: "Panther ( Ann Takamaki )", gif: "Panther", opus: ["P5"] },
