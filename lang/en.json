@@ -337,6 +337,9 @@
     "tab_title": "Title",
     "tab_badges": "Badges",
     "avatar_hint": "Pick a portrait — it is applied right away. Badly framed? Adjust it.",
+    "avatar_filter_all": "All",
+    "avatar_filter_animated": "Animated",
+    "avatar_filter_empty": "No animated portrait in this game.",
     "avatar_origin_notice": "🪪 Your portrait was cropped before the game started remembering which one it is. Pick it again once below (crop it if you like) so your friends — and the Same Energy badge — know who you're wearing.",
     "avatar_adjust": "Adjust framing",
     "crop_title": "Adjust your avatar",
@@ -349,6 +352,9 @@
     "pinned_hint": "Pick up to 4 badges to pin on your card. Click a pinned one to unpin it.",
     "pin_badge": "Pin a badge",
     "unpin_badge": "Unpin",
+    "badge_inspect": "View details",
+    "badge_unlocked": "Unlocked",
+    "badge_locked": "Locked",
     "pick_empty": "No badge unlocked yet — play a few games, they will show up here.",
     "pin_limit": "You can only pin <strong>4 badges</strong>!",
     "pin_limit_hint": "Unpin one first.",
@@ -551,6 +557,11 @@
       "condition": "Click on the GitHub button",
       "description": "You checked the source code! A true Phantom Thief always gathers intel first."
     },
+    "cafe_leblanc": {
+      "name": "Café Leblanc",
+      "condition": "Click on the Ko-fi button",
+      "description": "You were curious enough to push open the door of my café. The coffee's on the house — and thanks for stopping by."
+    },
     "true_hacker": {
       "name": "True Hacker",
       "condition": "???",
@@ -655,6 +666,26 @@
       "name": "Same Energy",
       "condition": "Reach Social Link rank 5 with a friend while one of you wears Motoha Arai and the other Chie Satonaka",
       "description": "Two kung-fu girls, two games, one energy. When a rank-5 friend shows up as Chie while you're wearing Arai — or the other way around — you both get this one, at the same moment."
+    },
+    "chord_progression": {
+      "name": "Chord Progression",
+      "condition": "Beat 10 friend challenges in Music mode",
+      "description": "Rise holds the mic, Chord holds the guitar, and you held the tune ten times over. Ten challenges sent your way in Music mode, ten answered."
+    },
+    "birds_different_feather": {
+      "name": "Birds of a Different Feather",
+      "condition": "Find Goro Akechi and Kira Kitazato in Silhouette, and Crow and Messa in All-Out Attack",
+      "description": "Two masks, two beaks, two very different birds. One plays the prince, the other doesn't bother pretending — you saw through both."
+    },
+    "memento_vivere_mori": {
+      "name": "Memento Vivere, Memento Mori",
+      "condition": "Find Makoto Yuki and Kotone Shiomi in every mode, and their four themes in Music",
+      "description": "The same year, the same dorm, the same ending — told twice. Remember to live, remember to die: you found them both, everywhere there was to look."
+    },
+    "her_own_orpheus": {
+      "name": "Her Own Orpheus",
+      "condition": "???",
+      "description": "Same arcana, same dorm, a different song. Makoto has his Orpheus; she has hers — and she carries it through fire."
     },
     "velvet_regular": {
       "name": "Velvet Regular",
@@ -917,6 +948,11 @@
     "filter_dimension": "Dimension",
     "dimension_normal": "Normal",
     "dimension_expert": "⚡ Expert",
+    "dimension_bonds": "🤝 Social Link",
+    "bonds_rank": "Rank {{n}}",
+    "bonds_none": "No Social Link has earned XP yet.",
+    "bonds_none_mine": "You don't have a Social Link with any XP yet.",
+    "bonds_note": "Friendships ranked by Social Link XP. Rank stops at 10 — the XP doesn't.",
     "scope_global": "Global",
     "scope_friends": "Friends",
     "login_for_friends": "Log in to see your friends leaderboard.",
@@ -1268,6 +1304,7 @@
     "done_today": "Done today",
     "rank_up": "🎉 Social Link — Rank {{rank}}: {{name}}",
     "max_rank": "✨ MAX — True Confidant",
+    "xp_beyond_max": "+{{xp}} XP beyond rank 10",
     "howto_aria": "How to gain Social Link XP",
     "howto_trigger": "How to gain XP?",
     "howto_title": "Spend time together — XP is automatic:",

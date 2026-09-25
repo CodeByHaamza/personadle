@@ -8,9 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 1437 tests Vitest (77 suites), 377 méthodes PHPUnit, 253 tests E2E,
-> Vérifié le 2026-08-26 : 1428 tests Vitest (77 suites), 363 méthodes PHPUnit, 248 tests E2E,
-> Vérifié le 2026-08-26 : 1425 tests Vitest (77 suites), 359 méthodes PHPUnit, 247 tests E2E,
+> Vérifié le 2026-08-26 : 1525 tests Vitest (84 suites), 379 méthodes PHPUnit, 278 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
@@ -56,7 +54,7 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
 - [x] Jouer `sql/migrations/042_moderation_maintenance.sql` (colonnes de ban motivé sur `users`,
       tables `user_notices`, `admin_notes`, `announcements`, `site_settings` ; MariaDB
       `IF NOT EXISTS`, rejouable). Sans elle : **`requireAuth()` plante** (`Unknown column
-      'ban_reason'`) — plus aucun appel authentifié ne passe, et `GET /api/auth/me` tombe
+  'ban_reason'`) — plus aucun appel authentifié ne passe, et `GET /api/auth/me` tombe
       en 500 sur toutes les pages. À jouer **avant** le `git pull` de Hostinger, pas après.
 - [x] Jouer `sql/migrations/045_leaderboard_expert_dimension.sql` (colonne
       `leaderboard_cache.is_expert`, clé unique `uq_leaderboard` élargie, index de lecture
@@ -116,12 +114,12 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       **À jouer AVANT le `git pull` Hostinger.** Sans elle, `GET /api/user/:id`, `GET /api/friends/`
       et tout PATCH d'avatar tombent en `Unknown column 'avatar_src'` → **500 sur le profil et la
       liste d'amis pour tout le monde**. Puis `INSERT IGNORE INTO schema_migrations (version) VALUES
-      ('052_profiles_avatar_src')`. Vérifiée le 2026-09-19 sur la base de dev au schéma 051 (58 origines
+  ('052_profiles_avatar_src')`. Vérifiée le 2026-09-19 sur la base de dev au schéma 051 (58 origines
       reprises, 45 portraits recadrés restent inconnus) et sur un import vierge (no-op).
 - [x] Jouer `sql/migrations/053_date_badges_any_year.sql` — **jouée et enregistrée en prod le 2026-09-19 nuit** (dump `badges` avant). (5 `UPDATE badges` par slug, rejouable) **avant le
       pull** : sans elle, les cinq badges de dates gardent `manual` et ne tombent jamais d'office ; avec le
       nouveau code, aucun crash dans les deux sens (pas de nouvelle colonne). Puis `INSERT IGNORE INTO
-      schema_migrations (version) VALUES ('053_date_badges_any_year')`. Validée le 2026-09-19 sur import
+  schema_migrations (version) VALUES ('053_date_badges_any_year')`. Validée le 2026-09-19 sur import
       vierge + rejouée sur la préprod (dump de prod).
 - [x] **Bumper `CACHE_VERSION` dans `sw.js` (v100 → v101, fait le 2026-09-19 nuit)** : `profile/profile-page.js`
       (précaché) porte l'encart Atelier « portrait sans origine ».
@@ -130,12 +128,12 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
 - [x] Jouer `sql/migrations/051_user_stats_expert.sql` (table `user_stats_expert` + reprise des
       **Jouées en prod le 2026-09-19 (051 puis 052, dump 51 Mo en local avant, validées contre le schéma prod recréé dans Docker) : 79 lignes Expert / 300 parties reprises, 7 origines d'avatar.** Backfill des streaks à lancer depuis le webroot après le pull.
       compteurs depuis `game_sessions WHERE is_expert = 1`, `CREATE TABLE IF NOT EXISTS` + `INSERT …
-      ON DUPLICATE KEY`, rejouable), **puis** `php scripts/backfill_expert_streaks.php` depuis le
+  ON DUPLICATE KEY`, rejouable), **puis** `php scripts/backfill_expert_streaks.php` depuis le
       webroot (pose `streak`/`streak_record`, que le SQL ne peut pas calculer ; rejouable aussi).
       **À jouer AVANT le `git pull` Hostinger.** Sans la table, `GET /api/user/:id/stats`
       (`expert_by_mode`) et chaque enregistrement de partie Expert tombent en `Table doesn't exist`
       → **500 sur la page profil et sur toute partie Expert**. Puis `INSERT IGNORE INTO
-      schema_migrations (version) VALUES ('051_user_stats_expert')`. Vérifiée le 2026-09-19 sur la
+  schema_migrations (version) VALUES ('051_user_stats_expert')`. Vérifiée le 2026-09-19 sur la
       base de dev au schéma 050 (326 lignes reprises pour 540 parties Expert) et sur un import vierge
       du nouveau `bdd_mysql.sql` (no-op).
 - [x] **Bumper `CACHE_VERSION` dans `sw.js` (v96 → v97, fait le 2026-09-18 soir)** : `js/filterMenu.js`
@@ -198,7 +196,39 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
 > au schéma pré-migration, puis une seconde fois pour l'idempotence : schéma final identique à
 > `sql/bdd_mysql.sql`, rejeu sans erreur. Elles portent désormais `IF EXISTS` / `IF NOT EXISTS`.
 > Chemin de prod : SSH + `mysql --delimiter='$$'`, jamais phpMyAdmin.
->
+
+### Release 2.3 — reste à faire
+
+- [x] **Jouer `sql/migrations/054_badges_titles_2_3.sql` en prod** — table `challenge_wins`,
+      4 badges, le titre `tatsuya_maya_deja_vu` et le code `IAMNOTAPRINCESS`. Sans elle, le
+      code 2.3 affiche des badges et un titre qui n'existent pas en base : personne ne peut
+      les décrocher.
+- [x] **Jouer `sql/migrations/055_badge_cafe_leblanc.sql` en prod** — badge secret Ko-fi.
+      `INSERT IGNORE`, rejouable. Même conséquence si elle est oubliée.
+- [x] **Téléverser sur R2** les animations All-Out Attack ajoutées depuis la 2.2. En prod le
+      mode lit le CDN, **pas** le dépôt. État vérifié le 2026-09-25 : `Kotone.webp` (écrasé
+      par la nouvelle animation), `Luce_Notte.webp` et `Soy_Pioneer.webp` répondent tous en
+      200 avec le bon poids. ✅
+- [x] **Retirer la mention « en cours de développement »** du frontmatter de
+      `PersonaDLE_Update_Documentation/PersonaDLE 2.3/PersonaDLE_Update.html` (bloc `fr` ET
+      bloc `en` : « en cours de développement » / « in development »). Demande Hamza du
+      2026-09-25. La page devient celle d'une version **livrée** au moment où `main` la sert :
+      laisser la mention ferait passer la prod pour un chantier.
+- [x] **Ajouter l'entrée `version-item` 2.3** dans le modal « Nouveautés » de `index.html`
+      — volontairement absente jusqu'ici (CLAUDE.md §9 : elle s'ajoute **à la sortie**).
+- [x] **Bumper `CACHE_VERSION`** dans `sw.js`. Sans bump, `activate` ne purge rien : les
+      joueurs **déjà venus** gardent les anciens assets servis en cache-first (images, sons).
+      Invisible en test, puisque ce sont justement les nouveaux venus qui vont bien.
+- [x] **Migrations jouées en prod le 2026-09-25** — 054 puis 055, envoyées depuis le poste
+      local (les fichiers ne sont pas encore sur le serveur à ce stade, cf. DEPLOY.md §4).
+      Backup rapatrié en local avant : `~/personadle_backups/db_backup_2026-09-25_1927.sql`,
+      52 Mo, 31 tables. Résultat : badges 69 → **74**, titres 22 → **23**, codes 13 → **14**,
+      table `challenge_wins` créée. Enregistrées ensuite dans `schema_migrations` (§4bis) :
+      **55 lignes pour 55 fichiers**, le contrôle qui attrape l'oubli.
+- [ ] **`npm run schema:check-prod`** sur le serveur avant la bascule, et rejouer toute
+      migration qui INSERT contre le `SHOW CREATE TABLE` de la prod — pas seulement contre
+      `sql/bdd_mysql.sql` (cf. CLAUDE.md §7, vécu à la 2.2 et à la 050).
+
 > ✅ **Le changelog joueur n'est plus bloquant** (2026-08-26). Cette section affirmait qu'il ne
 > contenait « aucune entrée Expert, pour aucun des 6 modes » — vrai le 2026-08-21, comblé
 > depuis par la PR #71 : `PersonaDLE_Update.html` a sa section ⚡ complète (les 6 modes +
@@ -225,10 +255,10 @@ Bonne nouvelle sur le coût : `api/lib/condition_check.php` gère déjà `mode_w
 > arbitrées avec Hamza, plus exigeantes que la reco `mode_wins` initiale — elles mesurent
 > la maîtrise (vitesse, régularité), pas le volume :
 >
-> | Mode | Condition |
-> |---|---|
-> | Classique, Silhouette | 10 victoires en 4 essais ou moins chacune |
-> | Émoji | 10 victoires sur une seule journée |
+> | Mode                   | Condition                                  |
+> | ---------------------- | ------------------------------------------ |
+> | Classique, Silhouette  | 10 victoires en 4 essais ou moins chacune  |
+> | Émoji                  | 10 victoires sur une seule journée         |
 > | AOA, Personae, Musique | 15 victoires parfaites (1 essai) d'affilée |
 >
 > Décision produit : le déblocage est une propriété du **compte** — il suit le joueur sur
@@ -387,7 +417,7 @@ Léo et Damien, `reset --hard` sur Hostinger, PR ouvertes à recréer**. À ne f
 - [ ] **Léo et Damien prévenus** : leurs clones deviennent incompatibles → `git clone` à
       neuf (rien de local à garder chez eux avant) ;
 - [ ] **sauvegarde** : `git clone --mirror https://github.com/CodeByHaamza/personadle.git
-      personadle-backup.git`, gardée hors ligne un mois ;
+  personadle-backup.git`, gardée hors ligne un mois ;
 - [ ] **réécriture** : `bash scripts/purge_git_history.sh` (réécrit le 2026-09-13 — il cible
       **uniquement** `allOutAttackMode/database/allOutAttack/*.gif` ; l'ancienne version purgeait
       « tout blob > 5 Mo » et aurait emporté les badges et wallpapers PNG). Il fait lui-même le
@@ -396,11 +426,11 @@ Léo et Damien, `reset --hard` sur Hostinger, PR ouvertes à recréer**. À ne f
       (avatars, loading — petits et encore servis) ;
 - [ ] **vérifier** sur le miroir réécrit, cloné à part : `npm test`, `make up` +
       `npm run test:e2e`, `git log --oneline | wc -l` identique, `git diff <ancien main>
-      <nouveau main>` vide hors `.gif` purgés ;
+  <nouveau main>` vide hors `.gif` purgés ;
 - [ ] **pousser** : `git push --force --mirror` (toutes branches et tags) ;
 - [ ] **Hostinger** (le `git pull` auto refusera l'historique divergent) : SSH,
       `cd domains/personadle.net/public_html && git fetch origin && git reset --hard
-      origin/main`, puis vérifier `api/config.php` et les fichiers non suivis toujours en
+  origin/main`, puis vérifier `api/config.php` et les fichiers non suivis toujours en
       place. Hors heure de pointe, prévoir quelques minutes ;
 - [ ] **après coup** : `git gc --prune=now --aggressive` sur chaque clone survivant ;
       supprimer le miroir de sauvegarde après un mois sans problème.
@@ -485,7 +515,7 @@ Léo et Damien, `reset --hard` sur Hostinger, PR ouvertes à recréer**. À ne f
       d'alors n'enregistrait qu'une session par jour : levé par la migration 032. (2) Le rate
       limit de `api/sessions.php` (`15 / 15 min`), calibré pour ce monde-là, devenait le
       plafond effectif et coupait à la **16e partie d'affilée** — sans rien perdre, mais sans
-      rien compter non plus, et le compteur *reculait* au `pullProfileFromCloud()` suivant.
+      rien compter non plus, et le compteur _reculait_ au `pullProfileFromCloud()` suivant.
       Porté à `90 / 15 min`. Vérifié de bout en bout : 50 victoires classique le même jour
       donnent `games=50`, `wins=50`, classements `ever` et `day` à 50, badges `mode_wins ≥ 50`
       / `mode_games ≥ 30` / `games_total ≥ 25` débloqués.

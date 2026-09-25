@@ -362,11 +362,13 @@ Dans hPanel → **Avancé** → **Tâches Cron** :
 | **Toutes les heures**   | `wget --header="X-Cron-Key: TON_SECRET" -qO- "https://personadle.net/api/cron/leaderboard.php" > /dev/null 2>&1`   |
 | **1× par jour à 03:00** | `wget --header="X-Cron-Key: TON_SECRET" -qO- "https://personadle.net/api/cron/hard-delete.php" > /dev/null 2>&1`   |
 | **1× par jour à 04:00** | `wget --header="X-Cron-Key: TON_SECRET" -qO- "https://personadle.net/api/cron/purge-rate-limits.php" > /dev/null 2>&1` |
-| **1× par jour à 00:05** | `wget --header="X-Cron-Key: TON_SECRET" -qO- "https://personadle.net/api/cron/discord-daily.php" > /dev/null 2>&1` |
+| **1× par jour à 06:00 UTC** (`0 6 * * *` — 8 h Paris l'été, 7 h l'hiver ; décision Hamza 2026-09-21, avant : 00:05 Paris) | `wget --header="X-Cron-Key: TON_SECRET" -qO- "https://personadle.net/api/cron/discord-daily.php" > /dev/null 2>&1` |
 | **Dimanche 20:00** (`0 20 * * 0`) | `wget --header="X-Cron-Key: TON_SECRET" -qO- "https://personadle.net/api/cron/discord_weekly.php" > /dev/null 2>&1` |
 
-Les deux crons Discord attendent l'heure de **Paris** : vérifier le fuseau du cron hPanel
-(première exécution : regarder l'heure réelle du post dans le salon, ajuster si décalé).
+Le cron hPanel est en **UTC** (vérifié le 2026-09-20 : une ligne `5 0 * * *` postait à 02:05
+Paris). Le quotidien vise le matin, pas minuit : la cible change à minuit Paris mais personne
+ne joue à cette heure-là, et le ping 🔔 Daily réveillait les gens. Le message dit toujours
+« jusqu'à minuit, heure de Paris » — c'est vrai quelle que soit l'heure du post.
 Le top 3 hebdo a besoin de `DISCORD_WEEKLY_WEBHOOK` dans `config.php` (à défaut il poste
 sur le webhook du quotidien).
 

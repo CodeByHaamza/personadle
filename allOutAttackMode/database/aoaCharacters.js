@@ -16,6 +16,11 @@ export const aoaCharacters = [
   { nom: "Metis", gif: "Metis", opus: ["P3", "P3FES"] },
 
   // === Persona 3 Portable (P3P) ===
+  // Une seule entrée (décision Hamza du 2026-09-25), rangée en P3P : c'est le jeu
+  // dont elle vient, et c'est là que le joueur la cherche dans les filtres. Son
+  // animation, elle, est celle de *Persona 5: The Phantom X* (version 4.10), où elle
+  // débarque en 5 étoiles — les fichiers gardent le nom `Kotone`, pour qu'un
+  // personnage reste un seul fichier ici comme sur le CDN.
   { nom: "Kotone Shiomi", gif: "Kotone", opus: ["P3P"] },
 
   // === Persona 5 (base / Strikers / Tactica) ===
@@ -102,4 +107,12 @@ export const aoaCharacters = [
 
   // === P5X — Collaboration Hatsune Miku ===
   { nom: "Miku ( Hatsune Miku )", gif: "Miku", opus: ["P5X"] },
+
+  // === P5X — Skins 2.3 (lot du 2026-09-22) ===
+  // Noms officiels vérifiés : « Notte » (et non « Night ») et « Pioneer » (et non
+  // « Frontier », nom daté d'un datamine antérieur qu'un des fichiers source porte
+  // encore). Sources : lufel.net/en/character/luce-notte/ → « Shoki·Notte », et
+  // lufel.net/en/character/soy-pioneer/ → « Shun·Pioneer ».
+  { nom: "Luce Notte ( Shoki Ikenami )", gif: "Luce_Notte", opus: ["P5X"] },
+  { nom: "Soy Pioneer ( Shun Kano )", gif: "Soy_Pioneer", opus: ["P5X"] },
 ];

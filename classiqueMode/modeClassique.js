@@ -295,11 +295,19 @@ function filterCharacterPool() {
 
 /**
  * Converts a string age range to a numeric midpoint for arrow comparison.
+ *
+ * ⚠️ Ce barème doit couvrir TOUTE tranche de `VALID_AGES`
+ * (`scripts/validate_characters.js`) sauf "Unknown", qui n'est pas ordonnable
+ * et doit rester à -1. Les deux listes sont des sources de vérité distinctes :
+ * "60+" a vécu dans `VALID_AGES` sans jamais entrer ici, donc Mutatsu — son
+ * seul porteur — ressortait en rouge au lieu de l'orange avec flèche.
+ * `tests/modeComparisons.test.js` verrouille cette correspondance.
+ *
  * @param {string} age - e.g. "15-20", "40+"
  * @returns {number} Numeric value or -1 if unknown
  */
 export function convertAgeToValue(age) {
-  const map = { "< 15": 10, "15-20": 17.5, "21-40": 30, "40+": 50, "80+": 85 };
+  const map = { "< 15": 10, "15-20": 17.5, "21-40": 30, "40+": 50, "60+": 65, "80+": 85 };
   return map[age] ?? -1;
 }
 

@@ -130,6 +130,15 @@ final class BadgeWallpaperCatalogTest extends TestCase
             'tanabata'       => ['played_on_date', '07-07', null],
             'golden_week'    => ['played_in_period', '04-29:05-05', null],
             'promised_day'   => ['played_on_all_dates', '12-31,01-01', null],
+            // Lot du 2026-09-23 (migration 054) — contenu 2.3
+            'birds_different_feather' => ['targets_found', 'birds_different_feather', null],
+            'memento_vivere_mori'     => ['targets_found', 'memento_vivere_mori', null],
+            // Défis relevés : lu dans `challenge_wins`, table en ajout seul (cf.
+            // migration 054). `messages` ne convenait pas — le joueur peut les
+            // supprimer, et le badge se reperdrait.
+            'chord_progression'       => ['mode_challenge_wins', 'music', 10],
+            // Secret : accordé UNIQUEMENT par /redeem (code dévoilé à la sortie).
+            'her_own_orpheus'         => ['manual', null, null],
             'easter_2026'    => ['played_on_easter', null, null],
         ];
 
@@ -145,6 +154,8 @@ final class BadgeWallpaperCatalogTest extends TestCase
             'reborn_phoenix', 'take_the_pose', 'data_mining', 'leblanc_meeting',
             'rentree', 'sport', 'christmas_2025', 'new_years_2026', 'chinese_new_year_2026',
             'true_hacker', 'tae_takemi', 'arati', 'gyotre', 'dzulian', 'chef', 'github_contributor',
+            // Lot du 2026-09-25 : pendant Ko-fi de github_contributor, même régime `manual`.
+            'cafe_leblanc',
             'lobster', 'hifumi_archives', 'report',
         ];
 
@@ -158,12 +169,12 @@ final class BadgeWallpaperCatalogTest extends TestCase
     public function testEveryBadgeHasExpectedConditionColumns(): void
     {
         $expected = self::expectedBadgeConditions();
-        $this->assertCount(69, $expected, 'Le catalogue de référence de ce test doit lister les 69 badges');
+        $this->assertCount(74, $expected, 'Le catalogue de référence de ce test doit lister les 74 badges');
 
         $rows = self::$pdo->query(
             'SELECT slug, condition_type, condition_mode, condition_value FROM badges'
         )->fetchAll(PDO::FETCH_ASSOC);
-        $this->assertCount(69, $rows, 'La table badges doit contenir exactement 69 lignes (seed bdd_mysql.sql)');
+        $this->assertCount(74, $rows, 'La table badges doit contenir exactement 74 lignes (seed bdd_mysql.sql)');
 
         $bySlug = [];
         foreach ($rows as $r) {
@@ -258,6 +269,8 @@ final class BadgeWallpaperCatalogTest extends TestCase
             'tatsuya_dont_burn_out'       => ['played_on_date', '06-24', null],
             // Lot du 2026-09-18 (migration 046)
             'wonder_go_beyond'            => ['targets_found', 'wonder_go_beyond', null],
+            // Lot du 2026-09-23 (migration 054)
+            'tatsuya_maya_deja_vu'        => ['targets_found', 'p2_deja_vu', null],
         ];
     }
 
@@ -608,6 +621,17 @@ final class BadgeWallpaperCatalogTest extends TestCase
                     case 'all_modes_won':
                         foreach (PERSONADLE_MODES as $m) {
                             self::$pdo->prepare('INSERT INTO user_stats (user_id, mode, wins) VALUES (?, ?, 1)')->execute([$uid, $m]);
+                        }
+                        break;
+                    case 'mode_challenge_wins':
+                        // Table en AJOUT SEUL : on y insère directement, il n'y a
+                        // pas de « partie » à simuler. `message_id` distinct à
+                        // chaque ligne, sinon la clé unique les confond.
+                        $cw = self::$pdo->prepare(
+                            'INSERT INTO challenge_wins (user_id, mode, is_expert, message_id) VALUES (?, ?, 0, ?)'
+                        );
+                        for ($i = 0; $i < (int) $value; $i++) {
+                            $cw->execute([$uid, $mode, 900000 + $i]);
                         }
                         break;
                     case 'targets_found':

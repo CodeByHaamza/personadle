@@ -31,6 +31,10 @@ const filters = {
   // tirage, autre barème, et un taux de victoire sans commune mesure — les
   // mélanger ne décrirait ni l'un ni l'autre.
   expert: false,
+  // Troisième dimension (2.3), et la seule qui change la NATURE de la ligne :
+  // on n'y classe plus des joueurs mais des AMITIÉS. Mode, période et métrique
+  // n'ont alors aucun sens — leurs groupes sont masqués.
+  bonds: false,
   offset: 0,
 };
 
@@ -55,6 +59,20 @@ function esc(str) {
 function t(key) {
   const val = window.i18n?.t?.(key);
   return val != null && val !== key ? val : "";
+}
+
+/**
+ * Nombre d'XP lisible, groupé par milliers selon la langue de la page. Une
+ * amitié très active dépasse largement les 2 700 du rang 10, et « 18450 XP » ne
+ * se lit plus. Même logique que `fmtXp()` dans js/social-link.js.
+ */
+function fmtXp(n) {
+  const v = Number(n) || 0;
+  try {
+    return v.toLocaleString(document.documentElement.lang || "en");
+  } catch {
+    return String(v);
+  }
 }
 
 /** Formate la valeur de score selon la métrique courante. */
@@ -93,6 +111,25 @@ function metricLabel() {
 function renderFilterNote() {
   const el = document.getElementById("lbFilterNote");
   if (!el) return;
+
+  // En mode Amitiés, mode / période / métrique ne s'appliquent pas : les
+  // rappeler ici laisserait croire l'inverse. On dit plutôt ce que le classement
+  // range, et sur quoi il départage.
+  if (filters.bonds) {
+    const scope = filters.friendsOnly
+      ? `<span class="lb-fn-sep">·</span><span class="lb-fn-chip lb-fn-chip--friends">👥 ${esc(t("leaderboard.scope_friends") || "Friends")}</span>`
+      : "";
+    el.innerHTML = `
+      <span class="lb-fn-chips">
+        <span class="lb-fn-chip lb-fn-chip--bonds">${esc(t("leaderboard.dimension_bonds") || "🤝 Social Link")}</span>
+        ${scope}
+      </span>
+      <span class="lb-fn-note">${esc(
+        t("leaderboard.bonds_note") ||
+          "Friendships ranked by Social Link XP. Rank stops at 10 — the XP doesn't."
+      )}</span>`;
+    return;
+  }
 
   const modeLabels = {
     all: t("leaderboard.filter_all_modes") || "All modes",
@@ -275,6 +312,131 @@ function renderMyRank(myRank) {
 }
 
 /** Affiche le corps du leaderboard. */
+/**
+ * Podium des trois plus fortes amitiés — même forme que celui des joueurs
+ * (2 — 1 — 3, la première marche plus haute), mais avec DEUX visages par carte.
+ *
+ * Écrit à part de `renderPodium()` plutôt que paramétré, pour la même raison que
+ * `renderBonds()` : une carte d'amitié n'a pas le même contenu (deux avatars,
+ * deux pseudos, le lien au centre). Fondre les deux aurait demandé des branches
+ * dans chaque ligne de la fonction.
+ */
+function renderBondsPodium(top, myId) {
+  // Ordre visuel 2 — 1 — 3 ; le CSS remet 1,2,3 en colonne sur mobile.
+  const ordre = [top[1], top[0], top[2]].filter(Boolean);
+  const medailles = { 1: "🥇", 2: "🥈", 3: "🥉" };
+
+  return `
+    <div class="lb-podium lb-podium--bonds">
+      ${ordre
+        .map((e) => {
+          const rang = e.rank ?? top.indexOf(e) + 1;
+          const mien = myId && (e.a.user_id === myId || e.b.user_id === myId);
+          const visage = (u) => `
+            <img class="lb-podium-avatar lb-bond-podium-avatar"
+                 src="${esc(avatarSrc(u.avatar_data))}"
+                 alt="${esc(u.pseudo)}"
+                 loading="lazy"
+                 style="border-color:${esc(u.avatar_border_color || "#ffffff")}"
+                 onerror="this.src='../../img/default_avatar.png'">`;
+
+          return `
+            <div class="lb-podium-card lb-podium-card--${rang}${mien ? " lb-podium-card--me" : ""}">
+              <span class="lb-podium-medal" aria-hidden="true">${medailles[rang] ?? rang}</span>
+              <div class="lb-bond-podium-faces">
+                ${visage(e.a)}
+                <span class="lb-bond-podium-heart" aria-hidden="true">${e.sl_rank >= 10 ? "💛" : "❤️"}</span>
+                ${visage(e.b)}
+              </div>
+              <span class="lb-podium-name lb-bond-podium-names">${esc(e.a.pseudo)} &amp; ${esc(e.b.pseudo)}</span>
+              <span class="lb-podium-score">${fmtXp(e.xp)} XP</span>
+              <span class="lb-podium-sub">${esc(
+                (t("leaderboard.bonds_rank") || "Rank {{n}}").replace("{{n}}", e.sl_rank)
+              )}</span>
+            </div>`;
+        })
+        .join("")}
+    </div>`;
+}
+
+/**
+ * Classement des AMITIÉS : une ligne = un lien entre deux joueurs.
+ *
+ * Volontairement séparé de `renderLeaderboard()` plutôt que paramétré : la ligne
+ * n'a ni la même structure (deux avatars, deux pseudos), ni le même sens (un
+ * rang y décrit une relation, pas une performance). Fondre les deux dans une
+ * fonction à branches aurait rendu les deux illisibles.
+ *
+ * Pas de podium : un top 3 en marches vient récompenser des individus, et ce
+ * classement-ci n'en récompense aucun.
+ */
+function renderBonds(data) {
+  const body = document.getElementById("leaderboardBody");
+  const myId = window._currentUser?.id ?? null;
+  const entries = data.entries ?? [];
+
+  if (!entries.length) {
+    const texte = filters.friendsOnly
+      ? t("leaderboard.bonds_none_mine") || "You don't have a Social Link with any XP yet."
+      : t("leaderboard.bonds_none") || "No Social Link has earned XP yet.";
+    body.innerHTML = `
+      <div class="lb-empty">
+        <span class="lb-empty__icon">🤝</span>
+        <p class="lb-empty__text">${esc(texte)}</p>
+      </div>`;
+    renderMyRank(null);
+    return;
+  }
+
+  const medailles = { 1: "🥇", 2: "🥈", 3: "🥉" };
+
+  // Podium sur la première page, dès qu'il y a un vrai top 3 — comme les autres
+  // classements. Je l'avais d'abord écarté en me disant qu'un podium récompense
+  // des individus ; le retour de Hamza a tranché, et il a raison : l'écart de
+  // traitement se voyait immédiatement, et une amitié au sommet mérite la même
+  // mise en avant qu'un joueur.
+  const podium = filters.offset === 0 && entries.length >= 3;
+
+  body.innerHTML =
+    (podium
+      ? renderBondsPodium(entries.slice(0, 3), myId) +
+        `<div class="lb-podium-divider"><span>${esc(t("leaderboard.others") || "Others")}</span></div>`
+      : "") +
+    (podium ? entries.slice(3) : entries)
+    .map((e) => {
+      // « me concerne » : le lien est mis en avant si j'en suis l'un des deux
+      // côtés, exactement comme une ligne de classement normale l'est pour moi.
+      const mien = myId && (e.a.user_id === myId || e.b.user_id === myId);
+      const cote = (u) => `
+        <div class="lb-bond-side">
+          <img class="lb-bond-avatar"
+               src="${esc(avatarSrc(u.avatar_data))}"
+               alt="${esc(u.pseudo)}"
+               loading="lazy"
+               style="border-color:${esc(u.avatar_border_color || "#ffffff")}"
+               onerror="this.src='../../img/default_avatar.png'">
+          <span class="lb-bond-name">${esc(u.pseudo)}</span>
+        </div>`;
+
+      return `
+        <div class="lb-row lb-bond-row${mien ? " lb-row--me" : ""}">
+          <span class="lb-rank">${medailles[e.rank] ?? e.rank}</span>
+          ${cote(e.a)}
+          <span class="lb-bond-link" aria-hidden="true">
+            <span class="lb-bond-heart">${e.sl_rank >= 10 ? "💛" : "❤️"}</span>
+            <span class="lb-bond-rank">${esc(
+              (t("leaderboard.bonds_rank") || "Rank {{n}}").replace("{{n}}", e.sl_rank)
+            )}</span>
+          </span>
+          ${cote(e.b)}
+          <span class="lb-bond-xp">${fmtXp(e.xp)} XP</span>
+        </div>`;
+    })
+    .join("");
+
+  renderMyRank(data.my_rank ?? null);
+}
+
 function renderLeaderboard(data) {
   const body = document.getElementById("leaderboardBody");
   const myId = window._currentUser?.id ?? null;
@@ -378,10 +540,16 @@ async function loadLeaderboard() {
       offset: filters.offset,
       friends_only: filters.friendsOnly ? 1 : 0,
       expert: filters.expert ? 1 : 0,
+      ...(filters.bonds ? { view: "bonds" } : {}),
     });
 
-    renderLeaderboard(data);
-    renderPagination(data.count ?? 0);
+    if (filters.bonds) {
+      renderBonds(data);
+      renderPagination(data.total ?? 0);
+    } else {
+      renderLeaderboard(data);
+      renderPagination(data.count ?? 0);
+    }
   } catch (err) {
     if (body) {
       const msg =
@@ -450,6 +618,7 @@ function attachFilterListeners() {
     const pill = e.target.closest(".lb-pill");
     if (!pill) return;
     filters.expert = pill.dataset.value === "expert";
+    filters.bonds = pill.dataset.value === "bonds";
     filters.offset = 0;
     activatePill(dimensionGroup, pill.dataset.value);
     // La carte des filtres prend l'ambiance Expert : l'écart de contexte doit se
@@ -457,6 +626,11 @@ function attachFilterListeners() {
     document
       .querySelector(".lb-filters-card")
       ?.classList.toggle("lb-filters-card--expert", filters.expert);
+    // Les filtres sans objet pour les amitiés sont MASQUÉS, pas désactivés : un
+    // groupe grisé laisse croire qu'il s'appliquera peut-être.
+    for (const id of ["modeFilter", "periodFilter", "metricFilter"]) {
+      document.getElementById(id)?.closest(".lb-filter-group")?.classList.toggle("hidden", filters.bonds);
+    }
     loadLeaderboard();
   });
 

@@ -3,7 +3,9 @@
  * de codes déblocables donnant un badge exclusif).
  */
 
-import { api, toast, escHtml, renderLoading, renderError } from "./admin-api.js";
+import { api, toast, escHtml, pathPrefix, renderLoading, renderError } from "./admin-api.js";
+import { badgesCatalog, loadBadgesCatalog } from "./catalogs.js";
+import { ouvrirSelecteurBadge } from "./badge_picker.js";
 
 export async function renderEventCodes() {
   const el = document.getElementById("codes-panel-content");
@@ -70,8 +72,11 @@ export async function renderEventCodes() {
           <label>Code (majuscules, chiffres, _)
             <input id="new-code" type="text" placeholder="EX: PERSONA2027" maxlength="50">
           </label>
-          <label>Badge ID
-            <input id="new-badge-id" type="text" placeholder="slug_du_badge" maxlength="100">
+          <label>Badge
+            <span class="badge-choice">
+              <input id="new-badge-id" type="text" placeholder="slug_du_badge" maxlength="100" readonly>
+              <button type="button" id="pick-badge-btn" class="btn-small">📋 Choisir…</button>
+            </span>
           </label>
           <label>Description
             <input id="new-description" type="text" placeholder="Optionnel" maxlength="255">
@@ -135,15 +140,37 @@ export async function renderEventCodes() {
     };
   });
 
+  // Choix du badge par la LISTE, et non au clavier. Un slug tapé à la main se
+  // trompe en silence : le code est créé, il s'affiche actif, et il ne donnera
+  // jamais rien — le joueur reçoit « Code mal configuré » et personne ne sait
+  // pourquoi tant qu'on n'a pas relu la ligne en base.
+  //
+  // Le champ reste `readonly` plutôt que remplacé par un `<select>` : il montre
+  // le slug exact qui partira en base, ce qu'un admin doit pouvoir relire.
+  const champBadge = document.getElementById("new-badge-id");
+  document.getElementById("pick-badge-btn").onclick = async () => {
+    if (!badgesCatalog.length) await loadBadgesCatalog();
+    ouvrirSelecteurBadge(badgesCatalog, pathPrefix, (slug) => {
+      champBadge.value = slug;
+    });
+  };
+
   // Create
   document.getElementById("create-code-btn").onclick = async () => {
     const btn = document.getElementById("create-code-btn");
     const isPerm = document.getElementById("new-permanent").checked;
     btn.disabled = true;
     btn.textContent = "…";
+    const slug = document.getElementById("new-badge-id").value.trim();
+    if (!slug) {
+      toast("❌ Choisis un badge avant de créer le code", "error");
+      btn.disabled = false;
+      btn.textContent = "➕ Créer le code";
+      return;
+    }
     const res = await api.post("/api/admin/event_codes", {
       code: document.getElementById("new-code").value.trim(),
-      badge_id: document.getElementById("new-badge-id").value.trim(),
+      badge_id: slug,
       description: document.getElementById("new-description").value.trim(),
       is_permanent: isPerm,
       is_active: true,

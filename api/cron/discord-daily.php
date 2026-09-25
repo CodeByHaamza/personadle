@@ -6,7 +6,9 @@
  *   GET https://personadle.net/api/cron/discord-daily.php
  *   Header: X-Cron-Key: <CRON_SECRET>
  *
- * Fréquence : tous les jours à 00:05 (Paris), juste après le reset du jeu.
+ * Fréquence : tous les jours à 06:00 UTC (8 h Paris l'été, 7 h l'hiver) — décision Hamza
+ * 2026-09-21 : le matin plutôt que 00:05 Paris, personne ne joue à minuit et le ping réveillait.
+ * La cible du jour, elle, change à minuit Paris : le message reste juste (« jusqu'à minuit »).
  *
  * Un webhook Discord accepte 'username' et 'avatar_url' à CHAQUE message : un
  * seul webhook fait donc parler plusieurs personnages, avec leur avatar, sans
@@ -20,6 +22,7 @@
  */
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../lib/event_calendar.php';
 
 requireCronSecret();
 
@@ -340,6 +343,19 @@ $mention = defined('DISCORD_DAILY_MENTION_ROLE')
     ? preg_replace('/\D/', '', (string) DISCORD_DAILY_MENTION_ROLE)
     : '';
 
+// 🎁 Récompense du jour : badges/titres à date et codes événement qui commencent ou
+// finissent aujourd'hui, lus dans le catalogue (api/lib/event_calendar.php). Plus rien
+// à écrire à la main : créer le code dans l'admin suffit (demande Hamza, 2026-09-20).
+$rewards = personadle_rewards_for_date(pdo(), DateTimeImmutable::createFromMutable($now));
+$fields  = [];
+if ($rewards !== []) {
+    $fields[] = [
+        'name'   => "🎁 Récompense du jour / Today's reward",
+        'value'  => mb_substr(personadle_rewards_announcement($rewards), 0, 1024),
+        'inline' => false,
+    ];
+}
+
 $payload = [
     'username'   => $v['nom'],
     'avatar_url' => $avatar,
@@ -348,6 +364,7 @@ $payload = [
         'description' => $corps,
         'color'       => $v['color'],
         'thumbnail'   => ['url' => $avatar],
+        'fields'      => $fields,
         'footer'      => ['text' => 'PersonaDLE — ' . $now->format('d/m/Y')],
     ]],
     'allowed_mentions' => ['parse' => [], 'roles' => $mention !== '' ? [$mention] : []],
@@ -410,6 +427,7 @@ jsonSuccess([
         'index_phrase' => $iPhrase,
         'total_voix'   => count($voix),
         'combinaisons' => count($voix) * count($v['phrases']),
+        'rewards'      => array_map(static fn($r) => $r['slug'] . ':' . $r['phase'], $rewards),
         'status'       => $code,
         'elapsed_ms'   => round((microtime(true) - $start) * 1000),
         'ran_at'       => $now->format('Y-m-d H:i:s'),

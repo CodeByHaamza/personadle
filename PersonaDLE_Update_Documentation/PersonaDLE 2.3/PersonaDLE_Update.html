@@ -1,0 +1,2539 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PersonaDLE — What's New in v2.3</title>
+    <link rel="icon" type="image/gif" href="../../img/persona_64x64.gif" />
+    <script>
+        (function () {
+            var lang = localStorage.getItem("lang") || "en";
+            document.documentElement.lang = lang;
+            if (localStorage.getItem("darkMode") === "enabled") {
+                document.documentElement.classList.add("darkmode");
+            }
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ── Theme variables ── */
+        :root {
+            --primary-color: #e8447e;
+            --text-main: #1e1830;
+            --text-muted: #5a4a72;
+            --text-h3: #9a3670;
+            --bg-overlay: rgba(255, 242, 248, 0.90);
+            --bg-code: #1e1428;
+            --bg-quote: rgba(255, 214, 232, 0.55);
+            --border-color: rgba(232, 68, 126, 0.22);
+            --panel-bg: rgba(255, 252, 255, 0.88);
+            --blockquote-text: #5c1e42;
+            --inline-code-bg: rgba(232, 68, 126, 0.09);
+            --inline-code-color: #b81e5c;
+            --table-head-bg: rgba(232, 68, 126, 0.12);
+            --table-head-color: #7a0e3c;
+            --table-row-alt: rgba(0, 0, 0, 0.025);
+            --details-bg: rgba(255, 250, 255, 0.9);
+            --details-color: #1e1830;
+            --home-btn-bg: rgba(255, 252, 255, 0.93);
+            --home-btn-color: #1e1830;
+            --home-btn-hover-bg: rgba(240, 232, 255, 0.97);
+            --card-bg: rgba(255, 252, 255, 0.92);
+            --mode-card-border: rgba(232, 68, 126, 0.2);
+            --aoa-card-bg: linear-gradient(135deg, #fdf8ff 0%, #fff4fa 35%, #f4f8ff 65%, #fdf8ff 100%);
+            --aoa-portrait-bg: rgba(240, 235, 250, 0.7);
+            --aoa-battle-bg: rgba(240, 235, 250, 0.6);
+            --aoa-col-border: rgba(232, 68, 126, 0.15);
+            --card-name-color: #1e0030;
+            --card-sub-color: #a14a76;
+            --summer-card-bg: linear-gradient(135deg, #fffbf0 0%, #fff7e0 40%, #f0feff 70%, #f4fff4 100%);
+            --summer-title-color: #9a5c00;
+            --summer-intro-bg: rgba(210, 155, 30, 0.08);
+            --summer-intro-border: #b08020;
+            --section-intro-bg: rgba(100, 60, 200, 0.055);
+            --section-intro-color: #5a4878;
+            --section-intro-border: #7c4dff;
+        }
+
+        :root.darkmode {
+            --text-main: #e8e4f0;
+            --text-muted: #a89ec0;
+            --text-h3: #c8b8e0;
+            --bg-overlay: rgba(8, 6, 14, 0.9);
+            --bg-code: #12101e;
+            --bg-quote: rgba(30, 10, 20, 0.7);
+            --border-color: rgba(232, 68, 126, 0.32);
+            --panel-bg: rgba(14, 10, 24, 0.75);
+            --blockquote-text: #f0c4dc;
+            --inline-code-bg: rgba(255, 120, 175, 0.13);
+            --inline-code-color: #ff9ec4;
+            --table-head-bg: rgba(232, 68, 126, 0.2);
+            --table-head-color: #ffc6de;
+            --table-row-alt: rgba(255, 255, 255, 0.03);
+            --details-bg: rgba(14, 10, 24, 0.75);
+            --details-color: #e8e4f0;
+            --home-btn-bg: #1a1228;
+            --home-btn-color: #e8e4f0;
+            --home-btn-hover-bg: #2d1a40;
+            --card-bg: rgba(14, 10, 24, 0.85);
+            --mode-card-border: rgba(232, 68, 126, 0.3);
+            --aoa-card-bg: linear-gradient(135deg, #08000e 0%, #1c0018 35%, #0e0020 65%, #180010 100%);
+            --aoa-portrait-bg: rgba(6, 0, 8, 0.7);
+            --aoa-battle-bg: rgba(6, 0, 8, 0.6);
+            --aoa-col-border: rgba(232, 68, 126, 0.22);
+            --card-name-color: #fff;
+            --card-sub-color: #e09ab8;
+            --summer-card-bg: linear-gradient(135deg, #100c00 0%, #1e1600 40%, #001c20 70%, #0a1400 100%);
+            --summer-title-color: #f6ab3c;
+            --summer-intro-bg: rgba(246, 171, 60, 0.07);
+            --summer-intro-border: #d4943a;
+            --section-intro-bg: rgba(140, 100, 255, 0.07);
+            --section-intro-color: #b8c0cc;
+            --section-intro-border: #7c4dff;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background:
+                linear-gradient(var(--bg-overlay), var(--bg-overlay)),
+                url('../../img/personadle_wallpaper.jpg') center / cover fixed;
+            min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .doc-wrap {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px clamp(16px, 5vw, 56px);
+        }
+
+        h1, h2, h3 {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--text-main);
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        h2 {
+            font-size: 1.45rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 4px;
+            margin-top: 2em;
+        }
+
+        h3 { font-size: 1.15rem; color: var(--text-h3); }
+
+        p { margin-bottom: 1em; }
+
+        ul { padding-left: 1.4em; margin-bottom: 1em; }
+        ul li { margin-bottom: 0.3em; }
+
+        /* Frontmatter */
+        .frontmatter {
+            text-align: center;
+            margin-bottom: 36px;
+            padding: 36px 28px;
+            background: var(--panel-bg);
+            border-radius: 16px;
+            border: 1px solid rgba(232, 68, 126, 0.3);
+            backdrop-filter: blur(4px);
+            animation: fmPulse 5s ease-in-out infinite;
+        }
+        @keyframes fmPulse {
+            0%, 100% { border-color: rgba(232,68,126,.3); }
+            50% { border-color: rgba(232,68,126,.65); box-shadow: 0 0 40px rgba(232,68,126,.06); }
+        }
+
+        .frontmatter h1 {
+            border: none;
+            font-size: 2.6rem;
+            margin: 0 0 8px 0;
+            color: var(--primary-color);
+            text-shadow: 0 0 30px rgba(232, 68, 126, 0.35);
+        }
+
+        .frontmatter p {
+            margin: 4px 0;
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        .fm-meta { margin-top: 16px; display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; }
+        .fm-tag {
+            font-size: 0.8rem;
+            background: rgba(232, 68, 126, 0.08);
+            border: 1px solid rgba(232, 68, 126, 0.2);
+            border-radius: 20px;
+            padding: 4px 14px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Blockquotes */
+        blockquote {
+            border-left: 4px solid var(--primary-color);
+            background-color: var(--bg-quote);
+            margin: 1.2em 0;
+            padding: 1em 1.4em;
+            border-radius: 0 8px 8px 0;
+            font-weight: 600;
+            color: var(--blockquote-text);
+            backdrop-filter: blur(3px);
+        }
+        blockquote p { margin: 0; }
+
+        /* Code */
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: var(--inline-code-bg);
+            color: var(--inline-code-color);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-size: 0.88em;
+        }
+
+        pre {
+            background-color: var(--bg-code);
+            color: #cdd6f4;
+            padding: 14px 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.88em;
+            line-height: 1.5;
+        }
+        pre code { background: transparent; color: inherit; padding: 0; }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.4em 0;
+            font-size: 0.93em;
+        }
+        thead { background-color: var(--table-head-bg); color: var(--table-head-color); }
+        th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { font-family: 'Montserrat', sans-serif; font-weight: 700; text-transform: uppercase; font-size: 0.82em; letter-spacing: 0.5px; }
+        tbody tr:nth-child(even) { background-color: var(--table-row-alt); }
+        tbody tr:hover { background: rgba(232,68,126,.04) !important; }
+
+        /* Details */
+        details {
+            background: var(--details-bg);
+            color: var(--details-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin: 0.8em 0;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            user-select: none;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 2px 0;
+        }
+        summary::-webkit-details-marker { display: none; }
+        summary::before { content: '▶'; font-size: .65em; color: var(--primary-color); transition: transform .2s; flex-shrink: 0; }
+        details[open] summary::before { transform: rotate(90deg); }
+        summary:hover { color: var(--primary-color); }
+
+        hr { border: 0; height: 1px; background: var(--border-color); margin: 2.5em 0; }
+
+        img { max-width: 100%; height: auto; border-radius: 8px; display: block; margin: 1.2em auto; }
+        .center { text-align: center; }
+
+        /* Home button */
+        .home-btn {
+            position: fixed;
+            top: 12px; left: 16px;
+            z-index: 999;
+            display: flex; align-items: center; gap: 6px;
+            background: var(--home-btn-bg);
+            color: var(--home-btn-color);
+            border: 1px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 13px; font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s, box-shadow 0.2s;
+            backdrop-filter: blur(14px);
+        }
+        .home-btn:hover {
+            background: var(--home-btn-hover-bg);
+            box-shadow: 0 0 10px rgba(232, 68, 126, 0.35);
+            transform: translateY(-2px);
+        }
+
+        /* Section label */
+        .section-label {
+            display: inline-block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 2px 10px;
+            border-radius: 4px;
+            background: rgba(232, 68, 126, 0.1);
+            border: 1px solid rgba(232, 68, 126, 0.25);
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+
+        /* Feature list (what's new bullets) */
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 10px;
+            margin: 16px 0 24px;
+        }
+        .feature-item {
+            background: var(--card-bg);
+            border: 1px solid var(--mode-card-border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            backdrop-filter: blur(4px);
+        }
+        .feature-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+        .feature-text strong { display: block; font-size: 0.92rem; margin-bottom: 2px; }
+        .feature-text span { font-size: 0.82rem; color: var(--text-muted); }
+
+        /* Mode cards grid */
+        .mode-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .mode-card {
+            background: var(--card-bg);
+            border: 1px solid var(--mode-card-border);
+            border-radius: 12px;
+            padding: 18px 20px;
+            backdrop-filter: blur(4px);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .mode-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(232,68,126,.12); }
+        .mode-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .mode-icon { font-size: 1.4rem; }
+        .mode-card h3 { margin: 0; font-size: 1rem; color: var(--text-main); }
+        .mode-card p { margin: 0; font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
+        .mode-badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(232,68,126,.08);
+            border: 1px solid rgba(232,68,126,.2);
+            color: var(--primary-color);
+            border-radius: 4px;
+            padding: 1px 7px;
+            margin-top: 8px;
+        }
+
+        /* Portrait card (character showcase) */
+        .char-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--mode-card-border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 10px 0;
+            backdrop-filter: blur(4px);
+        }
+        .char-portrait {
+            width: 100px; height: 100px;
+            object-fit: cover; object-position: top;
+            border-radius: 10px;
+            border: 2px solid var(--primary-color);
+            flex-shrink: 0;
+            display: block;
+            margin: 0;
+        }
+        .char-info { flex: 1; }
+        .char-persona-wrap { display: flex; flex-direction: column; align-items: center; gap: 3px; margin-left: auto; flex-shrink: 0; }
+        .char-persona {
+            width: 112px; height: 112px;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35));
+        }
+        .char-persona-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+        .char-info strong { display: block; font-family: 'Montserrat', sans-serif; font-size: 0.95rem; }
+        .char-info span { font-size: 0.82rem; color: var(--text-muted); }
+        .char-info em { font-size: 0.8rem; color: var(--primary-color); font-style: normal; }
+
+        /* Music group list */
+        .music-group-list { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
+        .music-group {
+            display: flex; align-items: center; gap: 14px;
+            background: var(--card-bg);
+            border: 1px solid var(--mode-card-border);
+            border-radius: 10px; padding: 10px 14px;
+        }
+        .mg-cover { flex: 0 0 72px; }
+        .mg-cover img { width: 72px; height: 72px; object-fit: cover; border-radius: 8px; display: block; margin: 0; }
+        .mg-cover code { font-size: 0.7em; color: var(--primary-color); margin-top: 4px; display: block; text-align: center; }
+        .mg-tracks { flex: 1; }
+        .mg-track {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 3px 0; border-bottom: 1px solid var(--border-color);
+            font-size: 0.85em;
+        }
+        .mg-track:last-child { border-bottom: none; }
+        .mg-artist { color: var(--text-muted); font-style: italic; font-size: 0.88em; margin-left: 10px; flex-shrink: 0; }
+
+        /* Opus covers */
+        .opus-covers-grid { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+        .ocg-item {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            background: var(--card-bg);
+            border: 1px solid rgba(232,68,126,0.12);
+            border-radius: 8px; padding: 8px 6px;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .ocg-item:hover { border-color: rgba(232,68,126,0.5); transform: translateY(-2px); }
+        .ocg-item img { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; display: block; margin: 0; }
+        .ocg-item code { font-size: 0.7em; color: var(--primary-color); }
+
+        /* Title showcase */
+        .title-showcase { display: flex; flex-wrap: wrap; gap: 16px; margin: 20px 0; justify-content: flex-start; }
+        .title-card {
+            flex: 1 1 200px; max-width: 260px;
+            border-radius: 14px; padding: 20px 16px; text-align: center;
+            transition: transform 0.2s;
+        }
+        .title-card:hover { transform: translateY(-4px); }
+        .tc-stars { font-size: 0.9rem; letter-spacing: 3px; margin-bottom: 5px; }
+        .tc-rarity-label {
+            display: inline-block; font-family: 'Montserrat', sans-serif;
+            font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1.5px; padding: 2px 10px; border-radius: 20px; margin-bottom: 12px;
+        }
+        .tc-name { font-family: 'Montserrat', sans-serif; font-size: 0.95rem; font-weight: 800; margin-bottom: 4px; }
+        .tc-game { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; opacity: 0.6; }
+        .tc-img { width: 100%; max-width: 180px; height: auto; margin: 8px auto 10px; border-radius: 10px; display: block; object-fit: contain; }
+        .tc-condition { font-size: 0.78rem; line-height: 1.4; opacity: 0.7; font-style: italic; }
+
+        .title-card.rarity-rare {
+            background: linear-gradient(155deg, #e8f4ff, #c5e3ff 60%, #dde8ff);
+            border: 2px solid rgba(66,165,245,0.65);
+        }
+        .title-card.rarity-rare .tc-stars, .title-card.rarity-rare .tc-name { color: #1565c0; }
+        .title-card.rarity-rare .tc-rarity-label { background: rgba(66,165,245,.13); color: #1565c0; border: 1px solid rgba(66,165,245,.28); }
+        .title-card.rarity-rare .tc-game, .title-card.rarity-rare .tc-condition { color: #1e3a5f; }
+
+        .title-card.rarity-epic {
+            background: linear-gradient(155deg, #f3e8ff, #e0c4ff 60%, #eee0ff);
+            border: 2px solid rgba(156,39,176,0.6);
+        }
+        .title-card.rarity-epic .tc-stars, .title-card.rarity-epic .tc-name { color: #6a1b9a; }
+        .title-card.rarity-epic .tc-rarity-label { background: rgba(156,39,176,.1); color: #7b1fa2; border: 1px solid rgba(156,39,176,.24); }
+        .title-card.rarity-epic .tc-game, .title-card.rarity-epic .tc-condition { color: #3a1054; }
+
+        @keyframes legendaryPulse { 0%,100%{box-shadow:0 4px 28px rgba(250,177,0,.28);} 50%{box-shadow:0 6px 42px rgba(250,177,0,.52);} }
+        @keyframes legendaryPulseDark { 0%,100%{box-shadow:0 4px 28px rgba(255,196,0,.18);} 50%{box-shadow:0 6px 42px rgba(255,196,0,.38);} }
+        .title-card.rarity-legendary {
+            background: linear-gradient(155deg, #fffde7, #fff3b0 50%, #fffbdc);
+            border: 2px solid rgba(250,177,0,0.75);
+            animation: legendaryPulse 4s ease-in-out infinite;
+        }
+        .title-card.rarity-legendary .tc-stars, .title-card.rarity-legendary .tc-name { color: #7a5000; }
+        .title-card.rarity-legendary .tc-rarity-label { background: rgba(250,177,0,.14); color: #7a5000; border: 1px solid rgba(250,177,0,.32); }
+        .title-card.rarity-legendary .tc-game, .title-card.rarity-legendary .tc-condition { color: #4a3000; }
+
+        :root.darkmode .title-card.rarity-rare {
+            background: linear-gradient(155deg, #0a1a2e, #0d2240 60%, #101830);
+            border-color: rgba(100,180,255,.45);
+        }
+        :root.darkmode .title-card.rarity-rare .tc-stars, :root.darkmode .title-card.rarity-rare .tc-name { color: #90caf9; }
+        :root.darkmode .title-card.rarity-rare .tc-rarity-label { background: rgba(66,165,245,.11); color: #90caf9; border-color: rgba(100,180,255,.22); }
+        :root.darkmode .title-card.rarity-rare .tc-game, :root.darkmode .title-card.rarity-rare .tc-condition { color: #7badd0; }
+
+        :root.darkmode .title-card.rarity-epic {
+            background: linear-gradient(155deg, #1a0830, #280c40 60%, #1e0a38);
+            border-color: rgba(200,100,220,.45);
+        }
+        :root.darkmode .title-card.rarity-epic .tc-stars, :root.darkmode .title-card.rarity-epic .tc-name { color: #ce93d8; }
+        :root.darkmode .title-card.rarity-epic .tc-rarity-label { background: rgba(206,147,216,.1); color: #ce93d8; border-color: rgba(200,100,220,.22); }
+        :root.darkmode .title-card.rarity-epic .tc-game, :root.darkmode .title-card.rarity-epic .tc-condition { color: #b08ac0; }
+
+        :root.darkmode .title-card.rarity-legendary {
+            background: linear-gradient(155deg, #1e1600, #2c2000 50%, #1a1400);
+            border-color: rgba(255,196,0,.55);
+            animation: legendaryPulseDark 4s ease-in-out infinite;
+        }
+        :root.darkmode .title-card.rarity-legendary .tc-stars, :root.darkmode .title-card.rarity-legendary .tc-name { color: #ffe082; }
+        :root.darkmode .title-card.rarity-legendary .tc-rarity-label { background: rgba(255,196,0,.11); color: #ffe082; border-color: rgba(255,196,0,.28); }
+        :root.darkmode .title-card.rarity-legendary .tc-game, :root.darkmode .title-card.rarity-legendary .tc-condition { color: #c8a860; }
+
+        /* Antag portraits */
+        .antag-portrait {
+            width: 84px; height: 84px;
+            object-fit: cover; object-position: top;
+            border-radius: 8px; display: block;
+            border: 2px solid var(--primary-color);
+            margin: 0;
+        }
+
+        /* Scroll progress */
+        #vx-progress { position: fixed; top: 0; left: 0; width: 100%; height: 3px; z-index: 9999; pointer-events: none; }
+        #vx-progress-fill {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, #c0193a, #e8447e, #ff6b9d, #ffd700);
+            box-shadow: 0 0 12px rgba(232,68,126,0.9);
+            transition: width .08s linear;
+        }
+
+        /* Back to top */
+        #vx-btt {
+            position: fixed; bottom: 24px; right: 24px; z-index: 500;
+            width: 40px; height: 40px; border-radius: 8px;
+            background: var(--panel-bg); border: 1.5px solid var(--primary-color);
+            color: var(--primary-color); font-size: 1.1rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(10px); opacity: 0; pointer-events: none;
+            transform: translateY(14px); transition: opacity .3s, transform .3s;
+            font-family: 'Montserrat', sans-serif; font-weight: 800;
+        }
+        #vx-btt.on { opacity: 1; pointer-events: auto; transform: translateY(0); }
+        #vx-btt:hover { box-shadow: 0 0 18px rgba(232,68,126,0.5); }
+
+        /* Scroll reveal */
+        .vx-reveal { opacity: 0; transform: translateY(22px); transition: opacity .6s cubic-bezier(.22,1,.36,1), transform .6s cubic-bezier(.22,1,.36,1); }
+        .vx-reveal.in { opacity: 1; transform: none; }
+
+        /* Illustrations */
+        .doc-illustration {
+            display: block; width: 100%; max-width: 720px;
+            margin: 1.5rem auto 0.5rem; border-radius: 14px;
+            box-shadow: 0 6px 28px rgba(0,0,0,0.18); border: 1px solid var(--border-color);
+            object-fit: cover;
+        }
+        .doc-illustration-caption {
+            display: block; text-align: center; font-size: 0.78rem;
+            color: var(--text-muted); margin-bottom: 1.2rem; font-style: italic;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .vx-reveal { opacity: 1; transform: none; transition: none; }
+            .frontmatter, .title-card.rarity-legendary { animation: none; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            table { display: block; overflow-x: auto; }
+            .doc-wrap { padding-top: 56px; }
+            .frontmatter h1 { font-size: 2rem; }
+            h1 { font-size: 1.65rem; }
+            h2 { font-size: 1.2rem; }
+            .mode-grid { grid-template-columns: 1fr; }
+            .feature-list { grid-template-columns: 1fr; }
+            .title-showcase { justify-content: center; }
+            .title-card { max-width: 100%; flex-basis: 100%; }
+            .music-group { flex-direction: column; align-items: flex-start; }
+            .mg-cover { flex: none; }
+        }
+
+        @media (max-width: 480px) {
+            .doc-wrap { padding: 56px 12px 24px; }
+            .frontmatter { padding: 20px 14px; }
+            .frontmatter h1 { font-size: 1.7rem; }
+            h1 { font-size: 1.4rem; }
+            .home-btn { font-size: 11px; padding: 5px 10px; }
+            .char-card { flex-direction: column; }
+        }
+
+        @media print {
+            body { background: white; }
+            .home-btn, #vx-progress, #vx-btt { display: none; }
+        }
+
+        /* ── All-Out Attack card — keyframe animations ── */
+        @keyframes aoaCardGlow {
+            0%, 100% {
+                box-shadow: 0 0 24px rgba(232, 68, 126, 0.55), 0 0 60px rgba(232, 68, 126, 0.15);
+            }
+            50% {
+                box-shadow: 0 0 44px rgba(232, 68, 126, 0.95), 0 0 90px rgba(255, 107, 157, 0.3), 0 0 140px rgba(255, 200, 50, 0.12);
+            }
+        }
+        @keyframes aoaBorderShimmer {
+            0%, 100% { border-color: rgba(232, 68, 126, 0.9); }
+            33%      { border-color: rgba(255, 107, 157, 1); }
+            66%      { border-color: rgba(255, 210, 60, 0.8); }
+        }
+        @keyframes aoaNameNeon {
+            0%, 100% { text-shadow: 0 0 8px rgba(232, 68, 126, 0.9), 0 0 20px rgba(232, 68, 126, 0.5); }
+            50%      { text-shadow: 0 0 14px rgba(255, 107, 157, 1), 0 0 34px rgba(255, 107, 157, 0.7), 0 0 60px rgba(255, 200, 100, 0.3); }
+        }
+        @keyframes aoaStarFlicker {
+            0%, 65%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+            70% { opacity: 0.25; transform: scale(0.65) rotate(20deg); }
+            78% { opacity: 1; transform: scale(1.35) rotate(-8deg); color: #fff8c0; }
+        }
+        @keyframes aoaPortraitPulse {
+            0%, 100% { box-shadow: 0 0 14px rgba(255, 107, 157, 0.75), 0 0 28px rgba(255, 107, 157, 0.25); }
+            50%      { box-shadow: 0 0 24px rgba(255, 107, 157, 1), 0 0 50px rgba(255, 210, 100, 0.35); }
+        }
+
+        /* ── AoA card — layout 3 colonnes ── */
+        .aoa-card {
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid #e8447e;
+            background: var(--aoa-card-bg);
+            animation: aoaCardGlow 3s ease-in-out infinite, aoaBorderShimmer 6s ease-in-out infinite;
+            transition: transform 0.25s ease;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .aoa-card:hover { transform: translateY(-6px) scale(1.006); }
+        .aoa-card-inner { display: flex; align-items: stretch; }
+
+        .aoa-portrait-col {
+            flex: 0 0 160px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 18px 12px;
+            border-right: 1px solid var(--aoa-col-border);
+        }
+        .aoa-portrait-img {
+            width: 250px; height: auto;
+            object-fit: contain; object-position: center;
+            border-radius: 10px;
+            border: 1px solid rgba(232, 68, 126, 0.5);
+            background: var(--aoa-portrait-bg);
+            display: block; margin: 0;
+        }
+
+        .aoa-gif-col {
+            flex: 0 0 300px; height: 190px;
+            overflow: hidden;
+            border-right: 1px solid var(--aoa-col-border);
+            position: relative; align-self: center;
+        }
+        .aoa-gif-col::after {
+            content: ''; position: absolute; inset: 0;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.04) 0px, rgba(0,0,0,0.04) 1px, transparent 1px, transparent 3px);
+            pointer-events: none;
+        }
+        .aoa-gif-img {
+            width: auto; height: auto;
+            object-fit: cover; object-position: center;
+            display: block; margin: 0; margin-top: 1pc;
+        }
+
+        .aoa-battle-col {
+            flex: 1; display: flex; align-items: center; gap: 16px; padding: 18px 20px;
+        }
+        .aoa-battle-img {
+            flex-shrink: 0; width: 150px; height: auto;
+            object-fit: contain; object-position: top;
+            border-radius: 14px; border: 2px solid #ff6b9d;
+            background: var(--aoa-battle-bg);
+            display: block; margin: 0;
+            animation: aoaPortraitPulse 3s ease-in-out infinite;
+        }
+        .aoa-info { flex: 1; }
+
+        .aoa-card .card-stars { display: flex; gap: 6px; margin-bottom: 8px; }
+        .aoa-card .card-stars span {
+            font-size: 0.85rem; display: inline-block;
+            animation: aoaStarFlicker 2.5s ease-in-out infinite;
+        }
+        .aoa-card .card-stars span:nth-child(1) { animation-delay: 0s;   color: #ffd700; }
+        .aoa-card .card-stars span:nth-child(2) { animation-delay: 0.5s; color: #fff; }
+        .aoa-card .card-stars span:nth-child(3) { animation-delay: 1s;   color: #ffd700; }
+        .aoa-card .card-stars span:nth-child(4) { animation-delay: 1.5s; color: #ff9dcf; }
+        .aoa-card .card-stars span:nth-child(5) { animation-delay: 2s;   color: #ffd700; }
+
+        .aoa-card .card-badge {
+            display: inline-block;
+            background: linear-gradient(90deg, #c0193a, #ff4d6d);
+            color: #fff; padding: 3px 14px; border-radius: 20px;
+            font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+            box-shadow: 0 2px 8px rgba(192, 25, 58, 0.4); margin-bottom: 6px;
+        }
+        .aoa-card .card-name {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.3rem; font-weight: 800;
+            color: var(--card-name-color); margin: 4px 0; letter-spacing: 0.5px;
+            animation: aoaNameNeon 4s ease-in-out infinite;
+        }
+        .aoa-card .card-sub { color: var(--card-sub-color); font-size: 0.83rem; margin: 0; letter-spacing: 0.3px; }
+
+        /* ── Summer variant — ambre/teal, pas de neon ── */
+        /* ── Thème Hatsune Miku — cyan #39C5BB + rose + rouge ── */
+        .aoa-card-miku {
+            border: 4px solid #39c5bb;
+            background: linear-gradient(135deg, #e6fbff 0%, #fff0f7 40%, #ffe9ec 70%, #e6fbff 100%);
+            box-shadow: 0 0 0 3px rgba(57, 197, 187, 0.35), 0 6px 28px rgba(255, 77, 148, 0.25), 0 2px 10px rgba(232, 68, 126, 0.18);
+            animation: mikuCardGlow 3s ease-in-out infinite;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .dark-mode .aoa-card-miku,
+        body.darkmode .aoa-card-miku {
+            background: linear-gradient(135deg, #02161a 0%, #1a0410 40%, #1a0006 70%, #02161a 100%);
+        }
+        .aoa-card-miku:hover { transform: translateY(-6px) scale(1.006); }
+        @keyframes mikuCardGlow {
+            0%, 100% { box-shadow: 0 0 0 3px rgba(57, 197, 187, 0.35), 0 6px 28px rgba(255, 77, 148, 0.25); }
+            50%      { box-shadow: 0 0 0 3px rgba(255, 77, 148, 0.45), 0 6px 32px rgba(57, 197, 187, 0.4); }
+        }
+        .aoa-card-miku .aoa-portrait-col,
+        .aoa-card-miku .aoa-gif-col { border-right-color: rgba(57, 197, 187, 0.3); }
+        .aoa-card-miku .aoa-portrait-img,
+        .aoa-card-miku .aoa-battle-img { border-color: #39c5bb; }
+        .aoa-card-miku .card-badge {
+            background: linear-gradient(90deg, #39c5bb, #ff4d94, #e8447e);
+            color: #fff; border: none;
+        }
+        .aoa-card-miku .card-name {
+            background: linear-gradient(90deg, #39c5bb 0%, #ff6bbf 50%, #e8447e 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            animation: mikuNameShift 4s linear infinite;
+            text-shadow: none;
+        }
+        @keyframes mikuNameShift { to { background-position: 200% center; } }
+        .aoa-card-miku .card-sub { color: #39c5bb; }
+        .aoa-card-miku .card-stars span { color: #39c5bb; }
+        .aoa-card-miku .card-stars span:nth-child(2),
+        .aoa-card-miku .card-stars span:nth-child(4) { color: #ff4d94; }
+        /* Notes de musique flottantes — signature visuelle Miku */
+        .aoa-card-miku::after {
+            content: "♪ ♫ ♪";
+            position: absolute; top: 8px; right: 16px;
+            font-size: 1.1rem; letter-spacing: 6px; font-weight: 700;
+            background: linear-gradient(90deg, #39c5bb, #ff4d94);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            animation: mikuNotes 2.5s ease-in-out infinite;
+            pointer-events: none;
+        }
+        /* ── Summer variant — ambre/teal, pas de neon (même style que les Summer de la 2.1) ── */
+        .aoa-card-summer {
+            border: 4px solid #f6ab3c;
+            background: var(--summer-card-bg);
+            animation: none;
+            box-shadow: 0 0 0 3px rgba(77, 208, 225, 0.3), 0 6px 28px rgba(246, 171, 60, 0.22), 0 2px 8px rgba(77, 208, 225, 0.12);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            margin-top: 20px;
+        }
+        .aoa-card-summer:hover {
+            transform: translateY(-6px) scale(1.006);
+            box-shadow: 0 0 0 4px rgba(77, 208, 225, 0.45), 0 12px 40px rgba(246, 171, 60, 0.35), 0 4px 14px rgba(77, 208, 225, 0.2);
+        }
+        .aoa-card-summer .aoa-portrait-col { border-right-color: rgba(246, 171, 60, 0.22); }
+        .aoa-card-summer .aoa-gif-col       { border-right-color: rgba(246, 171, 60, 0.22); }
+        .aoa-card-summer .aoa-portrait-img  { border-color: rgba(246, 171, 60, 0.5); }
+        .aoa-card-summer .aoa-battle-img {
+            width: 130px; height: auto; max-width: none;
+            object-fit: contain; object-position: top;
+            display: block; margin: 0;
+            border-color: #4dd0e1; animation: none;
+            box-shadow: 0 2px 10px rgba(77, 208, 225, 0.18);
+        }
+        .aoa-card-summer .card-badge {
+            background: linear-gradient(90deg, #c07800, #f6ab3c);
+            box-shadow: 0 2px 8px rgba(246, 171, 60, 0.3);
+        }
+        .aoa-card-summer .card-name { color: var(--summer-title-color); animation: none; text-shadow: none; }
+        .aoa-card-summer .card-sub  { color: #4dd0e1; }
+        .aoa-card-summer .card-stars span:nth-child(1) { animation-delay: 0s;   color: #f6d365; }
+        .aoa-card-summer .card-stars span:nth-child(2) { animation-delay: 0.5s; color: #4dd0e1; }
+        .aoa-card-summer .card-stars span:nth-child(3) { animation-delay: 1s;   color: #f6d365; }
+        .aoa-card-summer .card-stars span:nth-child(4) { animation-delay: 1.5s; color: #fff; }
+        .aoa-card-summer .card-stars span:nth-child(5) { animation-delay: 2s;   color: #f6d365; }
+
+        .summer-chars-title { margin-top: 36px; color: var(--summer-title-color); }
+        .summer-intro {
+            color: var(--blockquote-text); font-style: italic;
+            margin: 10px 0 24px 0; line-height: 1.6; font-size: 0.95rem;
+            padding: 12px 18px;
+            background: var(--summer-intro-bg);
+            border-left: 3px solid var(--summer-intro-border);
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* ── Cosmic variant — galaxie animée (Bui Cosmic, P5X) ─────────────────
+           Fond d'espace profond dans les deux thèmes (c'est le sujet), nébuleuse
+           qui dérive lentement, deux couches d'étoiles qui scintillent à des
+           rythmes différents (parallaxe), nom en dégradé aurore. Tout en CSS. */
+        .aoa-card-cosmic {
+            position: relative;
+            border: 4px solid #7c4dff;
+            background:
+                radial-gradient(ellipse 60% 50% at 18% 30%, rgba(124, 77, 255, 0.55), transparent 70%),
+                radial-gradient(ellipse 50% 60% at 82% 70%, rgba(0, 200, 255, 0.35), transparent 70%),
+                radial-gradient(ellipse 40% 40% at 60% 20%, rgba(255, 64, 160, 0.28), transparent 70%),
+                linear-gradient(135deg, #05030f 0%, #0b0722 45%, #04101f 100%);
+            background-size: 200% 200%, 200% 200%, 200% 200%, 100% 100%;
+            animation: cosmicDrift 22s ease-in-out infinite alternate;
+            box-shadow: 0 0 0 3px rgba(0, 200, 255, 0.25), 0 8px 34px rgba(124, 77, 255, 0.35), 0 2px 10px rgba(0, 200, 255, 0.18);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            margin-top: 20px;
+            overflow: hidden;
+            color: #e9e6ff;
+        }
+        .aoa-card-cosmic:hover {
+            transform: translateY(-6px) scale(1.006);
+            box-shadow: 0 0 0 4px rgba(0, 200, 255, 0.45), 0 14px 46px rgba(124, 77, 255, 0.5), 0 4px 16px rgba(0, 200, 255, 0.28);
+        }
+        @keyframes cosmicDrift {
+            0%   { background-position: 0% 0%, 100% 100%, 50% 0%, 0 0; }
+            100% { background-position: 100% 60%, 0% 20%, 20% 100%, 0 0; }
+        }
+        /* Deux champs d'étoiles : des points blancs en radial-gradient répétés,
+           tailles et périodes différentes pour donner de la profondeur. */
+        .aoa-card-cosmic::before,
+        .aoa-card-cosmic::after {
+            content: "";
+            position: absolute; inset: -20%;
+            pointer-events: none; z-index: 0;
+            background-repeat: repeat;
+        }
+        .aoa-card-cosmic::before {
+            background-image:
+                radial-gradient(1.5px 1.5px at 20px 30px, #fff 60%, transparent 100%),
+                radial-gradient(1px 1px at 90px 80px, rgba(255,255,255,0.8) 60%, transparent 100%),
+                radial-gradient(1.5px 1.5px at 160px 20px, #cfe8ff 60%, transparent 100%),
+                radial-gradient(1px 1px at 210px 120px, rgba(255,255,255,0.7) 60%, transparent 100%),
+                radial-gradient(2px 2px at 60px 150px, #ffe9c9 60%, transparent 100%);
+            background-size: 240px 180px;
+            animation: cosmicTwinkle 4s ease-in-out infinite, cosmicPan 60s linear infinite;
+            opacity: 0.9;
+        }
+        .aoa-card-cosmic::after {
+            background-image:
+                radial-gradient(1px 1px at 40px 60px, rgba(255,255,255,0.6) 60%, transparent 100%),
+                radial-gradient(1px 1px at 130px 20px, rgba(200,230,255,0.7) 60%, transparent 100%),
+                radial-gradient(1.5px 1.5px at 190px 140px, rgba(255,255,255,0.9) 60%, transparent 100%),
+                radial-gradient(1px 1px at 250px 90px, rgba(255,200,240,0.7) 60%, transparent 100%);
+            background-size: 300px 220px;
+            animation: cosmicTwinkle 6s ease-in-out infinite reverse, cosmicPan 95s linear infinite reverse;
+            opacity: 0.7;
+        }
+        @keyframes cosmicTwinkle { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+        @keyframes cosmicPan { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-240px, -180px, 0); } }
+        .aoa-card-cosmic .aoa-card-inner { position: relative; z-index: 1; }
+        .aoa-card-cosmic .aoa-portrait-col { border-right-color: rgba(124, 77, 255, 0.35); }
+        .aoa-card-cosmic .aoa-gif-col       { border-right-color: rgba(124, 77, 255, 0.35); }
+        .aoa-card-cosmic .aoa-portrait-img  { border-color: rgba(0, 200, 255, 0.7); box-shadow: 0 0 18px rgba(0, 200, 255, 0.35); }
+        .aoa-card-cosmic .aoa-battle-img {
+            width: 130px; height: auto; max-width: none;
+            object-fit: contain; object-position: top;
+            display: block; margin: 0;
+            border-color: #7c4dff; animation: none;
+            box-shadow: 0 0 22px rgba(124, 77, 255, 0.45);
+        }
+        .aoa-card-cosmic .card-badge {
+            background: linear-gradient(90deg, #7c4dff, #00c8ff);
+            box-shadow: 0 2px 10px rgba(0, 200, 255, 0.35);
+        }
+        .aoa-card-cosmic .card-name {
+            background: linear-gradient(90deg, #b39dff 0%, #6ee7ff 40%, #ff8ad4 70%, #b39dff 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            animation: cosmicNameShift 6s linear infinite;
+            text-shadow: none;
+        }
+        @keyframes cosmicNameShift { to { background-position: 200% center; } }
+        .aoa-card-cosmic .card-sub  { color: #9fdcff; }
+        .aoa-card-cosmic .card-stars span:nth-child(1) { animation-delay: 0s;   color: #cbb8ff; }
+        .aoa-card-cosmic .card-stars span:nth-child(2) { animation-delay: 0.5s; color: #6ee7ff; }
+        .aoa-card-cosmic .card-stars span:nth-child(3) { animation-delay: 1s;   color: #fff; }
+        .aoa-card-cosmic .card-stars span:nth-child(4) { animation-delay: 1.5s; color: #ff8ad4; }
+        .aoa-card-cosmic .card-stars span:nth-child(5) { animation-delay: 2s;   color: #cbb8ff; }
+        /* Filante — un trait qui traverse la carte de temps en temps */
+        .aoa-card-cosmic .cosmic-shooting {
+            position: absolute; top: 12%; left: -20%;
+            width: 140px; height: 2px; z-index: 1; pointer-events: none;
+            background: linear-gradient(90deg, transparent, #fff 60%, transparent);
+            transform: rotate(-18deg);
+            opacity: 0;
+            animation: cosmicShoot 9s ease-in infinite 3s;
+        }
+        @keyframes cosmicShoot {
+            0%   { opacity: 0; transform: rotate(-18deg) translateX(0); }
+            4%   { opacity: 1; }
+            12%  { opacity: 0; transform: rotate(-18deg) translateX(900px); }
+            100% { opacity: 0; transform: rotate(-18deg) translateX(900px); }
+        }
+        .cosmic-chars-title {
+            margin-top: 36px;
+            background: linear-gradient(90deg, #7c4dff, #00a8ff);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .cosmic-intro {
+            color: var(--blockquote-text); font-style: italic;
+            margin: 10px 0 24px 0; line-height: 1.6; font-size: 0.95rem;
+            padding: 12px 18px;
+            background: rgba(124, 77, 255, 0.08);
+            border-left: 3px solid #7c4dff;
+            border-radius: 0 8px 8px 0;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .aoa-card-cosmic, .aoa-card-cosmic::before, .aoa-card-cosmic::after,
+            .aoa-card-cosmic .card-name, .aoa-card-cosmic .cosmic-shooting { animation: none; }
+            .aoa-card-cosmic .cosmic-shooting { display: none; }
+        }
+
+        /* ── Shujin variant — l'uniforme de Shujin Academy (Wonder Shujin, P5X) ──
+           Blazer noir à trame fine, liseré or des boutons, et le tartan rouge du
+           pantalon en bande basse. Sombre dans les deux thèmes : c'est le sujet. */
+        .aoa-card-shujin {
+            position: relative;
+            border: 4px solid #15151a;
+            background:
+                repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.025) 0 2px, transparent 2px 7px),
+                repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.02) 0 2px, transparent 2px 7px),
+                linear-gradient(160deg, #1c1c22 0%, #101014 55%, #1a0d10 100%);
+            animation: none;
+            box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.6), 0 8px 30px rgba(179, 18, 46, 0.3), 0 2px 10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            margin-top: 20px;
+            padding-bottom: 16px;
+        }
+        .aoa-card-shujin:hover {
+            transform: translateY(-6px) scale(1.006);
+            box-shadow: 0 0 0 4px rgba(201, 162, 39, 0.8), 0 14px 40px rgba(179, 18, 46, 0.4), 0 4px 14px rgba(0, 0, 0, 0.6);
+        }
+        /* Le tartan : trame rouge sombre, croisée de deux lignes noires et d'un fil or */
+        .aoa-card-shujin::after {
+            content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 16px;
+            background:
+                repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.55) 0 3px, transparent 3px 26px),
+                repeating-linear-gradient(0deg,  rgba(0, 0, 0, 0.55) 0 3px, transparent 3px 26px),
+                repeating-linear-gradient(90deg, rgba(201, 162, 39, 0.5) 12px 13px, transparent 13px 26px),
+                repeating-linear-gradient(0deg,  rgba(201, 162, 39, 0.5) 12px 13px, transparent 13px 26px),
+                #9e1023;
+            border-top: 2px solid rgba(201, 162, 39, 0.7);
+            pointer-events: none;
+        }
+        /* Les trois boutons dorés du blazer */
+        .aoa-card-shujin .shujin-buttons {
+            position: absolute; top: 14px; right: 18px; z-index: 2;
+            display: flex; gap: 8px; pointer-events: none;
+        }
+        .aoa-card-shujin .shujin-buttons i {
+            width: 11px; height: 11px; border-radius: 50%; display: block;
+            background: radial-gradient(circle at 35% 30%, #ffe9a3, #c9a227 55%, #7a5a10);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+        }
+        .aoa-card-shujin .aoa-card-inner { position: relative; z-index: 1; }
+        .aoa-card-shujin .aoa-portrait-col { border-right-color: rgba(201, 162, 39, 0.28); }
+        .aoa-card-shujin .aoa-gif-col       { border-right-color: rgba(201, 162, 39, 0.28); }
+        .aoa-card-shujin .aoa-portrait-img  { border-color: rgba(201, 162, 39, 0.75); background: rgba(0, 0, 0, 0.35); box-shadow: 0 0 14px rgba(201, 162, 39, 0.2); }
+        .aoa-card-shujin .aoa-battle-img {
+            width: 130px; height: auto; max-width: none;
+            object-fit: contain; object-position: top;
+            display: block; margin: 0;
+            border-color: #b3122e; animation: none;
+            background: rgba(0, 0, 0, 0.35);
+            box-shadow: 0 0 16px rgba(179, 18, 46, 0.45);
+        }
+        .aoa-card-shujin .card-badge {
+            background: linear-gradient(90deg, #7a0a1c, #b3122e);
+            color: #ffe9a3;
+            box-shadow: 0 2px 8px rgba(179, 18, 46, 0.45);
+        }
+        .aoa-card-shujin .card-name { color: #f5f0e6; animation: none; text-shadow: 0 0 12px rgba(201, 162, 39, 0.35); }
+        .aoa-card-shujin .card-sub  { color: #d9b64a; }
+        .aoa-card-shujin .card-stars span:nth-child(1) { animation-delay: 0s;   color: #c9a227; }
+        .aoa-card-shujin .card-stars span:nth-child(2) { animation-delay: 0.5s; color: #e8447e; }
+        .aoa-card-shujin .card-stars span:nth-child(3) { animation-delay: 1s;   color: #f5f0e6; }
+        .aoa-card-shujin .card-stars span:nth-child(4) { animation-delay: 1.5s; color: #e8447e; }
+        .aoa-card-shujin .card-stars span:nth-child(5) { animation-delay: 2s;   color: #c9a227; }
+
+        .shujin-chars-title {
+            margin-top: 36px;
+            background: linear-gradient(90deg, #b3122e, #c9a227);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .shujin-intro {
+            color: var(--blockquote-text); font-style: italic;
+            margin: 10px 0 24px 0; line-height: 1.6; font-size: 0.95rem;
+            padding: 12px 18px;
+            background: rgba(179, 18, 46, 0.07);
+            border-left: 3px solid #b3122e;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* ── Vitrine badges (lot Shujin) — même vocabulaire de rareté que .title-card ── */
+        .badge-showcase {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 14px; margin: 20px 0;
+        }
+        .badge-card {
+            border-radius: 14px; padding: 16px 14px 14px; text-align: center;
+            transition: transform 0.2s;
+        }
+        .badge-card:hover { transform: translateY(-4px); }
+        .badge-card img { width: 96px; height: 96px; object-fit: contain; display: block; margin: 0 auto 10px; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.25)); }
+        .bc-name { font-family: 'Montserrat', sans-serif; font-size: 0.92rem; font-weight: 800; margin-bottom: 6px; }
+        .bc-condition { font-size: 0.78rem; line-height: 1.4; opacity: 0.75; font-style: italic; }
+        .badge-card.rarity-rare {
+            background: linear-gradient(155deg, #e8f4ff, #c5e3ff 60%, #dde8ff);
+            border: 2px solid rgba(66, 165, 245, 0.65);
+        }
+        .badge-card.rarity-rare .bc-name { color: #1565c0; }
+        .badge-card.rarity-rare .bc-condition { color: #1e3a5f; }
+
+        /* Premier badge LÉGENDAIRE du catalogue (Memento Vivere, Memento Mori) :
+           seules les cartes de TITRE avaient cette rareté jusqu'ici. */
+        .badge-card.rarity-legendary {
+            background: linear-gradient(155deg, #fff8e1, #ffe7a8 60%, #ffd77a);
+            border: 2px solid rgba(250, 177, 0, 0.7);
+        }
+        .badge-card.rarity-legendary .bc-name { color: #7a5000; }
+        .badge-card.rarity-legendary .bc-condition { color: #6b4a00; }
+        .badge-card.rarity-secret {
+            background: linear-gradient(155deg, #efe6ff, #d9c7ff 60%, #e8dcff);
+            border: 2px solid rgba(147, 51, 234, 0.55);
+        }
+        .badge-card.rarity-secret .bc-name { color: #5b21b6; }
+        .badge-card.rarity-secret .bc-condition { color: #4c1d95; }
+        .badge-card.rarity-epic {
+            background: linear-gradient(155deg, #f5e9ff, #e3c8fa 60%, #efe0ff);
+            border: 2px solid rgba(156, 39, 176, 0.55);
+        }
+        .badge-card.rarity-epic .bc-name { color: #6a1b9a; }
+        .badge-card.rarity-epic .bc-condition { color: #3a1054; }
+        :root.darkmode .badge-card.rarity-rare {
+            background: linear-gradient(155deg, #0e1e30, #10284a 60%, #0c1a30);
+            border-color: rgba(100, 180, 255, 0.4);
+        }
+        :root.darkmode .badge-card.rarity-rare .bc-name { color: #90caf9; }
+        :root.darkmode .badge-card.rarity-rare .bc-condition { color: #7badd0; }
+        :root.darkmode .badge-card.rarity-epic {
+            background: linear-gradient(155deg, #1c0e30, #2a144a 60%, #1a0c30);
+            border-color: rgba(200, 100, 220, 0.4);
+        }
+        :root.darkmode .badge-card.rarity-epic .bc-name { color: #ce93d8; }
+        :root.darkmode .badge-card.rarity-epic .bc-condition { color: #b08ac0; }
+
+        @keyframes mikuNotes {
+            0%, 100% { transform: translateY(0); opacity: 0.7; }
+            50%      { transform: translateY(-5px); opacity: 1; }
+        }
+
+        .aoa-card-summer {
+            border: 4px solid #f6ab3c;
+            background: var(--summer-card-bg);
+            animation: none;
+            box-shadow: 0 0 0 3px rgba(77, 208, 225, 0.3), 0 6px 28px rgba(246, 171, 60, 0.22), 0 2px 8px rgba(77, 208, 225, 0.12);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            margin-top: 20px;
+        }
+        .aoa-card-summer:hover {
+            transform: translateY(-6px) scale(1.006);
+            box-shadow: 0 0 0 4px rgba(77, 208, 225, 0.45), 0 12px 40px rgba(246, 171, 60, 0.35), 0 4px 14px rgba(77, 208, 225, 0.2);
+        }
+        .aoa-card-summer .aoa-portrait-col { border-right-color: rgba(246, 171, 60, 0.22); }
+        .aoa-card-summer .aoa-gif-col       { border-right-color: rgba(246, 171, 60, 0.22); }
+        .aoa-card-summer .aoa-portrait-img  { border-color: rgba(246, 171, 60, 0.5); }
+        .aoa-card-summer .aoa-battle-img {
+            width: 130px; height: auto; max-width: none;
+            object-fit: contain; object-position: top;
+            display: block; margin: 0;
+            border-color: #4dd0e1; animation: none;
+            box-shadow: 0 2px 10px rgba(77, 208, 225, 0.18);
+        }
+        .aoa-card-summer .card-badge {
+            background: linear-gradient(90deg, #c07800, #f6ab3c);
+            box-shadow: 0 2px 8px rgba(246, 171, 60, 0.3);
+        }
+        .aoa-card-summer .card-name { color: var(--summer-title-color); animation: none; text-shadow: none; }
+        .aoa-card-summer .card-sub  { color: #4dd0e1; }
+        .aoa-card-summer .card-stars span:nth-child(1) { animation-delay: 0s;   color: #f6d365; }
+        .aoa-card-summer .card-stars span:nth-child(2) { animation-delay: 0.5s; color: #4dd0e1; }
+        .aoa-card-summer .card-stars span:nth-child(3) { animation-delay: 1s;   color: #f6d365; }
+        .aoa-card-summer .card-stars span:nth-child(4) { animation-delay: 1.5s; color: #fff; }
+        .aoa-card-summer .card-stars span:nth-child(5) { animation-delay: 2s;   color: #f6d365; }
+
+        .summer-chars-title { margin-top: 36px; color: var(--summer-title-color); }
+
+        /* ── Intro paragraphs ── */
+        .card-intro {
+            color: var(--blockquote-text); font-style: italic;
+            margin: 10px 0 20px 0; line-height: 1.6; font-size: 0.95rem;
+            padding: 12px 18px;
+            background: rgba(232, 68, 126, 0.06);
+            border-left: 3px solid var(--primary-color);
+            border-radius: 0 8px 8px 0;
+        }
+        .summer-intro {
+            color: var(--blockquote-text); font-style: italic;
+            margin: 10px 0 24px 0; line-height: 1.6; font-size: 0.95rem;
+            padding: 12px 18px;
+            background: var(--summer-intro-bg);
+            border-left: 3px solid var(--summer-intro-border);
+            border-radius: 0 8px 8px 0;
+        }
+        .section-intro {
+            color: var(--section-intro-color); font-style: italic;
+            margin: 8px 0 28px 0; line-height: 1.65; font-size: 0.94rem;
+            padding: 11px 18px;
+            background: var(--section-intro-bg);
+            border-left: 3px solid var(--section-intro-border);
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* ── AoA card responsive ── */
+        @media (max-width: 660px) {
+            .aoa-card-inner { flex-direction: column; }
+            .aoa-portrait-col { flex: auto; border-right: none; border-bottom: 1px solid var(--aoa-col-border); padding: 14px; }
+            .aoa-gif-col { flex: auto; height: 180px; border-right: none; width: 100%; }
+            .aoa-gif-img { width: 100%; height: 240px; margin-top: -30px; }
+            .aoa-battle-col { flex: auto; flex-direction: column; align-items: center; text-align: center; padding: 16px; }
+            .aoa-battle-img { width: 140px; height: 140px; }
+            .aoa-card-summer .aoa-battle-img { width: 80px; height: 130px; }
+        }
+
+        /* ── Galeries v2.1 ─────────────────────────────────────────────
+           Grille compacte pour les 20 personas de Persona 1 : une fiche
+           .char-card par persona serait illisible à ce volume. */
+        .p1-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+        .p1-item {
+            background: var(--card-bg);
+            border: 1px solid var(--mode-card-border);
+            border-radius: 12px;
+            padding: 10px 8px 12px;
+            text-align: center;
+            backdrop-filter: blur(4px);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .p1-item:hover { transform: translateY(-4px); box-shadow: 0 8px 22px rgba(232,68,126,.16); }
+        .p1-item img {
+            width: 100%; height: 96px;
+            object-fit: contain;
+            display: block; margin: 0 0 8px;
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,.35));
+        }
+        .p1-name {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.78rem; font-weight: 700;
+            color: var(--card-name-color);
+            line-height: 1.25;
+        }
+        .p1-user { font-size: 0.68rem; color: var(--text-muted); display: block; margin-top: 2px; }
+
+        .opus-banner {
+            display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+            justify-content: center;
+            background: var(--card-bg);
+            border: 1px solid var(--mode-card-border);
+            border-radius: 16px;
+            padding: 18px 22px;
+            margin: 20px 0;
+        }
+        .opus-banner img { max-width: 260px; width: 100%; display: block; margin: 0; }
+
+        @media (max-width: 480px) {
+            .p1-grid { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+            .p1-item img { height: 78px; }
+        }
+        /* ── Le Compendium : carte « Grimoire » — losanges bleus, or, pentacle ── */
+        .grimoire-card {
+            --gr-blue: #0f1f5c; --gr-blue-light: #2b46b3; --gr-gold: #d4af37; --gr-gold-light: #f1d27a;
+            position: relative;
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 22px;
+            align-items: center;
+            margin: 18px 0 22px;
+            padding: 22px 24px;
+            border-radius: 16px;
+            border: 3px solid var(--gr-gold);
+            color: #eef2ff;
+            background-color: var(--gr-blue);
+            background-image:
+                linear-gradient(45deg, var(--gr-blue-light) 25%, transparent 25%, transparent 75%, var(--gr-blue-light) 75%),
+                linear-gradient(-45deg, var(--gr-blue-light) 25%, transparent 25%, transparent 75%, var(--gr-blue-light) 75%);
+            background-size: 44px 44px;
+            background-position: 0 0, 22px 22px;
+            box-shadow: inset 0 0 0 5px #070f33, inset 0 0 0 7px rgba(212, 175, 55, 0.45), 0 12px 36px rgba(3, 6, 30, 0.45);
+            overflow: hidden;
+            animation: grimoireDrift 14s linear infinite;
+        }
+        @keyframes grimoireDrift { from { background-position: 0 0, 22px 22px; } to { background-position: 44px 44px, 66px 66px; } }
+        .grimoire-card::after {
+            content: "";
+            position: absolute; inset: 0; pointer-events: none;
+            background: radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.10), transparent 60%);
+        }
+        .grimoire-pentacle {
+            width: 150px; height: 150px; color: var(--gr-gold-light);
+            filter: drop-shadow(0 0 10px rgba(241, 210, 122, 0.55));
+            animation: grimoireGlow 4s ease-in-out infinite;
+        }
+        @keyframes grimoireGlow {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(241, 210, 122, 0.35)); }
+            50%      { filter: drop-shadow(0 0 18px rgba(241, 210, 122, 0.8)); }
+        }
+        .grimoire-body h3 {
+            margin: 0 0 6px;
+            font-family: 'Cinzel', Georgia, serif;
+            font-size: 1.35rem; letter-spacing: 0.08em; text-transform: uppercase;
+            color: var(--gr-gold-light);
+            text-shadow: 0 2px 0 #7a5f14, 0 0 14px rgba(241, 210, 122, 0.35);
+        }
+        .grimoire-body p { margin: 0 0 12px; color: #dfe6ff; font-size: 0.92rem; line-height: 1.55; }
+        .grimoire-chapters { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+        .grimoire-chapters li {
+            padding: 4px 10px; border-radius: 100px;
+            border: 1px solid rgba(241, 210, 122, 0.55);
+            background: rgba(7, 15, 51, 0.65);
+            color: var(--gr-gold-light);
+            font-family: 'Cinzel', Georgia, serif; font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase;
+        }
+        @media (max-width: 600px) {
+            .grimoire-card { grid-template-columns: 1fr; text-align: center; padding: 18px 16px; }
+            .grimoire-pentacle { width: 110px; height: 110px; margin: 0 auto; }
+            .grimoire-chapters { justify-content: center; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .grimoire-card, .grimoire-pentacle { animation: none; }
+        }
+        /* ══════════════════════════════════════════════════════════════════
+           v2.3 — PINK RIBBON
+
+           La 2.3 est la mise à jour Kotone Shiomi : le rouge Phantom Thieves de
+           la 2.2 laisse la place à son rose, et le frontmatter porte un ruban.
+           Des tokens plutôt que des littérales en dur, pour que le thème de la
+           prochaine version ne soit qu'un remplacement de ces quelques lignes.
+        ═════════════════════════════════════════════════════════════════ */
+        :root {
+            --kotone-pink:      #e8447e;
+            --kotone-pink-soft: #ff8fb8;
+            --kotone-pink-pale: #ffd6e6;
+            --kotone-pink-deep: #8a1e4d;
+            --kotone-butterfly: #6fa8dc;
+        }
+
+        :root.darkmode {
+            --kotone-pink-pale: #3a1028;
+            --kotone-pink-deep: #ffb3d1;
+        }
+
+        /* Ruban décoratif du frontmatter. `aria-hidden` côté HTML : c'est de
+           l'ornement, un lecteur d'écran n'a rien à en dire. */
+        .kotone-ribbon {
+            display: block;
+            width: 100%;
+            max-width: 320px;
+            margin: 14px auto 0;
+            height: 10px;
+            border-radius: 999px;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                var(--kotone-pink-soft) 18%,
+                var(--kotone-pink) 50%,
+                var(--kotone-pink-soft) 82%,
+                transparent 100%
+            );
+            animation: kotoneRibbonShimmer 4.5s ease-in-out infinite;
+        }
+
+        @keyframes kotoneRibbonShimmer {
+            0%, 100% { opacity: 0.75; transform: scaleX(0.94); }
+            50%      { opacity: 1;    transform: scaleX(1); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .kotone-ribbon { animation: none; }
+        }
+
+
+        /* ═══════════════════════════════════════════════════════════════════
+           GRILLE DES NOUVEAUX PORTRAITS
+
+           Tout nouveau contenu est listé explicitement (CLAUDE.md §9) : ici,
+           chaque portrait avec son image et le personnage qu'il représente.
+           Les vignettes se chargent en `loading="lazy"` — il y en a beaucoup, et
+           elles sont toutes sous la ligne de flottaison.
+        ════════════════════════════════════════════════════════════════════ */
+        .pfp-grid-wrap { margin: 18px 0 6px; }
+
+        .pfp-grid-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 22px 0 10px;
+            font-family: 'Montserrat', 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-h3);
+        }
+
+        .pfp-grid-badge {
+            flex: none;
+            padding: 3px 9px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            letter-spacing: 0.04em;
+            color: #fff;
+            background: linear-gradient(90deg, var(--kotone-pink-soft), var(--kotone-pink));
+        }
+
+        .pfp-grid-count {
+            font-size: 0.72rem;
+            font-weight: 800;
+            opacity: 0.6;
+        }
+
+        .pfp-grid {
+            display: grid;
+            /* `auto-fill` plutôt qu'un nombre de colonnes fixe : la grille se
+               réduit d'elle-même jusqu'au téléphone sans requête média. */
+            grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+            gap: 12px;
+            /* Sans ça, une légende qui passe à deux lignes étire toute sa rangée
+               et décale les vignettes voisines vers le bas. */
+            align-items: start;
+        }
+
+        .pfp-cell {
+            margin: 0;
+            text-align: center;
+        }
+
+        .pfp-cell img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 2px solid var(--kotone-pink-pale);
+            background: var(--card-bg);
+            transition: transform 0.18s ease, border-color 0.18s ease;
+        }
+
+        .pfp-cell img:hover {
+            transform: translateY(-3px) scale(1.03);
+            border-color: var(--kotone-pink);
+        }
+
+        .pfp-cell figcaption {
+            margin-top: 5px;
+            /* Deux lignes réservées : les noms longs passent à la ligne, et une
+               hauteur fixe garde les rangées alignées. */
+            min-height: 2.5em;
+            font-size: 0.68rem;
+            line-height: 1.25;
+            color: var(--text-muted);
+            word-break: break-word;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .pfp-cell img { transition: none; }
+            .pfp-cell img:hover { transform: none; }
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════
+           CARTES ALL-OUT ATTACK 2.3
+
+           Même principe qu'en 2.2 (Wonder Shujin) : chaque carte emprunte la
+           palette de l'attaque qu'elle présente, plutôt qu'un habillage
+           générique. Les deux variantes ci-dessous fixent leurs couleurs dans
+           les DEUX thèmes — c'est le sujet qui les impose : Notte est une
+           scène de nuit, Pioneer un plein jour de western. Une carte qui
+           basculerait en sombre perdrait le blanc du costume de Soy.
+        ════════════════════════════════════════════════════════════════════ */
+
+        /* ── Notte — Luce, Shoki Ikenami (P5X) ──────────────────────────────
+           Nuit vénitienne : verre teinté violet de sa carte de fin, or du
+           masque, cramoisi de sa doublure, et les perles cousues sur le
+           masque en guise de boutons. */
+        .aoa-card-notte {
+            position: relative;
+            border: 4px solid #0a0710;
+            background:
+                repeating-linear-gradient(60deg, rgba(160, 110, 200, 0.07) 0 1px, transparent 1px 22px),
+                repeating-linear-gradient(-60deg, rgba(160, 110, 200, 0.07) 0 1px, transparent 1px 22px),
+                radial-gradient(ellipse at 72% 18%, rgba(120, 60, 160, 0.34) 0%, transparent 58%),
+                linear-gradient(165deg, #1a1026 0%, #0d0814 52%, #1c0d18 100%);
+            animation: none;
+            box-shadow:
+                0 0 0 3px rgba(201, 162, 39, 0.62),
+                0 8px 30px rgba(86, 32, 122, 0.36),
+                0 2px 10px rgba(0, 0, 0, 0.55);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            margin-top: 20px;
+            padding-bottom: 16px;
+        }
+        .aoa-card-notte:hover {
+            transform: translateY(-6px) scale(1.006);
+            box-shadow:
+                0 0 0 4px rgba(201, 162, 39, 0.85),
+                0 14px 40px rgba(86, 32, 122, 0.48),
+                0 4px 14px rgba(0, 0, 0, 0.62);
+        }
+        /* Bandeau de vitrail : losanges violets sertis d'un plomb noir et d'un fil d'or */
+        .aoa-card-notte::after {
+            content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 16px;
+            background:
+                repeating-linear-gradient(60deg, rgba(0, 0, 0, 0.6) 0 2px, transparent 2px 18px),
+                repeating-linear-gradient(-60deg, rgba(0, 0, 0, 0.6) 0 2px, transparent 2px 18px),
+                repeating-linear-gradient(60deg, rgba(201, 162, 39, 0.45) 8px 9px, transparent 9px 18px),
+                linear-gradient(90deg, #4a1f6e 0%, #7a2a52 45%, #8e1230 100%);
+            border-top: 2px solid rgba(201, 162, 39, 0.7);
+            pointer-events: none;
+        }
+        /* Les perles du masque */
+        .aoa-card-notte .notte-pearls {
+            position: absolute; top: 14px; right: 18px; z-index: 2;
+            display: flex; gap: 7px; pointer-events: none;
+        }
+        .aoa-card-notte .notte-pearls i {
+            width: 9px; height: 9px; border-radius: 50%; display: block;
+            background: radial-gradient(circle at 32% 28%, #ffffff, #e6dcc8 48%, #9c8b6a);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.75), inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+        }
+        .aoa-card-notte .aoa-card-inner { position: relative; z-index: 1; }
+        .aoa-card-notte .aoa-portrait-col,
+        .aoa-card-notte .aoa-gif-col { border-right-color: rgba(201, 162, 39, 0.26); }
+        .aoa-card-notte .aoa-portrait-img {
+            border-color: rgba(201, 162, 39, 0.75);
+            background: rgba(0, 0, 0, 0.38);
+            box-shadow: 0 0 14px rgba(140, 70, 180, 0.28);
+        }
+        .aoa-card-notte .aoa-battle-img {
+            width: 130px; height: auto; max-width: none;
+            object-fit: contain; object-position: top;
+            display: block; margin: 0;
+            border-color: #8e1230; animation: none;
+            background: rgba(0, 0, 0, 0.38);
+            box-shadow: 0 0 16px rgba(142, 18, 48, 0.42);
+        }
+        .aoa-card-notte .card-badge {
+            background: linear-gradient(90deg, #3d1a5c, #8e1230);
+            color: #f0e6d2;
+            box-shadow: 0 2px 8px rgba(86, 32, 122, 0.5);
+        }
+        .aoa-card-notte .card-name {
+            color: #f4ecdd; animation: none;
+            text-shadow: 0 0 12px rgba(201, 162, 39, 0.38);
+        }
+        .aoa-card-notte .card-sub { color: #cbb06a; }
+        .aoa-card-notte .card-stars span:nth-child(1) { animation-delay: 0s;   color: #c9a227; }
+        .aoa-card-notte .card-stars span:nth-child(2) { animation-delay: 0.5s; color: #8e1230; }
+        .aoa-card-notte .card-stars span:nth-child(3) { animation-delay: 1s;   color: #b07ad0; }
+        .aoa-card-notte .card-stars span:nth-child(4) { animation-delay: 1.5s; color: #8e1230; }
+        .aoa-card-notte .card-stars span:nth-child(5) { animation-delay: 2s;   color: #c9a227; }
+
+        /* ── Pioneer — Soy, Shun Kano (P5X) ─────────────────────────────────
+           Plein jour de western : blanc du chapeau et du manteau, bleu du
+           ruban et de sa carte de fin en trame de BD, or du masque. Le
+           bandeau bas reprend le cuir clouté de son ceinturon. */
+        .aoa-card-pioneer {
+            position: relative;
+            border: 4px solid #1b4f9c;
+            background:
+                radial-gradient(rgba(47, 111, 208, 0.13) 1px, transparent 1.4px) 0 0 / 9px 9px,
+                linear-gradient(160deg, #fbfcfe 0%, #e9f0fa 55%, #dbe7f7 100%);
+            animation: none;
+            box-shadow:
+                0 0 0 3px rgba(212, 160, 23, 0.62),
+                0 8px 30px rgba(27, 79, 156, 0.26),
+                0 2px 10px rgba(0, 0, 0, 0.14);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            margin-top: 20px;
+            padding-bottom: 16px;
+        }
+        .aoa-card-pioneer:hover {
+            transform: translateY(-6px) scale(1.006);
+            box-shadow:
+                0 0 0 4px rgba(212, 160, 23, 0.85),
+                0 14px 40px rgba(27, 79, 156, 0.34),
+                0 4px 14px rgba(0, 0, 0, 0.2);
+        }
+        /* Ceinturon de cuir clouté — les clous sont des radial-gradients, pas des
+           bandes : en repeating-linear ils ressortaient en rayures. */
+        .aoa-card-pioneer::after {
+            content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 16px;
+            background:
+                radial-gradient(circle at 50% 50%, #ffe9a3 0 2px, rgba(122, 82, 48, 0) 2.6px) 0 0 / 22px 16px,
+                radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.35) 0 3px, transparent 3.4px) 1px 1px / 22px 16px,
+                linear-gradient(180deg, #a5743f 0%, #8a5c30 55%, #6b4526 100%);
+            border-top: 2px solid rgba(212, 160, 23, 0.8);
+            pointer-events: none;
+        }
+        /* Les étoiles de shérif du chapeau */
+        .aoa-card-pioneer .pioneer-stars {
+            position: absolute; top: 12px; right: 18px; z-index: 2;
+            display: flex; gap: 6px; pointer-events: none;
+            color: #d4a017; font-size: 14px; line-height: 1;
+            text-shadow: 0 1px 2px rgba(27, 79, 156, 0.4);
+        }
+        .aoa-card-pioneer .aoa-card-inner { position: relative; z-index: 1; }
+        .aoa-card-pioneer .aoa-portrait-col,
+        .aoa-card-pioneer .aoa-gif-col { border-right-color: rgba(27, 79, 156, 0.24); }
+        .aoa-card-pioneer .aoa-portrait-img {
+            border-color: rgba(212, 160, 23, 0.85);
+            background: rgba(255, 255, 255, 0.72);
+            box-shadow: 0 0 14px rgba(27, 79, 156, 0.2);
+        }
+        .aoa-card-pioneer .aoa-battle-img {
+            width: 130px; height: auto; max-width: none;
+            object-fit: contain; object-position: top;
+            display: block; margin: 0;
+            border-color: #2f6fd0; animation: none;
+            background: rgba(255, 255, 255, 0.72);
+            box-shadow: 0 0 16px rgba(47, 111, 208, 0.34);
+        }
+        .aoa-card-pioneer .card-badge {
+            background: linear-gradient(90deg, #1b4f9c, #2f6fd0);
+            color: #ffe9a3;
+            box-shadow: 0 2px 8px rgba(27, 79, 156, 0.4);
+        }
+        .aoa-card-pioneer .card-name {
+            color: #12305e; animation: none;
+            text-shadow: 0 0 12px rgba(212, 160, 23, 0.3);
+        }
+        .aoa-card-pioneer .card-sub { color: #1b4f9c; }
+
+        /* ── Kotone Shiomi (P3P × P5X) ──────────────────────────────────────
+           La carte de la mise à jour, donc la plus habillée des trois. Sa
+           palette est celle de l'attaque elle-même : le rose de l'écran
+           « THAT'S A WRAP! », le cramoisi du brassard S.E.E.S. et du ruban,
+           et le bleu du papillon de Nyx en contrepoint — c'est le seul froid
+           de l'ensemble, il sert de respiration.
+
+           Fixée dans les DEUX thèmes, comme Notte et Pioneer : en sombre, un
+           rose désaturé ferait perdre le sujet, qui est justement cet aplat
+           rose saturé. */
+        .aoa-card-kotone {
+            position: relative;
+            border: 4px solid #2a0a18;
+            background:
+                repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 26px),
+                radial-gradient(ellipse at 78% 22%, rgba(255, 255, 255, 0.22) 0%, transparent 55%),
+                linear-gradient(150deg, #e8447e 0%, #c9184a 48%, #8a1e4d 100%);
+            animation: none;
+            box-shadow:
+                0 0 0 3px rgba(255, 214, 230, 0.75),
+                0 8px 30px rgba(138, 30, 77, 0.42),
+                0 2px 10px rgba(0, 0, 0, 0.45);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            margin-top: 20px;
+            padding-bottom: 18px;
+        }
+        .aoa-card-kotone:hover {
+            transform: translateY(-6px) scale(1.006);
+            box-shadow:
+                0 0 0 4px #fff,
+                0 14px 40px rgba(138, 30, 77, 0.55),
+                0 4px 14px rgba(111, 168, 220, 0.45);
+        }
+        /* Le brassard S.E.E.S. en bas de carte : bande cramoisie, liseré blanc,
+           et la trame de couture répétée. */
+        .aoa-card-kotone::after {
+            content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 16px;
+            background:
+                repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.55) 0 2px, transparent 2px 14px),
+                linear-gradient(90deg, #8a1e4d 0%, #c9184a 40%, #8a1e4d 100%);
+            border-top: 2px solid rgba(255, 255, 255, 0.8);
+            pointer-events: none;
+        }
+        /* Les papillons de Nyx — trois, décalés, qui montent doucement. */
+        .aoa-card-kotone .kotone-wings {
+            position: absolute; top: 12px; right: 18px; z-index: 2;
+            display: flex; gap: 10px; pointer-events: none;
+            font-size: 0.95rem; line-height: 1;
+        }
+        .aoa-card-kotone .kotone-wings i {
+            font-style: normal; color: #6fa8dc;
+            text-shadow: 0 0 8px rgba(111, 168, 220, 0.9);
+            animation: kotoneFlutter 3.2s ease-in-out infinite;
+        }
+        .aoa-card-kotone .kotone-wings i:nth-child(2) { animation-delay: 0.7s; color: #bcdcff; }
+        .aoa-card-kotone .kotone-wings i:nth-child(3) { animation-delay: 1.4s; }
+        @keyframes kotoneFlutter {
+            0%, 100% { transform: translateY(0) rotate(-6deg); opacity: 0.75; }
+            50%      { transform: translateY(-7px) rotate(6deg); opacity: 1; }
+        }
+        .aoa-card-kotone .aoa-card-inner { position: relative; z-index: 1; }
+        .aoa-card-kotone .aoa-portrait-col,
+        .aoa-card-kotone .aoa-gif-col { border-right-color: rgba(255, 255, 255, 0.32); }
+        .aoa-card-kotone .aoa-portrait-img,
+        .aoa-card-kotone .aoa-battle-img { border-color: #ffd6e6; }
+        .aoa-card-kotone .card-badge {
+            background: #fff; color: #c9184a; border: 1px solid #ffd6e6; font-weight: 700;
+        }
+        .aoa-card-kotone .card-name {
+            color: #fff;
+            text-shadow: 0 2px 0 #8a1e4d, 0 0 14px rgba(255, 143, 184, 0.8);
+        }
+        .aoa-card-kotone .card-sub { color: #ffd6e6; }
+        .aoa-card-kotone .card-stars span:nth-child(1) { animation-delay: 0s;   color: #fff; }
+        .aoa-card-kotone .card-stars span:nth-child(2) { animation-delay: 0.5s; color: #6fa8dc; }
+        .aoa-card-kotone .card-stars span:nth-child(3) { animation-delay: 1s;   color: #fff; }
+        .aoa-card-kotone .card-stars span:nth-child(4) { animation-delay: 1.5s; color: #ffd6e6; }
+        .aoa-card-kotone .card-stars span:nth-child(5) { animation-delay: 2s;   color: #fff; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .aoa-card-kotone .kotone-wings i { animation: none; }
+        }
+
+        .aoa-card-pioneer .card-stars span:nth-child(1) { animation-delay: 0s;   color: #d4a017; }
+        .aoa-card-pioneer .card-stars span:nth-child(2) { animation-delay: 0.5s; color: #2f6fd0; }
+        .aoa-card-pioneer .card-stars span:nth-child(3) { animation-delay: 1s;   color: #7a5230; }
+        .aoa-card-pioneer .card-stars span:nth-child(4) { animation-delay: 1.5s; color: #2f6fd0; }
+        .aoa-card-pioneer .card-stars span:nth-child(5) { animation-delay: 2s;   color: #d4a017; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .aoa-card-notte, .aoa-card-pioneer,
+            .aoa-card-notte .card-stars span, .aoa-card-pioneer .card-stars span { animation: none; }
+        }
+
+        /* ════════════════════════════════════════════════════════════════════
+           GRAPHIQUES D'ALLÈGEMENT
+
+           En CSS pur, volontairement : importer une bibliothèque de graphiques
+           pour trois mesures ajouterait des dizaines de kilo-octets de
+           JavaScript à une page dont le sujet est précisément le poids
+           téléchargé. Les barres sont dimensionnées par une variable --pct.
+
+           Chaque mesure est aussi écrite en toutes lettres à côté de sa barre :
+           un graphique décoratif qui serait la seule source du chiffre le
+           rendrait illisible aux lecteurs d'écran.
+           ════════════════════════════════════════════════════════════════════ */
+        .perf-chart {
+            margin: 26px 0;
+            padding: 20px 18px 16px;
+            border-radius: 14px;
+            border: 2px solid var(--kotone-pink-pale);
+            background: linear-gradient(160deg, rgba(255, 214, 230, 0.22) 0%, rgba(255, 255, 255, 0.5) 100%);
+        }
+        .dark-mode .perf-chart,
+        body.darkmode .perf-chart {
+            background: linear-gradient(160deg, rgba(58, 16, 40, 0.5) 0%, rgba(20, 6, 14, 0.4) 100%);
+        }
+        .perf-chart h3 {
+            margin: 0 0 4px;
+            font-size: 1rem;
+            color: var(--kotone-pink);
+            letter-spacing: 0.3px;
+        }
+        .perf-chart .perf-note {
+            margin: 0 0 16px;
+            font-size: 0.82rem;
+            opacity: 0.78;
+        }
+        .perf-row { margin-bottom: 15px; }
+        .perf-row:last-child { margin-bottom: 0; }
+        .perf-label {
+            display: block;
+            font-size: 0.86rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .perf-bar {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 4px;
+        }
+        .perf-bar .perf-track {
+            flex: 1;
+            height: 15px;
+            border-radius: 8px;
+            background: rgba(120, 90, 105, 0.16);
+            overflow: hidden;
+        }
+        .perf-bar .perf-fill {
+            display: block;
+            height: 100%;
+            width: var(--pct);
+            border-radius: 8px;
+            animation: perfGrow 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .perf-bar .perf-val {
+            flex: 0 0 auto;
+            min-width: 76px;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            font-size: 0.82rem;
+            font-weight: 700;
+        }
+        /* Avant : gris sourd, c'est le point de départ, pas le sujet. */
+        .perf-bar--before .perf-fill { background: linear-gradient(90deg, #9b8590, #6f5b66); }
+        .perf-bar--before .perf-val { color: #6f5b66; }
+        /* Après : la palette de la version. */
+        .perf-bar--after .perf-fill {
+            background: linear-gradient(90deg, var(--kotone-pink-soft), var(--kotone-pink));
+        }
+        .perf-bar--after .perf-val { color: var(--kotone-pink); }
+        .perf-bar .perf-tag {
+            flex: 0 0 auto;
+            min-width: 48px;
+            font-size: 0.74rem;
+            opacity: 0.72;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+        @keyframes perfGrow {
+            from { width: 0; }
+            to   { width: var(--pct); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .perf-bar .perf-fill { animation: none; }
+        }
+        @media (max-width: 480px) {
+            .perf-bar .perf-tag { min-width: 40px; font-size: 0.68rem; }
+            .perf-bar .perf-val { min-width: 64px; font-size: 0.76rem; }
+        }
+
+</style>
+</head>
+<body>
+
+<a href="../../index.html" class="home-btn">← PersonaDLE</a>
+
+<script type="module">
+  import { initLang } from '../../js/i18n.js';
+  window.__i18nReady = initLang();
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'lang' && e.newValue && window.i18n?.setLang) {
+      window.i18n.setLang(e.newValue);
+    }
+  });
+</script>
+
+<div class="doc-wrap">
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         CHANGELOG JOUEUR v2.3 — page bilingue EN/FR.
+
+         Squelette repris de « PersonaDLE 2.2/PersonaDLE_Update.html » : mêmes
+         composants (bandeau de progression, bouton retour, cartes AOA,
+         révélation au scroll), palette Pink Ribbon à la place du rouge Phantom
+         Thieves — la 2.3 est la mise à jour Kotone Shiomi.
+
+         RÈGLES (CLAUDE.md §9) :
+           • Chaque bloc de texte existe DEUX fois : data-i18n-block="fr" et
+             data-i18n-block="en". Jamais l'un sans l'autre.
+           • Highlights UNIQUEMENT, langage non technique. Le détail par commit
+             va dans DEV_CHANGELOG.md, pas ici.
+           • Tout nouveau contenu est listé explicitement — badges, titres,
+             musiques, avatars : image, nom et condition de déblocage. Pas de
+             section « sans spoiler » (décision Hamza, cf. DEV_CHANGELOG 2.2).
+           • À la sortie de la 2.3 : ajouter l'entrée « version-item »
+             correspondante dans le modal « Nouveautés » de index.html, qui
+             pointe vers cette page.
+         ════════════════════════════════════════════════════════════════════ -->
+
+    <!-- FRONTMATTER -->
+    <div class="frontmatter">
+        <h1>PersonaDLE</h1>
+        <div data-i18n-block="fr">
+            <p><strong>Nouveautés v2.3</strong> — Kotone Shiomi · Septembre 2026</p>
+        </div>
+        <div data-i18n-block="en">
+            <p><strong>What's New in v2.3</strong> — Kotone Shiomi · September 2026</p>
+        </div>
+        <span class="kotone-ribbon" aria-hidden="true"></span>
+    </div>
+
+    <blockquote>
+        <div data-i18n-block="fr"><p>Cette page se remplit au fil de la v2.3. C'est la mise à jour de Kotone Shiomi : de nouveaux avatars à débloquer, des contours de profil à motifs, et une nouvelle façon de voir où se situent vos liens d'amitié.</p></div>
+        <div data-i18n-block="en"><p>This page fills up as v2.3 goes on. It's Kotone Shiomi's update: new avatars to unlock, patterned profile borders, and a new way to see where your bonds stand.</p></div>
+    </blockquote>
+
+    <hr>
+
+    <!-- ════════════════════════════════════
+         CONTENU — à remplir lot par lot (cf. DEV_CHANGELOG.md)
+    ════════════════════════════════════ -->
+
+    <!-- ═══════════════════════════════════
+         DONNÉES CORRIGÉES
+    ═══════════════════════════════════ -->
+
+    <div data-i18n-block="fr"><h1>🃏 Données corrigées</h1></div>
+    <div data-i18n-block="en"><h1>🃏 Data corrections</h1></div>
+
+    <div data-i18n-block="fr">
+        <ul>
+            <li><strong>Elisabeth</strong> est désormais une utilisatrice de persona en mode
+                Classique, avec <em>Thanatos</em> — qu'elle manie dans <em>Persona 4 Arena
+                Ultimax</em>. Le mode Personae le savait déjà ; la grille du mode Classique
+                disait le contraire. Theodore, lui, ne manie toujours aucune persona.</li>
+        </ul>
+    </div>
+    <div data-i18n-block="en">
+        <ul>
+            <li><strong>Elizabeth</strong> is now a persona user in Classic mode, with
+                <em>Thanatos</em> — the persona she wields in <em>Persona 4 Arena
+                Ultimax</em>. Personae mode already knew; the Classic grid said otherwise.
+                Theodore still wields no persona.</li>
+        </ul>
+    </div>
+
+    <!-- ═══════════════════════════════════
+         NOUVEAUX PORTRAITS DE PROFIL
+    ═══════════════════════════════════ -->
+
+    <div data-i18n-block="fr"><h1>🖼️ 146 nouveaux portraits de profil</h1></div>
+    <div data-i18n-block="en"><h1>🖼️ 146 new profile pictures</h1></div>
+
+    <div data-i18n-block="fr">
+        <p>La galerie passe de 204 à <strong>350</strong> portraits. Vingt personnages qui n'en
+        avaient aucun en ont enfin un — Maki Sonomura, Reiji Kido, Ulala, Baofu, Katsuya,
+        Ryoji, Takaya, Jin, Sae Niijima, Zenkichi, et neuf Phantom Idols de
+        <em>Persona 5: The Phantom X</em>. Chaque jeu est désormais rangé protagoniste, puis
+        cast principal, puis personnages secondaires, et les portraits d'un même personnage
+        se suivent. Tous disponibles dès maintenant — aucun n'est à débloquer.</p>
+    </div>
+    <div data-i18n-block="en">
+        <p>The gallery goes from 204 to <strong>350</strong> pictures. Twenty characters who had
+        none at all finally get one — Maki Sonomura, Reiji Kido, Ulala, Baofu, Katsuya,
+        Ryoji, Takaya, Jin, Sae Niijima, Zenkichi, and nine Phantom Idols from
+        <em>Persona 5: The Phantom X</em>. Every game is now sorted protagonist first, then
+        main cast, then supporting characters, with each character's pictures grouped
+        together. All available right away — none of them need unlocking.</p>
+    </div>
+
+    <div class="pfp-grid-wrap">
+        <p class="pfp-grid-title"><span class="pfp-grid-badge">P1</span> Persona 1 <span class="pfp-grid-count">10</span></p>
+        <div class="pfp-grid">
+            <figure class="pfp-cell"><img src="../../img/avatar/naoya_todou_p1.jpg" alt="Naoya Todou" loading="lazy"><figcaption>Naoya Todou</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/naoya_todou_p1_2.jpg" alt="Naoya Todou" loading="lazy"><figcaption>Naoya Todou</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/naoya_todou_p1_3.jpg" alt="Naoya Todou" loading="lazy"><figcaption>Naoya Todou</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kei_nanjo_p1.jpg" alt="Kei Nanjo" loading="lazy"><figcaption>Kei Nanjo</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/eriko_kirishima_p1.jpg" alt="Eriko Kirishima" loading="lazy"><figcaption>Eriko Kirishima</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yukino_mayuzumi_p1.jpg" alt="Yukino Mayuzumi" loading="lazy"><figcaption>Yukino Mayuzumi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yukino_mayuzumi_p1_2.jpg" alt="Yukino Mayuzumi" loading="lazy"><figcaption>Yukino Mayuzumi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/maki_sonomura_p1.jpg" alt="Maki Sonomura" loading="lazy"><figcaption>Maki Sonomura</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/reiji_kido_p1.jpg" alt="Reiji Kido" loading="lazy"><figcaption>Reiji Kido</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/reiji_kido_p1_2.jpg" alt="Reiji Kido" loading="lazy"><figcaption>Reiji Kido</figcaption></figure>
+        </div>
+        <p class="pfp-grid-title"><span class="pfp-grid-badge">P2</span> Persona 2 <span class="pfp-grid-count">24</span></p>
+        <div class="pfp-grid">
+            <figure class="pfp-cell"><img src="../../img/avatar/tatsuya_suou_p2.jpg" alt="Tatsuya Suou" loading="lazy"><figcaption>Tatsuya Suou</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/tatsuya_suou_p2_2.jpg" alt="Tatsuya Suou" loading="lazy"><figcaption>Tatsuya Suou</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/tatsuya_suou_p2_3.jpg" alt="Tatsuya Suou" loading="lazy"><figcaption>Tatsuya Suou</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/maya_amano_p2.jpg" alt="Maya Amano" loading="lazy"><figcaption>Maya Amano</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/maya_amano_p2_2.jpg" alt="Maya Amano" loading="lazy"><figcaption>Maya Amano</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/maya_amano_p2_3.jpg" alt="Maya Amano" loading="lazy"><figcaption>Maya Amano</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/maya_amano_p2_4.jpg" alt="Maya Amano" loading="lazy"><figcaption>Maya Amano</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/maya_amano_p2_5.jpg" alt="Maya Amano" loading="lazy"><figcaption>Maya Amano</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/eikichi_mishina_p2.jpg" alt="Eikichi Mishina" loading="lazy"><figcaption>Eikichi Mishina</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/eikichi_mishina_p2_2.jpg" alt="Eikichi Mishina" loading="lazy"><figcaption>Eikichi Mishina</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/eikichi_mishina_p2_3.jpg" alt="Eikichi Mishina" loading="lazy"><figcaption>Eikichi Mishina</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/lisa_silverman_p2.jpg" alt="Lisa Silverman" loading="lazy"><figcaption>Lisa Silverman</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/lisa_silverman_p2_2.jpg" alt="Lisa Silverman" loading="lazy"><figcaption>Lisa Silverman</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/baofu_p2.jpg" alt="Baofu" loading="lazy"><figcaption>Baofu</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/baofu_p2_2.jpg" alt="Baofu" loading="lazy"><figcaption>Baofu</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/zenkichi_hasegawa_p5s_2.jpg" alt="Zenkichi Hasegawa" loading="lazy"><figcaption>Zenkichi Hasegawa</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/zenkichi_hasegawa_p5s_3.jpg" alt="Zenkichi Hasegawa" loading="lazy"><figcaption>Zenkichi Hasegawa</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/katsuya_suou_p2.jpg" alt="Katsuya Suou" loading="lazy"><figcaption>Katsuya Suou</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/katsuya_suou_p2_2.jpg" alt="Katsuya Suou" loading="lazy"><figcaption>Katsuya Suou</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/katsuya_suou_p2_3.jpg" alt="Katsuya Suou" loading="lazy"><figcaption>Katsuya Suou</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/katsuya_suou_p2_4.jpg" alt="Katsuya Suou" loading="lazy"><figcaption>Katsuya Suou</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ulala_serizawa_p2.jpg" alt="Ulala Serizawa" loading="lazy"><figcaption>Ulala Serizawa</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ulala_serizawa_p2_2.jpg" alt="Ulala Serizawa" loading="lazy"><figcaption>Ulala Serizawa</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yukino_mayuzumi_p2.jpg" alt="Yukino Mayuzumi (P2)" loading="lazy"><figcaption>Yukino Mayuzumi (P2)</figcaption></figure>
+        </div>
+        <p class="pfp-grid-title"><span class="pfp-grid-badge">P3</span> Persona 3 <span class="pfp-grid-count">55</span></p>
+        <div class="pfp-grid">
+            <figure class="pfp-cell"><img src="../../img/avatar/makoto_yuki_p3.jpg" alt="Makoto Yuki" loading="lazy"><figcaption>Makoto Yuki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/makoto_yuki_p3_2.jpg" alt="Makoto Yuki" loading="lazy"><figcaption>Makoto Yuki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/makoto_yuki_p3_3.jpg" alt="Makoto Yuki" loading="lazy"><figcaption>Makoto Yuki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/makoto_yuki_p3_4.jpg" alt="Makoto Yuki" loading="lazy"><figcaption>Makoto Yuki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/makoto_yuki_p3_5.jpg" alt="Makoto Yuki" loading="lazy"><figcaption>Makoto Yuki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/makoto_yuki_p3_6.jpg" alt="Makoto Yuki" loading="lazy"><figcaption>Makoto Yuki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/makoto_yuki_p3_7.jpg" alt="Makoto Yuki" loading="lazy"><figcaption>Makoto Yuki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kotone_shiomi_p3p.jpg" alt="Kotone Shiomi" loading="lazy"><figcaption>Kotone Shiomi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kotone_shiomi_p3p_2.jpg" alt="Kotone Shiomi" loading="lazy"><figcaption>Kotone Shiomi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kotone_shiomi_p3p_3.jpg" alt="Kotone Shiomi" loading="lazy"><figcaption>Kotone Shiomi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kotone_shiomi_p5x_crossover.jpg" alt="Kotone Shiomi" loading="lazy"><figcaption>Kotone Shiomi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yukari_takeba_p3.jpg" alt="Yukari Takeba" loading="lazy"><figcaption>Yukari Takeba</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yukari_takeba_p3_2.jpg" alt="Yukari Takeba" loading="lazy"><figcaption>Yukari Takeba</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yukari_takeba_p3_3.jpg" alt="Yukari Takeba" loading="lazy"><figcaption>Yukari Takeba</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/junpei_iori_p3.jpg" alt="Junpei Iori" loading="lazy"><figcaption>Junpei Iori</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/junpei_iori_p3_2.jpg" alt="Junpei Iori" loading="lazy"><figcaption>Junpei Iori</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/junpei_iori_p3_3.jpg" alt="Junpei Iori" loading="lazy"><figcaption>Junpei Iori</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/junpei_iori_p3_4.jpg" alt="Junpei Iori" loading="lazy"><figcaption>Junpei Iori</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/akihiko_sanada_p3.jpg" alt="Akihiko Sanada" loading="lazy"><figcaption>Akihiko Sanada</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/akihiko_sanada_p3_2.jpg" alt="Akihiko Sanada" loading="lazy"><figcaption>Akihiko Sanada</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/akihiko_sanada_pq.jpg" alt="Akihiko Sanada" loading="lazy"><figcaption>Akihiko Sanada</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/mitsuru_kirijo_p3.jpg" alt="Mitsuru Kirijo" loading="lazy"><figcaption>Mitsuru Kirijo</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/mitsuru_kirijo_p3_2.jpg" alt="Mitsuru Kirijo" loading="lazy"><figcaption>Mitsuru Kirijo</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/mitsuru_kirijo_p3_3.jpg" alt="Mitsuru Kirijo" loading="lazy"><figcaption>Mitsuru Kirijo</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/mitsuru_kirijo_p3_4.jpg" alt="Mitsuru Kirijo" loading="lazy"><figcaption>Mitsuru Kirijo</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/mitsuru_kirijo_p3_5.jpg" alt="Mitsuru Kirijo" loading="lazy"><figcaption>Mitsuru Kirijo</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/mitsuru_kirijo_p3_6.jpg" alt="Mitsuru Kirijo" loading="lazy"><figcaption>Mitsuru Kirijo</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/fuuka_yamagishi_p3.jpg" alt="Fuuka Yamagishi" loading="lazy"><figcaption>Fuuka Yamagishi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/fuuka_yamagishi_p3_2.jpg" alt="Fuuka Yamagishi" loading="lazy"><figcaption>Fuuka Yamagishi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/fuuka_yamagishi_p3_3.jpg" alt="Fuuka Yamagishi" loading="lazy"><figcaption>Fuuka Yamagishi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/aigis_p3.jpg" alt="Aigis" loading="lazy"><figcaption>Aigis</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/aigis_p3_2.jpg" alt="Aigis" loading="lazy"><figcaption>Aigis</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/aigis_p3_3.jpg" alt="Aigis" loading="lazy"><figcaption>Aigis</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/koromaru_p3.jpg" alt="Koromaru" loading="lazy"><figcaption>Koromaru</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/koromaru_p3_2.jpg" alt="Koromaru" loading="lazy"><figcaption>Koromaru</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/koromaru_pq2.jpg" alt="Koromaru" loading="lazy"><figcaption>Koromaru</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ken_amada_p3.jpg" alt="Ken Amada" loading="lazy"><figcaption>Ken Amada</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ken_amada_p3_2.jpg" alt="Ken Amada" loading="lazy"><figcaption>Ken Amada</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ken_amada_p3_3.jpg" alt="Ken Amada" loading="lazy"><figcaption>Ken Amada</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/shinjiro_aragaki_p3.jpg" alt="Shinjiro Aragaki" loading="lazy"><figcaption>Shinjiro Aragaki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/shinjiro_aragaki_p3_2.jpg" alt="Shinjiro Aragaki" loading="lazy"><figcaption>Shinjiro Aragaki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/shinjiro_aragaki_p3_3.jpg" alt="Shinjiro Aragaki" loading="lazy"><figcaption>Shinjiro Aragaki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/metis_p3.jpg" alt="Metis" loading="lazy"><figcaption>Metis</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/elisabeth_p3.jpg" alt="Elisabeth" loading="lazy"><figcaption>Elisabeth</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/elisabeth_p3_2.jpg" alt="Elisabeth" loading="lazy"><figcaption>Elisabeth</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/elisabeth_p3_3.jpg" alt="Elisabeth" loading="lazy"><figcaption>Elisabeth</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/elisabeth_p3_4.jpg" alt="Elisabeth" loading="lazy"><figcaption>Elisabeth</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/jin_shirato_p3.jpg" alt="Jin Shirato" loading="lazy"><figcaption>Jin Shirato</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/jin_shirato_p3_2.jpg" alt="Jin Shirato" loading="lazy"><figcaption>Jin Shirato</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ryoji_mochizuki_p3.jpg" alt="Ryoji Mochizuki" loading="lazy"><figcaption>Ryoji Mochizuki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ryoji_mochizuki_p3_2.jpg" alt="Ryoji Mochizuki" loading="lazy"><figcaption>Ryoji Mochizuki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ryoji_mochizuki_p3_3.jpg" alt="Ryoji Mochizuki" loading="lazy"><figcaption>Ryoji Mochizuki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ryoji_mochizuki_p3_4.jpg" alt="Ryoji Mochizuki" loading="lazy"><figcaption>Ryoji Mochizuki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/takaya_sakaki_p3.jpg" alt="Takaya Sakaki" loading="lazy"><figcaption>Takaya Sakaki</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/takaya_sakaki_p3_2.jpg" alt="Takaya Sakaki" loading="lazy"><figcaption>Takaya Sakaki</figcaption></figure>
+        </div>
+        <p class="pfp-grid-title"><span class="pfp-grid-badge">P4</span> Persona 4 <span class="pfp-grid-count">1</span></p>
+        <div class="pfp-grid">
+            <figure class="pfp-cell"><img src="../../img/avatar/rise_kujikawa_p4.jpg" alt="Rise Kujikawa" loading="lazy"><figcaption>Rise Kujikawa</figcaption></figure>
+        </div>
+        <p class="pfp-grid-title"><span class="pfp-grid-badge">P5</span> Persona 5 <span class="pfp-grid-count">10</span></p>
+        <div class="pfp-grid">
+            <figure class="pfp-cell"><img src="../../img/avatar/futaba_sakura_p5.jpg" alt="Futaba Sakura" loading="lazy"><figcaption>Futaba Sakura</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/sophia_p5s.jpg" alt="Sophia" loading="lazy"><figcaption>Sophia</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/sophia_p5s_2.jpg" alt="Sophia" loading="lazy"><figcaption>Sophia</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/sophia_p5s_3.jpg" alt="Sophia" loading="lazy"><figcaption>Sophia</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/sophia_p5s_4.jpg" alt="Sophia" loading="lazy"><figcaption>Sophia</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/sophia_p5s_5.jpg" alt="Sophia" loading="lazy"><figcaption>Sophia</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/erina_p5t.jpg" alt="Erina" loading="lazy"><figcaption>Erina</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/sae_niijima_p5.jpg" alt="Sae Niijima" loading="lazy"><figcaption>Sae Niijima</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/sae_niijima_p5_2.jpg" alt="Sae Niijima" loading="lazy"><figcaption>Sae Niijima</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/zenkichi_hasegawa_p5s.jpg" alt="Zenkichi Hasegawa" loading="lazy"><figcaption>Zenkichi Hasegawa</figcaption></figure>
+        </div>
+        <p class="pfp-grid-title"><span class="pfp-grid-badge">P5X</span> Persona 5: The Phantom X <span class="pfp-grid-count">46</span></p>
+        <div class="pfp-grid">
+            <figure class="pfp-cell"><img src="../../img/avatar/wonder_joker_matching_p5x.jpg" alt="Wonder (Nagisa Kamishiro)" loading="lazy"><figcaption>Wonder (Nagisa Kamishiro)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/wonder_p5x.jpg" alt="Wonder (Nagisa Kamishiro)" loading="lazy"><figcaption>Wonder (Nagisa Kamishiro)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yaoling_li_p5x.jpg" alt="Yaoling Li (Rin)" loading="lazy"><figcaption>Yaoling Li (Rin)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yui_comic_p5x.jpg" alt="YUI (Bui)" loading="lazy"><figcaption>YUI (Bui)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yui_comic_p5x_2.jpg" alt="YUI (Bui)" loading="lazy"><figcaption>YUI (Bui)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/shoki_ikenami_p5x.jpg" alt="Shoki Ikenami (Luce)" loading="lazy"><figcaption>Shoki Ikenami (Luce)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/shoki_ikenami_notte_p5x.jpg" alt="Shoki Ikenami (Luce)" loading="lazy"><figcaption>Shoki Ikenami (Luce)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ayaka_sakai_p5x.jpg" alt="Ayaka Sakai (Chord)" loading="lazy"><figcaption>Ayaka Sakai (Chord)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ayaka_sakai_p5x_2.jpg" alt="Ayaka Sakai (Chord)" loading="lazy"><figcaption>Ayaka Sakai (Chord)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ayaka_sakai_p5x_3.jpg" alt="Ayaka Sakai (Chord)" loading="lazy"><figcaption>Ayaka Sakai (Chord)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ayaka_sakai_p5x_4.jpg" alt="Ayaka Sakai (Chord)" loading="lazy"><figcaption>Ayaka Sakai (Chord)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ayaka_sakai_summer_p5x.jpg" alt="Ayaka Sakai (Chord)" loading="lazy"><figcaption>Ayaka Sakai (Chord)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kira_kitazato_p5x.jpg" alt="Kira Kitazato (Messa)" loading="lazy"><figcaption>Kira Kitazato (Messa)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kira_kitazato_p5x_2.jpg" alt="Kira Kitazato (Messa)" loading="lazy"><figcaption>Kira Kitazato (Messa)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kira_kitazato_p5x_3.jpg" alt="Kira Kitazato (Messa)" loading="lazy"><figcaption>Kira Kitazato (Messa)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yumi_shiina_p5x.jpg" alt="Yumi Shiina (Phoebe)" loading="lazy"><figcaption>Yumi Shiina (Phoebe)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yumi_shiina_p5x_2.jpg" alt="Yumi Shiina (Phoebe)" loading="lazy"><figcaption>Yumi Shiina (Phoebe)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/yumi_shiina_p5x_3.jpg" alt="Yumi Shiina (Phoebe)" loading="lazy"><figcaption>Yumi Shiina (Phoebe)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/aran_hirano_p5x.jpg" alt="Aran Hirano (Anri)" loading="lazy"><figcaption>Aran Hirano (Anri)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/ichigo_shikano_p5x.jpg" alt="Ichigo Shikano (Berry)" loading="lazy"><figcaption>Ichigo Shikano (Berry)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kiyoshi_kurotani_p5x.jpg" alt="Kiyoshi Kurotani (Key)" loading="lazy"><figcaption>Kiyoshi Kurotani (Key)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kotone_montagne_p5x.jpg" alt="Kotone Montagne (Mont)" loading="lazy"><figcaption>Kotone Montagne (Mont)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kumi_katayama_p5x.jpg" alt="Kumi Katayama (Blitz)" loading="lazy"><figcaption>Kumi Katayama (Blitz)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/miyu_sahara_p5x.jpg" alt="Miyu Sahara (Puppet)" loading="lazy"><figcaption>Miyu Sahara (Puppet)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/mio_natsukawa_p5x.jpg" alt="Mio Natsukawa (Matoi)" loading="lazy"><figcaption>Mio Natsukawa (Matoi)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/narumi_nashimoto_p5x.jpg" alt="Narumi Nashimoto (Pinky)" loading="lazy"><figcaption>Narumi Nashimoto (Pinky)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/seiji_shiratori_p5x.jpg" alt="Seiji Shiratori (Fleuret)" loading="lazy"><figcaption>Seiji Shiratori (Fleuret)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/hatsune_miku_p5x.jpg" alt="Hatsune Miku" loading="lazy"><figcaption>Hatsune Miku</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/haruna_nishimori_p5x.jpg" alt="Haruna Nishimori (Riddle)" loading="lazy"><figcaption>Haruna Nishimori (Riddle)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/leo_kamiyama_p5x.jpg" alt="Leo Kamiyama (Leon)" loading="lazy"><figcaption>Leo Kamiyama (Leon)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/leo_kamiyama_p5x_2.jpg" alt="Leo Kamiyama (Leon)" loading="lazy"><figcaption>Leo Kamiyama (Leon)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/manaka_nagao_p5x.jpg" alt="Manaka Nagao (Ange)" loading="lazy"><figcaption>Manaka Nagao (Ange)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/manaka_nagao_p5x_2.jpg" alt="Manaka Nagao (Ange)" loading="lazy"><figcaption>Manaka Nagao (Ange)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/manaka_nagao_p5x_3.jpg" alt="Manaka Nagao (Ange)" loading="lazy"><figcaption>Manaka Nagao (Ange)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/manaka_nagao_p5x_4.jpg" alt="Manaka Nagao (Ange)" loading="lazy"><figcaption>Manaka Nagao (Ange)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/masaki_ashiya_p5x.jpg" alt="Masaki Ashiya (Cherish)" loading="lazy"><figcaption>Masaki Ashiya (Cherish)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/masaki_ashiya_p5x_2.jpg" alt="Masaki Ashiya (Cherish)" loading="lazy"><figcaption>Masaki Ashiya (Cherish)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/masaki_ashiya_p5x_3.jpg" alt="Masaki Ashiya (Cherish)" loading="lazy"><figcaption>Masaki Ashiya (Cherish)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/mayumi_hashimoto_p5x.jpg" alt="Mayumi Hashimoto (Turbo)" loading="lazy"><figcaption>Mayumi Hashimoto (Turbo)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/mayumi_hashimoto_p5x_2.jpg" alt="Mayumi Hashimoto (Turbo)" loading="lazy"><figcaption>Mayumi Hashimoto (Turbo)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/minami_miyashita_p5x.jpg" alt="Minami Miyashita (Marian)" loading="lazy"><figcaption>Minami Miyashita (Marian)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/runa_dogenzaka_p5x.jpg" alt="Runa Dogenzaka (Howler)" loading="lazy"><figcaption>Runa Dogenzaka (Howler)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/runa_dogenzaka_p5x_2.jpg" alt="Runa Dogenzaka (Howler)" loading="lazy"><figcaption>Runa Dogenzaka (Howler)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/runa_dogenzaka_p5x_3.jpg" alt="Runa Dogenzaka (Howler)" loading="lazy"><figcaption>Runa Dogenzaka (Howler)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/toshiya_sumi_p5x.jpg" alt="Toshiya Sumi (Sepia)" loading="lazy"><figcaption>Toshiya Sumi (Sepia)</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/toshiya_sumi_p5x_2.jpg" alt="Toshiya Sumi (Sepia)" loading="lazy"><figcaption>Toshiya Sumi (Sepia)</figcaption></figure>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════
+         PORTRAITS ANIMÉS
+    ═══════════════════════════════════ -->
+
+    <div data-i18n-block="fr"><h1>✨ Portraits animés</h1></div>
+    <div data-i18n-block="en"><h1>✨ Animated pictures</h1></div>
+
+    <div data-i18n-block="fr">
+        <p>Six portraits animés rejoignent la galerie — quatre de <strong>Kotone Shiomi</strong>
+        et deux de <strong>Theodore</strong>. Et pour ne plus avoir à les chercher parmi
+        357 images, l'atelier a désormais un onglet <strong>Animés</strong> qui ne montre
+        que les portraits qui bougent : les six nouveaux, et les treize qui étaient déjà là.
+        Tous disponibles immédiatement — aucun n'est à débloquer.</p>
+    </div>
+    <div data-i18n-block="en">
+        <p>Six animated pictures join the gallery — four of <strong>Kotone Shiomi</strong> and
+        two of <strong>Theodore</strong>. And so you don't have to hunt for them among 357
+        images, the workshop now has an <strong>Animated</strong> tab showing only the
+        pictures that move: the six new ones, and the thirteen that were already there.
+        All available right away — none of them need unlocking.</p>
+    </div>
+
+    <div class="pfp-grid-wrap">
+        <p class="pfp-grid-title"><span class="pfp-grid-badge">P3</span> Kotone Shiomi <span class="pfp-grid-count">4</span></p>
+        <div class="pfp-grid">
+            <figure class="pfp-cell"><img src="../../img/avatar/kotone_shiomi_p3_anim_butterfly.webp" alt="Kotone Shiomi" loading="lazy"><figcaption>Kotone Shiomi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kotone_shiomi_p3_anim_listening.webp" alt="Kotone Shiomi" loading="lazy"><figcaption>Kotone Shiomi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kotone_shiomi_p3_anim_orpheus.webp" alt="Kotone Shiomi" loading="lazy"><figcaption>Kotone Shiomi</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/kotone_shiomi_p3_anim_pink.webp" alt="Kotone Shiomi" loading="lazy"><figcaption>Kotone Shiomi</figcaption></figure>
+        </div>
+        <p class="pfp-grid-title"><span class="pfp-grid-badge">P3</span> Theodore <span class="pfp-grid-count">2</span></p>
+        <div class="pfp-grid">
+            <figure class="pfp-cell"><img src="../../img/avatar/theodore_p3_anim_elevator.webp" alt="Theodore" loading="lazy"><figcaption>Theodore</figcaption></figure>
+            <figure class="pfp-cell"><img src="../../img/avatar/theodore_p3_anim_look_back.webp" alt="Theodore" loading="lazy"><figcaption>Theodore</figcaption></figure>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════
+         NOUVEAUX ALL-OUT ATTACK — SKINS P5X
+    ═══════════════════════════════════ -->
+
+    <div data-i18n-block="fr"><h1>💥 Trois nouvelles animations All-Out Attack</h1></div>
+    <div data-i18n-block="en"><h1>💥 Three new All-Out Attack animations</h1></div>
+
+    <div data-i18n-block="fr">
+        <p>En tête, celle de la mise à jour : l'All-Out Attack de <strong>Kotone Shiomi</strong>
+        devient la sienne dans <em>Persona 5: The Phantom X</em>, où elle débarque en 5 étoiles.
+        Elle <strong>remplace</strong> son ancienne animation, et reste rangée dans
+        <em>Persona 3 Portable</em> — c'est le jeu dont elle vient.</p>
+        <p>Suivent deux tenues 5 étoiles du même jeu, qui ne remplacent rien : Luce et Soy
+        restent devinables séparément, chacun avec sa propre animation.</p>
+    </div>
+    <div data-i18n-block="en">
+        <p>Leading the way, the one this update is named after: <strong>Kotone Shiomi</strong>'s
+        All-Out Attack becomes the one she has in <em>Persona 5: The Phantom X</em>, where she
+        arrives as a 5-star. It <strong>replaces</strong> her old animation, and she stays filed
+        under <em>Persona 3 Portable</em> — the game she comes from.</p>
+        <p>Then two 5-star outfits from that same game, which replace nothing: Luce and Soy are
+        still guessable on their own, each with its own animation.</p>
+    </div>
+
+    <div data-i18n-block="fr">
+        <h2 class="shujin-chars-title">🎀 All-Out Attack — Kotone Shiomi</h2>
+        <p class="shujin-intro">Uniforme de Gekkoukan, brassard S.E.E.S. au bras, naginata au
+        clair et le XXII dans les cheveux : la protagoniste de <em>Persona 3 Portable</em>
+        traverse les jeux et finit sa charge sur un écran rose — <em>« That's a wrap! »</em>.</p>
+    </div>
+    <div data-i18n-block="en">
+        <h2 class="shujin-chars-title">🎀 All-Out Attack — Kotone Shiomi</h2>
+        <p class="shujin-intro">Gekkoukan uniform, S.E.E.S. armband, naginata drawn and the
+        XXII in her hair: the <em>Persona 3 Portable</em> protagonist crosses over and ends her
+        charge on a wall of pink — <em>"That's a wrap!"</em>.</p>
+    </div>
+
+    <div class="aoa-card aoa-card-kotone vx-reveal">
+        <span class="kotone-wings" aria-hidden="true"><i>✦</i><i>✦</i><i>✦</i></span>
+        <div class="aoa-card-inner">
+            <div class="aoa-portrait-col">
+                <img class="aoa-portrait-img" src="../../allOutAttackMode/database/img/Kotone.webp" alt="Kotone Shiomi portrait">
+            </div>
+            <div class="aoa-gif-col">
+                <img class="aoa-gif-img" src="../../allOutAttackMode/database/allOutAttack/Kotone.webp" alt="Kotone Shiomi All-Out Attack">
+            </div>
+            <div class="aoa-battle-col">
+                <img class="aoa-battle-img" src="../../allOutAttackMode/database/img/Kotone_Battle.webp" alt="Kotone Shiomi battle">
+                <div class="aoa-info">
+                    <div class="card-stars" aria-hidden="true">
+                        <span>✦</span><span>★</span><span>✦</span><span>★</span><span>✦</span>
+                    </div>
+                    <span class="card-badge">P3P</span>
+                    <p class="card-name">Kotone Shiomi</p>
+                    <p class="card-sub">Animation Persona 5 X</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div data-i18n-block="fr">
+        <h2 class="shujin-chars-title">🎭 All-Out Attack — Luce Notte</h2>
+        <p class="shujin-intro">Masque cramoisi perlé d'or, cape noire, vitrail violet en
+        toile de fond : Shoki Ikenami troque le prince pour le bal masqué vénitien.</p>
+    </div>
+    <div data-i18n-block="en">
+        <h2 class="shujin-chars-title">🎭 All-Out Attack — Luce Notte</h2>
+        <p class="shujin-intro">A crimson mask beaded with gold, a black cape, stained glass
+        for a backdrop: Shoki Ikenami trades the prince for the Venetian masquerade.</p>
+    </div>
+
+    <div class="aoa-card aoa-card-notte vx-reveal">
+        <span class="notte-pearls" aria-hidden="true"><i></i><i></i><i></i></span>
+        <div class="aoa-card-inner">
+            <div class="aoa-portrait-col">
+                <img class="aoa-portrait-img" src="../../allOutAttackMode/database/img/Luce_Notte.webp" alt="Luce Notte portrait">
+            </div>
+            <div class="aoa-gif-col">
+                <img class="aoa-gif-img" src="../../allOutAttackMode/database/allOutAttack/Luce_Notte.webp" alt="Luce Notte All-Out Attack">
+            </div>
+            <div class="aoa-battle-col">
+                <img class="aoa-battle-img" src="../../allOutAttackMode/database/img/Luce_Notte_Battle.webp" alt="Luce Notte battle">
+                <div class="aoa-info">
+                    <div class="card-stars" aria-hidden="true">
+                        <span>✦</span><span>★</span><span>✦</span><span>★</span><span>✦</span>
+                    </div>
+                    <span class="card-badge">P5X</span>
+                    <p class="card-name">Luce Notte</p>
+                    <p class="card-sub">Shoki Ikenami — Persona 5 X</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div data-i18n-block="fr">
+        <h2 class="shujin-chars-title">🤠 All-Out Attack — Soy Pioneer</h2>
+        <p class="shujin-intro">Chapeau blanc à ruban bleu, masque doré, manteau de
+        cavalier : Shun Kano passe du cuisinier au pistolero.</p>
+    </div>
+    <div data-i18n-block="en">
+        <h2 class="shujin-chars-title">🤠 All-Out Attack — Soy Pioneer</h2>
+        <p class="shujin-intro">A white hat with a blue band, a golden mask, a rider's coat:
+        Shun Kano goes from cook to gunslinger.</p>
+    </div>
+
+    <div class="aoa-card aoa-card-pioneer vx-reveal">
+        <span class="pioneer-stars" aria-hidden="true">★ ★ ★</span>
+        <div class="aoa-card-inner">
+            <div class="aoa-portrait-col">
+                <img class="aoa-portrait-img" src="../../allOutAttackMode/database/img/Soy_Pioneer.webp" alt="Soy Pioneer portrait">
+            </div>
+            <div class="aoa-gif-col">
+                <img class="aoa-gif-img" src="../../allOutAttackMode/database/allOutAttack/Soy_Pioneer.webp" alt="Soy Pioneer All-Out Attack">
+            </div>
+            <div class="aoa-battle-col">
+                <img class="aoa-battle-img" src="../../allOutAttackMode/database/img/Soy_Pioneer_Battle.webp" alt="Soy Pioneer battle">
+                <div class="aoa-info">
+                    <div class="card-stars" aria-hidden="true">
+                        <span>✦</span><span>★</span><span>✦</span><span>★</span><span>✦</span>
+                    </div>
+                    <span class="card-badge">P5X</span>
+                    <p class="card-name">Soy Pioneer</p>
+                    <p class="card-sub">Shun Kano — Persona 5 X</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════
+         NOUVEAUX BADGES ET TITRE
+    ═══════════════════════════════════ -->
+
+    <div data-i18n-block="fr"><h1>🏅 Cinq badges et un titre</h1></div>
+    <div data-i18n-block="en"><h1>🏅 Five badges and a title</h1></div>
+
+    <div data-i18n-block="fr">
+        <p>Dont le deuxième badge <strong>légendaire</strong> du jeu, et deux badges secrets :
+        l'un dont la condition sera dévoilée sur le Discord le jour de la sortie, l'autre qui
+        attend sagement quelque part sur le site que quelqu'un le trouve.</p>
+    </div>
+    <div data-i18n-block="en">
+        <p>Including the game's second <strong>legendary</strong> badge, and two secret ones:
+        one whose condition will be revealed on Discord on release day, and one quietly waiting
+        somewhere on the site for someone to find it.</p>
+    </div>
+
+    <div class="badge-showcase">
+        <div class="badge-card rarity-legendary">
+            <img src="../../profile/badges/images/Badge_Memento_Vivere_Memento_Mori.webp" alt="Memento Vivere, Memento Mori" loading="lazy">
+            <p class="bc-name">Memento Vivere, Memento Mori</p>
+            <div data-i18n-block="fr"><p class="bc-condition">Trouve Makoto Yuki et Kotone Shiomi dans les six modes, et leurs quatre thèmes en Musique</p></div>
+            <div data-i18n-block="en"><p class="bc-condition">Find Makoto Yuki and Kotone Shiomi in all six modes, and their four themes in Music</p></div>
+        </div>
+        <div class="badge-card rarity-epic">
+            <img src="../../profile/badges/images/Badge_Chord_Progression.webp" alt="Chord Progression" loading="lazy">
+            <p class="bc-name">Chord Progression</p>
+            <div data-i18n-block="fr"><p class="bc-condition">Relève 10 défis d'amis en mode Musique</p></div>
+            <div data-i18n-block="en"><p class="bc-condition">Beat 10 friend challenges in Music mode</p></div>
+        </div>
+        <div class="badge-card rarity-rare">
+            <img src="../../profile/badges/images/Badge_Birds_Of_A_Different_Feather.webp" alt="Birds of a Different Feather" loading="lazy">
+            <p class="bc-name">Birds of a Different Feather</p>
+            <div data-i18n-block="fr"><p class="bc-condition">Trouve Goro Akechi et Kira Kitazato en Silhouette, puis Crow et Messa en All-Out Attack</p></div>
+            <div data-i18n-block="en"><p class="bc-condition">Find Goro Akechi and Kira Kitazato in Silhouette, then Crow and Messa in All-Out Attack</p></div>
+        </div>
+        <div class="badge-card rarity-secret">
+            <img src="../../profile/badges/images/Badge_Kotone_Orpheus.webp" alt="Her Own Orpheus" loading="lazy">
+            <p class="bc-name">Her Own Orpheus</p>
+            <div data-i18n-block="fr"><p class="bc-condition">??? — condition dévoilée sur le Discord à la sortie</p></div>
+            <div data-i18n-block="en"><p class="bc-condition">??? — condition revealed on Discord at launch</p></div>
+        </div>
+        <div class="badge-card rarity-secret">
+            <img src="../../profile/badges/images/Badge_Cafe_Leblanc.webp" alt="Café Leblanc" loading="lazy">
+            <p class="bc-name">Café Leblanc</p>
+            <div data-i18n-block="fr"><p class="bc-condition">??? — il se cache quelque part sur le site</p></div>
+            <div data-i18n-block="en"><p class="bc-condition">??? — it's hiding somewhere on the site</p></div>
+        </div>
+    </div>
+
+    <div class="title-showcase">
+        <div class="title-card rarity-epic">
+            <img class="tc-img" src="../../profile/titles/tatsuya_maya_deja_vu.webp" alt="Déjà Vu" loading="lazy">
+            <p class="tc-stars">★ ★ ★ ★</p>
+            <span class="tc-rarity-label">Epic</span>
+            <p class="tc-name">Déjà Vu</p>
+            <p class="tc-game">Persona 2: Innocent Sin</p>
+            <div data-i18n-block="fr"><p class="tc-condition">Trouve Tatsuya Suou et Maya Amano en Classique ET en Silhouette</p></div>
+            <div data-i18n-block="en"><p class="tc-condition">Find Tatsuya Suou and Maya Amano in both Classic and Silhouette</p></div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════
+         CLASSEMENT DES AMITIÉS
+    ═══════════════════════════════════ -->
+
+    <div data-i18n-block="fr"><h1>🤝 Le classement des amitiés</h1></div>
+    <div data-i18n-block="en"><h1>🤝 The friendship ranking</h1></div>
+
+    <div data-i18n-block="fr">
+        <p>Le classement gagne une troisième dimension, à côté de Normal et Expert :
+        <strong>Social Link</strong>. On n'y classe plus des joueurs mais des
+        <strong>amitiés</strong> — deux avatars, un lien, et l'XP accumulée ensemble.</p>
+        <p>Et l'XP de Social Link ne se cache plus une fois le rang 10 atteint : la jauge
+        affiche désormais votre total et ce que vous avez gagné <em>au-delà</em>. Le rang
+        s'arrête à 10 ; l'XP, elle, continue — et c'est elle qui départage les amitiés du
+        classement.</p>
+    </div>
+    <div data-i18n-block="en">
+        <p>The ranking gains a third dimension alongside Normal and Expert:
+        <strong>Social Link</strong>. It doesn't rank players but <strong>friendships</strong>
+        — two avatars, one bond, and the XP earned together.</p>
+        <p>And Social Link XP no longer hides once you hit rank 10: the gauge now shows your
+        total and how much you've earned <em>beyond</em> it. The rank stops at 10; the XP
+        doesn't — and it's what separates the friendships in the ranking.</p>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════
+         BADGES — RÉORDONNER ET INSPECTER
+    ═══════════════════════════════════ -->
+
+    <div data-i18n-block="fr"><h1>🎖️ Vos badges, dans votre ordre</h1></div>
+    <div data-i18n-block="en"><h1>🎖️ Your badges, in your order</h1></div>
+
+    <div data-i18n-block="fr">
+        <ul>
+            <li><strong>Réordonner</strong> — vos badges épinglés se déplacent au glisser,
+                à la souris comme au doigt. Les flèches du clavier marchent aussi. L'ordre
+                était jusqu'ici celui dans lequel vous les aviez épinglés, et le corriger
+                demandait de tout dépingler pour recommencer. Pendant le déplacement, la
+                rangée se réorganise sous vos yeux : le badge que vous tenez reste affiché,
+                en transparence, à la place exacte qu'il prendra si vous lâchez.</li>
+            <li><strong>Un clic sur un badge épinglé</strong> ouvre sa fiche, comme dans
+                l'atelier. Relire la condition d'un de vos propres badges ne demande plus
+                d'aller le rechercher dans la liste complète.</li>
+            <li><strong>Inspecter</strong> — un œil sur chaque badge ouvre sa fiche sans y
+                toucher. Jusqu'ici, la seule façon de lire la condition d'un badge était de
+                le survoler — impossible au doigt : sur téléphone, il fallait le toucher,
+                donc modifier ses badges épinglés pour lire une phrase.</li>
+        </ul>
+    </div>
+    <div data-i18n-block="en">
+        <ul>
+            <li><strong>Reorder</strong> — your pinned badges can be dragged around, by mouse
+                or by finger. Arrow keys work too. Until now the order was whichever you
+                pinned them in, and fixing it meant unpinning everything to start over. While
+                you drag, the row rearranges itself as you go: the badge you are holding stays
+                on screen, faded, exactly where it will land if you let go.</li>
+            <li><strong>Clicking a pinned badge</strong> opens its details, just like in the
+                workshop. Re-reading the condition of one of your own badges no longer means
+                digging it out of the full list.</li>
+            <li><strong>Inspect</strong> — an eye on each badge opens its details without
+                touching anything. Until now the only way to read a badge's condition was to
+                hover it — impossible on touch: on a phone you had to tap it, and so change
+                your pinned badges just to read a sentence.</li>
+        </ul>
+    </div>
+
+    <!-- CORRECTIONS — section commune, alimentée par chaque lot de fix. -->
+
+    <!-- ═══════════════════════════════════
+         MUSIQUE — « SUN »
+    ═══════════════════════════════════ -->
+
+    <div data-i18n-block="fr"><h1>🎵 Une musique de plus</h1></div>
+    <div data-i18n-block="en"><h1>🎵 One more song</h1></div>
+
+    <div data-i18n-block="fr">
+        <p><strong>« Sun »</strong>, de <em>Persona 3 Portable</em>, rejoint le mode Musique —
+        le catalogue passe à <strong>100 morceaux</strong>. Elle est instrumentale : jouable
+        en Musique, mais <strong>pas</strong> en Mode Expert, où l'on devine une chanson par
+        ses paroles.</p>
+    </div>
+    <div data-i18n-block="en">
+        <p><strong>"Sun"</strong>, from <em>Persona 3 Portable</em>, joins Music mode — the
+        catalogue reaches <strong>100 tracks</strong>. It is instrumental: playable in Music,
+        but <strong>not</strong> in Expert Mode, where you guess a song from its lyrics.</p>
+    </div>
+
+    <!-- Même présentation que les musiques de la 2.2 : pochette de l'opus, code,
+         puis la piste et son interprète. Le CSS était déjà dans la page, hérité
+         du squelette — seul le balisage manquait. -->
+    <div class="music-group-list vx-reveal">
+        <div class="music-group">
+            <div class="mg-cover">
+                <img src="../../musicsMode/database/img/P3P.webp" alt="Persona 3 Portable" loading="lazy">
+                <code>P3P</code>
+            </div>
+            <div class="mg-tracks">
+                <div class="mg-track">
+                    <span>Sun</span>
+                    <span class="mg-artist">Instrumental</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════
+         ALLÈGEMENT — GRAPHIQUES
+    ═══════════════════════════════════ -->
+
+    <div data-i18n-block="fr"><h1>⚡ Le jeu s'allège</h1></div>
+    <div data-i18n-block="en"><h1>⚡ The game gets lighter</h1></div>
+
+    <div data-i18n-block="fr">
+        <p>Trois mesures prises avant et après, sur un écran de téléphone. Ce ne sont pas des
+        estimations : c'est ce que le navigateur a réellement téléchargé.</p>
+    </div>
+    <div data-i18n-block="en">
+        <p>Three measurements taken before and after, on a phone-sized screen. These are not
+        estimates: it is what the browser actually downloaded.</p>
+    </div>
+
+    <div class="perf-chart vx-reveal">
+        <div data-i18n-block="fr">
+            <h3>Ouvrir sa page de profil</h3>
+            <p class="perf-note">Toutes les images de badges et de fonds d'écran étaient
+            chargées d'un coup, même celles qu'on ne voyait jamais.</p>
+        </div>
+        <div data-i18n-block="en">
+            <h3>Opening your profile page</h3>
+            <p class="perf-note">Every badge and wallpaper image was loaded at once, including
+            the ones never shown on screen.</p>
+        </div>
+        <div class="perf-row">
+            <div class="perf-bar perf-bar--before">
+                <span class="perf-tag">2.2</span>
+                <span class="perf-track"><span class="perf-fill" style="--pct: 100%"></span></span>
+                <span class="perf-val" data-i18n-block="fr">125,6 Mo</span><span class="perf-val" data-i18n-block="en">125.6 MB</span>
+            </div>
+            <div class="perf-bar perf-bar--after">
+                <span class="perf-tag">2.3</span>
+                <span class="perf-track"><span class="perf-fill" style="--pct: 10.7%"></span></span>
+                <span class="perf-val" data-i18n-block="fr">13,5 Mo</span><span class="perf-val" data-i18n-block="en">13.5 MB</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="perf-chart vx-reveal">
+        <div data-i18n-block="fr">
+            <h3>Une partie d'All-Out Attack, au pire</h3>
+            <p class="perf-note">L'animation la plus lourde du mode, celle de Koromaru.</p>
+        </div>
+        <div data-i18n-block="en">
+            <h3>One All-Out Attack round, worst case</h3>
+            <p class="perf-note">The mode's heaviest animation — Koromaru's.</p>
+        </div>
+        <div class="perf-row">
+            <div class="perf-bar perf-bar--before">
+                <span class="perf-tag">2.2</span>
+                <span class="perf-track"><span class="perf-fill" style="--pct: 100%"></span></span>
+                <span class="perf-val" data-i18n-block="fr">80,2 Mo</span><span class="perf-val" data-i18n-block="en">80.2 MB</span>
+            </div>
+            <div class="perf-bar perf-bar--after">
+                <span class="perf-tag">2.3</span>
+                <span class="perf-track"><span class="perf-fill" style="--pct: 4%"></span></span>
+                <span class="perf-val" data-i18n-block="fr">3,2 Mo</span><span class="perf-val" data-i18n-block="en">3.2 MB</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="perf-chart vx-reveal">
+        <div data-i18n-block="fr">
+            <h3>Toutes les animations du mode réunies</h3>
+            <p class="perf-note">80 personnages. Un tiers d'entre eux étaient encodés en
+            1080p alors que le jeu les affiche à 660 pixels de large.</p>
+        </div>
+        <div data-i18n-block="en">
+            <h3>All the mode's animations together</h3>
+            <p class="perf-note">80 characters. A third of them were encoded in 1080p while
+            the game displays them 660 pixels wide.</p>
+        </div>
+        <div class="perf-row">
+            <div class="perf-bar perf-bar--before">
+                <span class="perf-tag">2.2</span>
+                <span class="perf-track"><span class="perf-fill" style="--pct: 100%"></span></span>
+                <span class="perf-val" data-i18n-block="fr">1 782 Mo</span><span class="perf-val" data-i18n-block="en">1,782 MB</span>
+            </div>
+            <div class="perf-bar perf-bar--after">
+                <span class="perf-tag">2.3</span>
+                <span class="perf-track"><span class="perf-fill" style="--pct: 22.3%"></span></span>
+                <span class="perf-val" data-i18n-block="fr">397 Mo</span><span class="perf-val" data-i18n-block="en">397 MB</span>
+            </div>
+        </div>
+    </div>
+
+    <div data-i18n-block="fr">
+        <p>La qualité à l'écran ne bouge pas : les animations réencodées passent au format
+        que les trois quarts du mode utilisaient déjà, et que le navigateur réduisait de
+        toute façon à l'affichage.</p>
+    </div>
+    <div data-i18n-block="en">
+        <p>On-screen quality is unchanged: the re-encoded animations move to the format three
+        quarters of the mode already used, and which the browser was scaling down anyway.</p>
+    </div>
+
+    <hr>
+
+    <div data-i18n-block="fr"><h1>🔧 Corrections</h1></div>
+    <div data-i18n-block="en"><h1>🔧 Fixes</h1></div>
+
+    <div data-i18n-block="fr">
+        <ul>
+                        <li><strong>Mode Personae Expert</strong> — huit fiches de lore donnaient la
+                réponse sans le vouloir, en citant un mot dérivé du nom de la persona
+                (« terpsichorean » pour Terpsichore, « morose » pour Moros). Le masquage ne
+                couvrait que le mot exact.</li>
+
+            <li><strong>Profil</strong> — ouvrir le jeu sur un <em>second appareil</em>, dans
+                un navigateur neuf ou après avoir vidé son cache pouvait effacer vos badges
+                épinglés, votre couleur de bordure et votre thème. L'appareil envoyait son
+                profil vide au serveur avant d'avoir lu le vôtre. Rien ne le signalait.</li>
+
+            <li><strong>Paramètres</strong> — depuis votre profil, le bouton
+                <em>Sauvegarder</em> se retrouvait sous le bas de la fenêtre : il reste
+                maintenant affiché en permanence. Au passage, le panneau ne défilait plus du
+                tout, ce qui rendait « Réinitialiser le profil » et « Supprimer mon compte »
+                tout simplement inaccessibles sur les écrans peu hauts. Merci à
+                <strong>Gypotre</strong> pour le signalement.</li>
+
+            <li><strong>Mode Classique</strong> — un personnage de la tranche d'âge
+                <em>60+</em> s'affichait en rouge au lieu de l'orange avec la flèche, même
+                quand la réponse était plus âgée. Un seul personnage du jeu porte cette
+                tranche, ce qui explique qu'elle soit passée inaperçue si longtemps.</li>
+        </ul>
+    </div>
+    <div data-i18n-block="en">
+        <ul>
+                        <li><strong>Personae Expert mode</strong> — eight lore cards gave the answer
+                away by quoting a word derived from the persona's name («terpsichorean» for
+                Terpsichore, «morose» for Moros). The masking only covered the exact word.</li>
+
+            <li><strong>Profile</strong> — opening the game on a <em>second device</em>, in a
+                fresh browser or after clearing your cache could wipe your pinned badges,
+                border colour and theme. The device pushed its empty profile to the server
+                before reading yours. Nothing showed it was happening.</li>
+
+            <li><strong>Settings</strong> — from your profile, the <em>Save</em> button ended
+                up below the bottom of the window; it now stays on screen at all times. Along
+                the way, the panel had stopped scrolling entirely, which made "Reset Profile"
+                and "Delete my account" simply unreachable on shorter screens. Thanks to
+                <strong>Gypotre</strong> for the report.</li>
+
+            <li><strong>Classic Mode</strong> — a character in the <em>60+</em> age bracket
+                showed up red instead of orange with an arrow, even when the answer was
+                older. Only one character in the game uses that bracket, which is why it
+                went unnoticed for so long.</li>
+        </ul>
+    </div>
+
+    <hr>
+
+</div><!-- /.doc-wrap -->
+
+<script>
+(function() {
+    'use strict';
+
+    /* Progress bar */
+    var pb = document.createElement('div'); pb.id = 'vx-progress';
+    var pf = document.createElement('div'); pf.id = 'vx-progress-fill';
+    pb.appendChild(pf); document.body.insertBefore(pb, document.body.firstChild);
+
+    /* Back to top */
+    var btt = document.createElement('button'); btt.id = 'vx-btt'; btt.innerHTML = '↑';
+    btt.setAttribute('aria-label', 'Back to top'); document.body.appendChild(btt);
+    btt.addEventListener('click', function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+    /* Scroll reveal */
+    var revObs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) { if (e.isIntersecting) e.target.classList.add('in'); });
+    }, { threshold: 0.06, rootMargin: '0px 0px -60px 0px' });
+    document.querySelectorAll('.vx-reveal').forEach(function(el) { revObs.observe(el); });
+
+    /* Scroll handler */
+    var raf = false;
+    window.addEventListener('scroll', function() {
+        if (raf) return; raf = true;
+        requestAnimationFrame(function() {
+            var st = window.scrollY || 0;
+            var dh = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            pf.style.width = (dh > 0 ? st / dh * 100 : 0) + '%';
+            if (st > 400) btt.classList.add('on'); else btt.classList.remove('on');
+            raf = false;
+        });
+    }, { passive: true });
+})();
+</script>
+
+</body>
+</html>

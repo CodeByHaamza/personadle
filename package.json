@@ -12,6 +12,7 @@
     "i18n:check-untranslated": "node scripts/check-i18n-untranslated.js",
     "data:check": "node scripts/validate_characters.js",
     "ingest:check": "node scripts/validate_incoming.js incoming",
+    "changelog:resolve": "python scripts/resolve_changelog_conflict.py \"PersonaDLE_Update_Documentation/PersonaDLE 2.3/DEV_CHANGELOG.md\"",
     "docs:check": "node scripts/check-doc-numbers.js",
     "docs:fix": "node scripts/check-doc-numbers.js --fix",
     "pools:check": "node scripts/export-daily-pools.js --check",
@@ -23,7 +24,9 @@
     "setup-hooks": "git config core.hooksPath .githooks && echo 'Git hooks activated (.githooks/)'",
     "format": "prettier --write \"**/*.{js,css,html,json,md}\" --ignore-path .prettierignore",
     "format:check": "prettier --check \"**/*.{js,css,html,json,md}\" --ignore-path .prettierignore",
-    "lyrics:build": "node scripts/export_expert_lyrics.js"
+    "lyrics:build": "node scripts/export_expert_lyrics.js",
+    "avatars:census": "node scripts/avatar_census.js",
+    "avatars:sort": "node scripts/sort_avatars_data.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",

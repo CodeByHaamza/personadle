@@ -289,7 +289,8 @@
   "Moros": {
     "text": "Moros est la personnification grecque du destin funeste — de la fatalité qui vient, de la fin déjà fixée pour chaque vie. Fils de Nyx, frère du Sommeil, de la Rétribution et de la Mort, frère aîné et guide des trois Moires. Il n'a aucune forme : un esprit informe dont la tâche est de révéler à un mortel le jour de sa propre mort. Parce que ce savoir est insoutenable, il devint aussi un esprit de désespoir, les âmes qu'il visite restant rongées d'effroi. Son nom est à la racine du mot « morose ».",
     "mask": [
-      "Moros"
+      "Moros",
+      "morose"
     ]
   },
   "Psyche": {
@@ -886,7 +887,8 @@
     "mask": [
       "Terpsichore",
       "Terpsichore",
-      "Terpsichore"
+      "Terpsichore",
+      "terpsichoréen"
     ]
   },
   "Styx": {
