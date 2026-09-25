@@ -40,6 +40,38 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-09-24 — L'entrée 2.3 du modal « Nouveautés »
+
+Demande Hamza. C'est le seul endroit où un joueur découvre ce qui a changé sans
+quitter l'accueil, et il ne renvoie vers la page complète qu'ensuite.
+
+### Thème Pink Ribbon
+
+`.pink-ribbon-theme`, sur le modèle des thèmes existants (`velvet-theme`,
+`cny-theme`…) : le rose du ruban de Kotone (#c9184a → #7a0e3c), et **le bleu du
+papillon de Nyx en liseré au survol** — seule note froide d'une palette
+entièrement rose, et ce qui l'empêche d'être mièvre. Mode sombre inclus.
+
+Même palette que `PersonaDLE 2.3/PersonaDLE_Update.html`, pour que le joueur qui
+clique « Voir le changelog complet » reste dans le même univers.
+
+### Contenu
+
+Sept points, dans les **six langues** — ce que le joueur VOIT, pas la liste des
+commits. Les correctifs d'outillage n'y sont pas ; en revanche la perte des
+badges épinglés sur un second appareil y figure, parce qu'un joueur a pu la
+subir sans comprendre.
+
+Placée en TÊTE de l'accordéon, comme chaque version l'a été avant elle.
+
+### Vérification
+
+Rendu contrôlé en navigateur, **clair et sombre** : l'entrée s'ouvre, les
+7 puces s'affichent, 12 blocs par langue (titre + date + contenu), structure
+équilibrée (267 `div`).
+
+---
+
 ## 2026-09-24 — « Sun » (Persona 3 Portable) entre en mode Musique
 
 Piste fournie par Hamza. Titre confirmé sur la source (« Persona 3 Portable:
