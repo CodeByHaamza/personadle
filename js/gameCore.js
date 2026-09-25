@@ -426,7 +426,9 @@ let _newlyUnlocked = []; // modes passés de verrouillé à débloqué depuis la
  */
 export function diffNewlyUnlocked(prev, next) {
   if (!prev || !next) return [];
-  return Object.keys(next).filter((mode) => prev[mode]?.unlocked === false && next[mode]?.unlocked === true);
+  return Object.keys(next).filter(
+    (mode) => prev[mode]?.unlocked === false && next[mode]?.unlocked === true
+  );
 }
 
 /**
@@ -1306,7 +1308,9 @@ export function maybeNudgeGuest() {
   if (!box) return false;
   let streak = 0;
   try {
-    streak = Number(JSON.parse(localStorage.getItem("personaUserProfile") || "{}")?.stats?.streak || 0);
+    streak = Number(
+      JSON.parse(localStorage.getItem("personaUserProfile") || "{}")?.stats?.streak || 0
+    );
   } catch {
     return false;
   }
@@ -1767,6 +1771,79 @@ export const MODE_STATE_KEYS = {
 };
 
 /**
+ * Les mêmes clés, dans la dimension EXPERT.
+ *
+ * ── Pourquoi cette table existe ─────────────────────────────────────────────
+ * Accepter un défi efface l'état du mode pour que le joueur reparte de zéro sur
+ * la cible dédiée. Seule la dimension NORMALE était effacée : accepter un défi
+ * Expert laissait donc intacte la partie Expert du jour, et la page — qui
+ * restaure `…GameOver` au chargement — affichait la victoire précédente
+ * immédiatement. Le joueur « réussissait » le défi sans jouer.
+ *
+ * Signalé en production le 2026-09-25 sur le mode Musique ; le défaut touchait
+ * les six modes.
+ *
+ * ── Pourquoi elles sont écrites en toutes lettres ───────────────────────────
+ * Cinq modes dérivent leur clé Expert par `expertContext().key()`, qui rend
+ * `prefixExpert_nom`. **Le mode Musique, lui, ne passe pas par là** : il
+ * construit `${KEY_PREFIX}Target` avec `KEY_PREFIX = "musicExpert"`, donc SANS
+ * underscore et sans répéter « music ». Aucune règle unique ne couvre les six,
+ * et une dérivation « astucieuse » produirait `musicExpertmusicTarget` — une
+ * clé qui n'existe pas, donc un effacement silencieusement inopérant.
+ *
+ * `tests/challengeExpertState.test.js` relit les fichiers de mode et vérifie que
+ * chaque clé listée ici y est réellement construite : c'est ce test, et non la
+ * vigilance, qui empêche cette table de dériver.
+ */
+export const MODE_STATE_KEYS_EXPERT = {
+  classic: ["classicExpert_target", "classicExpert_attempts", "classicExpert_guessHistory"],
+  emoji: [
+    "emojiExpert_targetEmoji",
+    "emojiExpert_attemptsEmoji",
+    "emojiExpert_emojiGameOver",
+    "emojiExpert_emojiForceReveal",
+    "emojiExpert_emojiWin",
+  ],
+  silhouette: [
+    "silhouetteExpert_silhouetteTarget",
+    "silhouetteExpert_silhouetteAttempts",
+    "silhouetteExpert_silhouetteGameOver",
+    "silhouetteExpert_silhouetteForceReveal",
+  ],
+  alloutattack: [
+    "aoaExpert_aoaTarget",
+    "aoaExpert_aoaAttempts",
+    "aoaExpert_aoaGameOver",
+    "aoaExpert_aoaForceReveal",
+  ],
+  personae: [
+    "personaeExpert_personaeTarget",
+    "personaeExpert_personaeAttempts",
+    "personaeExpert_personaeGameOver",
+    "personaeExpert_personaeForceReveal",
+  ],
+  music: [
+    "musicExpertTarget",
+    "musicExpertAttempts",
+    "musicExpertGameOver",
+    "musicExpertTriedTitles",
+    "musicExpertForceReveal",
+  ],
+};
+
+/**
+ * Les clés d'état d'un mode dans la dimension demandée.
+ *
+ * @param {string} modeKey   clé canonique ("classic", "music"…)
+ * @param {boolean} isExpert
+ * @returns {string[]}
+ */
+export function modeStateKeys(modeKey, isExpert) {
+  const table = isExpert ? MODE_STATE_KEYS_EXPERT : MODE_STATE_KEYS;
+  return table[modeKey] ?? [];
+}
+
+/**
  * Lit la case de défi d'une dimension et renvoie son contenu s'il est encore
  * valable AUJOURD'HUI (heure Paris), sinon null.
  *
@@ -1810,7 +1887,11 @@ export function isFilterKeyHeldByChallenge(storageKey) {
   if (current == null) return false;
   for (const isExpert of [false, true]) {
     const c = readActiveChallenge(isExpert);
-    if (c?.filterKey === storageKey && c.installedFilters != null && c.installedFilters === current) {
+    if (
+      c?.filterKey === storageKey &&
+      c.installedFilters != null &&
+      c.installedFilters === current
+    ) {
       return true;
     }
   }
@@ -1871,8 +1952,7 @@ export function releaseActiveChallenge(challenge) {
   // récent que le nôtre, on n'y touche pas.
   if (challenge.filterKey) {
     const current = localStorage.getItem(challenge.filterKey);
-    const untouched =
-      challenge.installedFilters == null || current === challenge.installedFilters;
+    const untouched = challenge.installedFilters == null || current === challenge.installedFilters;
     if (untouched) {
       if (challenge.originalFilters != null) {
         localStorage.setItem(challenge.filterKey, challenge.originalFilters);
@@ -2027,7 +2107,10 @@ export function installActiveChallenge(c) {
   releaseStaleChallenge(isExpert);
 
   // Le joueur repart de zéro sur ce mode : la cible dédiée remplace celle du jour.
-  (MODE_STATE_KEYS[modeKey] ?? []).forEach((k) => localStorage.removeItem(k));
+  // DANS SA DIMENSION — un défi Expert doit effacer l'état Expert, sans quoi la
+  // page restaure la partie Expert déjà gagnée du jour et annonce la victoire
+  // avant que le joueur ait joué une note.
+  modeStateKeys(modeKey, isExpert).forEach((k) => localStorage.removeItem(k));
 
   // Pas de repli "[]" : filterMenu.js lit un tableau vide comme « tout
   // désélectionné » (état volontaire), différent de l'absence de clé (« tout
@@ -2286,17 +2369,22 @@ function _ensureFriendsGamesButton(challengeBtn) {
     fb.addEventListener("click", () => {
       const st = challengeBtn._challenge ?? {};
       if (isChallengeLocked(st.score)) {
-        _showChallengeLockHint(fb, t("friends_today.locked_hint", "Finish today's game to see your friends' games"));
+        _showChallengeLockHint(
+          fb,
+          t("friends_today.locked_hint", "Finish today's game to see your friends' games")
+        );
         return;
       }
       openFriendsGamesModal(st.mode);
     });
   }
-  if (fb.previousElementSibling !== challengeBtn) challengeBtn.insertAdjacentElement("afterend", fb);
+  if (fb.previousElementSibling !== challengeBtn)
+    challengeBtn.insertAdjacentElement("afterend", fb);
   const locked = isChallengeLocked(challengeBtn._challenge?.score);
   fb.classList.toggle("btn-challenge--locked", locked);
   fb.setAttribute("aria-disabled", locked ? "true" : "false");
-  if (locked) fb.title = t("friends_today.locked_hint", "Finish today's game to see your friends' games");
+  if (locked)
+    fb.title = t("friends_today.locked_hint", "Finish today's game to see your friends' games");
   else fb.removeAttribute("title");
 }
 
@@ -2329,7 +2417,8 @@ function _showChallengeLockHint(btn, text = null) {
     hint.setAttribute("role", "status");
     btn.appendChild(hint);
   }
-  hint.textContent = text ?? t("challenge.locked_hint", "Finish today's game to challenge a friend");
+  hint.textContent =
+    text ?? t("challenge.locked_hint", "Finish today's game to challenge a friend");
   hint.classList.add("btn-challenge__hint--show");
   clearTimeout(btn._hintTimer);
   btn._hintTimer = setTimeout(() => hint.classList.remove("btn-challenge__hint--show"), 2600);
@@ -2398,7 +2487,14 @@ export async function initChallengeButton(mode, targetPool, score = null) {
 /** Ami à mettre en avant à la prochaine ouverture de la modale (une seule fois). */
 let _challengePreselectId = null;
 
-function _showChallengeModal(mode, score, date, activeFilters = [], targetPool = null, isExpert = false) {
+function _showChallengeModal(
+  mode,
+  score,
+  date,
+  activeFilters = [],
+  targetPool = null,
+  isExpert = false
+) {
   const api = window._personadleApi;
   if (!api || !window._currentUser) return;
 
@@ -2470,9 +2566,7 @@ function _showChallengeModal(mode, score, date, activeFilters = [], targetPool =
 
       // `expert_unlocked` absent = backend antérieur : on ne filtre pas plutôt
       // que de vider la liste. Le serveur refusera l'envoi de toute façon.
-      const friends = isExpert
-        ? all.filter((f) => f.expert_unlocked !== false)
-        : all;
+      const friends = isExpert ? all.filter((f) => f.expert_unlocked !== false) : all;
 
       if (!friends.length) {
         listEl.innerHTML = `<p class="challenge-card__empty">${t(

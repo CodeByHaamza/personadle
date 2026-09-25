@@ -37,7 +37,7 @@ import { openModal, closeModal } from "../js/modal.js";
 import { pullProfileFromCloud, pushLangToCloud } from "../js/cloud-sync.js";
 import { formatPlayTime } from "./formatPlayTime.js";
 import { MODES, modeLabel, normalizeModeKey } from "../js/gameCore.js";
-import { AVATAR_GROUPS, ANIMATED_AVATARS } from "./avatars_data.js";
+import { AVATAR_GROUPS, ANIMATED_AVATARS, isAnimatedAvatar } from "./avatars_data.js";
 import {
   getStreakTier,
   formatSongTime,
@@ -47,10 +47,7 @@ import {
 } from "./profile-format.js";
 import { THEME_COLORS, hexToRgb, adjustHex, resolveTheme, applyThemeVars } from "./theme.js";
 import { initAtelier, openAtelier, initSaveStatus, scheduleAutosave } from "./atelier.js";
-import {
-  renderUnlockableWallpaperGallery,
-  initUnlockableWallpapers,
-} from "./wallpapers-ui.js";
+import { renderUnlockableWallpaperGallery, initUnlockableWallpapers } from "./wallpapers-ui.js";
 import {
   renderTitlesSection,
   initTitlesSection,
@@ -233,7 +230,6 @@ let dragging = false; // État du drag
 let startX = 0; // Position X initiale du drag
 let startY = 0; // Position Y initiale du drag
 let selectedAvatarSrc = ""; // Portrait sélectionné dans la grille (chemin ../img/avatar/…)
-
 
 // ─────────────────────────────────────────────────────────
 // ÉLÉMENTS DOM
@@ -426,7 +422,9 @@ function saveProfile() {
 function galleryAvatarPath(avatar) {
   if (typeof avatar !== "string" || !avatar) return null;
   const path = avatar.replace(/^\.\/img\//, "../img/");
-  return /^\.\.\/img\/avatar\/[A-Za-z0-9_-]+\.(?:gif|png|jpe?g|webp|avif)$/i.test(path) ? path : null;
+  return /^\.\.\/img\/avatar\/[A-Za-z0-9_-]+\.(?:gif|png|jpe?g|webp|avif)$/i.test(path)
+    ? path
+    : null;
 }
 
 /**
@@ -459,7 +457,8 @@ async function updateWithBadgeFallback(api, fields) {
   try {
     return await api.user.update(window._currentUser.id, fields);
   } catch (e) {
-    const m = e?.status === 403 ? /Badge not unlocked: ([a-z0-9_-]+)/i.exec(e?.message || "") : null;
+    const m =
+      e?.status === 403 ? /Badge not unlocked: ([a-z0-9_-]+)/i.exec(e?.message || "") : null;
     if (!m || !Array.isArray(fields.selected_badges)) throw e;
     const slug = m[1];
     console.warn(`[Profile] badge « ${slug} » refusé par le serveur : retiré de la sélection`);
@@ -566,7 +565,7 @@ function _applyCloudToUI() {
   // ── Stats ─────────────────────────────────────────────────
   renderStats();
   renderModeStats();
-    renderExpertStats();
+  renderExpertStats();
 
   // ── Musique de profil ─────────────────────────────────────
   // profileMusicId = valeur cloud (undefined = pas encore sync, null = pas de song, string = fichier)
@@ -720,14 +719,31 @@ function renderStats() {
     { icon: "🏆", value: s.wins || 0, label: tf("profile.stat_wins_label", "Wins") },
     { icon: "🏳️", value: s.giveups || 0, label: tf("profile.stat_giveups_label", "Give-ups") },
     { icon: "🎮", value: s.games || 0, label: tf("profile.stat_games_label", "Games Played") },
-    { icon: "⭐", value: s.streakRecord || 0, label: tf("profile.stat_best_streak_label", "Best Streak") },
-    { icon: "⏱️", value: formatPlayTime(s.totalTimeMinutes || 0), label: tf("profile.stat_time_label", "Time Played") },
-    { icon: "📅", value: s.firstPlayed?.split("T")[0] || "—", label: tf("profile.stat_first_played_label", "First Played"), full: true },
+    {
+      icon: "⭐",
+      value: s.streakRecord || 0,
+      label: tf("profile.stat_best_streak_label", "Best Streak"),
+    },
+    {
+      icon: "⏱️",
+      value: formatPlayTime(s.totalTimeMinutes || 0),
+      label: tf("profile.stat_time_label", "Time Played"),
+    },
+    {
+      icon: "📅",
+      value: s.firstPlayed?.split("T")[0] || "—",
+      label: tf("profile.stat_first_played_label", "First Played"),
+      full: true,
+    },
     { icon: "🎯", value: modeFav, label: tf("profile.stat_fav_mode_label", "Fav Mode") },
     { icon: "🏅", value: modeBest, label: tf("profile.stat_best_mode_label", "Best Mode Overall") },
   ];
 
-  const streakHTML = buildStreakItem(s.streak || 0, tf("profile.stat_current_streak_label", "Current Streak"), "0.22s");
+  const streakHTML = buildStreakItem(
+    s.streak || 0,
+    tf("profile.stat_current_streak_label", "Current Streak"),
+    "0.22s"
+  );
   const regularHTML = stats
     .map(
       (st, idx) => `
@@ -750,15 +766,13 @@ function renderStats() {
     if ((s.streak || 0) === 0 && canRecover()) {
       const prev = getPreviousStreak();
       if (prev > 1) {
-        const btnLabel = tf(
-          "streak_recovery.profile_btn",
-          `❄️ Reignite — 0 → ${prev} days`,
-          { count: prev }
-        );
+        const btnLabel = tf("streak_recovery.profile_btn", `❄️ Reignite — 0 → ${prev} days`, {
+          count: prev,
+        });
         recoveryPrompt.innerHTML = `<button class="srp-btn">${btnLabel}</button>`;
-        recoveryPrompt.querySelector(".srp-btn").addEventListener("click", () =>
-          showStreakRecoveryMenu(prev)
-        );
+        recoveryPrompt
+          .querySelector(".srp-btn")
+          .addEventListener("click", () => showStreakRecoveryMenu(prev));
         recoveryPrompt.classList.remove("hidden");
       } else {
         recoveryPrompt.classList.add("hidden");
@@ -831,7 +845,6 @@ function renderModeStats() {
     </div>
     <div class="mode-stats-list">${rows}</div>`;
 }
-
 
 /**
  * Section « Mode Expert » — rendue sous le Mode Breakdown, uniquement si le joueur
@@ -934,15 +947,18 @@ document.getElementById("equippedTitleBtn")?.addEventListener("click", () => {
  * mal cadrés d'origine et le joueur veut régler ça tout de suite (retour Hamza
  * du 2026-09-16). La fermer sans rien toucher garde le portrait tel quel.
  *
- * Un GIF ne passe pas par le canvas (il y perdrait son animation) : pas de
- * recadrage possible, on s'arrête à l'application.
+ * Un portrait ANIMÉ ne passe pas par le canvas (il y perdrait son animation) :
+ * pas de recadrage possible, on s'arrête à l'application. Animé ≠ `.gif` — les
+ * portraits de Kotone sont des WebP animés.
  *
  * @param {string} src  chemin relatif à profile/ (../img/avatar/…)
  */
 function applyAvatarPreset(src) {
   selectedAvatarSrc = src;
   commitAvatar(src);
-  if (src.toLowerCase().endsWith(".gif")) return;
+  // Un portrait animé ne passe pas par le canvas : il y perdrait son animation.
+  // Pas de recadrage possible pour lui, on s'arrête à l'application.
+  if (isAnimatedAvatar(src)) return;
   loadImageToCanvas(src);
   openModal("avatarCropModal");
 }
@@ -972,6 +988,12 @@ document.getElementById("avatarAdjustBtn")?.addEventListener("click", () => {
     return;
   }
   selectedAvatarSrc = src;
+  // Même règle qu'à la sélection : recadrer un portrait animé le figerait, et le
+  // joueur perdrait sans prévenir ce qu'il était venu chercher.
+  if (isAnimatedAvatar(src)) {
+    openAtelier("avatar");
+    return;
+  }
   loadImageToCanvas(src);
   openModal("avatarCropModal");
 });
@@ -983,13 +1005,16 @@ document.getElementById("avatarAdjustBtn")?.addEventListener("click", () => {
  * pas d'origine connue — on regarde donc les deux.
  */
 function _markSelectedAvatarCell() {
-  const current = profile.avatarSrc || (profile.avatar?.startsWith("../img/") ? profile.avatar : "");
+  const current =
+    profile.avatarSrc || (profile.avatar?.startsWith("../img/") ? profile.avatar : "");
   avatarGrid?.querySelectorAll(".avatar-cell img").forEach((img) => {
     img.classList.toggle("selected", !!current && img.dataset.src === current);
   });
   // Portrait recadré avant la 052 : on ne sait plus lequel c'est → l'Atelier le dit,
   // et l'encart disparaît dès qu'un portrait est re-choisi (avatarSrc posé).
-  document.getElementById("avatarOriginNotice")?.classList.toggle("hidden", !needsAvatarOrigin(profile));
+  document
+    .getElementById("avatarOriginNotice")
+    ?.classList.toggle("hidden", !needsAvatarOrigin(profile));
 }
 
 // ── Réinitialiser le profil ──────────────────────────────────────────────────
@@ -1050,7 +1075,8 @@ if (deleteAccountBtn && deleteAccountModal) {
   };
 
   deleteAccountInput.addEventListener("input", () => {
-    deleteAccountConfirmBtn.disabled = deleteAccountInput.value.trim() !== (profile.pseudo || "").trim();
+    deleteAccountConfirmBtn.disabled =
+      deleteAccountInput.value.trim() !== (profile.pseudo || "").trim();
   });
 
   const closeDeleteModal = () => closeModal("deleteAccountModal");
@@ -1066,7 +1092,10 @@ if (deleteAccountBtn && deleteAccountModal) {
     try {
       await window._personadleApi.user.delete(userId);
       alert(
-        tf("profile.delete_account_success", "Your account has been deactivated. You'll be logged out now.")
+        tf(
+          "profile.delete_account_success",
+          "Your account has been deactivated. You'll be logged out now."
+        )
       );
       localStorage.removeItem("personaUserProfile");
       localStorage.removeItem("personaSettings");
@@ -1074,7 +1103,9 @@ if (deleteAccountBtn && deleteAccountModal) {
       window.location.href = "../index.html";
     } catch (err) {
       console.error("Delete account failed:", err);
-      alert(tf("profile.delete_account_error", "Something went wrong. Please try again or contact us."));
+      alert(
+        tf("profile.delete_account_error", "Something went wrong. Please try again or contact us.")
+      );
       deleteAccountConfirmBtn.disabled = false;
       deleteAccountConfirmBtn.innerHTML = originalLabel;
     }
@@ -1103,8 +1134,16 @@ borderColorPicker.onchange = (e) => setBorderColor(e.target.value);
 
 // Palette de bordures d'avatar (pastilles preset, même UX que le thème).
 const BORDER_PRESETS = [
-  "#ffd700", "#e63946", "#3b82f6", "#2bae66", "#8b5cf6",
-  "#ff6b9d", "#ffffff", "#111111", "#00b8d4", "#f39c12",
+  "#ffd700",
+  "#e63946",
+  "#3b82f6",
+  "#2bae66",
+  "#8b5cf6",
+  "#ff6b9d",
+  "#ffffff",
+  "#111111",
+  "#00b8d4",
+  "#f39c12",
 ];
 
 /** Applique une couleur de bordure (clic pastille ou custom) + sauvegarde. */
@@ -1134,9 +1173,9 @@ function renderBorderPicker() {
     ).join("") +
     `<button class="swatch swatch--rainbow${!isPreset ? " active" : ""}" id="borderCustomBtn" title="${customLabel}" aria-label="${customLabel}">🎨</button>`;
 
-  container.querySelectorAll(".swatch[data-color]").forEach((b) =>
-    b.addEventListener("click", () => setBorderColor(b.dataset.color))
-  );
+  container
+    .querySelectorAll(".swatch[data-color]")
+    .forEach((b) => b.addEventListener("click", () => setBorderColor(b.dataset.color)));
   document.getElementById("borderCustomBtn")?.addEventListener("click", () => {
     const picker = document.getElementById("borderColorPicker");
     if (picker) {
@@ -1169,9 +1208,9 @@ function renderFavoriteModePicker() {
     ).join("") +
     `<button type="button" class="mode-chip mode-chip--none${current ? "" : " active"}" data-mode="" aria-pressed="${!current}">${noneLabel}</button>`;
 
-  container.querySelectorAll(".mode-chip").forEach((b) =>
-    b.addEventListener("click", () => setFavoriteMode(b.dataset.mode || null))
-  );
+  container
+    .querySelectorAll(".mode-chip")
+    .forEach((b) => b.addEventListener("click", () => setFavoriteMode(b.dataset.mode || null)));
 }
 
 function setFavoriteMode(key) {
@@ -1184,8 +1223,6 @@ function setFavoriteMode(key) {
   renderFavoriteModePicker();
   renderStats();
 }
-
-
 
 /**
  * Filtre courant de la galerie : "all" ou "animated". Mémorisé pour la durée de
@@ -1218,8 +1255,7 @@ function initAvatarGrid() {
   // règle « le nom finit par .gif » était fausse des deux côtés : elle ratait les
   // WebP animés de Kotone et n'aurait rien dit d'un .gif fixe.
   const themeBadge = (name) => {
-    if (ANIMATED_AVATARS.has(name))
-      return `<span class="avatar-tag avatar-tag--gif">ANIM</span>`;
+    if (ANIMATED_AVATARS.has(name)) return `<span class="avatar-tag avatar-tag--gif">ANIM</span>`;
     if (name.toLowerCase().includes("jazz"))
       return `<span class="avatar-tag avatar-tag--jazz">JAZZ</span>`;
     return "";
@@ -1231,7 +1267,9 @@ function initAvatarGrid() {
     // Le filtre s'applique DANS chaque groupe : un joueur qui cherche un portrait
     // animé veut quand même savoir de quel jeu il vient.
     const liste =
-      avatarFilter === "animated" ? grp.avatars.filter((n) => ANIMATED_AVATARS.has(n)) : grp.avatars;
+      avatarFilter === "animated"
+        ? grp.avatars.filter((n) => ANIMATED_AVATARS.has(n))
+        : grp.avatars;
     if (!liste.length) continue;
     visibles += liste.length;
     html +=
@@ -1409,7 +1447,6 @@ confirmCrop.onclick = () => {
 // L'export du profil vit désormais dans la modale ⚙ Paramètres
 // (js/settings-modal.js → exportProfileFile), retour Hamza du 2026-09-16.
 
-
 // ─────────────────────────────────────────────────────────
 // PARTAGE DE PROFIL
 // ─────────────────────────────────────────────────────────
@@ -1436,7 +1473,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // 1. Charger le profil et initialiser l'UI
   initProfile();
   renderModeStats();
-    renderExpertStats();
+  renderExpertStats();
 
   // 1b. Sync complet cloud → local (le backend est la source de vérité).
   // Chaîne : pull → apply UI → re-init titres avec session valide → sync badges local→back.
@@ -1492,7 +1529,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderUnlockableWallpaperGallery(profile);
     renderBadgesPreview(profile);
     renderBadgePicker(profile, saveProfileAndSyncBadges);
-      renderBadgesModal(profile, saveProfileAndSyncBadges);
+    renderBadgesModal(profile, saveProfileAndSyncBadges);
     resetTitlesUnlockedState();
     renderTitlesSection(profile, saveProfile, saveProfileToCloud, markDirty);
   });
@@ -1582,7 +1619,6 @@ window.addEventListener("badgesRendered", () => {
 
 // (voir ./wallpapers-ui.js — UNLOCKABLE_WALLPAPERS, renderUnlockableWallpaperGallery,
 // checkAndUnlockWallpapers, showWallpaperNotification, initUnlockableWallpapers)
-
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 🎴 TITRES VISUELS (CALLING CARDS)
