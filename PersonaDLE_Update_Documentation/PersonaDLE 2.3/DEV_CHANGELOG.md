@@ -42,6 +42,67 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-09-25 — Une seule Kotone en All-Out Attack, rangée dans P3P
+
+Décision de Hamza, qui revient sur celle de l'entrée précédente : l'ancienne animation
+disparaît, la version *Persona 5: The Phantom X* devient **la** Kotone du mode, et elle
+reste dans la catégorie **P3P**.
+
+### Pourquoi c'était discutable, et pourquoi il a raison
+
+L'entrée précédente en gardait deux, sur le modèle d'« Aigis ( P3FES ) ». La différence,
+c'est qu'Aigis a deux apparences distinctes : la P3FES est reconnaissable. Kotone, non —
+c'est le même personnage, le même uniforme, la même naginata, dans deux moteurs différents.
+Deux entrées sous « Kotone Shiomi » et « Kotone Shiomi ( P5X ) », avec **le même portrait**
+depuis que le portrait P5X a remplacé l'ancien partout, auraient surtout produit une paire
+que rien ne distingue à l'œil au moment de répondre.
+
+### Ce que ça change
+
+| | Avant ce correctif | Après |
+|---|---|---|
+| Entrées | `Kotone Shiomi` (P3P) + `Kotone Shiomi ( P5X )` (P5X) | **`Kotone Shiomi`** (P3P) |
+| `gif` | `Kotone` + `Kotone_P5X` | `Kotone_P5X` |
+| Pool `alloutattack` | 78 | **77** |
+
+Le `gif` garde son suffixe alors que l'entrée n'en a plus : il dit d'où vient l'animation,
+et surtout **il ne se confond pas avec le fichier `Kotone.webp` déjà présent sur le CDN**,
+qui contient l'ANCIENNE animation. Réutiliser ce nom aurait servi la mauvaise vidéo en
+production jusqu'au téléversement — un défaut silencieux, là où un nom neuf donne une image
+qui ne charge pas, donc visible.
+
+### Fichiers supprimés
+
+Plus rien ne les référence :
+
+| Fichier | Poids |
+|---|---|
+| `allOutAttackMode/database/allOutAttack/Kotone.webp` | **67 Mo** |
+| `allOutAttackMode/database/img/Kotone.webp` | 72 Ko |
+| `allOutAttackMode/database/img/Kotone_Battle.webp` | 544 Ko |
+
+Les 67 Mo sont l'ancienne animation, en 1080p — le calibre des entrées P3, dix fois plus
+lourdes que celles de P5X (cf. entrée précédente). Elles restent dans l'historique git ;
+c'est l'arbre de travail qui s'allège.
+
+### Détails
+
+- `aoaCharacters.js` — l'entrée P3P porte désormais `gif: "Kotone_P5X"`, le bloc de
+  collaboration P5X est retiré.
+- `portraitsMap.js` — `"Kotone Shiomi"` pointe sur `Kotone_P5X` ; la ligne suffixée saute.
+- `personas_allOut.js` — le nom suffixé saute, donc n'est plus proposé à la saisie.
+- `api/data/daily_pools.json` — régénéré, `alloutattack` 78 → **77**.
+- `PersonaDLE_Update.html` — la section ne parle plus de trois *attaques* ajoutées mais de
+  trois nouvelles **animations** : celle de Kotone en remplace une, les deux autres non. La
+  carte porte le badge `P3P` (celui du filtre, comme les autres cartes) et non `P3P × P5X`.
+
+### Inchangé
+
+Le portrait P5X reste celui de Kotone dans tout le jeu, et les modes Classique, Émoji,
+Silhouette et Personae ne sont pas concernés : ils ont leurs propres entrées Kotone, qui
+n'ont jamais été dupliquées.
+
+---
 ## 2026-09-25 — Les badges épinglés se consultent, et on voit où ils tombent
 
 Deux retours de Hamza sur la rangée de badges de la page profil, tous deux sur le
@@ -136,6 +197,10 @@ production sur le geste le plus courant.
 ---
 
 ## 2026-09-25 — Kotone Shiomi entre en All-Out Attack, et change de portrait partout
+
+> **Révisé le jour même** — la décision « deux entrées » ci-dessous a été annulée par
+> Hamza. Voir l'entrée « Une seule Kotone en All-Out Attack » plus haut. Le reste de
+> cette entrée (encodage, portrait, carte du changelog) reste valable.
 
 Elle est arrivée en jeu la veille : *Persona 5: The Phantom X* version 4.10 l'ajoute en
 personnage **5 étoiles**, avec son propre All-Out Attack et le remix jazz de
