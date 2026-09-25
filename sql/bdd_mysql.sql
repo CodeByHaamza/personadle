@@ -1276,6 +1276,7 @@ INSERT IGNORE INTO badges (slug, name_en, category, rarity, image_path, conditio
 ('dzulian',             'The First Contractor',       'secret',      'epic',      'profile/badges/images/Badge_Dzulian.png',                '???', 'manual', NULL, NULL, 1),
 ('chef',                'Master Chef',                'secret',      'rare',      'profile/badges/images/Badges_Chef.png',                  '???', 'manual', NULL, NULL, 1),
 ('github_contributor',  'Phantom Coder',              'secret',      'common',    'profile/badges/images/Badges_Github_Morgana.png',        '???', 'manual', NULL, NULL, 1),
+('cafe_leblanc',        'Café Leblanc',               'secret',      'common',    'profile/badges/images/Badge_Cafe_Leblanc.webp',         '???', 'manual', NULL, NULL, 1),
 ('lobster',             'Artistic Lobster',           'secret',      'rare',      'profile/badges/images/Badges_Lobster.png',               '???', 'manual', NULL, NULL, 1),
 ('hifumi_archives',     'The Grandmaster''s Tome',    'secret',      'rare',      'profile/badges/images/Badge_Hifumi_Archives.webp',       '???', 'manual', NULL, NULL, 1),
 ('report',              'The Priestess''s Audit',     'secret',      'rare',      'profile/badges/images/Badge_Report.webp',                '???', 'manual', NULL, NULL, 1),
