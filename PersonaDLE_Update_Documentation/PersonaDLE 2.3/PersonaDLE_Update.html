@@ -1526,6 +1526,90 @@
             text-shadow: 0 0 12px rgba(212, 160, 23, 0.3);
         }
         .aoa-card-pioneer .card-sub { color: #1b4f9c; }
+
+        /* ── Kotone Shiomi (P3P × P5X) ──────────────────────────────────────
+           La carte de la mise à jour, donc la plus habillée des trois. Sa
+           palette est celle de l'attaque elle-même : le rose de l'écran
+           « THAT'S A WRAP! », le cramoisi du brassard S.E.E.S. et du ruban,
+           et le bleu du papillon de Nyx en contrepoint — c'est le seul froid
+           de l'ensemble, il sert de respiration.
+
+           Fixée dans les DEUX thèmes, comme Notte et Pioneer : en sombre, un
+           rose désaturé ferait perdre le sujet, qui est justement cet aplat
+           rose saturé. */
+        .aoa-card-kotone {
+            position: relative;
+            border: 4px solid #2a0a18;
+            background:
+                repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 26px),
+                radial-gradient(ellipse at 78% 22%, rgba(255, 255, 255, 0.22) 0%, transparent 55%),
+                linear-gradient(150deg, #e8447e 0%, #c9184a 48%, #8a1e4d 100%);
+            animation: none;
+            box-shadow:
+                0 0 0 3px rgba(255, 214, 230, 0.75),
+                0 8px 30px rgba(138, 30, 77, 0.42),
+                0 2px 10px rgba(0, 0, 0, 0.45);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            margin-top: 20px;
+            padding-bottom: 18px;
+        }
+        .aoa-card-kotone:hover {
+            transform: translateY(-6px) scale(1.006);
+            box-shadow:
+                0 0 0 4px #fff,
+                0 14px 40px rgba(138, 30, 77, 0.55),
+                0 4px 14px rgba(111, 168, 220, 0.45);
+        }
+        /* Le brassard S.E.E.S. en bas de carte : bande cramoisie, liseré blanc,
+           et la trame de couture répétée. */
+        .aoa-card-kotone::after {
+            content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 16px;
+            background:
+                repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.55) 0 2px, transparent 2px 14px),
+                linear-gradient(90deg, #8a1e4d 0%, #c9184a 40%, #8a1e4d 100%);
+            border-top: 2px solid rgba(255, 255, 255, 0.8);
+            pointer-events: none;
+        }
+        /* Les papillons de Nyx — trois, décalés, qui montent doucement. */
+        .aoa-card-kotone .kotone-wings {
+            position: absolute; top: 12px; right: 18px; z-index: 2;
+            display: flex; gap: 10px; pointer-events: none;
+            font-size: 0.95rem; line-height: 1;
+        }
+        .aoa-card-kotone .kotone-wings i {
+            font-style: normal; color: #6fa8dc;
+            text-shadow: 0 0 8px rgba(111, 168, 220, 0.9);
+            animation: kotoneFlutter 3.2s ease-in-out infinite;
+        }
+        .aoa-card-kotone .kotone-wings i:nth-child(2) { animation-delay: 0.7s; color: #bcdcff; }
+        .aoa-card-kotone .kotone-wings i:nth-child(3) { animation-delay: 1.4s; }
+        @keyframes kotoneFlutter {
+            0%, 100% { transform: translateY(0) rotate(-6deg); opacity: 0.75; }
+            50%      { transform: translateY(-7px) rotate(6deg); opacity: 1; }
+        }
+        .aoa-card-kotone .aoa-card-inner { position: relative; z-index: 1; }
+        .aoa-card-kotone .aoa-portrait-col,
+        .aoa-card-kotone .aoa-gif-col { border-right-color: rgba(255, 255, 255, 0.32); }
+        .aoa-card-kotone .aoa-portrait-img,
+        .aoa-card-kotone .aoa-battle-img { border-color: #ffd6e6; }
+        .aoa-card-kotone .card-badge {
+            background: #fff; color: #c9184a; border: 1px solid #ffd6e6; font-weight: 700;
+        }
+        .aoa-card-kotone .card-name {
+            color: #fff;
+            text-shadow: 0 2px 0 #8a1e4d, 0 0 14px rgba(255, 143, 184, 0.8);
+        }
+        .aoa-card-kotone .card-sub { color: #ffd6e6; }
+        .aoa-card-kotone .card-stars span:nth-child(1) { animation-delay: 0s;   color: #fff; }
+        .aoa-card-kotone .card-stars span:nth-child(2) { animation-delay: 0.5s; color: #6fa8dc; }
+        .aoa-card-kotone .card-stars span:nth-child(3) { animation-delay: 1s;   color: #fff; }
+        .aoa-card-kotone .card-stars span:nth-child(4) { animation-delay: 1.5s; color: #ffd6e6; }
+        .aoa-card-kotone .card-stars span:nth-child(5) { animation-delay: 2s;   color: #fff; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .aoa-card-kotone .kotone-wings i { animation: none; }
+        }
+
         .aoa-card-pioneer .card-stars span:nth-child(1) { animation-delay: 0s;   color: #d4a017; }
         .aoa-card-pioneer .card-stars span:nth-child(2) { animation-delay: 0.5s; color: #2f6fd0; }
         .aoa-card-pioneer .card-stars span:nth-child(3) { animation-delay: 1s;   color: #7a5230; }
@@ -1858,18 +1942,56 @@
          NOUVEAUX ALL-OUT ATTACK — SKINS P5X
     ═══════════════════════════════════ -->
 
-    <div data-i18n-block="fr"><h1>💥 Deux nouveaux All-Out Attack</h1></div>
-    <div data-i18n-block="en"><h1>💥 Two new All-Out Attacks</h1></div>
+    <div data-i18n-block="fr"><h1>💥 Trois nouveaux All-Out Attack</h1></div>
+    <div data-i18n-block="en"><h1>💥 Three new All-Out Attacks</h1></div>
 
     <div data-i18n-block="fr">
-        <p>Deux tenues 5 étoiles de <em>Persona 5: The Phantom X</em> rejoignent le mode
-        All-Out Attack. Elles ne remplacent pas leur version de base : Luce et Soy restent
-        devinables séparément, chacun avec sa propre animation.</p>
+        <p>En tête, celle de la mise à jour : <strong>Kotone Shiomi</strong>, qui débarque en
+        5 étoiles dans <em>Persona 5: The Phantom X</em>. Puis deux tenues 5 étoiles du même
+        jeu. Aucune ne remplace sa version de base : la Kotone de <em>Persona 3 Portable</em>,
+        Luce et Soy restent devinables séparément, chacun avec sa propre animation.</p>
     </div>
     <div data-i18n-block="en">
-        <p>Two 5-star outfits from <em>Persona 5: The Phantom X</em> join All-Out Attack mode.
-        They don't replace the base versions: Luce and Soy are still guessable on their own,
-        each with its own animation.</p>
+        <p>Leading the way, the one this update is named after: <strong>Kotone Shiomi</strong>,
+        arriving as a 5-star in <em>Persona 5: The Phantom X</em>. Then two 5-star outfits from
+        the same game. None of them replaces a base version: the <em>Persona 3 Portable</em>
+        Kotone, Luce and Soy are all still guessable on their own, each with its own animation.</p>
+    </div>
+
+    <div data-i18n-block="fr">
+        <h2 class="shujin-chars-title">🎀 All-Out Attack — Kotone Shiomi</h2>
+        <p class="shujin-intro">Uniforme de Gekkoukan, brassard S.E.E.S. au bras, naginata au
+        clair et le XXII dans les cheveux : la protagoniste de <em>Persona 3 Portable</em>
+        traverse les jeux et finit sa charge sur un écran rose — <em>« That's a wrap! »</em>.</p>
+    </div>
+    <div data-i18n-block="en">
+        <h2 class="shujin-chars-title">🎀 All-Out Attack — Kotone Shiomi</h2>
+        <p class="shujin-intro">Gekkoukan uniform, S.E.E.S. armband, naginata drawn and the
+        XXII in her hair: the <em>Persona 3 Portable</em> protagonist crosses over and ends her
+        charge on a wall of pink — <em>"That's a wrap!"</em>.</p>
+    </div>
+
+    <div class="aoa-card aoa-card-kotone vx-reveal">
+        <span class="kotone-wings" aria-hidden="true"><i>✦</i><i>✦</i><i>✦</i></span>
+        <div class="aoa-card-inner">
+            <div class="aoa-portrait-col">
+                <img class="aoa-portrait-img" src="../../allOutAttackMode/database/img/Kotone_P5X.webp" alt="Kotone Shiomi portrait">
+            </div>
+            <div class="aoa-gif-col">
+                <img class="aoa-gif-img" src="../../allOutAttackMode/database/allOutAttack/Kotone_P5X.webp" alt="Kotone Shiomi All-Out Attack">
+            </div>
+            <div class="aoa-battle-col">
+                <img class="aoa-battle-img" src="../../allOutAttackMode/database/img/Kotone_P5X_Battle.webp" alt="Kotone Shiomi battle">
+                <div class="aoa-info">
+                    <div class="card-stars" aria-hidden="true">
+                        <span>✦</span><span>★</span><span>✦</span><span>★</span><span>✦</span>
+                    </div>
+                    <span class="card-badge">P3P × P5X</span>
+                    <p class="card-name">Kotone Shiomi</p>
+                    <p class="card-sub">Collaboration — Persona 5 X</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div data-i18n-block="fr">
