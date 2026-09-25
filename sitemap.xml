@@ -1,27 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">
+<!--
+  Le namespace DOIT être en http:// — c'est un identifiant, pas une adresse à
+  visiter, et la spec sitemaps.org ne reconnaît que cette forme. Avec https://,
+  des validateurs rejettent le fichier en entier.
+
+  La page 404 n'y figure plus : une page d'erreur listée dans un sitemap est
+  remontée comme telle par la Search Console, qui demande à l'indexer puis
+  signale qu'elle ne le peut pas.
+
+  Les pages de nouveautés ne sont pas listées : elles sont déjà indexées par les
+  liens depuis l'accueil, et celle d'une version en cours de développement n'a
+  rien à faire ici avant sa sortie.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://www.personadle.net/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
   </url>
   <url>
     <loc>https://www.personadle.net/classiqueMode/classiqueMode.html</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.personadle.net/emojiMode/emojiMode.html</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.personadle.net/allOutAttackMode/allOutAttack.html</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.personadle.net/silhouetteMode/silhouette.html</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.personadle.net/personaeMode/personae.html</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.personadle.net/musicsMode/musics.html</loc>
-  </url>
-  <url>
-    <loc>https://www.personadle.net/pages/404.html</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
   </url>
 </urlset>
