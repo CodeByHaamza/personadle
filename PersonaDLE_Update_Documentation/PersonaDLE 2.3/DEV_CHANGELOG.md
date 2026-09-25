@@ -45,6 +45,74 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-09-25 — La page Classique démarrait 46 px plus bas que les cinq autres
+
+« Sur l'écran d'ami, la page Classique n'a pas la nouvelle taille adaptée, obligé de
+scroller » (Hamza).
+
+### Ce que la mesure dit
+
+Classique est le **seul** mode à porter deux badges fixes en haut à droite : la bascule
+dark mode, partagée par toutes les pages, et la bascule daltonien qui lui est propre. Ils
+étaient **empilés** — dark mode 10→50, daltonien 60→108 — obligeant la page à réserver
+`padding-top: 96px` sous 900 px.
+
+Relevé à 390 px, avant :
+
+| | Classique | Émoji (référence) |
+|---|---|---|
+| `padding-top` | **96 px** | 50 px |
+| Haut du logo | **106 px** | 60 px |
+
+Soit 46 px de décalage, et le bouton « Give up » repoussé hors de l'écran.
+
+### Le correctif
+
+Les deux badges partagent désormais la **même rangée**. La bande réservée retombe à une
+hauteur de badge : `padding-top` passe à 60 px, et le logo démarre à 70 px.
+
+Il reste 10 px d'écart avec les autres modes, et c'est délibéré : la bascule daltonien fait
+48 px de haut (cible tactile, CLAUDE.md §7) quand celle du dark mode en fait 40. Les rogner
+pour gagner ces 10 px se paierait au doigt.
+
+### Trois règles qui se contredisaient
+
+Le premier correctif n'a rien changé, et la mesure l'a dit tout de suite : le badge restait
+à 60→108. `#daltonianToggle` est déclaré **trois fois** dans `classique.css` — la règle de
+base, puis une par media query (481–900 px et ≤ 480 px), les deux dernières repinçant
+`top: 60px`. Une règle ajoutée avant elles était simplement écrasée.
+
+Ce sont donc les **deux règles qui s'appliquent réellement** qui ont été corrigées, et
+aucune quatrième n'a été ajoutée : trois endroits qui se contredisent, c'est précisément
+comment on en arrive là.
+
+### La marge droite dépend de la plage
+
+La bascule dark mode ne fait pas la même largeur partout — ~93 px sous 480 px, jusqu'à
+201 px entre 481 et 900 (elle porte un libellé). Une marge unique laissait donc les deux
+badges se chevaucher dans la plage haute. D'où `right: 112px` sous 480 px et `right: 225px`
+au-dessus, mesurés et non estimés.
+
+### Vérifications
+
+- Géométrie relevée à **360, 390, 480, 768, 899 et 1280 px** : plus aucun chevauchement,
+  entre badges comme avec le logo, à aucune largeur. Le desktop ne bouge pas.
+- `tests-e2e/classic_mobile_layout.spec.js` — **nouveau**. Il mesure des rectangles plutôt
+  que de comparer des captures : ce qui compte n'est pas que le rendu soit identique au
+  pixel, mais que rien ne se chevauche et que le haut de page reste comparable aux autres
+  modes. Une capture de référence casserait au moindre changement de contenu.
+- Le haut de page est comparé au **mode Émoji** et non à une constante : si le gabarit
+  commun change un jour, le test suit au lieu de se mettre à mentir.
+- Les 5 cas **échouent sans le correctif**, vérifié en le retirant.
+
+### Défaut voisin, non corrigé
+
+À **899 px** exactement, la page déborde horizontalement (`scrollWidth > clientWidth`).
+Vérifié en revenant au fichier d'origine : **ce défaut préexiste**, il n'est pas causé par
+ce lot. Il n'est pas traité ici pour ne pas mélanger deux corrections dans un même
+changement — mais il est réel, et cette largeur est la borne haute de la media query.
+
+---
 ## 2026-09-25 — Un défi Expert se gagnait tout seul, et les portraits animés de Kotone mouraient au recadrage
 
 Deux signalements de Hamza le soir de la sortie. Sans rapport l'un avec l'autre, mais le
