@@ -87,6 +87,63 @@ test.describe("Classement — amitiés", () => {
     await b.ctx.dispose();
   });
 
+  test("le top 3 a un podium, à la même échelle que les autres classements", async ({
+    browser,
+  }) => {
+    // Le classement n'en avait pas au départ — je l'avais écarté en me disant
+    // qu'un podium récompense des individus. L'écart de traitement avec les
+    // autres classements se voyait immédiatement (retour Hamza).
+    const page = await (await browser.newContext()).newPage();
+    await gotoSettled(page, "/profile/leaderboard/leaderboard.html");
+    await page.locator('#dimensionFilter .lb-pill[data-value="bonds"]').click();
+
+    const podium = page.locator(".lb-podium--bonds");
+    await expect(podium).toBeVisible({ timeout: 15000 });
+    await expect(podium.locator(".lb-podium-card")).toHaveCount(3);
+    // Deux visages par marche : c'est ce qui distingue ce podium de l'autre.
+    await expect(podium.locator(".lb-bond-podium-avatar")).toHaveCount(6);
+
+    // La première marche est plus grande — sinon ce n'est pas un podium.
+    const [premier, second] = await podium
+      .locator(".lb-podium-card")
+      .evaluateAll((cartes) => {
+        const h = (c) => c.querySelector(".lb-bond-podium-avatar").getBoundingClientRect().width;
+        const un = cartes.find((c) => c.classList.contains("lb-podium-card--1"));
+        const deux = cartes.find((c) => c.classList.contains("lb-podium-card--2"));
+        return [h(un), h(deux)];
+      });
+    expect(premier).toBeGreaterThan(second);
+
+    // Et le reste du classement suit, sous le séparateur.
+    await expect(page.locator(".lb-bond-row").first()).toBeVisible();
+
+    await page.context().close();
+  });
+
+  test("sur mobile, les deux visages ne débordent pas de leur marche", async ({ browser }) => {
+    // Le podium GARDE ses trois colonnes sous 480 px : une carte fait alors
+    // ~95 px de contenu, et deux avatars de taille normale passaient par-dessus
+    // ses bordures. Invisible en test unitaire — jsdom ne calcule pas les tailles.
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const page = await ctx.newPage();
+    await gotoSettled(page, "/profile/leaderboard/leaderboard.html");
+    await page.locator('#dimensionFilter .lb-pill[data-value="bonds"]').click();
+    await expect(page.locator(".lb-podium--bonds")).toBeVisible({ timeout: 15000 });
+
+    const debordent = await page.locator(".lb-podium--bonds .lb-podium-card").evaluateAll((cartes) =>
+      cartes.some((c) => {
+        const r = c.getBoundingClientRect();
+        return [...c.querySelectorAll(".lb-bond-podium-avatar")].some((a) => {
+          const b = a.getBoundingClientRect();
+          return b.left < r.left - 1 || b.right > r.right + 1;
+        });
+      })
+    );
+    expect(debordent, "un visage dépasse de sa carte").toBe(false);
+
+    await ctx.close();
+  });
+
   test("l'onglet affiche des paires et masque les filtres sans objet", async ({ browser }) => {
     const page = await (await browser.newContext()).newPage();
     await gotoSettled(page, "/profile/leaderboard/leaderboard.html");

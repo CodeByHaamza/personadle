@@ -313,6 +313,53 @@ function renderMyRank(myRank) {
 
 /** Affiche le corps du leaderboard. */
 /**
+ * Podium des trois plus fortes amitiés — même forme que celui des joueurs
+ * (2 — 1 — 3, la première marche plus haute), mais avec DEUX visages par carte.
+ *
+ * Écrit à part de `renderPodium()` plutôt que paramétré, pour la même raison que
+ * `renderBonds()` : une carte d'amitié n'a pas le même contenu (deux avatars,
+ * deux pseudos, le lien au centre). Fondre les deux aurait demandé des branches
+ * dans chaque ligne de la fonction.
+ */
+function renderBondsPodium(top, myId) {
+  // Ordre visuel 2 — 1 — 3 ; le CSS remet 1,2,3 en colonne sur mobile.
+  const ordre = [top[1], top[0], top[2]].filter(Boolean);
+  const medailles = { 1: "🥇", 2: "🥈", 3: "🥉" };
+
+  return `
+    <div class="lb-podium lb-podium--bonds">
+      ${ordre
+        .map((e) => {
+          const rang = e.rank ?? top.indexOf(e) + 1;
+          const mien = myId && (e.a.user_id === myId || e.b.user_id === myId);
+          const visage = (u) => `
+            <img class="lb-podium-avatar lb-bond-podium-avatar"
+                 src="${esc(avatarSrc(u.avatar_data))}"
+                 alt="${esc(u.pseudo)}"
+                 loading="lazy"
+                 style="border-color:${esc(u.avatar_border_color || "#ffffff")}"
+                 onerror="this.src='../../img/default_avatar.png'">`;
+
+          return `
+            <div class="lb-podium-card lb-podium-card--${rang}${mien ? " lb-podium-card--me" : ""}">
+              <span class="lb-podium-medal" aria-hidden="true">${medailles[rang] ?? rang}</span>
+              <div class="lb-bond-podium-faces">
+                ${visage(e.a)}
+                <span class="lb-bond-podium-heart" aria-hidden="true">${e.sl_rank >= 10 ? "💛" : "❤️"}</span>
+                ${visage(e.b)}
+              </div>
+              <span class="lb-podium-name lb-bond-podium-names">${esc(e.a.pseudo)} &amp; ${esc(e.b.pseudo)}</span>
+              <span class="lb-podium-score">${fmtXp(e.xp)} XP</span>
+              <span class="lb-podium-sub">${esc(
+                (t("leaderboard.bonds_rank") || "Rank {{n}}").replace("{{n}}", e.sl_rank)
+              )}</span>
+            </div>`;
+        })
+        .join("")}
+    </div>`;
+}
+
+/**
  * Classement des AMITIÉS : une ligne = un lien entre deux joueurs.
  *
  * Volontairement séparé de `renderLeaderboard()` plutôt que paramétré : la ligne
@@ -343,7 +390,19 @@ function renderBonds(data) {
 
   const medailles = { 1: "🥇", 2: "🥈", 3: "🥉" };
 
-  body.innerHTML = entries
+  // Podium sur la première page, dès qu'il y a un vrai top 3 — comme les autres
+  // classements. Je l'avais d'abord écarté en me disant qu'un podium récompense
+  // des individus ; le retour de Hamza a tranché, et il a raison : l'écart de
+  // traitement se voyait immédiatement, et une amitié au sommet mérite la même
+  // mise en avant qu'un joueur.
+  const podium = filters.offset === 0 && entries.length >= 3;
+
+  body.innerHTML =
+    (podium
+      ? renderBondsPodium(entries.slice(0, 3), myId) +
+        `<div class="lb-podium-divider"><span>${esc(t("leaderboard.others") || "Others")}</span></div>`
+      : "") +
+    (podium ? entries.slice(3) : entries)
     .map((e) => {
       // « me concerne » : le lien est mis en avant si j'en suis l'un des deux
       // côtés, exactement comme une ligne de classement normale l'est pour moi.
