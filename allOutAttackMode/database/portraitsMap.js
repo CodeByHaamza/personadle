@@ -8,7 +8,7 @@ export const portraitsMap = {
   "Akihiko Sanada": "Akihiko",
   "Junpei Iori": "Junpei",
   "Ken Amada": "Ken",
-  "Kotone Shiomi": "Kotone_P5X",
+  "Kotone Shiomi": "Kotone",
   Koromaru: "Koromaru",
   Lavenza: "Lavenza",
   "Makoto Yuki": "Yuki",
