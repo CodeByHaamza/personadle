@@ -3717,6 +3717,187 @@ body.darkmode .cny-theme .version-header:hover {
 }
 
 /* =====================================================
+   THÈME 2.3 — Pink Ribbon (Kotone Shiomi, Persona 3 Portable)
+   -----------------------------------------------------
+   La palette de la page Nouveautés 2.3 : le rose du ruban de Kotone, et le
+   bleu du papillon de Nyx en accent. Même langage que
+   PersonaDLE_Update_Documentation/PersonaDLE 2.3/.
+   ===================================================== */
+
+.pink-ribbon-theme {
+  border: 2px solid #e8447e !important;
+  background-color: #fff5f9;
+}
+
+.pink-ribbon-theme .version-header {
+  background: linear-gradient(135deg, #c9184a 0%, #7a0e3c 100%);
+  color: #ffd9e8;
+  border-bottom: 1px solid #ff8fb5;
+}
+
+.pink-ribbon-theme .version-title {
+  color: #ffd9e8 !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.pink-ribbon-theme .version-date {
+  color: #ffc2d8 !important;
+}
+
+.pink-ribbon-theme .version-arrow {
+  color: #ffd9e8 !important;
+}
+
+.pink-ribbon-theme .version-content ul li strong {
+  color: #c9184a;
+}
+
+.pink-btn {
+  background-color: #c9184a !important;
+  color: #fff !important;
+  border: 1px solid #a3123c !important;
+}
+
+.pink-btn:hover {
+  background-color: #a3123c !important;
+  box-shadow: 0 0 10px rgba(201, 24, 74, 0.4);
+}
+
+.pink-ribbon-theme .version-header:hover {
+  background: linear-gradient(135deg, #e8447e 0%, #9a1146 100%) !important;
+  /* Le liseré bleu au survol : le papillon de Nyx, seule note froide d'une
+     palette entièrement rose — c'est ce qui l'empêche d'être mièvre. */
+  box-shadow: inset 0 0 15px rgba(111, 168, 220, 0.3) !important;
+  transform: scale(1.01);
+  transition: all 0.2s ease-in-out;
+}
+
+.pink-ribbon-theme .version-header:hover .version-arrow {
+  transform: translateX(3px);
+}
+
+/* ── Décor de l'en-tête 2.3 ─────────────────────────────────────────────────
+   Les autres versions ont leur identité visuelle (pentacle et ❦ pour la Velvet
+   Room, dorures pour le Nouvel An chinois). La 2.3 a la sienne : le ruban de
+   Kotone, ses notes de musique, et les pétales du printemps de Gekkoukan. */
+.pink-ribbon-theme .version-header {
+  position: relative;
+  overflow: hidden;
+}
+
+.pink-ribbon-theme .v2-header-inner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Le nœud, en SVG : c'est lui qui donne son nom au thème. */
+.pink-ribbon-mark {
+  flex-shrink: 0;
+  width: 48px;
+  height: 40px;
+  color: #ffd9e8;
+  filter: drop-shadow(0 0 6px rgba(255, 143, 181, 0.55));
+  animation: pinkRibbonGlow 4s ease-in-out infinite;
+}
+
+@keyframes pinkRibbonGlow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 4px rgba(255, 143, 181, 0.35));
+  }
+  50% {
+    filter: drop-shadow(0 0 9px rgba(255, 143, 181, 0.7));
+  }
+}
+
+/* Les notes : son lecteur MP3 est sa marque de fabrique dans P3P. */
+.pink-ornament {
+  position: absolute;
+  font-size: 1.15rem;
+  line-height: 1;
+  color: #ffc2d8;
+  opacity: 0.75;
+  text-shadow: 0 0 6px rgba(255, 143, 181, 0.55);
+  pointer-events: none;
+}
+.pink-ornament--tl {
+  top: 6px;
+  left: 10px;
+}
+.pink-ornament--br {
+  bottom: 6px;
+  right: 10px;
+  transform: scale(-1);
+}
+
+/* Quatre pétales qui descendent lentement en fond. Volontairement discrets
+   (opacité 0.35) : l'en-tête doit rester lisible, c'est un décor, pas un motif. */
+.pink-petals {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.pink-petals i {
+  position: absolute;
+  top: -10px;
+  width: 7px;
+  height: 7px;
+  border-radius: 60% 0 60% 0;
+  background: #ffc2d8;
+  opacity: 0.35;
+  animation: pinkPetalFall 9s linear infinite;
+}
+.pink-petals i:nth-child(1) { left: 18%; animation-delay: 0s; }
+.pink-petals i:nth-child(2) { left: 42%; animation-delay: 2.4s; }
+.pink-petals i:nth-child(3) { left: 67%; animation-delay: 4.8s; }
+.pink-petals i:nth-child(4) { left: 86%; animation-delay: 7.1s; }
+
+@keyframes pinkPetalFall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translateY(90px) rotate(220deg);
+    opacity: 0;
+  }
+}
+
+/* Un décor animé n'apporte rien à qui a demandé moins de mouvement. */
+@media (prefers-reduced-motion: reduce) {
+  .pink-ribbon-mark,
+  .pink-petals i {
+    animation: none;
+  }
+  .pink-petals {
+    display: none;
+  }
+}
+
+body.darkmode .pink-ribbon-theme {
+  background-color: #2a0d1c;
+  border-color: #ff6b9d !important;
+}
+
+body.darkmode .pink-ribbon-theme .version-header {
+  background: linear-gradient(135deg, #7a0e3c 0%, #43061f 100%);
+}
+
+body.darkmode .pink-ribbon-theme .version-content ul li strong {
+  color: #ff8fb5;
+}
+
+body.darkmode .pink-ribbon-theme .version-header:hover {
+  background: linear-gradient(135deg, #9a1146 0%, #5c0a2b 100%) !important;
+  box-shadow: inset 0 0 10px rgba(111, 168, 220, 0.18) !important;
+}
+
+/* =====================================================
    10. THÈME v2.0 — Major Update (Sophia / Backend)
    ===================================================== */
 
