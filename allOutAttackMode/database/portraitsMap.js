@@ -8,7 +8,7 @@ export const portraitsMap = {
   "Akihiko Sanada": "Akihiko",
   "Junpei Iori": "Junpei",
   "Ken Amada": "Ken",
-  "Kotone Shiomi": "Kotone",
+  "Kotone Shiomi": "Kotone_P5X",
   Koromaru: "Koromaru",
   Lavenza: "Lavenza",
   "Makoto Yuki": "Yuki",
@@ -89,5 +89,4 @@ export const portraitsMap = {
   // Skins 2.3
   "Luce Notte ( Shoki Ikenami )": "Luce_Notte",
   "Soy Pioneer ( Shun Kano )": "Soy_Pioneer",
-  "Kotone Shiomi ( P5X )": "Kotone_P5X",
 };
