@@ -211,15 +211,15 @@ test.describe("Badges épinglés — consulter et voir où le badge tombe", () =
 
     await cases.nth(1).click();
 
-    const fiche = j.page.locator(".badge-inspect__card");
+    const fiche = j.page.locator(".badge-zoom-content");
     await expect(fiche).toBeVisible({ timeout: 8000 });
-    await expect(fiche.locator(".badge-inspect__name")).not.toBeEmpty();
+    await expect(fiche.locator("h3")).not.toBeEmpty();
     // Un badge épinglé est débloqué par construction : sa condition est lisible.
-    await expect(fiche.locator(".badge-inspect__condition")).not.toBeEmpty();
+    await expect(fiche.locator(".badge-condition")).not.toBeEmpty();
 
     // Consulter ne modifie rien — ni l'ordre, ni l'épinglage.
     expect(await ordreAffiche(j.page)).toEqual(avant);
-    await j.page.locator(".badge-inspect__close").click();
+    await j.page.locator(".badge-zoom-close").click();
     await expect(fiche).toBeHidden();
     await expect(cases).toHaveCount(3);
 
