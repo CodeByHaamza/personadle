@@ -16,6 +16,11 @@ export const aoaCharacters = [
   { nom: "Metis", gif: "Metis", opus: ["P3", "P3FES"] },
 
   // === Persona 3 Portable (P3P) ===
+  // Une seule entrée (décision Hamza du 2026-09-25), rangée en P3P : c'est le jeu
+  // dont elle vient, et c'est là que le joueur la cherche dans les filtres. Son
+  // animation, elle, est celle de *Persona 5: The Phantom X* (version 4.10), où elle
+  // débarque en 5 étoiles — les fichiers gardent le nom `Kotone`, pour qu'un
+  // personnage reste un seul fichier ici comme sur le CDN.
   { nom: "Kotone Shiomi", gif: "Kotone", opus: ["P3P"] },
 
   // === Persona 5 (base / Strikers / Tactica) ===
@@ -110,11 +115,4 @@ export const aoaCharacters = [
   // lufel.net/en/character/soy-pioneer/ → « Shun·Pioneer ».
   { nom: "Luce Notte ( Shoki Ikenami )", gif: "Luce_Notte", opus: ["P5X"] },
   { nom: "Soy Pioneer ( Shun Kano )", gif: "Soy_Pioneer", opus: ["P5X"] },
-
-  // === P5X — Collaboration Persona 3 Portable (version 4.10, 2026-09-24) ===
-  // Kotone Shiomi rejoint P5X en 5 étoiles. Contrairement aux Phantom Idols, une
-  // unité de collaboration n'a PAS de nom de code : elle garde son nom, qui est
-  // déjà pris par son entrée P3P. Le suffixe d'opus les sépare, sur le modèle
-  // d'« Aigis ( P3FES ) » — même personnage, autre jeu, autre All-Out Attack.
-  { nom: "Kotone Shiomi ( P5X )", gif: "Kotone_P5X", opus: ["P5X"] },
 ];
