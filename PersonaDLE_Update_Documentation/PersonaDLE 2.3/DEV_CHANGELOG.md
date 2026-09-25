@@ -45,6 +45,94 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-09-25 — Un défi Expert se gagnait tout seul, et les portraits animés de Kotone mouraient au recadrage
+
+Deux signalements de Hamza le soir de la sortie. Sans rapport l'un avec l'autre, mais le
+même mécanisme de fond : **une règle écrite pour un cas particulier, restée en place quand
+le cas s'est élargi.**
+
+### 1. « Je fais Expert en Musique, puis un défi ami — et je réussis direct »
+
+Accepter un défi efface l'état du mode pour que le joueur reparte de zéro sur la cible
+dédiée. `installActiveChallenge()` le faisait avec :
+
+```js
+(MODE_STATE_KEYS[modeKey] ?? []).forEach((k) => localStorage.removeItem(k));
+```
+
+Or `MODE_STATE_KEYS` ne liste que la dimension **normale**. Un défi **Expert** n'effaçait
+donc rien de la partie Expert du jour : la page, qui restaure `…GameOver` au chargement,
+retrouvait `"true"` et affichait la victoire **avant que le joueur ait joué une note**.
+
+Signalé sur le mode Musique ; le défaut touchait **les six modes**.
+
+`MODE_STATE_KEYS_EXPERT` et `modeStateKeys(modeKey, isExpert)` répondent maintenant à la
+question « quelles clés pour quelle dimension ».
+
+**Pourquoi la table est écrite en toutes lettres plutôt que dérivée.** Cinq modes bâtissent
+leur clé Expert par `expertContext().key()`, qui rend `prefixExpert_nom`. Le mode Musique,
+lui, ne passe pas par là : il construit `` `${KEY_PREFIX}Target` `` avec
+`KEY_PREFIX = "musicExpert"` — donc sans underscore, et sans répéter « music ». Aucune
+règle unique ne couvre les six, et la dérivation « astucieuse » aurait produit
+`musicExpertmusicTarget` : une clé inexistante, donc un effacement **silencieusement
+inopérant** — exactement le bug, en croyant l'avoir corrigé.
+
+Le risque d'une table en dur, c'est la dérive. `tests/challenge_expert_state.test.js` relit
+donc les fichiers de mode et vérifie que **chaque clé listée y est réellement construite**.
+Sans ce test, une clé mal orthographiée ne casserait rien de visible : le `removeItem`
+porterait sur une clé absente, et le bug reviendrait à l'identique.
+
+### 2. Les portraits animés de Kotone ne s'animaient pas
+
+« Les pdp de Kotone ont du mal à s'animer, comme Makoto qui marche très bien. »
+
+Le recadrage dessine le portrait dans un `<canvas>`, qui n'en retient qu'une image fixe :
+un portrait animé qui y entre en ressort **mort**. Le garde-fou qui décide de l'y envoyer
+testait :
+
+```js
+if (src.toLowerCase().endsWith(".gif")) return;
+```
+
+Les portraits animés de Kotone sont des **WebP** animés. Ils passaient donc par le canvas
+et y perdaient leur animation, pendant que ceux de Makoto (`Yuki.gif`) l'échappaient et
+bougeaient parfaitement. La différence que Hamza a vue est exactement celle-là.
+
+Le plus notable : **le dépôt savait déjà que cette règle était fausse.** Vingt lignes plus
+haut, le commentaire de la pastille ANIM le dit noir sur blanc — « l'ancienne règle « le nom
+finit par .gif » était fausse des deux côtés : elle ratait les WebP animés de Kotone ». La
+pastille avait été corrigée pour lire `ANIMATED_AVATARS` ; le garde-fou du recadrage, lui,
+était resté sur l'extension.
+
+Les deux chemins qui mènent au canvas passent désormais par `isAnimatedAvatar()` : la
+sélection d'un portrait, **et** le bouton « Ajuster le cadrage » — qui avait le même défaut
+et aurait figé sans prévenir ce que le joueur était venu chercher.
+
+Le prédicat vit dans `avatars_data.js`, à côté de la liste qu'il interroge, et non dans
+`profile-page.js` : ce dernier touche au DOM dès l'import (`canvas.getContext`), donc rien
+d'exporté depuis là n'est testable seul.
+
+`ANIMATED_AVATARS` est généré en relisant l'en-tête des fichiers : il dit ce qui bouge
+réellement, pas ce que l'extension laisse croire.
+
+### Vérifications
+
+- **Le correctif du défi Expert a été temporairement annulé** pour vérifier que les tests
+  échouent bien sans lui : 2 échecs, puis 9/9 une fois rétabli. Un test vert des deux côtés
+  ne prouve rien.
+- 9 cas pour les dimensions de défi, 7 pour les portraits animés — dont un qui vérifie
+  qu'un portrait **fixe** reste recadrable : interdire le recadrage partout « au cas où »
+  supprimerait la fonctionnalité pour la quasi-totalité de la galerie.
+- **1548 tests** verts.
+
+### Fichiers touchés
+
+- `js/gameCore.js` — `MODE_STATE_KEYS_EXPERT`, `modeStateKeys()`, effacement par dimension.
+- `profile/avatars_data.js` — `isAnimatedAvatar()`.
+- `profile/profile-page.js` — les deux chemins vers le canvas.
+- `tests/challenge_expert_state.test.js`, `tests/animated_avatar_crop.test.js` — **nouveaux**.
+
+---
 ## 2026-09-25 — Le serveur tranche les déblocages, et la carte locale cesse de mentir
 
 Signalé en production par **Colonel-Maskou** le soir de la sortie : animation de déblocage
