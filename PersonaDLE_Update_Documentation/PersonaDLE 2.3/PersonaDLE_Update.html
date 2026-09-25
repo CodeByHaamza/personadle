@@ -1620,6 +1620,105 @@
             .aoa-card-notte, .aoa-card-pioneer,
             .aoa-card-notte .card-stars span, .aoa-card-pioneer .card-stars span { animation: none; }
         }
+
+        /* ════════════════════════════════════════════════════════════════════
+           GRAPHIQUES D'ALLÈGEMENT
+
+           En CSS pur, volontairement : importer une bibliothèque de graphiques
+           pour trois mesures ajouterait des dizaines de kilo-octets de
+           JavaScript à une page dont le sujet est précisément le poids
+           téléchargé. Les barres sont dimensionnées par une variable --pct.
+
+           Chaque mesure est aussi écrite en toutes lettres à côté de sa barre :
+           un graphique décoratif qui serait la seule source du chiffre le
+           rendrait illisible aux lecteurs d'écran.
+           ════════════════════════════════════════════════════════════════════ */
+        .perf-chart {
+            margin: 26px 0;
+            padding: 20px 18px 16px;
+            border-radius: 14px;
+            border: 2px solid var(--kotone-pink-pale);
+            background: linear-gradient(160deg, rgba(255, 214, 230, 0.22) 0%, rgba(255, 255, 255, 0.5) 100%);
+        }
+        .dark-mode .perf-chart,
+        body.darkmode .perf-chart {
+            background: linear-gradient(160deg, rgba(58, 16, 40, 0.5) 0%, rgba(20, 6, 14, 0.4) 100%);
+        }
+        .perf-chart h3 {
+            margin: 0 0 4px;
+            font-size: 1rem;
+            color: var(--kotone-pink);
+            letter-spacing: 0.3px;
+        }
+        .perf-chart .perf-note {
+            margin: 0 0 16px;
+            font-size: 0.82rem;
+            opacity: 0.78;
+        }
+        .perf-row { margin-bottom: 15px; }
+        .perf-row:last-child { margin-bottom: 0; }
+        .perf-label {
+            display: block;
+            font-size: 0.86rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .perf-bar {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 4px;
+        }
+        .perf-bar .perf-track {
+            flex: 1;
+            height: 15px;
+            border-radius: 8px;
+            background: rgba(120, 90, 105, 0.16);
+            overflow: hidden;
+        }
+        .perf-bar .perf-fill {
+            display: block;
+            height: 100%;
+            width: var(--pct);
+            border-radius: 8px;
+            animation: perfGrow 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .perf-bar .perf-val {
+            flex: 0 0 auto;
+            min-width: 76px;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            font-size: 0.82rem;
+            font-weight: 700;
+        }
+        /* Avant : gris sourd, c'est le point de départ, pas le sujet. */
+        .perf-bar--before .perf-fill { background: linear-gradient(90deg, #9b8590, #6f5b66); }
+        .perf-bar--before .perf-val { color: #6f5b66; }
+        /* Après : la palette de la version. */
+        .perf-bar--after .perf-fill {
+            background: linear-gradient(90deg, var(--kotone-pink-soft), var(--kotone-pink));
+        }
+        .perf-bar--after .perf-val { color: var(--kotone-pink); }
+        .perf-bar .perf-tag {
+            flex: 0 0 auto;
+            min-width: 48px;
+            font-size: 0.74rem;
+            opacity: 0.72;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+        @keyframes perfGrow {
+            from { width: 0; }
+            to   { width: var(--pct); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .perf-bar .perf-fill { animation: none; }
+        }
+        @media (max-width: 480px) {
+            .perf-bar .perf-tag { min-width: 40px; font-size: 0.68rem; }
+            .perf-bar .perf-val { min-width: 64px; font-size: 0.76rem; }
+        }
+
 </style>
 </head>
 <body>
@@ -2204,6 +2303,135 @@
     </div>
 
     <!-- CORRECTIONS — section commune, alimentée par chaque lot de fix. -->
+
+    <!-- ═══════════════════════════════════
+         MUSIQUE — « SUN »
+    ═══════════════════════════════════ -->
+
+    <div data-i18n-block="fr"><h1>🎵 Une musique de plus</h1></div>
+    <div data-i18n-block="en"><h1>🎵 One more song</h1></div>
+
+    <div data-i18n-block="fr">
+        <ul>
+            <li><strong>« Sun »</strong>, de <em>Persona 3 Portable</em>, rejoint le mode
+            Musique — le catalogue passe à <strong>100 morceaux</strong>.</li>
+            <li>Elle est <strong>instrumentale</strong>, donc jouable en Musique mais
+            <strong>pas</strong> en Mode Expert : l'Expert fait deviner une chanson par ses
+            paroles, et une piste sans paroles y serait une cible impossible à trouver.</li>
+        </ul>
+    </div>
+    <div data-i18n-block="en">
+        <ul>
+            <li><strong>"Sun"</strong>, from <em>Persona 3 Portable</em>, joins Music mode —
+            the catalogue reaches <strong>100 tracks</strong>.</li>
+            <li>It is <strong>instrumental</strong>, so it is playable in Music but
+            <strong>not</strong> in Expert Mode: Expert has you guess a song from its lyrics,
+            and a track without any would be an impossible target.</li>
+        </ul>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════
+         ALLÈGEMENT — GRAPHIQUES
+    ═══════════════════════════════════ -->
+
+    <div data-i18n-block="fr"><h1>⚡ Le jeu s'allège</h1></div>
+    <div data-i18n-block="en"><h1>⚡ The game gets lighter</h1></div>
+
+    <div data-i18n-block="fr">
+        <p>Trois mesures prises avant et après, sur un écran de téléphone. Ce ne sont pas des
+        estimations : c'est ce que le navigateur a réellement téléchargé.</p>
+    </div>
+    <div data-i18n-block="en">
+        <p>Three measurements taken before and after, on a phone-sized screen. These are not
+        estimates: it is what the browser actually downloaded.</p>
+    </div>
+
+    <div class="perf-chart vx-reveal">
+        <div data-i18n-block="fr">
+            <h3>Ouvrir sa page de profil</h3>
+            <p class="perf-note">Toutes les images de badges et de fonds d'écran étaient
+            chargées d'un coup, même celles qu'on ne voyait jamais.</p>
+        </div>
+        <div data-i18n-block="en">
+            <h3>Opening your profile page</h3>
+            <p class="perf-note">Every badge and wallpaper image was loaded at once, including
+            the ones never shown on screen.</p>
+        </div>
+        <div class="perf-row">
+            <div class="perf-bar perf-bar--before">
+                <span class="perf-tag">2.2</span>
+                <span class="perf-track"><span class="perf-fill" style="--pct: 100%"></span></span>
+                <span class="perf-val" data-i18n-block="fr">125,6 Mo</span><span class="perf-val" data-i18n-block="en">125.6 MB</span>
+            </div>
+            <div class="perf-bar perf-bar--after">
+                <span class="perf-tag">2.3</span>
+                <span class="perf-track"><span class="perf-fill" style="--pct: 10.7%"></span></span>
+                <span class="perf-val" data-i18n-block="fr">13,5 Mo</span><span class="perf-val" data-i18n-block="en">13.5 MB</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="perf-chart vx-reveal">
+        <div data-i18n-block="fr">
+            <h3>Une partie d'All-Out Attack, au pire</h3>
+            <p class="perf-note">L'animation la plus lourde du mode, celle de Koromaru.</p>
+        </div>
+        <div data-i18n-block="en">
+            <h3>One All-Out Attack round, worst case</h3>
+            <p class="perf-note">The mode's heaviest animation — Koromaru's.</p>
+        </div>
+        <div class="perf-row">
+            <div class="perf-bar perf-bar--before">
+                <span class="perf-tag">2.2</span>
+                <span class="perf-track"><span class="perf-fill" style="--pct: 100%"></span></span>
+                <span class="perf-val" data-i18n-block="fr">80,2 Mo</span><span class="perf-val" data-i18n-block="en">80.2 MB</span>
+            </div>
+            <div class="perf-bar perf-bar--after">
+                <span class="perf-tag">2.3</span>
+                <span class="perf-track"><span class="perf-fill" style="--pct: 4%"></span></span>
+                <span class="perf-val" data-i18n-block="fr">3,2 Mo</span><span class="perf-val" data-i18n-block="en">3.2 MB</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="perf-chart vx-reveal">
+        <div data-i18n-block="fr">
+            <h3>Toutes les animations du mode réunies</h3>
+            <p class="perf-note">80 personnages. Un tiers d'entre eux étaient encodés en
+            1080p alors que le jeu les affiche à 660 pixels de large.</p>
+        </div>
+        <div data-i18n-block="en">
+            <h3>All the mode's animations together</h3>
+            <p class="perf-note">80 characters. A third of them were encoded in 1080p while
+            the game displays them 660 pixels wide.</p>
+        </div>
+        <div class="perf-row">
+            <div class="perf-bar perf-bar--before">
+                <span class="perf-tag">2.2</span>
+                <span class="perf-track"><span class="perf-fill" style="--pct: 100%"></span></span>
+                <span class="perf-val" data-i18n-block="fr">1 782 Mo</span><span class="perf-val" data-i18n-block="en">1,782 MB</span>
+            </div>
+            <div class="perf-bar perf-bar--after">
+                <span class="perf-tag">2.3</span>
+                <span class="perf-track"><span class="perf-fill" style="--pct: 22.3%"></span></span>
+                <span class="perf-val" data-i18n-block="fr">397 Mo</span><span class="perf-val" data-i18n-block="en">397 MB</span>
+            </div>
+        </div>
+    </div>
+
+    <div data-i18n-block="fr">
+        <p>La qualité à l'écran ne bouge pas : les animations réencodées passent au format
+        que les trois quarts du mode utilisaient déjà, et que le navigateur réduisait de
+        toute façon à l'affichage.</p>
+    </div>
+    <div data-i18n-block="en">
+        <p>On-screen quality is unchanged: the re-encoded animations move to the format three
+        quarters of the mode already used, and which the browser was scaling down anyway.</p>
+    </div>
+
+    <hr>
 
     <div data-i18n-block="fr"><h1>🔧 Corrections</h1></div>
     <div data-i18n-block="en"><h1>🔧 Fixes</h1></div>
