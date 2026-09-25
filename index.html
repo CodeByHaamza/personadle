@@ -609,7 +609,24 @@
       >
         <img src="./assets/buttons/discord.svg" alt="Discord" width="30" height="30" />
       </a>
-      <a href="https://ko-fi.com/hamzadev" target="_blank" title="kofi">
+      <a
+        href="https://ko-fi.com/hamzadev"
+        target="_blank"
+        rel="noopener"
+        title="kofi"
+        id="kofiLink"
+        onclick="
+          (function () {
+            try {
+              const p = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
+              if (!p.visitedKofi) {
+                p.visitedKofi = true;
+                localStorage.setItem('personaUserProfile', JSON.stringify(p));
+              }
+            } catch (e) {}
+          })()
+        "
+      >
         <img src="./assets/buttons/kofi.svg" alt="Ko-fi" width="30" height="30" />
       </a>
     </div>
