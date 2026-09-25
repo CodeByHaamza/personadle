@@ -45,6 +45,296 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-09-25 — La page Classique démarrait 46 px plus bas que les cinq autres
+
+« Sur l'écran d'ami, la page Classique n'a pas la nouvelle taille adaptée, obligé de
+scroller » (Hamza).
+
+### Ce que la mesure dit
+
+Classique est le **seul** mode à porter deux badges fixes en haut à droite : la bascule
+dark mode, partagée par toutes les pages, et la bascule daltonien qui lui est propre. Ils
+étaient **empilés** — dark mode 10→50, daltonien 60→108 — obligeant la page à réserver
+`padding-top: 96px` sous 900 px.
+
+Relevé à 390 px, avant :
+
+| | Classique | Émoji (référence) |
+|---|---|---|
+| `padding-top` | **96 px** | 50 px |
+| Haut du logo | **106 px** | 60 px |
+
+Soit 46 px de décalage, et le bouton « Give up » repoussé hors de l'écran.
+
+### Le correctif
+
+Les deux badges partagent désormais la **même rangée**. La bande réservée retombe à une
+hauteur de badge : `padding-top` passe à 60 px, et le logo démarre à 70 px.
+
+Il reste 10 px d'écart avec les autres modes, et c'est délibéré : la bascule daltonien fait
+48 px de haut (cible tactile, CLAUDE.md §7) quand celle du dark mode en fait 40. Les rogner
+pour gagner ces 10 px se paierait au doigt.
+
+### Trois règles qui se contredisaient
+
+Le premier correctif n'a rien changé, et la mesure l'a dit tout de suite : le badge restait
+à 60→108. `#daltonianToggle` est déclaré **trois fois** dans `classique.css` — la règle de
+base, puis une par media query (481–900 px et ≤ 480 px), les deux dernières repinçant
+`top: 60px`. Une règle ajoutée avant elles était simplement écrasée.
+
+Ce sont donc les **deux règles qui s'appliquent réellement** qui ont été corrigées, et
+aucune quatrième n'a été ajoutée : trois endroits qui se contredisent, c'est précisément
+comment on en arrive là.
+
+### La marge droite dépend de la plage
+
+La bascule dark mode ne fait pas la même largeur partout — ~93 px sous 480 px, jusqu'à
+201 px entre 481 et 900 (elle porte un libellé). Une marge unique laissait donc les deux
+badges se chevaucher dans la plage haute. D'où `right: 112px` sous 480 px et `right: 225px`
+au-dessus, mesurés et non estimés.
+
+### Vérifications
+
+- Géométrie relevée à **360, 390, 480, 768, 899 et 1280 px** : plus aucun chevauchement,
+  entre badges comme avec le logo, à aucune largeur. Le desktop ne bouge pas.
+- `tests-e2e/classic_mobile_layout.spec.js` — **nouveau**. Il mesure des rectangles plutôt
+  que de comparer des captures : ce qui compte n'est pas que le rendu soit identique au
+  pixel, mais que rien ne se chevauche et que le haut de page reste comparable aux autres
+  modes. Une capture de référence casserait au moindre changement de contenu.
+- Le haut de page est comparé au **mode Émoji** et non à une constante : si le gabarit
+  commun change un jour, le test suit au lieu de se mettre à mentir.
+- Les 5 cas **échouent sans le correctif**, vérifié en le retirant.
+
+### Défaut voisin, non corrigé
+
+À **899 px** exactement, la page déborde horizontalement (`scrollWidth > clientWidth`).
+Vérifié en revenant au fichier d'origine : **ce défaut préexiste**, il n'est pas causé par
+ce lot. Il n'est pas traité ici pour ne pas mélanger deux corrections dans un même
+changement — mais il est réel, et cette largeur est la borne haute de la media query.
+
+---
+## 2026-09-25 — Un défi Expert se gagnait tout seul, et les portraits animés de Kotone mouraient au recadrage
+
+Deux signalements de Hamza le soir de la sortie. Sans rapport l'un avec l'autre, mais le
+même mécanisme de fond : **une règle écrite pour un cas particulier, restée en place quand
+le cas s'est élargi.**
+
+### 1. « Je fais Expert en Musique, puis un défi ami — et je réussis direct »
+
+Accepter un défi efface l'état du mode pour que le joueur reparte de zéro sur la cible
+dédiée. `installActiveChallenge()` le faisait avec :
+
+```js
+(MODE_STATE_KEYS[modeKey] ?? []).forEach((k) => localStorage.removeItem(k));
+```
+
+Or `MODE_STATE_KEYS` ne liste que la dimension **normale**. Un défi **Expert** n'effaçait
+donc rien de la partie Expert du jour : la page, qui restaure `…GameOver` au chargement,
+retrouvait `"true"` et affichait la victoire **avant que le joueur ait joué une note**.
+
+Signalé sur le mode Musique ; le défaut touchait **les six modes**.
+
+`MODE_STATE_KEYS_EXPERT` et `modeStateKeys(modeKey, isExpert)` répondent maintenant à la
+question « quelles clés pour quelle dimension ».
+
+**Pourquoi la table est écrite en toutes lettres plutôt que dérivée.** Cinq modes bâtissent
+leur clé Expert par `expertContext().key()`, qui rend `prefixExpert_nom`. Le mode Musique,
+lui, ne passe pas par là : il construit `` `${KEY_PREFIX}Target` `` avec
+`KEY_PREFIX = "musicExpert"` — donc sans underscore, et sans répéter « music ». Aucune
+règle unique ne couvre les six, et la dérivation « astucieuse » aurait produit
+`musicExpertmusicTarget` : une clé inexistante, donc un effacement **silencieusement
+inopérant** — exactement le bug, en croyant l'avoir corrigé.
+
+Le risque d'une table en dur, c'est la dérive. `tests/challenge_expert_state.test.js` relit
+donc les fichiers de mode et vérifie que **chaque clé listée y est réellement construite**.
+Sans ce test, une clé mal orthographiée ne casserait rien de visible : le `removeItem`
+porterait sur une clé absente, et le bug reviendrait à l'identique.
+
+### 2. Les portraits animés de Kotone ne s'animaient pas
+
+« Les pdp de Kotone ont du mal à s'animer, comme Makoto qui marche très bien. »
+
+Le recadrage dessine le portrait dans un `<canvas>`, qui n'en retient qu'une image fixe :
+un portrait animé qui y entre en ressort **mort**. Le garde-fou qui décide de l'y envoyer
+testait :
+
+```js
+if (src.toLowerCase().endsWith(".gif")) return;
+```
+
+Les portraits animés de Kotone sont des **WebP** animés. Ils passaient donc par le canvas
+et y perdaient leur animation, pendant que ceux de Makoto (`Yuki.gif`) l'échappaient et
+bougeaient parfaitement. La différence que Hamza a vue est exactement celle-là.
+
+Le plus notable : **le dépôt savait déjà que cette règle était fausse.** Vingt lignes plus
+haut, le commentaire de la pastille ANIM le dit noir sur blanc — « l'ancienne règle « le nom
+finit par .gif » était fausse des deux côtés : elle ratait les WebP animés de Kotone ». La
+pastille avait été corrigée pour lire `ANIMATED_AVATARS` ; le garde-fou du recadrage, lui,
+était resté sur l'extension.
+
+Les deux chemins qui mènent au canvas passent désormais par `isAnimatedAvatar()` : la
+sélection d'un portrait, **et** le bouton « Ajuster le cadrage » — qui avait le même défaut
+et aurait figé sans prévenir ce que le joueur était venu chercher.
+
+Le prédicat vit dans `avatars_data.js`, à côté de la liste qu'il interroge, et non dans
+`profile-page.js` : ce dernier touche au DOM dès l'import (`canvas.getContext`), donc rien
+d'exporté depuis là n'est testable seul.
+
+`ANIMATED_AVATARS` est généré en relisant l'en-tête des fichiers : il dit ce qui bouge
+réellement, pas ce que l'extension laisse croire.
+
+### Vérifications
+
+- **Le correctif du défi Expert a été temporairement annulé** pour vérifier que les tests
+  échouent bien sans lui : 2 échecs, puis 9/9 une fois rétabli. Un test vert des deux côtés
+  ne prouve rien.
+- 9 cas pour les dimensions de défi, 7 pour les portraits animés — dont un qui vérifie
+  qu'un portrait **fixe** reste recadrable : interdire le recadrage partout « au cas où »
+  supprimerait la fonctionnalité pour la quasi-totalité de la galerie.
+- **1548 tests** verts.
+
+### Fichiers touchés
+
+- `js/gameCore.js` — `MODE_STATE_KEYS_EXPERT`, `modeStateKeys()`, effacement par dimension.
+- `profile/avatars_data.js` — `isAnimatedAvatar()`.
+- `profile/profile-page.js` — les deux chemins vers le canvas.
+- `tests/challenge_expert_state.test.js`, `tests/animated_avatar_crop.test.js` — **nouveaux**.
+
+---
+## 2026-09-25 — Le serveur tranche les déblocages, et la carte locale cesse de mentir
+
+Signalé en production par **Colonel-Maskou** le soir de la sortie : animation de déblocage
+pour *Memento Vivere, Memento Mori* et pour le titre *Déjà Vu* **sans avoir rempli la
+condition**, puis badge impossible à équiper. Sa description est exactement le symptôme :
+« débloqué, finalement non, finalement oui, finalement bug ».
+
+### L'état réel, mesuré en base
+
+La base était saine : **ni le badge ni le titre n'étaient accordés**, et le serveur avait
+raison de refuser.
+
+| Condition | Ce que le serveur voit dans `game_sessions` |
+|---|---|
+| `memento_vivere_mori` | classic **2/2** ✓ · emoji **1/2** · silhouette **1/2** · AOA **1/2** · personae **1/2** · musiques ✓✓ |
+| `p2_deja_vu` | classic **0/2** · silhouette **0/2** |
+
+Sa seule victoire Tatsuya est en **Personae**. Il avait donc raison de dire qu'il n'avait
+jamais fait la condition de Déjà Vu.
+
+### Deux défauts, qui se combinaient
+
+**1. `characterModeMap` comptait des parties que le serveur ne compte pas.**
+
+Cette carte ne vit que dans le `localStorage` du joueur — elle n'existe dans aucune colonne
+de `profiles`, n'est jamais synchronisée, jamais recalée. Le serveur, lui, décide depuis
+`game_sessions`, où **une partie de défi n'est jamais enregistrée** : `condition_check.php`
+le dit explicitement, « elle ne compte pas — voulu ».
+
+Or **quatre modes sur cinq** l'écrivaient quand même sur un défi :
+
+| Mode | Avant |
+|---|---|
+| Classique | ✅ déjà dans le bloc `!wasChallengePlay` |
+| Émoji | ❌ gardé contre l'abandon, pas contre le défi |
+| Silhouette | ❌ hors du garde-fou |
+| Personae | ❌ aucun garde-fou |
+| All-Out Attack | ❌ `checkSpecialBadges()` est appelée **avant** le garde-fou de session |
+
+Les cinq sont désormais alignés sur une seule règle : **la carte n'enregistre que ce que le
+serveur enregistrerait.**
+
+**2. Le client s'accordait le badge sans attendre la réponse.**
+
+```js
+profile.badges.push(badge.id);          // il se l'accorde
+showBadgeNotification(badge);            // il fête
+api.badges.unlock(id).catch(() => {});   // et jette le refus
+```
+
+Le `.catch(() => {})` avalait le 403. L'animation avait déjà joué, le badge était déjà dans
+le profil local, et le refus n'atteignait personne. Au `pullProfileFromCloud` suivant — le
+backend fait autorité — le badge disparaissait ; au rejeu, la condition locale repassait
+mais `_seenBadgeAnimIds` bloquait l'animation. D'où la valse décrite par le joueur.
+
+C'est la règle du CLAUDE.md §7 qui sautait : *« le client ne décide pas de ce qui existe »*.
+
+### Ce qui change
+
+`checkAndUnlockBadges()` devient asynchrone : la condition locale ne fait plus que
+**proposer**, le serveur accorde. Les candidats sont soumis **un par un**, pour qu'un badge
+refusé n'emporte pas ceux de la même fournée qui sont réellement gagnés.
+
+La distinction qui compte :
+
+| Réponse | Décision | Pourquoi |
+|---|---|---|
+| Succès | accordé | — |
+| **401** | accordé en local | Pas connecté : aucun interlocuteur, pas un refus |
+| **4xx** | **retiré** | Le serveur a regardé et dit non |
+| 5xx / réseau | gardé en local | On n'a pas pu demander : punir une connexion instable ferait perdre des badges gagnés |
+
+Pas d'API (hors ligne, hors bridge) : comportement local d'origine conservé.
+
+### Une course ouverte par l'attente, refermée
+
+Attendre le serveur insère un aller-retour réseau entre la lecture du profil et son
+écriture. La sauvegarde **relit** donc le profil et n'y fusionne que les badges accordés,
+au lieu de réécrire l'objet lu au départ — sinon un badge gagné effacerait les stats de fin
+de partie écrites entre-temps.
+
+### Les titres : un trou plus discret
+
+`titles-ui.js` attendait **déjà** le serveur correctement — il porte même le commentaire
+d'un bug identique signalé plus tôt. Mais il décidait lui-même d'avoir affaire à un invité :
+
+```js
+let confirmed = !api?.titles?.unlock || !window._currentUser;
+```
+
+Sur une page de mode, l'authentification n'est pas toujours résolue quand la vérification
+tourne : un joueur **connecté** passait pour un invité, et son titre s'annonçait sans que
+personne n'ait rien demandé. C'est maintenant le serveur qui dit s'il nous connaît — son
+**401** vaut « pas de compte », et l'acquis local tient, pour une raison vérifiée.
+
+### Les cartes déjà polluées : rien à migrer
+
+Elles ne s'auto-réparent pas, et c'est sans conséquence : leur seul effet résiduel est une
+requête refusée, silencieuse. Vérifié que `characterModeMap` ne sert **qu'aux conditions** —
+aucun affichage de progression ne s'en nourrit. Une migration coûterait plus qu'elle ne
+rapporte.
+
+### Écriture morte retirée dans le mode Musique
+
+`modeMusic.js` écrivait dans une clé `localStorage` **`characterModeMap` à part**, que rien
+ne lit : les conditions lisent `profile.characterModeMap`. La brancher aurait été pire que
+l'effacer — la part musicale des ensembles est délibérément vérifiée par le seul serveur
+(le titre d'une chanson n'est pas un nom de personnage), et l'ajouter au client aurait
+recréé la divergence qu'on venait de corriger.
+
+### Fichiers touchés
+
+- `profile/badges/badgesManager.js` — `serveurAccordeBadge()`, `checkAndUnlockBadges()`
+  asynchrone, sauvegarde par fusion.
+- `profile/titles-ui.js` — plus de `window._currentUser`, 401 distingué d'un refus.
+- `emojiMode/`, `silhouetteMode/`, `personaeMode/`, `allOutAttackMode/` — garde-fou de défi.
+- `musicsMode/modeMusic.js` — écriture morte retirée.
+- `tests/badgesManager.test.js` — **7 cas ajoutés**, dont les deux qui échouaient sur le
+  défaut réel avant correction.
+- `tests/titles_reconcile.test.js` — le test « invité » vérifiait que le client ne
+  *demandait pas* ; il vérifie désormais qu'un **401 n'empêche pas** l'acquis local. La
+  garantie utile est la même, la raison est vérifiée au lieu d'être devinée.
+- `tests/dataMiningBadge.test.js` — attente de la promesse.
+
+### Vérifications
+
+- Les deux tests posés avant le correctif échouaient bien sur le vrai défaut
+  (`expected [ 'ace_defective' ] to not include 'ace_defective'`), et passent après.
+- **1532 tests** verts.
+- Les cinq modes contrôlés un par un, accolades comptées, pour vérifier que le garde-fou est
+  réellement **ouvert** au moment de l'écriture — un premier repérage à vue avait manqué le
+  mode Émoji.
+
+---
 ## 2026-09-25 — Le bandeau 2.3 du modal « Nouveautés » gagne ses couches
 
 Retour Hamza : « le bandeau de la 2.3 est encore trop simple, la 2.0 et la 2.2 sont

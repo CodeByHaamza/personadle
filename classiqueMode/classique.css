@@ -309,13 +309,28 @@
    logo (max 460px, centré) n'atteint jamais les badges en haut à droite → on
    remet un padding minime, comme les 5 autres modes. Le chevauchement ne
    survient qu'en dessous de ~900px, où le logo (80vw) rejoint les badges :
-   on ne réserve la place que là, via media query. */
+   on ne réserve la place que là, via media query.
+
+   MàJ 2 (retour Hamza du 2026-09-25, « la page Classique n'a pas la taille
+   adaptée, obligé de scroller ») : ce correctif n'avait réglé que le desktop.
+   Sur mobile, réserver la hauteur de DEUX badges empilés coûtait 96px, quand
+   les cinq autres modes se contentent de 50px — le logo démarrait à 106px au
+   lieu de 60px, et tout le reste de la page descendait d'autant.
+
+   Mesuré à 390px : dark mode 10→50, daltonien 60→108. Les empiler était le
+   problème, pas leur taille. La bascule daltonien rejoint donc la RANGÉE du
+   dark mode au lieu de se placer dessous : la bande réservée retombe à une
+   seule hauteur de badge.
+
+   Elle garde ses 48px de haut (cible tactile, cf. CLAUDE.md §7) — d'où 60px
+   et non 50 : c'est la hauteur du bouton qui commande, et la rogner pour
+   gagner 10px se paierait au doigt. */
 body {
   padding-top: 8px;
 }
 @media (max-width: 900px) {
   body {
-    padding-top: 96px;
+    padding-top: 60px;
   }
 }
 
@@ -514,10 +529,17 @@ body.darkmode .counter.activated {
     font-size: 15px;
   }
 
-  /* Bouton daltonien sous le toggle dark mode */
+  /* Bouton daltonien À CÔTÉ du toggle dark mode, plus dessous : empilés, les
+     deux badges réservaient 96px de haut de page contre 50px pour les cinq
+     autres modes, et toute la page descendait d'autant. */
   #daltonianToggle {
-    top: 60px;
-    right: 10px;
+    top: 10px;
+    /* 225px = largeur maximale mesurée de la bascule dark mode dans cette plage
+       (201px à 768px) + sa marge droite + un espace. En dessous, les deux
+       badges se chevauchaient. */
+    right: 225px;
+    padding: 6px 12px;
+    font-size: 12px;
   }
 }
 
@@ -626,12 +648,13 @@ body.darkmode .counter.activated {
     font-size: 14px;
   }
 
-  /* Bouton daltonien */
+  /* Bouton daltonien — même rangée que le dark mode (cf. ≤900px ci-dessus). */
   #daltonianToggle {
-    top: 60px;
-    right: 10px;
+    top: 10px;
+    /* La bascule dark mode se réduit à ~93px sous 480px : 112px suffisent. */
+    right: 112px;
     font-size: 11px;
-    padding: 5px 12px;
+    padding: 5px 10px;
     z-index: 1000;
   }
 }

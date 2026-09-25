@@ -442,7 +442,6 @@ function initializeAutocomplete(element, array) {
 // GAME FLOW
 // ─────────────────────────────────────────────────────────────────────────────
 
-
 /**
  * Filtre CSS appliqué au GIF selon le mode et l'avancement.
  *
@@ -504,7 +503,8 @@ function handleGuess() {
 
     if (!wasChallengePlay && !isGameLogged(STATS_SCOPE)) {
       const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
-      if (!EXPERT.isExpert) updateProfileStats({ result: "win", mode: "All Out Attack", timeSpent });
+      if (!EXPERT.isExpert)
+        updateProfileStats({ result: "win", mode: "All Out Attack", timeSpent });
       savePendingSession(
         buildGameSession({
           mode: "AllOutAttack",
@@ -566,7 +566,8 @@ function giveUp() {
   const wasChallengePlay = isChallengePlay("alloutattack");
   if (!wasChallengePlay && !isGameLogged(STATS_SCOPE)) {
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
-    if (!EXPERT.isExpert) updateProfileStats({ result: "giveup", mode: "All Out Attack", timeSpent });
+    if (!EXPERT.isExpert)
+      updateProfileStats({ result: "giveup", mode: "All Out Attack", timeSpent });
     savePendingSession(
       buildGameSession({
         mode: "AllOutAttack",
@@ -761,12 +762,18 @@ function checkSpecialBadges(characterName) {
   // aoa_vision : victoire au 1er essai
   // (attempts est une variable locale du contexte d'appel, pas disponible ici — géré via profile.hasWonAOAFirstTry dans checkGuess)
 
-  // characterModeMap
-  if (!profile.characterModeMap) profile.characterModeMap = {};
-  if (!profile.characterModeMap[characterName]) profile.characterModeMap[characterName] = [];
-  if (!profile.characterModeMap[characterName].includes("alloutattack")) {
-    profile.characterModeMap[characterName].push("alloutattack");
-    shouldSave = true;
+  // characterModeMap — hors défi uniquement. Cette fonction est appelée AVANT le
+  // garde-fou de session du mode, elle tourne donc aussi sur un défi ami ; or le
+  // serveur n'enregistre pas ces parties (`condition_check.php` : « elle ne
+  // compte pas — voulu »). Les y compter ferait croire au client qu'une
+  // condition est remplie quand elle ne l'est pas. Signalé en prod le 2026-09-25.
+  if (!isChallengePlay("alloutattack")) {
+    if (!profile.characterModeMap) profile.characterModeMap = {};
+    if (!profile.characterModeMap[characterName]) profile.characterModeMap[characterName] = [];
+    if (!profile.characterModeMap[characterName].includes("alloutattack")) {
+      profile.characterModeMap[characterName].push("alloutattack");
+      shouldSave = true;
+    }
   }
 
   if (shouldSave) {
@@ -786,7 +793,10 @@ function applyDarkModeStyles() {
   applyDarkModeOverrides([
     {
       selector: ".emoji-hint-zone",
-      styles: { background: "rgba(20, 20, 20, 0.7)", boxShadow: "0 0 12px rgba(255, 255, 255, 0.2)" },
+      styles: {
+        background: "rgba(20, 20, 20, 0.7)",
+        boxShadow: "0 0 12px rgba(255, 255, 255, 0.2)",
+      },
     },
     { id: "textbar", styles: { backgroundColor: "#111", color: "#fff", border: "2px solid #666" } },
     {
@@ -871,7 +881,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   );
   if (challengeTargetName) {
     localStorage.setItem(EXPERT.key("aoaTarget"), challengeTargetName);
-    localStorage.setItem(EXPERT.key("aoaAttempts"), localStorage.getItem(EXPERT.key("aoaAttempts")) || 0);
+    localStorage.setItem(
+      EXPERT.key("aoaAttempts"),
+      localStorage.getItem(EXPERT.key("aoaAttempts")) || 0
+    );
   }
 
   // ── Restore session ──
@@ -886,9 +899,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const imageName = portraitsMap[target] || target.split(" ")[0];
     loadImageSafely(gifElement, cdn("allOutAttack", imageName), () => {
-      gifElement.style.filter = gameOver
-        ? "none"
-        : gifFilter();
+      gifElement.style.filter = gameOver ? "none" : gifFilter();
     });
 
     updateGiveUpCounter();
