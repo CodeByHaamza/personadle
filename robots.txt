@@ -1,0 +1,19 @@
+# robots.txt — https://www.personadle.net/
+#
+# Le site n'a aucune zone à protéger du référencement : le jeu, ses six modes et
+# les pages de nouveautés ont vocation à être trouvés. Ce fichier existe surtout
+# pour déclarer le sitemap — il répondait 404 jusqu'ici, et rien n'indiquait donc
+# aux robots où le trouver autrement que par la Search Console.
+#
+# `/api/` n'est délibérément PAS bloqué : les pages du jeu l'appellent en
+# JavaScript, et un robot qui rend la page a besoin de ces réponses. L'interdire
+# ferait rendre des pages cassées, ce qui coûte plus qu'il ne protège — les
+# routes ne sont de toute façon liées nulle part.
+
+User-agent: *
+Allow: /
+
+# Outil interne, mono-langue, sans intérêt public.
+Disallow: /admin/
+
+Sitemap: https://www.personadle.net/sitemap.xml
