@@ -2,9 +2,15 @@
 // 🎖️ PERSONADLE - GESTIONNAIRE DE BADGES
 // ═══════════════════════════════════════════════════════════════════════════
 
-import { badgesList, BADGE_CATEGORIES, getBadgeById, SAME_ENERGY_AVATARS, wearsAvatar } from "./badgesData.js";
+import {
+  badgesList,
+  BADGE_CATEGORIES,
+  getBadgeById,
+  SAME_ENERGY_AVATARS,
+  wearsAvatar,
+} from "./badgesData.js";
 import { initBadgeReorder } from "./badges_reorder.js";
-import { initBadgeInspect } from "./badge_inspect.js";
+import { initBadgeInspect, ouvrirFiche } from "./badge_inspect.js";
 import { normalizeModeKey } from "../../js/gameCore.js";
 import { statsForUnlocks } from "../profile-format.js";
 import { openAtelier } from "../atelier.js";
@@ -193,7 +199,7 @@ export async function syncBadgesWithBackend(profile, saveProfile) {
       // Re-render : renderBadgesModal était déjà appelé avant la fin de ce fetch async
       renderBadgesPreview(profile);
       renderBadgePicker(profile, saveProfile);
-          renderBadgesModal(profile, saveProfile);
+      renderBadgesModal(profile, saveProfile);
     }
 
     // Local → backend (bloqué si le profil vient d'un autre compte)
@@ -211,7 +217,8 @@ export async function syncBadgesWithBackend(profile, saveProfile) {
           // on le retire du local, il reviendra quand la condition sera vraiment
           // remplie. Tout autre échec (réseau, 5xx, code événement) laisse le local
           // tel quel : on ne sait pas.
-          if (err?.status === 403 && /condition not met/i.test(err?.message || "")) refused.push(id);
+          if (err?.status === 403 && /condition not met/i.test(err?.message || ""))
+            refused.push(id);
         }
       }
       if (refused.length) {
@@ -220,7 +227,9 @@ export async function syncBadgesWithBackend(profile, saveProfile) {
           profile.selectedBadges = profile.selectedBadges.filter((id) => !refused.includes(id));
         }
         saveProfile();
-        console.warn(`[badges] refusés par le serveur (condition non remplie) : ${refused.join(", ")}`);
+        console.warn(
+          `[badges] refusés par le serveur (condition non remplie) : ${refused.join(", ")}`
+        );
         renderBadgesPreview(profile);
         renderBadgePicker(profile, saveProfile);
         renderBadgesModal(profile, saveProfile);
@@ -283,8 +292,10 @@ export async function checkSocialBadges(profile, saveProfile) {
         if ((f.social_link_rank ?? 1) < 5) return false;
         const theirs = f.avatar_src || f.avatar_data;
         return (
-          (wearsAvatar(mine, SAME_ENERGY_AVATARS.arai) && wearsAvatar(theirs, SAME_ENERGY_AVATARS.chie)) ||
-          (wearsAvatar(mine, SAME_ENERGY_AVATARS.chie) && wearsAvatar(theirs, SAME_ENERGY_AVATARS.arai))
+          (wearsAvatar(mine, SAME_ENERGY_AVATARS.arai) &&
+            wearsAvatar(theirs, SAME_ENERGY_AVATARS.chie)) ||
+          (wearsAvatar(mine, SAME_ENERGY_AVATARS.chie) &&
+            wearsAvatar(theirs, SAME_ENERGY_AVATARS.arai))
         );
       });
       if (partner) {
@@ -765,6 +776,31 @@ function _tr(key, fallback) {
 }
 
 /**
+ * Les textes de la fiche d'un badge, dans la langue courante.
+ *
+ * Partagé par la grille de l'atelier et la rangée épinglée du profil : les deux
+ * ouvrent la MÊME fiche, et dupliquer la construction, c'était se garantir deux
+ * comportements divergents au premier ajout de champ.
+ *
+ * @returns {{badge:object, debloque:boolean, textes:object}|null}
+ */
+function ficheBadge(profile, id) {
+  // Les id viennent du DOM (dataset), donc en chaîne, alors que badgesList les
+  // porte en nombre — comparer sans convertir ne trouve jamais rien.
+  const badge = badgesList.find((b) => String(b.id) === String(id));
+  if (!badge) return null;
+  const debloque = (profile.badges || []).includes(badge.id);
+  return {
+    badge,
+    debloque,
+    textes: {
+      name: getBadgeName(badge),
+      condition: getBadgeCondition(badge, debloque),
+      description: getBadgeDescription(badge),
+    },
+  };
+}
+/**
  * Rend les 4 emplacements de badges épinglés sur la carte d'identité (2.2).
  * Un emplacement rempli montre le badge (clic = zoom, cf. share-card.js) avec
  * une croix pour le désépingler ; un emplacement vide est un « + » qui ouvre
@@ -832,11 +868,24 @@ export function renderBadgesPreview(profile) {
   // Réordonnancement : posé APRÈS le rendu, puisque la rangée est reconstruite à
   // chaque fois. Le nouvel ordre passe par le même chemin de sauvegarde que
   // l'épinglage — c'est le même champ.
-  initBadgeReorder(preview, profile, (ordre) => {
-    profile.selectedBadges = ordre;
-    _lastSaveProfile?.();
-    renderBadgesPreview(profile);
-  });
+  initBadgeReorder(
+    preview,
+    profile,
+    (ordre) => {
+      profile.selectedBadges = ordre;
+      _lastSaveProfile?.();
+      renderBadgesPreview(profile);
+    },
+    // Cliquer un badge déjà épinglé ouvre sa fiche. Jusqu'ici ce clic ne faisait
+    // RIEN : la seule façon de relire la condition d'un de ses propres badges
+    // était de retourner dans l'atelier et de le retrouver dans la grille
+    // (retour Hamza du 2026-09-24). Le ✕ garde sa priorité, et le seuil de
+    // glissement distingue déjà le clic du déplacement.
+    (id) => {
+      const f = ficheBadge(profile, id);
+      if (f) ouvrirFiche(f.badge, f.textes, f.debloque);
+    }
+  );
 
   window.dispatchEvent(new CustomEvent("badgesRendered"));
 }
@@ -1003,20 +1052,7 @@ export function renderBadgesModal(profile, saveProfile) {
   // L'œil : consulter la fiche d'un badge SANS l'épingler. Posé après les clics
   // de carte, et il arrête leur propagation — sinon regarder un badge
   // reviendrait à le modifier.
-  initBadgeInspect(grid, (id) => {
-    const badge = badgesList.find((b) => b.id === id);
-    if (!badge) return null;
-    const debloque = profile.badges.includes(badge.id);
-    return {
-      badge,
-      debloque,
-      textes: {
-        name: getBadgeName(badge),
-        condition: getBadgeCondition(badge, debloque),
-        description: getBadgeDescription(badge),
-      },
-    };
-  });
+  initBadgeInspect(grid, (id) => ficheBadge(profile, id));
 
   // Configurer l'ouverture/fermeture de la modal
   setupModalControls(openBtn, closeBtn, modal);
@@ -1394,7 +1430,7 @@ export async function handleEventCodeSubmit(profile, saveProfile, input, msg) {
     renderBadgesModal(profile, saveProfile);
     renderBadgesPreview(profile);
     renderBadgePicker(profile, saveProfile);
-      showCodeMessage(
+    showCodeMessage(
       msg,
       tCode("badges.event_code_success", "🎉 Badge unlocked successfully!"),
       "success"
