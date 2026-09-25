@@ -37,7 +37,101 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 11 | `feat/badge_inspect` | Inspection d'un badge sans l'équiper |
 | 12 | `feat/admin_unlock_picker` | Sélection et retrait de déblocages côté admin |
 | 13 | `feat/changelog_2_3_pink_ribbon` | Remplissage de la page Nouveautés |
+| 14 | `feat/badges_pin_ux` | Badges épinglés : clic vers la fiche, aperçu du déplacement |
 | 15 | `feat/aoa_kotone_p5x` | All-Out Attack de Kotone (P5X) et nouveau portrait |
+
+---
+
+## 2026-09-25 — Les badges épinglés se consultent, et on voit où ils tombent
+
+Deux retours de Hamza sur la rangée de badges de la page profil, tous deux sur le
+même geste : **« si je clique sur un badge sélectionné, je devrais quand même voir
+le détail »** et **« quand je déplace les badges c'est pas intuitif, je veux le badge
+transparent là où il sera, ça fait trop vide »**.
+
+### Cliquer un badge épinglé ouvre sa fiche
+
+Le clic sur une case épinglée ne faisait **rien du tout** : `renderBadgesPreview()`
+posait bien un `dataset.badgeId` sur l'image, mais aucun gestionnaire. Pour relire la
+condition d'un de ses propres badges, il fallait rouvrir l'atelier, retrouver le badge
+dans la grille et cliquer son œil.
+
+Le rappel est branché dans `initBadgeReorder()` et nulle part ailleurs, parce que c'est
+le seul endroit qui sait distinguer un **clic** d'un **glissement** : les deux
+commencent par le même `pointerdown`, et seul le seuil de 6 px les sépare. Un
+`click` posé à côté se déclencherait aussi à la fin d'un déplacement.
+
+`badgesManager.js` gagne `ficheBadge(profile, id)`, partagé avec l'œil de la grille :
+les deux chemins ouvrent désormais la **même** fiche (`ouvrirFiche()` de
+`badge_inspect.js`) à partir de la même construction, au lieu de deux copies destinées
+à diverger au premier champ ajouté. Ce helper compare les identifiants en chaîne — ils
+arrivent du DOM (`dataset`) alors que `badgesList` les porte en nombre.
+
+Entrée et Espace ouvrent la fiche au clavier, comme le clic.
+
+### L'aperçu : le badge reste dans la rangée, à sa future place
+
+La première version (lot 10) sortait le badge saisi du regard — opacité, léger
+agrandissement — et faisait s'écarter la case survolée. Résultat : un trou, et une
+intention à deviner.
+
+Les cases se **réorganisent maintenant en direct** dans le DOM dès que le pointeur
+passe sur un voisin. Le badge saisi reste affiché, estompé et cerclé de pointillés,
+exactement là où il atterrira. La rangée montre à tout instant l'ordre qu'elle aura si
+on relâche — plus de trou. Conséquence assumée : pendant le geste, l'ordre du DOM ne
+correspond plus à `profile.selectedBadges` ; c'est le DOM qui fait foi au relâchement,
+et un glissement annulé se répare par un simple rendu (d'où le `onOrdreChange` même
+quand l'ordre n'a pas changé — sinon la rangée resterait dans son état d'aperçu).
+
+### Deux pièges rencontrés, et pourquoi ils ne se voyaient pas
+
+**1. Une case animée ment sur sa position.** Le décalage des voisins est animé par un
+`transform` (technique FLIP : on mesure avant, on remet chaque case à son ancienne
+place, on relâche à la frame suivante). Or `getBoundingClientRect()` **inclut** les
+transformations : pendant la transition, une case répondait encore depuis son ancien
+emplacement, le badge saisi « retombait » dessus, et la rangée oscillait d'un
+mouvement de souris à l'autre.
+
+Le code ne relit donc plus les positions à chaque mouvement : il relève les
+**emplacements** une fois au début du geste et demande au DOM qui occupe le n-ième.
+C'est aussi plus juste conceptuellement — pendant un glissement, ce sont les occupants
+qui changent de place, pas les emplacements, dont ni le nombre ni la taille ne bougent.
+
+**2. Déplacer l'élément saisi lui fait perdre le pointeur.** Réorganiser le DOM
+déplace le badge saisi, ce qui **relâche implicitement la capture du pointeur**. Le
+`pointerup` arrivait alors sur le badge survolé, et les écouteurs posés sur la case
+saisie ne le voyaient jamais : glissement perdu, rien de sauvegardé, **aucune erreur**.
+Les écouteurs `pointermove`/`pointerup`/`pointercancel` vont donc sur la fenêtre, et
+la capture explicite disparaît (elle ne servait qu'à compenser ce que la fenêtre fait
+déjà mieux).
+
+Ces deux bugs ne se voyaient qu'à la **souris** : au doigt, la capture est implicite,
+et le test tactile passait. Sans le test souris déjà présent, la régression partait en
+production sur le geste le plus courant.
+
+### Fichiers touchés
+
+- `profile/badges/badges_reorder.js` — `onClic`, aperçu en direct, `emplacements()` /
+  `emplacementSous()` en remplacement de `caseSous()`, `animerDecalages()` (FLIP),
+  écoute au niveau fenêtre.
+- `profile/badges/badgesManager.js` — `ficheBadge()` partagé, branchement du clic.
+- `profile/badges/badges.css` — `.pin-slot--dragging` (transparence + pointillés) à la
+  place du soulèvement, `.pinned-slots--dragging` estompe les voisins et neutralise la
+  case « + » pour qu'elle ne passe pas pour une destination.
+- `tests/badgesReorder.test.js` — 9 cas de plus (19 au total) : clic contre glissement,
+  micro-tremblement sous le seuil, ✕ non capté, ordre du DOM **pendant** le geste,
+  traversée de plusieurs cases, retour à la place de départ, badge unique, clavier.
+- `tests-e2e/badges_reorder.spec.js` — 2 scénarios de plus : la fiche s'ouvre depuis la
+  rangée sans rien modifier, et le badge est bien visible/estompé à sa future place
+  **pointeur encore enfoncé**.
+
+### Angles morts connus
+
+- Les emplacements sont relevés au début du geste : un défilement de page à la molette
+  **pendant** un glissement les périme. Le geste cesse alors de suivre jusqu'au
+  relâchement, qui reste correct. `touch-action: none` empêche déjà le cas tactile.
+- La case « + » est estompée mais pas une cible : déposer dessus revient à ne rien
+  faire, ce qui est le comportement attendu, mais rien ne le dit explicitement.
 
 ---
 
