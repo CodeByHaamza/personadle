@@ -78,12 +78,12 @@ describe("fiche — ouverture et fermeture", () => {
     ouvrirFiche({ id: "a", img: "a.png" }, TEXTES, true);
     ouvrirFiche({ id: "b", img: "b.png" }, TEXTES, true);
     expect(document.querySelectorAll("#badgeInspectPanel")).toHaveLength(1);
-    expect(document.querySelector(".badge-inspect__name").textContent).toBe("Velvet Headache");
+    expect(document.querySelector(".badge-zoom-content h3").textContent).toBe("Velvet Headache");
   });
 
   it("le bouton de fermeture retire le panneau", () => {
     ouvrirFiche({ id: "a", img: "a.png" }, TEXTES, true);
-    document.querySelector(".badge-inspect__close").click();
+    document.querySelector(".badge-zoom-close").click();
     expect(document.getElementById("badgeInspectPanel")).toBeNull();
   });
 
@@ -94,13 +94,40 @@ describe("fiche — ouverture et fermeture", () => {
   });
 
   it("échappe le contenu — un nom ne peut pas injecter de HTML", () => {
-    ouvrirFiche({ id: "a", img: "a.png" }, { name: '<img src=x onerror=1>', condition: "" }, true);
-    expect(document.querySelector(".badge-inspect__name").innerHTML).not.toContain("<img");
+    ouvrirFiche({ id: "a", img: "a.png" }, { name: "<img src=x onerror=1>", condition: "" }, true);
+    expect(document.querySelector(".badge-zoom-content h3").innerHTML).not.toContain("<img");
   });
 
   it("grise l'image d'un badge verrouillé", () => {
     ouvrirFiche({ id: "a", img: "a.png" }, TEXTES, false);
-    expect(document.querySelector(".badge-inspect__img").className).toContain("is-locked");
+    expect(document.querySelector(".badge-zoom-content img").className).toContain("is-locked");
+  });
+
+  it("emploie la modale de PRODUCTION, pas une fiche à elle", () => {
+    // Le lot 2.3 avait introduit une seconde fenêtre de détail (`.badge-inspect__*`)
+    // à côté de la `.badge-zoom-modal` que la prod affiche déjà au déblocage, sur le
+    // profil public et sur la carte de partage. Deux habillages pour la même
+    // information. Ce test interdit d'y revenir sans le décider.
+    ouvrirFiche({ id: "a", img: "a.png" }, TEXTES, true);
+
+    const modale = document.querySelector(".badge-zoom-modal");
+    expect(modale, "conteneur .badge-zoom-modal").not.toBeNull();
+    expect(modale.querySelector(".badge-zoom-content")).not.toBeNull();
+    expect(modale.querySelector(".badge-zoom-close")).not.toBeNull();
+    expect(modale.querySelector(".badge-condition").textContent).toContain(TEXTES.condition);
+    expect(document.querySelector("[class*='badge-inspect__']"), "plus de fiche maison").toBeNull();
+  });
+
+  it("un badge débloqué n'affiche pas le cadenas", () => {
+    // Le cadenas est le SEUL signe de l'état verrouillé dans ce balisage : le mettre
+    // partout reviendrait à ne rien dire du tout.
+    ouvrirFiche({ id: "a", img: "a.png" }, TEXTES, true);
+    expect(document.querySelector(".badge-condition").textContent).not.toContain("🔒");
+    expect(document.querySelector(".badge-zoom-content img").className).not.toContain("is-locked");
+
+    fermerFiche();
+    ouvrirFiche({ id: "a", img: "a.png" }, TEXTES, false);
+    expect(document.querySelector(".badge-condition").textContent).toContain("🔒");
   });
 });
 
@@ -142,9 +169,9 @@ describe("initBadgeInspect", () => {
 
   it("cliquer l'œil ouvre la fiche SANS épingler", () => {
     initBadgeInspect(grille, resoudre);
-    grille.querySelector(".badge-inspect-btn").dispatchEvent(
-      new MouseEvent("click", { bubbles: true })
-    );
+    grille
+      .querySelector(".badge-inspect-btn")
+      .dispatchEvent(new MouseEvent("click", { bubbles: true }));
     expect(document.getElementById("badgeInspectPanel")).not.toBeNull();
     expect(equiper, "l'œil ne doit jamais épingler").not.toHaveBeenCalled();
   });
@@ -164,9 +191,9 @@ describe("initBadgeInspect", () => {
 
   it("ignore un identifiant inconnu sans planter", () => {
     initBadgeInspect(grille, () => null);
-    grille.querySelector(".badge-inspect-btn").dispatchEvent(
-      new MouseEvent("click", { bubbles: true })
-    );
+    grille
+      .querySelector(".badge-inspect-btn")
+      .dispatchEvent(new MouseEvent("click", { bubbles: true }));
     expect(document.getElementById("badgeInspectPanel")).toBeNull();
   });
 });

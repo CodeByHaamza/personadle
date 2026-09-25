@@ -13,6 +13,22 @@
  * ── Ce qui est volontairement séparé ────────────────────────────────────────
  * `construireFiche()` ne fabrique que du contenu, sans DOM ni état : c'est ce
  * qui se teste. Le reste n'est que l'ouverture et la fermeture d'un panneau.
+ *
+ * ── Pourquoi la modale est celle de la production ───────────────────────────
+ * La première version de ce lot dessinait SA propre fiche (`.badge-inspect__*`).
+ * Le jeu avait donc deux fenêtres de détail de badge : celle-ci, et la
+ * `.badge-zoom-modal` que la prod affiche déjà — au déblocage d'un badge, sur le
+ * profil public et sur la carte de partage. Deux habillages pour la même
+ * information, selon par où on est passé.
+ *
+ * Retour Hamza du 2026-09-25 : c'est la modale de prod qui reste. Ce fichier
+ * produit donc exactement son balisage (`.badge-zoom-modal` >
+ * `.badge-zoom-content`), et `showBadgeZoom()` dans `badgesManager.js` passe
+ * désormais par ici — une seule implémentation, un seul rendu.
+ *
+ * Deux choses lui sont ajoutées, parce que l'œil rend consultable ce que la prod
+ * n'ouvrait jamais : un badge NON débloqué. Le cadenas devant la condition et
+ * l'image en niveaux de gris disent cet état, qui sans eux ne se verrait pas.
  */
 
 /** Traduit une clé i18n avec un vrai repli (cf. CLAUDE.md §5). */
@@ -71,7 +87,12 @@ function _surEchap(e) {
 }
 
 /**
- * Ouvre la fiche d'un badge par-dessus la grille.
+ * Ouvre la fiche d'un badge, dans la modale de la production.
+ *
+ * Le balisage est celui de `.badge-zoom-modal` tel qu'il tourne en prod, à la
+ * classe `is-locked` près (cf. en-tête) : même conteneur, même croix, même
+ * ordre image / titre / condition / description, même classe `.show` posée à la
+ * frame suivante pour l'animation d'entrée.
  *
  * @param {object} badge
  * @param {object} textes     { name, condition, description }
@@ -80,40 +101,45 @@ function _surEchap(e) {
 export function ouvrirFiche(badge, textes, debloque) {
   fermerFiche();
   const f = construireFiche(badge, textes, debloque);
+  const verrouille = f.etat === "locked";
 
-  const panneau = document.createElement("div");
-  panneau.id = ID_PANNEAU;
-  panneau.className = "badge-inspect";
-  panneau.setAttribute("role", "dialog");
-  panneau.setAttribute("aria-modal", "true");
-  panneau.setAttribute("aria-label", f.titre);
-  panneau.innerHTML = `
-    <div class="badge-inspect__card">
-      <button type="button" class="badge-inspect__close"
-              aria-label="${esc(t("ui.close", "Close"))}">✕</button>
-      <img class="badge-inspect__img${f.etat === "locked" ? " is-locked" : ""}"
+  const modale = document.createElement("div");
+  modale.id = ID_PANNEAU;
+  modale.className = "badge-zoom-modal";
+  // La prod n'en met pas : elle n'ouvre cette modale qu'après un clic sur la
+  // notification de déblocage. Ici elle est atteignable au clavier depuis la
+  // grille, donc elle s'annonce comme un dialogue.
+  modale.setAttribute("role", "dialog");
+  modale.setAttribute("aria-modal", "true");
+  modale.setAttribute("aria-label", f.titre);
+  modale.innerHTML = `
+    <div class="badge-zoom-content">
+      <span class="badge-zoom-close" role="button" tabindex="0"
+            aria-label="${esc(t("ui.close", "Close"))}">&times;</span>
+      <img class="${verrouille ? "is-locked" : ""}"
            src="${esc(badge?.img ?? "")}" alt="${esc(f.titre)}">
-      <p class="badge-inspect__name">${esc(f.titre)}</p>
-      <p class="badge-inspect__state">
-        ${f.etat === "unlocked" ? "🔓" : "🔒"}
-        ${esc(
-          f.etat === "unlocked"
-            ? t("profile.badge_unlocked", "Unlocked")
-            : t("profile.badge_locked", "Locked")
-        )}
-      </p>
-      <p class="badge-inspect__condition">${esc(f.condition)}</p>
-      ${f.description ? `<p class="badge-inspect__desc">${esc(f.description)}</p>` : ""}
+      <h3>${esc(f.titre)}</h3>
+      <p class="badge-condition">${verrouille ? "🔒 " : ""}${esc(f.condition)}</p>
+      ${f.description ? `<p class="badge-description">${esc(f.description)}</p>` : ""}
     </div>`;
 
   // Clic sur le fond = fermer, mais pas un clic DANS la carte.
-  panneau.addEventListener("click", (e) => {
-    if (e.target === panneau || e.target.closest(".badge-inspect__close")) fermerFiche();
+  modale.addEventListener("click", (e) => {
+    if (e.target === modale || e.target.closest(".badge-zoom-close")) fermerFiche();
+  });
+  modale.querySelector(".badge-zoom-close")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      fermerFiche();
+    }
   });
   document.addEventListener("keydown", _surEchap, true);
 
-  document.body.appendChild(panneau);
-  panneau.querySelector(".badge-inspect__close")?.focus();
+  document.body.appendChild(modale);
+  modale.querySelector(".badge-zoom-close")?.focus();
+  // `.show` déclenche l'apparition — la poser dans la même frame que l'insertion
+  // ne transitionne rien, l'élément n'a pas encore d'état de départ peint.
+  requestAnimationFrame(() => modale.classList.add("show"));
 }
 
 /**
