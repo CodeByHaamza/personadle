@@ -39,9 +39,97 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 13 | `feat/changelog_2_3_pink_ribbon` | Remplissage de la page Nouveautés |
 | 14 | `feat/badges_pin_ux` | Badges épinglés : clic vers la fiche, aperçu du déplacement |
 | 15 | `feat/aoa_kotone_p5x` | All-Out Attack de Kotone (P5X) et nouveau portrait |
+| 18 | `perf/aoa_reencode_hd` | Les 33 animations AOA en 1080p au calibre des autres |
 
 ---
 
+## 2026-09-25 — Les 33 animations All-Out Attack en 1080p repassent au calibre des autres
+
+Le mode All-Out Attack pesait **1,74 Go** d'animations pour 80 personnages. La cause n'était
+pas le nombre de fichiers mais deux calibres d'encodage cohabitant sans raison :
+
+| Largeur | Fichiers | Poids | Moyenne |
+|---|---|---|---|
+| 800 px | 44 | 256 Mo | 5,8 Mo |
+| **1920 px** | **31** (+2 en 1280) | **1 512 Mo** | **48 Mo** |
+
+Les 44 fichiers en 800 px sont tout le roster P5X — Wonder, Joker Starlight, Luce, Soy, et
+la Kotone du lot précédent. Les 31 autres datent d'avant et sortent en 1080p.
+
+### Pourquoi 800 px n'est pas un compromis ici
+
+`.aoa-gif-zone` fait `max-width: 700px` avec `padding: 20px` : **l'image est affichée à
+660 px**, et à ~370 px sur mobile. Les fichiers 1080p étaient donc réduits d'un facteur 3
+par le navigateur, après avoir été téléchargés en entier.
+
+Mesures faites sur Koromaru (le plus lourd, 80,2 Mo), SSIM contre l'original aux deux
+tailles réelles d'affichage :
+
+| Source | Rendu 660 px | Rendu 1320 px (retina 2×) |
+|---|---|---|
+| 800 px | **0,979** | 0,879 |
+| 1280 px | 0,982 | 0,907 |
+
+Sur un écran standard, l'écart est invisible — vérifié aussi à l'œil, les deux images côte
+à côte. **Sur un écran retina, il est mesurable** : le navigateur agrandit alors une source
+de 800 px jusqu'à 1320.
+
+La matrice qualité montre que le levier est la résolution, pas la compression :
+
+| Réglage | Poids | SSIM retina |
+|---|---|---|
+| 800 px q=65 | 2,54 Mo | 0,879 |
+| 800 px q=80 | 3,56 Mo | 0,884 |
+| 800 px q=90 | 7,17 Mo | 0,892 |
+| 1280 px q=65 | 8,36 Mo | 0,907 |
+
+Monter la qualité à 800 px coûte +180 % de poids pour +0,013 de SSIM : sans intérêt.
+
+**Le choix de 800 px q=65 n'est donc pas « dégrader pour gagner de la place », c'est
+aligner 33 exceptions sur le niveau que les 44 autres servent déjà** — y compris tout le
+contenu récent. Avant ce lot, un joueur téléchargeait 80 Mo pour Koromaru et 5,8 Mo pour
+Wonder, sans qu'aucune raison ne le justifie.
+
+### Résultat
+
+| | Avant | Après |
+|---|---|---|
+| Animations AOA | 1 782 Mo | **397 Mo** |
+| Pire cas pour une partie | 80,2 Mo | **3,2 Mo** |
+| Moyenne des 33 réencodées | 45,8 Mo | **2,6 Mo** |
+| Arbre de travail du dépôt | 2,5 Go | **1,2 Go** |
+
+### Comment, et ce qui a été vérifié à chaque fichier
+
+`ffmpeg -vf scale=800:-2:flags=lanczos -c:v libwebp -q:v 65`, avec un contrôle par fichier
+que **le nombre d'images est conservé** : un réencodage qui perd des images casse
+l'animation sans rien signaler. Le script refuse d'écraser l'original si le compte diffère.
+33 fichiers traités, **0 échec**.
+
+Vérifications d'ensemble après coup :
+
+- les 80 fichiers sont des conteneurs RIFF/WEBP valides, portent un chunk `ANIM` et au
+  moins deux images `ANMF` — donc réellement animés, pas des images fixes ;
+- `tests/content_aoa_skins_2_3.test.js` passe : chaque entrée du roster a bien ses trois
+  fichiers, et l'animation est animée ;
+- plus aucun fichier au-dessus de 800 px.
+
+### ⚠️ À faire avant la release
+
+**Reverser les 33 fichiers sur R2.** En production le mode lit le CDN, pas le dépôt : sans
+téléversement, le jeu continue de fonctionner mais sert toujours les 1080p, et le gain
+joueur — le vrai intérêt du lot — n'existe pas. Aucune casse en cas d'oubli, juste un
+bénéfice qui n'arrive pas.
+
+### Ce qui n'est PAS fait, et pourquoi
+
+Les anciennes versions restent dans l'historique git : `.git` ne diminue pas, seul l'arbre
+de travail s'allège. Purger l'historique (les ~1,3 Go de vieux `.gif` et les ~1,5 Go de
+`.webp` HD) demande une réécriture, donc un force-push, donc **un reclonage du webroot
+Hostinger** dont le `git pull` automatique casserait. À faire en une seule fois, et jamais
+la même semaine qu'une release.
+
+---
 ## 2026-09-25 — Une seule Kotone en All-Out Attack, rangée dans P3P
 
 Décision de Hamza, qui revient sur celle de l'entrée précédente : l'ancienne animation
