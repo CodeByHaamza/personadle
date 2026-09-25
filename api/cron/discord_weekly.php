@@ -58,6 +58,11 @@ $pdo = pdo();
 
 $normal = personadle_weekly_podium($pdo, $from, false);
 $expert = personadle_weekly_podium($pdo, $from, true);
+// Les amitiés ne sont PAS bornées à la semaine : une amitié se construit sur la
+// durée, et un classement hebdomadaire des liens ne dirait que « qui a joué
+// ensemble ces sept jours ». C'est donc le classement de tous les temps, comme
+// la page Amitié du site.
+$bonds  = personadle_weekly_bonds($pdo);
 
 if ($normal === [] && $expert === []) {
     jsonSuccess([
@@ -73,10 +78,16 @@ if ($normal !== []) {
 if ($expert !== []) {
     $fields[] = ['name' => '⚡ Mode Expert', 'value' => personadle_weekly_lines($expert), 'inline' => false];
 }
+if ($bonds !== []) {
+    $fields[] = ['name' => '💞 Les amitiés les plus fortes', 'value' => personadle_weekly_bond_lines($bonds), 'inline' => false];
+}
 
 $periode = sprintf('du %s au %s', $monday->format('d/m'), $sunday->format('d/m'));
-$corps   = "Le registre de la semaine est clos. Voici ceux dont les noms y figurent en tête.\n"
-    . "*The week's record is closed. These are the names written at the top.*\n\n"
+$intro   = personadle_weekly_intro((int) $monday->format('W'));
+$corps   = $intro['fr'] . "
+*" . $intro['en'] . "*
+
+"
     . '[Classement complet / Full leaderboard](' . LEADERBOARD_URL . '?period=week)';
 
 $avatar  = SITE_WEEKLY . 'img/avatar/margaret.jpg';
@@ -84,17 +95,41 @@ $mention = defined('DISCORD_WEEKLY_MENTION_ROLE')
     ? preg_replace('/\D/', '', (string) DISCORD_WEEKLY_MENTION_ROLE)
     : '';
 
+$embeds = [[
+    'title'       => '📖 Top 3 de la semaine — ' . $periode,
+    'description' => $corps,
+    'color'       => 0xB03A2E,
+    'thumbnail'   => ['url' => $avatar],
+    'fields'      => $fields,
+    'footer'      => ['text' => 'PersonaDLE — semaine ' . $monday->format('W')],
+]];
+
+// Un encart par joueur du podium QUI A un portrait affichable — Discord ne sait
+// pas mettre une image par ligne, c'est le seul moyen de les montrer.
+//
+// Ceux qui n'en ont pas sont simplement absents d'ici : ils restent nommés dans
+// le podium en texte juste au-dessus. Aucun encart vide, aucune image cassée.
+// La majorité des joueurs a un portrait recadré, stocké en base64, que Discord
+// ne peut pas aller chercher (cf. personadle_weekly_avatar_url).
+$medals = ['🥇', '🥈', '🥉'];
+foreach (array_slice($normal, 0, 3) as $i => $joueur) {
+    if (($joueur['avatar'] ?? null) === null) continue;
+    $embeds[] = [
+        'title'       => $medals[$i] . ' ' . personadle_discord_escape($joueur['pseudo']),
+        'color'       => [0xD4AF37, 0xBDC3C7, 0xCD7F32][$i],
+        'thumbnail'   => ['url' => $joueur['avatar']],
+        'description' => sprintf(
+            '%d victoire%s · %d partie%s',
+            $joueur['wins'], $joueur['wins'] > 1 ? 's' : '',
+            $joueur['games'], $joueur['games'] > 1 ? 's' : ''
+        ),
+    ];
+}
+
 $payload = [
     'username'   => 'Margaret',
     'avatar_url' => $avatar,
-    'embeds'     => [[
-        'title'       => '📖 Top 3 de la semaine — ' . $periode,
-        'description' => $corps,
-        'color'       => 0xB03A2E,
-        'thumbnail'   => ['url' => $avatar],
-        'fields'      => $fields,
-        'footer'      => ['text' => 'PersonaDLE — semaine ' . $monday->format('W')],
-    ]],
+    'embeds'     => $embeds,
     'allowed_mentions' => ['parse' => [], 'roles' => $mention !== '' ? [$mention] : []],
 ];
 if ($mention !== '') {
@@ -119,6 +154,8 @@ personadle_log_error($pdo, 'info', 'Discord weekly top 3 posted', [
     'from'   => $from,
     'normal' => count($normal),
     'expert' => count($expert),
+    'bonds'  => count($bonds),
+    'embeds' => count($embeds),
 ]);
 
 jsonSuccess([
@@ -129,6 +166,7 @@ jsonSuccess([
         'to'         => $sunday->format('Y-m-d'),
         'normal'     => $normal,
         'expert'     => $expert,
+        'bonds'      => $bonds,
         'mention'    => $mention !== '' ? $mention : null,
         'status'     => $r['code'],
         'elapsed_ms' => round((microtime(true) - $start) * 1000),

@@ -45,6 +45,80 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-09-26 — Discord : 39 voix au quotidien, portraits et amitiés à l'hebdo
+
+Deux demandes de Hamza sur le bot.
+
+### Le quotidien passe de 8 à 39 voix
+
+Les huit d'origine brisent le quatrième mur **dans les jeux** — Velvet Room et mascottes —
+ce qui justifiait qu'elles s'adressent au joueur. Le cast principal n'a pas ce privilège :
+plutôt que de le leur prêter, ils parlent **comme à quelqu'un qui joue à côté d'eux**.
+
+31 voix ajoutées, 3 répliques chacune, FR et EN, chacune accrochée à ce qui rend le
+personnage reconnaissable — le baseball de Junpei, les crises de rire de Yukiko, le chou
+d'Adachi, les vingt minutes que Yusuke passe à contempler **sans répondre**, le jardinage
+de Haru qui finit en menace polie.
+
+**Joker parle**, ainsi que Makoto Yuki et Kotone Shiomi. Je les avais d'abord écrits en
+didascalies au motif qu'ils sont des protagonistes muets — c'est une convention de jeu, pas
+une règle, et Hamza a tranché. Koromaru garde les siennes : c'est un chien.
+
+**39 voix** : la contrainte du fichier interdit tout multiple de 7, sinon « jour de l'année
+% 7 » fige une voix par jour de la semaine et le joueur du lundi n'en voit qu'une, à vie.
+39 laisse un reste de 4. Cycle complet de 117 jours, chaque personnage parle ~9 fois par an.
+
+**Les 39 avatars ont été contrôlés un par un contre la production.** Discord télécharge
+l'image lui-même : un chemin faux donne une pastille vide, sans la moindre erreur. Au
+passage, le premier contrôle renvoyait `000` partout — c'était la boucle de test qui
+traînait des retours chariot Windows, pas les URL.
+
+### L'hebdomadaire montre les portraits et les amitiés
+
+Demande : « dans le weekly on fait le top 3 des joueurs, si ils ont une pdp on l'affiche,
+et les meilleurs amis pareil, avec un message qui change ».
+
+**Le piège est le stockage des portraits.** Un portrait recadré vit en **base64** dans
+`profiles.avatar_data` (`data:image/png;base64,…`), et Discord va CHERCHER l'image à une
+adresse — il ne sait rien faire d'une data-URL. Seuls les portraits de galerie non recadrés
+laissent un chemin exploitable.
+
+Mesuré en production : **43 profils sur 328** ont une adresse utilisable, soit 13 %. Le
+portrait est donc **un bonus, jamais la structure** : le podium reste entièrement lisible en
+texte, et un encart illustré s'ajoute uniquement pour les joueurs qui en ont un. Aucun
+encart vide, aucune image cassée — c'est ce que Discord afficherait sinon.
+
+`personadle_weekly_avatar_url()` refuse tout ce qui n'est pas un fichier de la galerie :
+data-URL, URL externe, remontée de dossier, nom hors liste blanche. Ces valeurs viennent de
+la base, donc d'une saisie utilisateur passée par l'API — elles ne doivent pas devenir une
+adresse qu'on demande à Discord d'aller chercher.
+
+**Les amitiés ne sont pas bornées à la semaine**, contrairement aux victoires. Une amitié se
+construit dans la durée ; un classement hebdomadaire des liens ne dirait que « qui a joué
+ensemble ces sept jours ». C'est donc le classement de tous les temps, trié par XP comme la
+page Amitié — le rang plafonne à 10 et donnerait des dizaines d'ex æquo.
+
+**Le mot d'accueil de Margaret tourne** sur 7 phrases. Le nombre n'est pas neutre : s'il
+divisait 52 sans reste, la même phrase retomberait sur la même semaine chaque année et le
+rendez-vous deviendrait un calendrier fixe. 52 = 7 × 7 + 3, la rotation dérive. Un test
+l'impose plutôt que de compter sur la vigilance.
+
+### Vérifications
+
+- `tests/php/WeeklyDigestTest.php` — **nouveau**, 16 cas / 38 assertions. Dont la remontée
+  de dossier, l'URL externe, le pseudo en Markdown qui détournerait la mise en forme, et le
+  fait que 52 ne soit pas divisible par le nombre de phrases.
+- **395 tests PHPUnit** verts, syntaxe PHP validée dans le conteneur.
+- Chacune des 39 voix contrôlée : 3 répliques **complètes** (titre, FR, EN, relance). Une
+  réplique amputée passerait sinon en production sans erreur.
+- Aucune réplique ne dépasse 165 caractères — au-delà, c'est illisible sur téléphone.
+
+### Laissé de côté
+
+Sojiro, Dojima et Elizabeth n'ont **pas d'avatar** dans `img/avatar/`. Ils ne sont pas dans
+le casting : leur coller le portrait d'un autre aurait été pire que leur absence.
+
+---
 ## 2026-09-25 — La page Classique démarrait 46 px plus bas que les cinq autres
 
 « Sur l'écran d'ami, la page Classique n'a pas la nouvelle taille adaptée, obligé de
