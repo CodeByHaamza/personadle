@@ -68,7 +68,7 @@ compare with your friends, keep your streak alive.
 </table>
 
 **⚡ Expert Mode** — every mode has a harder twin, earned by playing: a single quote instead of traits,
-one *lying* emoji, a flash you trigger yourself, a frozen black-and-white blur, lyrics without audio,
+one _lying_ emoji, a flash you trigger yourself, a frozen black-and-white blur, lyrics without audio,
 the Persona's real myth with its name masked. Expert keeps its own targets, stats and leaderboard.
 
 ---
@@ -112,17 +112,28 @@ the Persona's real myth with its name masked. Expert keeps its own targets, stat
 
 ## 🆕 What's new
 
-**2.2 — September 2026** · *Profile showcase & Compendium*
+**2.3 — September 2026** · _Kotone Shiomi_
+
+- **Kotone Shiomi** joins All-Out Attack with her _Persona 5: The Phantom X_ animation, and her P5X portrait replaces the old one everywhere.
+- **Friendship ranking**: a Social Link dimension that ranks bonds rather than players, with its own podium. Social Link XP no longer stops at rank 10.
+- **Badges**: reorder your pinned ones by drag, click one to read its details, and an eye on every badge in the workshop. Five new badges and the _Déjà Vu_ title.
+- **146 new profile pictures** (204 → 350), an _Animated_ tab, and _Sun_ from Persona 3 Portable in Music mode.
+- **Lighter**: opening your profile went from 125.6 MB to 13.5 MB, and the heaviest All-Out Attack round from 80.2 MB to 3.2 MB.
+
+<details>
+<summary>2.2 — Profile showcase &amp; Compendium</summary>
 
 - **Profile showcase**: badges in large, wallpaper collection, share card; everything editable lives in one **Atelier**.
 - **Compendium** of titles, **Expert leaderboard** dimension, opus filters in a window.
-- **Wonder Shujin** in All-Out Attack, five new badges, the *Go Beyond* title, seven titles, three songs.
+- **Wonder Shujin** in All-Out Attack, five new badges, the _Go Beyond_ title, seven titles, three songs.
 - Persona Q / Q2 portraits, Persona 4 Revival wallpaper, Portuguese titles.
-- 2.2.x: Expert stats editable, badge *Same Energy* fixed, weekly Discord top 3, "Copy for Discord" repaired.
+- 2.2.x: Expert stats editable, badge _Same Energy_ fixed, weekly Discord top 3, "Copy for Discord" repaired.
+
+</details>
 
 📦 **[All releases with notes →](https://github.com/CodeByHaamza/personadle/releases)** ·
-📖 Player changelogs: [2.2](./PersonaDLE_Update_Documentation/PersonaDLE%202.2/PersonaDLE_Update.html) · [2.1](./PersonaDLE_Update_Documentation/PersonaDLE%202.1/PersonaDLE_Update.html) ·
-🔧 Dev changelogs: [2.2](./PersonaDLE_Update_Documentation/PersonaDLE%202.2/DEV_CHANGELOG.md) · [2.1](./PersonaDLE_Update_Documentation/PersonaDLE%202.1/DEV_CHANGELOG.md) · [2.0](./PersonaDLE_Update_Documentation/PersonaDLE%202.0/DEV_CHANGELOG.md)
+📖 Player changelogs: [2.3](./PersonaDLE_Update_Documentation/PersonaDLE%202.3/PersonaDLE_Update.html) · [2.2](./PersonaDLE_Update_Documentation/PersonaDLE%202.2/PersonaDLE_Update.html) · [2.1](./PersonaDLE_Update_Documentation/PersonaDLE%202.1/PersonaDLE_Update.html) ·
+🔧 Dev changelogs: [2.3](./PersonaDLE_Update_Documentation/PersonaDLE%202.3/DEV_CHANGELOG.md) · [2.2](./PersonaDLE_Update_Documentation/PersonaDLE%202.2/DEV_CHANGELOG.md) · [2.1](./PersonaDLE_Update_Documentation/PersonaDLE%202.1/DEV_CHANGELOG.md) · [2.0](./PersonaDLE_Update_Documentation/PersonaDLE%202.0/DEV_CHANGELOG.md)
 
 ---
 
@@ -140,13 +151,13 @@ Browser ── ES modules ──► /api (PHP 8.2, PDO) ──► MariaDB 10.6+ 
 Service worker              Cron: leaderboard cache, Discord daily & weekly posts, GDPR purge
 ```
 
-| Layer | What |
-|---|---|
-| **Front end** | HTML5 · CSS3 (one file per component, dark mode) · Vanilla JavaScript ES6+ |
-| **Back end** | PHP 8.2 REST API — `GET/POST/PATCH/DELETE /api/{resource}`, JSON, proper status codes |
-| **Database** | MariaDB 10.6+ / MySQL 8.0 — 30-table relational schema, 1525+ unit tests keep the contract honest |
-| **i18n** | EN · FR · ES · DE · IT · PT (1314 keys each), `en.json` is the source of truth |
-| **Hosting** | Hostinger, auto-deploy on push to `main`; SQL migrations applied by hand *before* the merge |
+| Layer         | What                                                                                              |
+| ------------- | ------------------------------------------------------------------------------------------------- |
+| **Front end** | HTML5 · CSS3 (one file per component, dark mode) · Vanilla JavaScript ES6+                        |
+| **Back end**  | PHP 8.2 REST API — `GET/POST/PATCH/DELETE /api/{resource}`, JSON, proper status codes             |
+| **Database**  | MariaDB 10.6+ / MySQL 8.0 — 30-table relational schema, 1525+ unit tests keep the contract honest |
+| **i18n**      | EN · FR · ES · DE · IT · PT (1314 keys each), `en.json` is the source of truth                    |
+| **Hosting**   | Hostinger, auto-deploy on push to `main`; SQL migrations applied by hand _before_ the merge       |
 
 ### Quality gates
 
