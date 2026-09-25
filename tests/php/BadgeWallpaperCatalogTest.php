@@ -154,6 +154,8 @@ final class BadgeWallpaperCatalogTest extends TestCase
             'reborn_phoenix', 'take_the_pose', 'data_mining', 'leblanc_meeting',
             'rentree', 'sport', 'christmas_2025', 'new_years_2026', 'chinese_new_year_2026',
             'true_hacker', 'tae_takemi', 'arati', 'gyotre', 'dzulian', 'chef', 'github_contributor',
+            // Lot du 2026-09-25 : pendant Ko-fi de github_contributor, même régime `manual`.
+            'cafe_leblanc',
             'lobster', 'hifumi_archives', 'report',
         ];
 
@@ -167,12 +169,12 @@ final class BadgeWallpaperCatalogTest extends TestCase
     public function testEveryBadgeHasExpectedConditionColumns(): void
     {
         $expected = self::expectedBadgeConditions();
-        $this->assertCount(73, $expected, 'Le catalogue de référence de ce test doit lister les 73 badges');
+        $this->assertCount(74, $expected, 'Le catalogue de référence de ce test doit lister les 74 badges');
 
         $rows = self::$pdo->query(
             'SELECT slug, condition_type, condition_mode, condition_value FROM badges'
         )->fetchAll(PDO::FETCH_ASSOC);
-        $this->assertCount(73, $rows, 'La table badges doit contenir exactement 73 lignes (seed bdd_mysql.sql)');
+        $this->assertCount(74, $rows, 'La table badges doit contenir exactement 74 lignes (seed bdd_mysql.sql)');
 
         $bySlug = [];
         foreach ($rows as $r) {
