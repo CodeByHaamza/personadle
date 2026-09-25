@@ -728,41 +728,28 @@ function _showBadgeNotificationImmediate(badge, onDone) {
 }
 
 /**
- * Affiche le zoom du badge avec tous les détails
+ * Affiche le zoom du badge avec tous les détails.
+ *
+ * Délègue à `ouvrirFiche()` : la modale `.badge-zoom-modal` était écrite ici ET
+ * dans `badge_inspect.js`, avec deux habillages différents selon par où le
+ * joueur arrivait. Une seule implémentation désormais — celle de la prod.
+ *
+ * `debloque: true` est correct par construction, et évite d'avoir à passer le
+ * profil : on n'arrive ici que depuis la notification de déblocage d'un badge
+ * qu'on vient d'obtenir.
+ *
  * @param {Object} badge - Le badge à afficher
  */
 function showBadgeZoom(badge) {
-  const modal = document.createElement("div");
-  modal.className = "badge-zoom-modal";
-
-  const zName = getBadgeName(badge);
-  const zDesc = getBadgeDescription(badge);
-  const zCond = getBadgeCondition(badge, true); // dans le zoom on montre toujours la condition
-
-  modal.innerHTML = `
-    <div class="badge-zoom-content">
-      <span class="badge-zoom-close">&times;</span>
-      <img src="${badge.img}" alt="${zName}">
-      <h3>${zName}</h3>
-      <p class="badge-condition">${zCond}</p>
-      ${zDesc ? `<p class="badge-description">${zDesc}</p>` : ""}
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-
-  // 🟢 FERMETURE PAR CLIC FOND
-  modal.addEventListener("click", (e) => {
-    if (e.target.classList.contains("badge-zoom-modal")) {
-      modal.remove();
-    }
-  });
-
-  // ❌ FERMETURE CROIX
-  modal.querySelector(".badge-zoom-close").onclick = () => modal.remove();
-
-  // 🔥 ANIMATION
-  setTimeout(() => modal.classList.add("show"), 10);
+  ouvrirFiche(
+    badge,
+    {
+      name: getBadgeName(badge),
+      condition: getBadgeCondition(badge, true),
+      description: getBadgeDescription(badge),
+    },
+    true
+  );
 }
 
 // ───────────────────────────────────────────────────────────────────────────

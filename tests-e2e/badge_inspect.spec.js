@@ -52,10 +52,10 @@ test.describe("Badges — inspecter sans épingler", () => {
 
     await carte.locator(".badge-inspect-btn").click({ force: true });
 
-    const fiche = page.locator(".badge-inspect__card");
+    const fiche = page.locator(".badge-zoom-content");
     await expect(fiche).toBeVisible();
-    await expect(fiche.locator(".badge-inspect__name")).not.toBeEmpty();
-    await expect(fiche.locator(".badge-inspect__condition")).not.toBeEmpty();
+    await expect(fiche.locator("h3")).not.toBeEmpty();
+    await expect(fiche.locator(".badge-condition")).not.toBeEmpty();
 
     // LE point du lot : rien n'a été épinglé.
     expect(await page.locator(".badge-item.selected").count()).toBe(0);
