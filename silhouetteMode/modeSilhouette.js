@@ -113,7 +113,8 @@ const maxZoomOut = 1;
 let gameOver = false;
 
 /** Cibles possibles d'un défi : pool filtré de la page, cible du jour exclue. Calculé au clic. */
-const challengePool = () => filteredCharacters.filter((c) => c.nom !== target?.nom).map((c) => c.nom);
+const challengePool = () =>
+  filteredCharacters.filter((c) => c.nom !== target?.nom).map((c) => c.nom);
 let currentPickToken = 0; // Anti-race-condition token for image preloading
 // URL de l'image NON noircie, révélée seulement en fin de partie. Tant qu'elle
 // n'est pas posée sur l'élément, l'originale n'existe nulle part dans le DOM.
@@ -489,8 +490,7 @@ function showVictory(force = false) {
   // d'entrer dans le DOM. Avant, `src` porte la version noircie (anti-triche).
   // Fallback sur le chemin du dataset si `revealSrc` n'a pas été renseigné —
   // partie restaurée depuis localStorage avant tout chargement d'image.
-  silhouetteImg.src =
-    revealSrc ?? `./database/img/${encodeURIComponent(target.image)}.webp`;
+  silhouetteImg.src = revealSrc ?? `./database/img/${encodeURIComponent(target.image)}.webp`;
 
   // Build result message
   document.querySelectorAll(".victory-message").forEach((e) => e.remove());
@@ -535,7 +535,11 @@ function showVictory(force = false) {
     }
 
     // 🎭 SHAPESHIFTER — track character per mode (write into personaUserProfile.characterModeMap)
-    if (target.nom) {
+    // Un défi ami n'entre PAS dans la carte : le serveur ne l'enregistre pas en
+    // session (`condition_check.php` : « elle ne compte pas — voulu »), donc l'y
+    // mettre ferait croire au client qu'une condition est remplie quand elle ne
+    // l'est pas. Signalé en production le 2026-09-25.
+    if (target.nom && !wasChallengePlay) {
       const _pShape = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
       if (!_pShape.characterModeMap) _pShape.characterModeMap = {};
       if (!_pShape.characterModeMap[target.nom]) _pShape.characterModeMap[target.nom] = [];

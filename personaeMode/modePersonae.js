@@ -180,10 +180,11 @@ function findByChallengeKey(key) {
   return (
     originalCharacters.find(
       (c) => c.persona === personaName && (Array.isArray(c.opus) ? c.opus[0] : c.opus) === opusHint
-    ) ?? originalCharacters.find((c) => c.persona === personaName) ?? null
+    ) ??
+    originalCharacters.find((c) => c.persona === personaName) ??
+    null
   );
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MODE EXPERT — chargement et rendu du lore
@@ -470,7 +471,6 @@ function initializeAutocomplete(input, personasList) {
     input.setAttribute("aria-activedescendant", items[currentFocus].id);
     items[currentFocus].scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
-
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -603,13 +603,18 @@ function showVictory(force = false, name = null) {
       profileUpdated = true;
     }
 
-    // characterModeMap
-    if (!profile.characterModeMap) profile.characterModeMap = {};
-    const _charName = Array.isArray(target.user) ? target.user[0] : target.user;
-    if (!profile.characterModeMap[_charName]) profile.characterModeMap[_charName] = [];
-    if (!profile.characterModeMap[_charName].includes("personae")) {
-      profile.characterModeMap[_charName].push("personae");
-      profileUpdated = true;
+    // characterModeMap — hors défi uniquement : le serveur n'enregistre pas les
+    // parties de défi en session (`condition_check.php` : « elle ne compte pas —
+    // voulu »), les y compter ferait croire au client qu'une condition est
+    // remplie quand elle ne l'est pas. Signalé en production le 2026-09-25.
+    if (!isChallengePlay("personae")) {
+      if (!profile.characterModeMap) profile.characterModeMap = {};
+      const _charName = Array.isArray(target.user) ? target.user[0] : target.user;
+      if (!profile.characterModeMap[_charName]) profile.characterModeMap[_charName] = [];
+      if (!profile.characterModeMap[_charName].includes("personae")) {
+        profile.characterModeMap[_charName].push("personae");
+        profileUpdated = true;
+      }
     }
 
     // `attempts` vaut 1 sur une victoire au premier essai : les modes incrementent
