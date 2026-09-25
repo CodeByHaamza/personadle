@@ -7,7 +7,7 @@
 ## 1. Présentation
 
 **PersonaDLE** — jeu de devinettes quotidien fan-made (Persona P1→P5X), 6 modes.
-**Site** : https://personadle.net | **Dépôt** : https://github.com/CodeByHaamza/personadle | **v2.0** (backend PHP+MariaDB)
+**Site** : https://personadle.net | **Dépôt** : https://github.com/CodeByHaamza/personadle | **v2.3** (backend PHP+MariaDB)
 
 | Pseudo | Rôle |
 |---|---|
