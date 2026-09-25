@@ -43,6 +43,52 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-09-25 — « Sun » et les graphiques d'allègement dans le changelog joueur
+
+Deux manques signalés par Hamza sur la page 2.3 : la musique ajoutée au mode Musique n'y
+figurait nulle part, et le travail d'optimisation n'y était pas montré.
+
+### « Sun » n'était listé que côté dev
+
+La piste avait son entrée dans ce fichier depuis le 2026-09-24, mais **pas** dans la page
+joueur — alors que la règle (CLAUDE.md §9) veut que tout nouveau contenu y soit listé. Elle
+a maintenant sa section, avec la précision qui compte pour le joueur : instrumentale, donc
+jouable en Musique mais **pas** en Mode Expert, où l'on devine par les paroles.
+
+### Trois graphiques, en CSS pur
+
+Pas de bibliothèque de graphiques : ce serait ajouter des dizaines de kilo-octets de
+JavaScript à une page dont le sujet est précisément le poids téléchargé. Les barres sont
+dimensionnées par une variable CSS `--pct`.
+
+| Mesure | 2.2 | 2.3 |
+|---|---|---|
+| Ouvrir sa page de profil | 125,6 Mo | **13,5 Mo** |
+| Une partie d'All-Out Attack, au pire | 80,2 Mo | **3,2 Mo** |
+| Toutes les animations du mode | 1 782 Mo | **397 Mo** |
+
+Ce sont des relevés, pas des estimations : les deux premiers viennent du `transferSize` de
+l'API Performance sur un écran de 390 px, le troisième d'un `ls` sur le dossier.
+
+### Deux choses qui auraient cloché sans y regarder
+
+- **Le chiffre est écrit à côté de sa barre, pas seulement dessiné.** Un graphique qui
+  serait la seule source de la mesure ne dirait rien à un lecteur d'écran.
+- **Les valeurs étaient hors des blocs de langue.** Un lecteur anglais aurait lu
+  « 1 782 Mo » — virgule et unité françaises. Le script d'i18n bascule n'importe quel
+  élément portant l'attribut, y compris un `span` : chaque valeur existe donc en deux
+  versions, `1 782 Mo` et `1,782 MB`.
+
+### Vérifications
+
+Rendu dans un vrai navigateur en 1280 px et 390 px. Contrôlé que les barres ont une largeur
+**réelle** et proportionnelle (706 px → 76 px pour 10,7 %, → 28 px pour 4 %, → 157 px pour
+22,3 %) : une animation figée à zéro aurait donné trois cadres vides sans lever la moindre
+erreur. Contrôlé aussi qu'une seule unité est visible à la fois — FR et EN ne s'empilent
+pas. Aucune erreur console. L'animation des barres est neutralisée sous
+`prefers-reduced-motion`.
+
+---
 ## 2026-09-25 — Le détail d'un badge reprend la modale de la production
 
 Retour Hamza : la 2.3 a ajouté des façons de consulter un badge (l'œil de l'atelier, le
