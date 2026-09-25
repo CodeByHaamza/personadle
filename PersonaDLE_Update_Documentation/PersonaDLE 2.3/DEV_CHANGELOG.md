@@ -113,6 +113,13 @@ joueur — alors que la règle (CLAUDE.md §9) veut que tout nouveau contenu y s
 a maintenant sa section, avec la précision qui compte pour le joueur : instrumentale, donc
 jouable en Musique mais **pas** en Mode Expert, où l'on devine par les paroles.
 
+**Présentation reprise de la 2.2** (demande Hamza) : la liste à puces d'origine est
+remplacée par la carte `music-group` — pochette de l'opus, code, piste et interprète. Le CSS
+n'a pas eu à être écrit : il était déjà dans la page, hérité du squelette 2.2, y compris sa
+règle mobile qui empile la pochette au-dessus des pistes. Seul le balisage manquait. Pour
+une instrumentale, la colonne de l'interprète porte « Instrumental » — le mot s'écrit
+pareil en français et en anglais, il n'a donc pas besoin d'être dupliqué par langue.
+
 ### Trois graphiques, en CSS pur
 
 Pas de bibliothèque de graphiques : ce serait ajouter des dizaines de kilo-octets de

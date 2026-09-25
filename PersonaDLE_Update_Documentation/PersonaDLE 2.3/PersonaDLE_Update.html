@@ -2312,22 +2312,33 @@
     <div data-i18n-block="en"><h1>🎵 One more song</h1></div>
 
     <div data-i18n-block="fr">
-        <ul>
-            <li><strong>« Sun »</strong>, de <em>Persona 3 Portable</em>, rejoint le mode
-            Musique — le catalogue passe à <strong>100 morceaux</strong>.</li>
-            <li>Elle est <strong>instrumentale</strong>, donc jouable en Musique mais
-            <strong>pas</strong> en Mode Expert : l'Expert fait deviner une chanson par ses
-            paroles, et une piste sans paroles y serait une cible impossible à trouver.</li>
-        </ul>
+        <p><strong>« Sun »</strong>, de <em>Persona 3 Portable</em>, rejoint le mode Musique —
+        le catalogue passe à <strong>100 morceaux</strong>. Elle est instrumentale : jouable
+        en Musique, mais <strong>pas</strong> en Mode Expert, où l'on devine une chanson par
+        ses paroles.</p>
     </div>
     <div data-i18n-block="en">
-        <ul>
-            <li><strong>"Sun"</strong>, from <em>Persona 3 Portable</em>, joins Music mode —
-            the catalogue reaches <strong>100 tracks</strong>.</li>
-            <li>It is <strong>instrumental</strong>, so it is playable in Music but
-            <strong>not</strong> in Expert Mode: Expert has you guess a song from its lyrics,
-            and a track without any would be an impossible target.</li>
-        </ul>
+        <p><strong>"Sun"</strong>, from <em>Persona 3 Portable</em>, joins Music mode — the
+        catalogue reaches <strong>100 tracks</strong>. It is instrumental: playable in Music,
+        but <strong>not</strong> in Expert Mode, where you guess a song from its lyrics.</p>
+    </div>
+
+    <!-- Même présentation que les musiques de la 2.2 : pochette de l'opus, code,
+         puis la piste et son interprète. Le CSS était déjà dans la page, hérité
+         du squelette — seul le balisage manquait. -->
+    <div class="music-group-list vx-reveal">
+        <div class="music-group">
+            <div class="mg-cover">
+                <img src="../../musicsMode/database/img/P3P.webp" alt="Persona 3 Portable" loading="lazy">
+                <code>P3P</code>
+            </div>
+            <div class="mg-tracks">
+                <div class="mg-track">
+                    <span>Sun</span>
+                    <span class="mg-artist">Instrumental</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <hr>
