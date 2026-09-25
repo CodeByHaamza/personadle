@@ -110,4 +110,11 @@ export const aoaCharacters = [
   // lufel.net/en/character/soy-pioneer/ → « Shun·Pioneer ».
   { nom: "Luce Notte ( Shoki Ikenami )", gif: "Luce_Notte", opus: ["P5X"] },
   { nom: "Soy Pioneer ( Shun Kano )", gif: "Soy_Pioneer", opus: ["P5X"] },
+
+  // === P5X — Collaboration Persona 3 Portable (version 4.10, 2026-09-24) ===
+  // Kotone Shiomi rejoint P5X en 5 étoiles. Contrairement aux Phantom Idols, une
+  // unité de collaboration n'a PAS de nom de code : elle garde son nom, qui est
+  // déjà pris par son entrée P3P. Le suffixe d'opus les sépare, sur le modèle
+  // d'« Aigis ( P3FES ) » — même personnage, autre jeu, autre All-Out Attack.
+  { nom: "Kotone Shiomi ( P5X )", gif: "Kotone_P5X", opus: ["P5X"] },
 ];

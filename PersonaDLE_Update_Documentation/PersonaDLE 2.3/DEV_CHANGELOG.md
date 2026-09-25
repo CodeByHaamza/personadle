@@ -38,6 +38,7 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 12 | `feat/admin_unlock_picker` | Sélection et retrait de déblocages côté admin |
 | 13 | `feat/changelog_2_3_pink_ribbon` | Remplissage de la page Nouveautés |
 | 14 | `feat/badges_pin_ux` | Badges épinglés : clic vers la fiche, aperçu du déplacement |
+| 15 | `feat/aoa_kotone_p5x` | All-Out Attack de Kotone (P5X) et nouveau portrait |
 
 ---
 
@@ -134,6 +135,105 @@ production sur le geste le plus courant.
 
 ---
 
+## 2026-09-25 — Kotone Shiomi entre en All-Out Attack, et change de portrait partout
+
+Elle est arrivée en jeu la veille : *Persona 5: The Phantom X* version 4.10 l'ajoute en
+personnage **5 étoiles**, avec son propre All-Out Attack et le remix jazz de
+« Wiping All Out ». C'est la mise à jour dont la 2.3 porte le nom, donc elle passe
+**en tête** de la page Nouveautés, devant Luce Notte et Soy Pioneer.
+
+### Une entrée de plus, pas un remplacement
+
+L'animation existante (`Kotone.webp`, opus `P3P`) est son All-Out Attack **de Persona 3** :
+naginata, décor bleu, style Reload. Celle du lot est une autre attaque, dans un autre jeu.
+Les deux restent devinables séparément, comme tous les skins depuis `Wonder Summer`.
+
+Reste le nom, qui est ce que le joueur tape. Contrairement aux Phantom Idols, **une unité
+de collaboration n'a pas de nom de code** — vérifié avant d'en inventer un : la presse et
+les guides ne la désignent que par « Kotone Shiomi » (le nom « Wiping All Out » est celui
+du morceau, pas de l'unité). Son nom étant déjà pris par son entrée P3P, les deux sont
+séparées par le suffixe d'opus, sur le modèle d'**« Aigis ( P3FES ) »** — même personnage,
+autre jeu, autre attaque :
+
+| Entrée | `gif` | Opus |
+|---|---|---|
+| `Kotone Shiomi` (existante) | `Kotone` | `P3P` |
+| **`Kotone Shiomi ( P5X )`** | `Kotone_P5X` | `P5X` |
+
+### Le nouveau portrait remplace l'ancien partout
+
+Demande de Hamza : le portrait P5X devient celui de Kotone **dans tout le jeu**, pas
+seulement sur sa nouvelle entrée. Il écrase donc les deux fichiers existants :
+
+- `database/portraits/Kotone.webp` — mode Classique, Émoji et lignes d'essai du mode
+  Silhouette (tous passent par `database/portraitsMap.js`, qui la mappe sur `Kotone`) ;
+- `allOutAttackMode/database/img/Kotone.webp` — l'entrée P3P du mode All-Out Attack.
+
+L'ancien était le rendu officiel P3P pleine hauteur (640 × 1947) ; le nouveau est un buste
+(640 × 680). Les portraits n'ont **pas** de format imposé dans ce dépôt — ils vont de
+832 × 652 à 1000 × 1451 — donc rien à recadrer. La silhouette (`Kotone_silhouette`) n'est
+pas touchée : c'est une image dérivée, pas un portrait.
+
+### Encodage de l'animation
+
+Source : la vidéo de présentation 5 étoiles livrée par Hamza, 1920 × 1080, 60 fps, 6,1 s.
+
+Réencodée sur le **calage des entrées P5X** (`Luce_Notte`, `Soy_Pioneer`) : 800 × 450,
+20 fps, `libwebp` q=65 — et surtout pas sur celui des entrées P3, qui datent d'avant et
+pèsent 70 à 80 Mo pièce en 1080p (`Kotone.webp` fait 67 Mo à lui seul).
+
+| Fichier | Dimensions | Images | Poids |
+|---|---|---|---|
+| `Luce_Notte.webp` (2.3) | 800 × 450 | 132 | 4,9 Mo |
+| `Soy_Pioneer.webp` (2.3) | 800 × 450 | 149 | 5,7 Mo |
+| **`Kotone_P5X.webp`** | 800 × 450 | 107 | **2,4 Mo** |
+
+Les 0,8 première seconde sont coupées : la vidéo source commence sur la boîte de dialogue
+d'un boss (« Accept the consequence of your resistance! »), qui n'a rien à faire dans
+l'image à deviner et aurait bouclé en plein milieu de l'attaque.
+
+### Fichiers touchés
+
+- `allOutAttackMode/database/allOutAttack/Kotone_P5X.webp` — **nouveau**, l'animation.
+- `allOutAttackMode/database/img/Kotone_P5X.webp` et `Kotone_P5X_Battle.webp` —
+  **nouveaux**, le portrait et l'illustration de fin (`Kotone_p5x_render.webp` livré).
+- `allOutAttackMode/database/img/Kotone.webp`, `database/portraits/Kotone.webp` —
+  **remplacés** par le nouveau portrait.
+- `aoaCharacters.js`, `portraitsMap.js`, `personas_allOut.js` — les trois tables. Les deux
+  dernières sont celles dont l'oubli ne lève rien : sans `portraitsMap` pas de portrait,
+  sans `personas_allOut` le personnage n'est jamais proposé à la saisie, donc injouable.
+- `api/data/daily_pools.json` — régénéré : `alloutattack` 77 → **78**.
+- `PersonaDLE 2.3/PersonaDLE_Update.html` — section AOA passée de deux à trois attaques,
+  Kotone en première position, carte `.aoa-card-kotone` : rose de l'écran « THAT'S A
+  WRAP! », brassard S.E.E.S. en bas de carte, papillons de Nyx en bleu (le seul froid de
+  la carte, en contrepoint). Couleurs fixées dans les **deux** thèmes, comme Notte et
+  Pioneer — le sujet de la carte est justement cet aplat rose saturé.
+
+### Vérifications
+
+- Autocomplétion du mode contrôlée dans un vrai navigateur : les deux Kotone sont
+  proposées, chacune avec **son** portrait, aucune requête en échec.
+- `tests/content_aoa_skins_2_3.test.js` (garde-fou général du lot 3) passe : les trois
+  fichiers existent pour tout le roster, aucun nom ni `gif` en double, et l'animation est
+  réellement animée — chunk `ANIM` présent, 107 images `ANMF`.
+- Carte du changelog rendue à 1280 px et à 390 px, les trois images chargent.
+
+### ⚠️ À faire avant la release
+
+`Kotone_P5X.webp` doit être **téléversé sur R2** (`allOutAttack/`). En production, le mode
+ne lit pas le fichier du dépôt : `cdn()` bascule sur le CDN Cloudflare. Sans téléversement,
+la cible existe mais son image ne charge jamais.
+
+Vérifié à l'instant sur le CDN — et `Luce_Notte.webp` **manque toujours** :
+
+| Fichier | CDN |
+|---|---|
+| `Soy_Pioneer.webp` | 200 |
+| `Kotone.webp` | 200 |
+| `Luce_Notte.webp` | **404** |
+| `Kotone_P5X.webp` | **404** |
+
+---
 ## 2026-09-24 — L'entrée 2.3 du modal « Nouveautés »
 
 Demande Hamza. C'est le seul endroit où un joueur découvre ce qui a changé sans
