@@ -4801,7 +4801,8 @@
       "Bui Cosmic ( YUI )",
       "Berry Summer ( Ichigo Shikano )",
       "Luce Notte ( Shoki Ikenami )",
-      "Soy Pioneer ( Shun Kano )"
+      "Soy Pioneer ( Shun Kano )",
+      "Kotone Shiomi ( P5X )"
     ],
     "opusByName": {
       "Aigis": [
@@ -5037,6 +5038,9 @@
         "P5X"
       ],
       "Soy Pioneer ( Shun Kano )": [
+        "P5X"
+      ],
+      "Kotone Shiomi ( P5X )": [
         "P5X"
       ]
     }
