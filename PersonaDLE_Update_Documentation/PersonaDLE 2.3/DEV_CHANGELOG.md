@@ -1769,7 +1769,7 @@ Code du badge : **`IAMNOTAPRINCESS`** (choisi par Hamza).
 
 ## 2026-09-22 — Le bouton « Sauvegarder » des paramètres était hors champ, et le panneau ne défilait plus
 
-Signalé par **Gypotre** : « quand on modifie nos paramètres depuis notre profil, on ne voit
+Signalé par **Gyotre** : « quand on modifie nos paramètres depuis notre profil, on ne voit
 pas le bouton sauvegarder ». En creusant, **deux** défauts distincts, dont le second est
 plus grave que celui rapporté.
 
