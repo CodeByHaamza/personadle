@@ -39,9 +39,230 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 13 | `feat/changelog_2_3_pink_ribbon` | Remplissage de la page Nouveautés |
 | 14 | `feat/badges_pin_ux` | Badges épinglés : clic vers la fiche, aperçu du déplacement |
 | 15 | `feat/aoa_kotone_p5x` | All-Out Attack de Kotone (P5X) et nouveau portrait |
+| 16 | `fix/badge_modal_prod` | Le détail d'un badge reprend la modale de la production |
+| 17 | `feat/badge_cafe_leblanc` | Badge secret Ko-fi |
 | 18 | `perf/aoa_reencode_hd` | Les 33 animations AOA en 1080p au calibre des autres |
 
 ---
+
+## 2026-09-25 — Le bandeau 2.3 du modal « Nouveautés » gagne ses couches
+
+Retour Hamza : « le bandeau de la 2.3 est encore trop simple, la 2.0 et la 2.2 sont
+magnifiques ».
+
+En comparant les trois, la différence n'est pas une affaire de goût mais de **densité**.
+La 2.0 empile un dégradé sombre, **dix orbes animés** et un liseré orange. La 2.3 avait un
+dégradé plat, quatre pétales et deux notes — moins de la moitié des couches, d'où
+l'impression d'inachevé.
+
+Rien n'est retiré, rien ne change de palette, le contenu n'est pas touché. On ajoute :
+
+| Couche | Ce qu'elle raconte |
+|---|---|
+| Trame diagonale | L'écran « THAT'S A WRAP! » de son All-Out Attack |
+| Lueur en haut à droite | La lune de la Dark Hour |
+| Ombre basse | Assoit le bandeau, évite l'aplat |
+| Liseré du bas | Le brassard S.E.E.S. — cramoisi, liseré clair, trame de couture |
+| Balayage lent | Un ruban de lumière qui traverse, toutes les 7 s |
+| Filigrane `XXII` | Son arcane. Assez pâle pour ne se voir qu'au second regard |
+| 8 pétales (au lieu de 4) | Tailles et vitesses irrégulières |
+| 3 papillons de Nyx | Le seul bleu d'un bandeau tout rose |
+
+Le bleu n'est pas une fantaisie : le commentaire du survol l'affirmait déjà — c'est cette
+note froide qui empêche l'ensemble d'être mièvre. Elle bouge désormais.
+
+### Deux défauts attrapés en regardant, pas en relisant le code
+
+- **Le filigrane passait derrière la flèche de dépliage.** À `right: 14px`, les deux se
+  superposaient et se lisaient comme un seul bloc illisible. Il est à 56 px.
+- **Sous 600 px, le titre passe sur deux lignes** et vient occuper la place du filigrane,
+  qui se retrouvait derrière le texte au lieu d'être derrière le vide. Un filigrane qu'on
+  remarque n'en est plus un : il disparaît sous cette largeur.
+
+### Le mode sombre devait recevoir les mêmes couches
+
+`body.darkmode .pink-ribbon-theme .version-header` redéfinit `background` en entier : sans
+y reporter l'empilement, la règle l'écrasait et le bandeau redevenait en sombre exactement
+l'aplat qu'on venait de quitter en clair. La lueur de lune y est baissée de 0,30 à 0,18 —
+sur du foncé, la même valeur produit un halo laiteux.
+
+### Pourquoi le diff de `index.html` ne fait que 2 lignes
+
+`index.html` n'est **pas** au format Prettier sur `develop`. Un `prettier --write` dessus
+reformatait 400 lignes sans rapport et noyait la modification réelle. Le fichier n'a donc
+reçu que son édition ciblée : quatre pétales et les trois papillons. Tout le reste est dans
+`css/index.css`.
+
+### Vérifications
+
+Rendu capturé dans un vrai navigateur en **1280 px clair, 1280 px sombre et 390 px** —
+c'est là, et pas dans le code, que les deux défauts ci-dessus sont apparus. Le décor animé
+est entièrement neutralisé sous `prefers-reduced-motion` : il ne porte aucune information.
+
+---
+## 2026-09-25 — Le détail d'un badge reprend la modale de la production
+
+Retour Hamza : la 2.3 a ajouté des façons de consulter un badge (l'œil de l'atelier, le
+clic sur un badge épinglé), mais elles ouvraient **une autre fenêtre** que celle qui tourne
+en prod. C'est celle de la prod qui reste.
+
+### Deux fenêtres pour la même information
+
+La prod affiche déjà une `.badge-zoom-modal` — au déblocage d'un badge, sur le profil
+public (`profile-view.js`) et sur la carte de partage (`share-card.js`). Le lot
+`feat/badge_inspect` en avait dessiné une seconde (`.badge-inspect__*`), plus sobre. Selon
+le chemin emprunté, le même badge s'affichait donc dans deux habillages différents.
+
+Ce n'était pas un oubli mais une mauvaise décision : j'avais écrit une fiche neuve sans
+regarder ce que la prod montrait déjà. Le défaut ne se voit qu'en comparant deux écrans —
+exactement le genre de chose qu'une revue attrape et pas un test.
+
+### Une seule implémentation
+
+`ouvrirFiche()` produit désormais le balisage de prod, et `showBadgeZoom()`
+(`badgesManager.js`) **passe par elle** au lieu d'avoir sa propre copie :
+
+| Chemin | Avant | Après |
+|---|---|---|
+| Déblocage d'un badge | `showBadgeZoom()`, copie locale | `ouvrirFiche()` |
+| Œil de l'atelier (2.3) | `.badge-inspect__card` | `ouvrirFiche()` |
+| Clic sur un badge épinglé (2.3) | `.badge-inspect__card` | `ouvrirFiche()` |
+
+`profile-view.js` et `share-card.js` gardent leur propre `showBadgeZoom` : elles tournent
+sur d'autres pages, avec leurs propres listes de badges, et produisent **déjà** ce
+balisage. Les unifier demanderait de leur faire importer `badgesManager`, ce qui coûte plus
+que ça ne rapporte tant qu'elles ne divergent pas.
+
+### Ce que le balisage de prod ne savait pas dire
+
+La prod n'ouvrait cette modale qu'après un déblocage, donc **toujours sur un badge obtenu**.
+L'œil rend consultable un badge verrouillé, état qu'aucune de ses lignes n'exprimait : sans
+rien, un badge non gagné s'afficherait exactement comme un badge gagné.
+
+Deux ajouts, aussi discrets que possible plutôt qu'une section de plus :
+
+- `🔒` devant la condition ;
+- `.badge-zoom-content img.is-locked` — l'image en niveaux de gris, comme sa carte dans la
+  grille.
+
+Le reste est identique : conteneur, croix, ordre image / titre / condition / description,
+et la classe `.show` posée à la frame suivante pour l'animation d'entrée.
+
+Ce qui est conservé du lot 2.3, parce que la prod n'en avait pas besoin et que ces chemins
+si : `role="dialog"`, `aria-modal`, le focus posé sur la croix, la fermeture à Échap (qui
+arrête sa propagation pour ne pas refermer AUSSI la modale des badges derrière), et la
+croix activable au clavier.
+
+`construireFiche()` ne bouge pas : un badge secret verrouillé continue de ne montrer ni son
+nom ni sa condition. Sans cette règle, l'œil serait devenu un moyen commode de lire toutes
+les réponses.
+
+### Fichiers touchés
+
+- `profile/badges/badge_inspect.js` — `ouvrirFiche()` rend le balisage de prod.
+- `profile/badges/badgesManager.js` — `showBadgeZoom()` délègue ; sa copie de la modale
+  disparaît.
+- `profile/badges/badges.css` — les règles `.badge-inspect` / `.badge-inspect__*` sont
+  retirées (≈ 70 lignes), remplacées par la seule `img.is-locked`. Le bouton œil
+  (`.badge-inspect-btn`) reste : c'est un élément de la grille, pas de la modale.
+- `tests/badgeInspect.test.js` — sélecteurs mis à jour, **2 cas ajoutés** : le balisage est
+  bien celui de prod et plus aucune classe `badge-inspect__` n'existe ; le cadenas
+  n'apparaît que sur un badge verrouillé.
+- `tests-e2e/badge_inspect.spec.js`, `tests-e2e/badges_reorder.spec.js` — sélecteurs.
+
+### Vérifications
+
+- 8 scénarios E2E des deux fichiers verts, `npm test` à 1520.
+- Rendu comparé à l'écran, en 1280 px et 390 px, dans les deux états : badge débloqué
+  depuis la rangée épinglée, badge **verrouillé** depuis l'œil de l'atelier.
+- Le test « emploie la modale de PRODUCTION » échoue si une fiche maison revient : il
+  vérifie l'absence de toute classe `badge-inspect__`, pas seulement la présence de
+  `.badge-zoom-modal`.
+
+---
+
+## 2026-09-25 — Badge secret « Café Leblanc », au bout du lien Ko-fi
+
+Demande de Hamza : un badge caché, sur le modèle de `github_contributor`, accordé au clic
+du bouton Ko-fi de l'accueil. Image livrée : `kofiBadges_fumee.png`.
+
+### Ce qu'il récompense, et ce qu'il ne peut pas récompenser
+
+**Ko-fi ne dit rien au jeu de ce qui se passe chez lui.** Aucun retour, aucun webhook, rien
+à recouper : le site voit un clic sur un lien sortant, pas un don. Le badge récompense donc
+la **visite**, et son texte le dit ainsi — « You were curious enough to push open the door
+of my cafe. The coffee's on the house — and thanks for stopping by. »
+
+C'est exactement la formulation demandée (« tu as eu la curiosité de consulter mon café »),
+et ce n'est pas un détail de style : un texte qui remercierait d'un *don* affirmerait au
+joueur une chose que personne n'a vérifiée, et qu'un simple clic suffit à obtenir. Un test
+interdit d'y glisser plus tard « donation », « support », « paid », « purchase » ou
+« contribution ».
+
+Rareté `common`, comme `github_contributor` : c'est le même geste, un clic.
+
+### La chaîne, de bout en bout
+
+| Étape | Où |
+|---|---|
+| Le clic pose `visitedKofi` dans le profil local | `index.html`, `onclick` inline du lien |
+| Le catalogue client lit le drapeau | `badgesData.js`, `check(stats, profile)` |
+| Le serveur accorde | `badges.condition_type = 'manual'` |
+
+`manual` est ce que le serveur accepte sur simple demande. C'est déjà le régime de
+`github_contributor`, et le seul possible ici : il n'existe aucune trace côté serveur qui
+permettrait de vérifier quoi que ce soit. À noter que ça ne contredit pas la règle « le
+client ne décide pas de ce qui existe » — le serveur reste seul à écrire, et un badge non
+`manual` demandé sans condition remplie est toujours refusé en 403.
+
+Le drapeau vit dans le `localStorage`, donc un vidage du cache le perd. Sans effet : une
+fois le badge accordé côté serveur, il est acquis (règle de monotonie, cf. CLAUDE.md §7).
+
+### Image
+
+`kofiBadges_fumee.png` → `Badge_Cafe_Leblanc.webp` : 500 × 500, transparence conservée,
+**334 Ko → 22 Ko** (`libwebp` q=82). Le WebP est le format des badges depuis la 2.3.
+
+### Fichiers touchés
+
+- `profile/badges/images/Badge_Cafe_Leblanc.webp` — **nouveau**.
+- `profile/badges/badgesData.js` — l'entrée, posée juste après `github_contributor` pour
+  que les deux badges « lien de l'accueil » se lisent ensemble.
+- `sql/migrations/055_badge_cafe_leblanc.sql` — **nouvelle**, `INSERT IGNORE`.
+- `sql/bdd_mysql.sql` — la même ligne dans le seed. Sans elle,
+  `tests/badgesCatalogParity.test.js` échoue, et c'est son rôle : un badge présent d'un seul
+  côté donne soit un 404 à l'unlock, soit un badge en base que personne ne peut gagner.
+- `index.html` — le lien Ko-fi reçoit `id="kofiLink"`, `rel="noopener"` et le `onclick` qui
+  pose le drapeau, calqué sur le lien GitHub juste au-dessus.
+- `lang/en.json` + les 5 autres — nom, condition et description. Le **nom reste
+  « Café Leblanc » dans toutes les langues** et le badge entre dans la liste `KEEP_ORIGINAL`
+  de `tests/badgesI18n.test.js` : Leblanc est le nom du café de P5, un lieu, pas une
+  expression. Cette liste existe pour que « VO assumée » soit une décision et non un
+  fourre-tout d'oublis — un test vérifie que le nom est bien identique partout.
+- `tests/badge_cafe_leblanc.test.js` — **nouveau**, 5 cas.
+- `tests-e2e/badge_cafe_leblanc.spec.js` — **nouveau**, 2 scénarios.
+- `PersonaDLE_Update.html` — le badge est listé (cinq badges, plus quatre), avec son image
+  et un `???` : sa condition est le jeu lui-même.
+
+### Vérifications
+
+- **Migration jouée pour de vrai** contre la base de dev : 73 → 74 badges, accent conservé
+  (`HEX(name_en)` donne bien `C3A9` pour le `é`), et rejeu sans effet — toujours 74.
+- E2E : le clic pose le drapeau, puis le serveur accorde le badge. Le scénario **négatif**
+  est là aussi — sans le clic, le serveur n'accorde rien. Sans lui, un badge accordé à tout
+  le monde passerait le premier scénario au vert sans rien prouver.
+- Tests unitaires : le badge refuse un profil vide, refuse le drapeau du badge GitHub, et
+  refuse une valeur seulement « vraie » (`"true"`, `1`, `[]`, `{}`) — le drapeau vient du
+  `localStorage`, où tout peut arriver après désérialisation.
+- La navigation vers ko-fi.com est interceptée en E2E : pas de dépendance réseau, et on ne
+  martèle pas leur site à chaque passage de CI.
+
+### À faire avant la release
+
+La **055** est à jouer en production, comme la 054.
+
+---
+
 
 ## 2026-09-25 — Les 33 animations All-Out Attack en 1080p repassent au calibre des autres
 

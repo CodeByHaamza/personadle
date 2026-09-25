@@ -557,6 +557,11 @@
       "condition": "Click on the GitHub button",
       "description": "You checked the source code! A true Phantom Thief always gathers intel first."
     },
+    "cafe_leblanc": {
+      "name": "Café Leblanc",
+      "condition": "Click on the Ko-fi button",
+      "description": "You were curious enough to push open the door of my café. The coffee's on the house — and thanks for stopping by."
+    },
     "true_hacker": {
       "name": "True Hacker",
       "condition": "???",
