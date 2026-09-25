@@ -269,7 +269,8 @@
   "Moros": {
     "text": "Moros is the Greek personification of doom — of impending fate, of the end already fixed for each life. Son of Nyx, brother to Sleep, to Retribution and to Death, and elder brother and leader of the three Fates. He has no shape at all: a formless spirit whose task is to reveal to a mortal the day of their own death. Because that knowledge is unbearable, he became a spirit of despair as well, since the souls he visits are left ridden with dread. His name is the root of the word 'morose'.",
     "mask": [
-      "Moros"
+      "Moros",
+      "morose"
     ]
   },
   "Psyche": {
@@ -863,7 +864,8 @@
   "Terpsichore": {
     "text": "Terpsichore is the Muse of dance and of the chorus, one of the nine daughters of Zeus and Mnemosyne. Tradition makes her the mother of the sirens — the bird-women who sing sailors onto the rocks by promising them exactly what they most want. The pairing is not accidental: she governs the art that moves bodies without words, and her daughters use song for the same purpose to lethal ends. Her name survives in English as terpsichorean, meaning anything pertaining to dance.",
     "mask": [
-      "Terpsichore"
+      "Terpsichore",
+      "terpsichorean"
     ]
   },
   "Styx": {

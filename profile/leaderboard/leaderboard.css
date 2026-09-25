@@ -746,6 +746,205 @@
   box-shadow: 0 2px 12px rgba(150, 70, 255, 0.4);
 }
 
+/* `.hidden` n'est pas une classe utilitaire globale sur cette page : seules
+   `.modal.hidden` et `.lb-pagination.hidden` existaient. Sans cette règle, les
+   groupes de filtres sans objet en mode Amitiés restaient affichés — la classe
+   était bien posée, mais ne peignait rien. */
+.lb-filter-group.hidden {
+  display: none;
+}
+
+/* Pastille « Social Link » du bandeau de filtres, assortie à celle du sélecteur. */
+.lb-fn-chip--bonds {
+  background: linear-gradient(135deg, #d0507a, #ff8fb5);
+  border-color: rgba(232, 115, 154, 0.8);
+  color: #fff;
+}
+
+/* Pastille Social Link : même principe que l'Expert (lisible inactive), mais en
+   rose Kotone plutôt qu'en violet — c'est une autre dimension, pas une variante
+   plus dure. */
+.lb-pill--bonds {
+  border-color: rgba(232, 115, 154, 0.45);
+  color: #d0507a;
+}
+.lb-pill--bonds:hover {
+  border-color: rgba(232, 115, 154, 0.75);
+  color: #c9184a;
+}
+.lb-pill--bonds.active {
+  background: linear-gradient(135deg, #d0507a, #ff8fb5);
+  border-color: rgba(232, 115, 154, 0.85);
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(232, 115, 154, 0.4);
+}
+
+/* ── Podium des AMITIÉS ─────────────────────────────────────────────────────
+   Même forme que le podium des joueurs — 2 — 1 — 3, la première marche plus
+   haute — mais deux visages par carte, le lien entre les deux. Le classement
+   n'avait d'abord pas de podium ; l'écart de traitement avec les autres se
+   voyait immédiatement (retour Hamza). */
+.lb-bond-podium-faces {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+/* Les deux visages, plus petits que l'avatar unique d'un podium de joueurs :
+   il en tient deux dans la même largeur de carte. La première marche les
+   agrandit, comme elle agrandit l'avatar simple. */
+.lb-bond-podium-avatar {
+  width: 46px;
+  height: 46px;
+  border-width: 2px;
+}
+.lb-podium-card--1 .lb-bond-podium-avatar {
+  width: 58px;
+  height: 58px;
+}
+
+.lb-bond-podium-heart {
+  font-size: 0.95rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.lb-podium-card--1 .lb-bond-podium-heart {
+  font-size: 1.2rem;
+}
+
+/* Deux pseudos tiennent rarement sur une ligne : on les laisse revenir à la
+   ligne plutôt que de les tronquer — c'est le sujet de la carte. */
+.lb-bond-podium-names {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  line-height: 1.25;
+  font-size: 0.8rem;
+}
+.lb-podium-card--1 .lb-bond-podium-names {
+  font-size: 0.88rem;
+}
+
+/* Sous 480 px le podium GARDE ses trois colonnes (règle partagée) : une carte
+   fait alors ~95 px de contenu, et deux visages de 50 px débordaient par-dessus
+   ses bordures. Ils passent à 32 px, le cœur rétrécit, et le tout rentre.
+   Constaté en capturant réellement à 390 px — je les avais dimensionnés en
+   supposant que les cartes passaient en colonne, ce qu'elles ne font pas. */
+@media (max-width: 480px) {
+  .lb-bond-podium-faces {
+    gap: 2px;
+  }
+  .lb-bond-podium-avatar {
+    width: 30px;
+    height: 30px;
+    border-width: 1.5px;
+  }
+  .lb-podium-card--1 .lb-bond-podium-avatar {
+    width: 38px;
+    height: 38px;
+  }
+  .lb-bond-podium-heart {
+    font-size: 0.7rem;
+  }
+  .lb-podium-card--1 .lb-bond-podium-heart {
+    font-size: 0.85rem;
+  }
+  .lb-bond-podium-names {
+    font-size: 0.66rem;
+  }
+  .lb-podium-card--1 .lb-bond-podium-names {
+    font-size: 0.72rem;
+  }
+}
+
+/* ── Ligne d'AMITIÉ ─────────────────────────────────────────────────────────
+   Deux joueurs face à face, le lien au milieu, l'XP au bout. Le lien est au
+   centre parce que c'est LUI le sujet de la ligne : ni l'un ni l'autre des deux
+   joueurs n'est classé ici. */
+.lb-bond-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.lb-bond-side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 0;
+}
+/* Le second joueur regarde vers le centre : la ligne se lit depuis le lien. */
+.lb-bond-side:nth-of-type(2) {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+.lb-bond-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  flex-shrink: 0;
+}
+.lb-bond-name {
+  font-weight: 700;
+  font-size: 0.86rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lb-bond-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  flex-shrink: 0;
+}
+.lb-bond-heart {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+.lb-bond-rank {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted, #888);
+}
+.lb-bond-xp {
+  flex-shrink: 0;
+  font-weight: 800;
+  font-size: 0.82rem;
+  color: #c8960c;
+  min-width: 72px;
+  text-align: right;
+}
+body.darkmode .lb-bond-xp {
+  color: #f0c14b;
+}
+
+/* Sous 480 px, deux avatars + deux pseudos + l'XP ne tiennent plus sur une
+   ligne : les pseudos passent dessous, le lien reste au milieu. */
+@media (max-width: 480px) {
+  .lb-bond-side {
+    flex-direction: column;
+    gap: 3px;
+  }
+  .lb-bond-side:nth-of-type(2) {
+    flex-direction: column;
+    text-align: center;
+  }
+  .lb-bond-name {
+    font-size: 0.72rem;
+    max-width: 82px;
+  }
+  .lb-bond-xp {
+    min-width: 0;
+    font-size: 0.74rem;
+  }
+}
+
 /* Carte des filtres en mode Expert : un liseré et un fond à peine teinté.
    Volontairement discret — le tableau juste en dessous doit rester le sujet,
    contrairement à la notification de défi, qui est un événement. */

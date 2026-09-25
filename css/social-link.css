@@ -60,6 +60,21 @@
   color: var(--text-muted, #888);
 }
 
+/* XP accumulée au-delà du rang 10. En or, comme le reste des marqueurs de rang
+   maximum : c'est la seule chose qui continue de bouger une fois le rang figé,
+   et c'est elle qui départage les amitiés dans le classement Amitié. */
+.sl-xp-beyond {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #c8960c;
+}
+body.darkmode .sl-xp-beyond {
+  color: #f0c14b;
+}
+
 /* Barre de progression */
 .sl-bar-bg {
   height: 8px;

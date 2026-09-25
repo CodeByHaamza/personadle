@@ -57,6 +57,9 @@
  *                          PERSONADLE_TARGET_SETS) gagnées, lu dans game_sessions —
  *                          badges Starlight Festival / Shujin Outlaws / Absolute
  *                          Authority, titre Go Beyond
+ *   mode_challenge_wins  → condition_value défis d'ami RELEVÉS dans condition_mode,
+ *                          lu dans `challenge_wins` (table append-only) — badge
+ *                          Chord Progression
  *   same_energy          → un ami de rang Social Link ≥ 5 porte Motoha Arai quand on
  *                          porte Chie, ou l'inverse (badge `same_energy`, accordé aux deux)
  *   joker_profile        → condition manuelle — retourne true (vérifié en aval par admin)
@@ -334,6 +337,21 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
             if (!$condMode) return false;
             return personadle_target_set_met($pdo, $userId, $condMode);
 
+        case 'mode_challenge_wins': {
+            // condition_value défis d'AMI relevés (gagnés) dans condition_mode.
+            // Badge Chord Progression : 10 en mode Musique.
+            //
+            // Lu dans `challenge_wins`, une table qui ne fait QUE grandir, et non
+            // dans `messages` : un joueur a le droit de supprimer ses messages
+            // (DELETE /api/messages/:id). Compter les lignes vivantes ferait
+            // reperdre le badge à qui range sa boîte de réception — exactement ce
+            // que la règle de monotonie interdit (CLAUDE.md §7).
+            if (!$condMode) return false;
+            $stmt = $pdo->prepare('SELECT COUNT(*) FROM challenge_wins WHERE user_id = ? AND mode = ?');
+            $stmt->execute([$userId, $condMode]);
+            return (int) $stmt->fetchColumn() >= $val;
+        }
+
         case 'same_energy':
             // Un ami de rang Social Link ≥ 5 porte Motoha Arai quand je porte Chie
             // (ou l'inverse) — voir personadle_same_energy_partners().
@@ -384,6 +402,8 @@ function personadle_known_condition_types(): array
         'expert_modes_mastered', 'expert_wins_total',
         // Lot du 2026-09-18 (migration 046)
         'mode_expert_perfect_wins', 'targets_found', 'same_energy',
+        // Lot du 2026-09-23 (migration 054)
+        'mode_challenge_wins',
     ];
 }
 
@@ -664,6 +684,53 @@ const PERSONADLE_TARGET_SETS = [
             'Ambitions and Visions', 'Fatal Desire', 'Last Strike', 'Seize the Light',
             'Shadow Loop', 'Wake Up Your Hero', 'Wonder Light', 'Show Stealer',
         ], 8],
+    ],
+
+    // ── 2.3 ─────────────────────────────────────────────────────────────────
+
+    // Badge Birds of a Different Feather : les deux voleurs à masque d'oiseau,
+    // reconnus à leur silhouette ET dans leur All-Out Attack.
+    'birds_different_feather' => [
+        ['silhouette',   null, ['Goro Akechi', 'Kira Kitazato'], 2],
+        ['alloutattack', null, ['Crow ( Goro Akechi )', 'Messa ( Kira Kitazato )'], 2],
+    ],
+
+    // Badge Memento Vivere / Memento Mori : les deux protagonistes de Persona 3
+    // Portable, dans tous les modes. Le pendant P3 de `wonder_go_beyond`.
+    //
+    // Deux choix à noter, tous deux voulus (décision Hamza du 2026-09-23) :
+    //
+    //  - En mode Personae, la partie enregistre LE PORTEUR, pas la persona
+    //    (même convention que `wonder_go_beyond`). `Orpheus ( Male )` et
+    //    `Orpheus Picaro` ont tous deux Makoto Yuki pour porteur : la condition
+    //    vaut donc « une persona de Makoto » et « une persona de Kotone », pas
+    //    précisément les deux Orpheus. Être plus fin demanderait de stocker le
+    //    nom de la persona dans game_sessions.
+    //  - Côté musique, UNE seule version de Mass Destruction est demandée — la
+    //    classique. Les variantes FES et ZUTOMAYO ne comptent pas.
+    'memento_vivere_mori' => [
+        ['classic',      null, ['Makoto Yuki', 'Kotone Shiomi'], 2],
+        ['emoji',        null, ['Makoto Yuki', 'Kotone Shiomi'], 2],
+        ['silhouette',   null, ['Makoto Yuki', 'Kotone Shiomi'], 2],
+        ['alloutattack', null, ['Makoto Yuki', 'Kotone Shiomi'], 2],
+        ['personae',     null, ['Makoto Yuki', 'Kotone Shiomi'], 2],
+        // Le thème de Makoto, puis les trois de Kotone (P3P).
+        ['music',        null, ['Mass Destruction'], 1],
+        // L'apostrophe est échappée plutôt qu'écrite entre guillemets doubles :
+        // tests/unlocks_wonder_shujin.test.js relit ce bloc pour vérifier que le
+        // miroir client dit la même chose, et son extracteur ne lit que les
+        // chaînes à apostrophes simples. Un `"It's …"` lui ferait avaler tout ce
+        // qui suit jusqu'à l'apostrophe suivante — et les cibles d'après
+        // passeraient pour absentes.
+        ['music',        null, ['Wiping All Out', 'Danger Zone', 'It\'s Going Down Now'], 3],
+    ],
+
+    // Titre Déjà Vu : Persona 2 est une duologie où le même duo revient d'un jeu
+    // à l'autre. Le titre demande donc littéralement de LES RETROUVER — Tatsuya
+    // et Maya, dans deux modes différents.
+    'p2_deja_vu' => [
+        ['classic',    null, ['Tatsuya Suou', 'Maya Amano'], 2],
+        ['silhouette', null, ['Tatsuya Suou', 'Maya Amano'], 2],
     ],
 ];
 

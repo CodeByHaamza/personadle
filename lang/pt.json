@@ -337,6 +337,9 @@
     "tab_title": "Título",
     "tab_badges": "Emblemas",
     "avatar_hint": "Escolhe um retrato — é aplicado de imediato. Mal enquadrado? Ajusta-o.",
+    "avatar_filter_all": "Todos",
+    "avatar_filter_animated": "Animados",
+    "avatar_filter_empty": "Nenhum retrato animado neste jogo.",
     "avatar_origin_notice": "🪪 O teu retrato foi recortado antes de o jogo passar a lembrar-se de qual é. Volta a escolhê-lo uma vez abaixo (recorta-o se quiseres) para que os teus amigos — e o emblema Same Energy — saibam quem usas.",
     "avatar_adjust": "Ajustar o enquadramento",
     "crop_title": "Ajusta o teu avatar",
@@ -349,6 +352,9 @@
     "pinned_hint": "Escolhe até 4 emblemas para fixar no teu cartão. Clica num fixado para o retirar.",
     "pin_badge": "Fixar um emblema",
     "unpin_badge": "Retirar",
+    "badge_inspect": "Ver ficha",
+    "badge_unlocked": "Desbloqueado",
+    "badge_locked": "Bloqueado",
     "pick_empty": "Ainda nenhum emblema desbloqueado — joga algumas partidas e eles aparecerão aqui.",
     "pin_limit": "Só podes fixar <strong>4 emblemas</strong>!",
     "pin_limit_hint": "Retira um primeiro.",
@@ -551,6 +557,11 @@
       "condition": "Clica no botão do GitHub",
       "description": "Vieste ver o código-fonte! Um verdadeiro Phantom Thief recolhe sempre informação primeiro."
     },
+    "cafe_leblanc": {
+      "name": "Café Leblanc",
+      "condition": "Clique no botão Ko-fi",
+      "description": "A curiosidade fez você abrir a porta do meu café. O café é por minha conta — e obrigado pela visita."
+    },
     "true_hacker": {
       "name": "Verdadeiro Hacker",
       "condition": "???",
@@ -655,6 +666,26 @@
       "name": "A mesma energia",
       "condition": "Alcance o rank 5 de vínculo social com um amigo enquanto um de vocês usa Motoha Arai e o outro Chie Satonaka",
       "description": "Duas garotas do kung-fu, dois jogos, uma só energia. Quando um amigo de rank 5 aparece como Chie enquanto você usa Arai — ou o contrário —, os dois recebem esta insígnia no mesmo instante."
+    },
+    "chord_progression": {
+      "name": "Chord Progression",
+      "condition": "Vence 10 desafios de amigos no modo Música",
+      "description": "A Rise segura o microfone, a Chord segura a guitarra, e tu seguraste a nota dez vezes seguidas. Dez desafios recebidos no modo Música, dez vencidos."
+    },
+    "birds_different_feather": {
+      "name": "Dois pássaros, duas plumagens",
+      "condition": "Encontra Goro Akechi e Kira Kitazato na Silhueta, e Crow e Messa no All-Out Attack",
+      "description": "Duas máscaras, dois bicos, dois pássaros em tudo diferentes. Um finge ser príncipe, o outro nem se dá ao trabalho — desmascaraste os dois."
+    },
+    "memento_vivere_mori": {
+      "name": "Memento Vivere, Memento Mori",
+      "condition": "Encontra Makoto Yuki e Kotone Shiomi em todos os modos, e os seus quatro temas na Música",
+      "description": "O mesmo ano, o mesmo dormitório, o mesmo fim — contado duas vezes. Lembra-te de viver, lembra-te de morrer: encontraste os dois, em todos os sítios onde havia para procurar."
+    },
+    "her_own_orpheus": {
+      "name": "O seu próprio Orpheus",
+      "condition": "???",
+      "description": "O mesmo arcano, o mesmo dormitório, outra canção. O Makoto tem o Orpheus dele; ela tem o dela — e leva-o através das chamas."
     },
     "velvet_regular": {
       "name": "Cliente Habitual Velvet",
@@ -917,6 +948,11 @@
     "filter_dimension": "Dimensão",
     "dimension_normal": "Normal",
     "dimension_expert": "⚡ Especialista",
+    "dimension_bonds": "🤝 Social Link",
+    "bonds_rank": "Nível {{n}}",
+    "bonds_none": "Nenhum Social Link ganhou XP ainda.",
+    "bonds_none_mine": "Ainda não tens nenhum Social Link com XP.",
+    "bonds_note": "Amizades ordenadas por XP de Social Link. O nível para no 10 — o XP não.",
     "scope_global": "Global",
     "scope_friends": "Amigos",
     "login_for_friends": "Inicia sessão para veres a classificação dos teus amigos.",
@@ -1268,6 +1304,7 @@
     "done_today": "Feito hoje",
     "rank_up": "🎉 Social Link — Nível {{rank}}: {{name}}",
     "max_rank": "✨ MÁX — True Confidant",
+    "xp_beyond_max": "+{{xp}} XP para além do nível 10",
     "howto_aria": "Como ganhar XP de Social Link",
     "howto_trigger": "Como ganhar XP?",
     "howto_title": "Passem tempo juntos — o XP é automático:",

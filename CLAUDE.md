@@ -7,7 +7,7 @@
 ## 1. Présentation
 
 **PersonaDLE** — jeu de devinettes quotidien fan-made (Persona P1→P5X), 6 modes.
-**Site** : https://personadle.net | **Dépôt** : https://github.com/CodeByHaamza/personadle | **v2.0** (backend PHP+MariaDB)
+**Site** : https://personadle.net | **Dépôt** : https://github.com/CodeByHaamza/personadle | **v2.3** (backend PHP+MariaDB)
 
 | Pseudo | Rôle |
 |---|---|
@@ -38,12 +38,12 @@ personadle/
 ├── js/                  ← gameCore.js, api.js, auth.js, i18n.js, cloud-sync.js…
 ├── css/                 ← global.css + un CSS par composant
 ├── database/            ← characters_clean.js, personas.js, quotes.js, portraits/
-├── lang/                ← en.json (source de vérité, 1287 clés), fr/es/de/it/pt.json
+├── lang/                ← en.json (source de vérité, 1314 clés), fr/es/de/it/pt.json
 ├── classiqueMode/  emojiMode/  allOutAttackMode/  silhouetteMode/  personaeMode/  musicsMode/
 ├── profile/             ← profile-page.js, badges/, friends/, leaderboard/
 ├── api/                 ← PHP REST (auth/, user/, messages/, social-links/, leaderboard/…)
-├── tests/               ← 77 suites Vitest (1437 tests) + tests/php/ (PHPUnit)
-└── sql/                 ← bdd_mysql.sql (29 tables)
+├── tests/               ← 84 suites Vitest (1525 tests) + tests/php/ (PHPUnit)
+└── sql/                 ← bdd_mysql.sql (30 tables)
 ```
 
 **Fichiers clés :**
@@ -225,7 +225,7 @@ Utiliser `min()`, `clamp()`, `vw`/`vh`. Éviter les largeurs fixes en `px` sur l
 ## 8. Tests & qualité
 
 - `npm test` · `npm run test:watch` · `npm run test:coverage`
-- **1437 tests** (Vitest + jsdom), 77 suites dans `tests/` (`gameCore`, `backend`, `auth`, `i18n`,
+- **1525 tests** (Vitest + jsdom), 84 suites dans `tests/` (`gameCore`, `backend`, `auth`, `i18n`,
   `social-link`, `profilePage`, `badgesManager`, `badgesConditions`, `streakFlow.integration`,
   `streakRecovery`, `validateCharacters`, `formatPlayTime`… — cf. `tests/` pour la liste à jour)
 - `npm run lint` (ESLint flat config) · `npm run data:check` (schéma personnages) · `npm run i18n:check`
@@ -269,27 +269,31 @@ un pool de tirage :
 > (corrigé le 2026-07-06 — la version précédente de cette section pointait vers un
 > `PersonaDLE_Update.md` qui n'existe pas pour la v2.0, seulement pour l'archive v1.1) :
 >
-> **Un dossier par version.** Version en cours de développement : **v2.2**
-> (`PersonaDLE 2.2/`, ouvert le 2026-09-09). Écrire dans le dossier de la version **en
-> cours de développement**, jamais dans celui d'une version déjà livrée — `PersonaDLE 2.0/`
-> et `PersonaDLE 2.1/` ne reçoivent plus que des correctifs de leur propre version en prod :
+> **Un dossier par version.** Version en cours de développement : **v2.3**
+> (`PersonaDLE 2.3/`, ouvert le 2026-09-22 — la mise à jour Kotone Shiomi, d'où la palette
+> Pink Ribbon de sa page joueur). Écrire dans le dossier de la version **en cours de
+> développement**, jamais dans celui d'une version déjà livrée — `PersonaDLE 2.0/`,
+> `PersonaDLE 2.1/` et `PersonaDLE 2.2/` ne reçoivent plus que des correctifs de leur
+> propre version en prod :
 >
-> - `PersonaDLE_Update_Documentation/PersonaDLE 2.2/DEV_CHANGELOG.md` — changelog **dev**
+> - `PersonaDLE_Update_Documentation/PersonaDLE 2.3/DEV_CHANGELOG.md` — changelog **dev**
 >   (contributeurs/mainteneurs), détail précis par commit : fichiers touchés, décisions
 >   d'architecture, angles morts connus. Toute modification qui touche au code en a besoin.
-> - `PersonaDLE_Update_Documentation/PersonaDLE 2.2/PersonaDLE_Update.html` — changelog
+> - `PersonaDLE_Update_Documentation/PersonaDLE 2.3/PersonaDLE_Update.html` — changelog
 >   **joueur** (page HTML bilingue EN/FR, blocs `data-i18n-block`), highlights uniquement,
 >   langage non technique. À alimenter **seulement** si le changement est visible/parlant
 >   pour un joueur (nouvelle feature, fix d'un bug qu'il pouvait remarquer) — jamais l'inverse
->   (ne pas alléger DEV_CHANGELOG.md pour "faire propre"). La page est liée depuis le modal
->   « Nouveautés » de `index.html`, entrée `version-item` par version — **entrée 2.2 à
+>   (ne pas alléger DEV_CHANGELOG.md pour "faire propre"). Tout nouveau contenu y est listé
+>   explicitement — badges, titres, musiques, avatars : image, nom et condition de déblocage,
+>   pas de section « sans spoiler » (décision Hamza). La page est liée depuis le modal
+>   « Nouveautés » de `index.html`, entrée `version-item` par version — **entrée 2.3 à
 >   ajouter à la sortie de la version**, pas avant.
 >
-> À l'ouverture d'une v2.3 : créer `PersonaDLE 2.3/`, y démarrer les deux fichiers, ajouter
-> son bloc de 3 lignes dans `.gitignore` (sinon les fichiers sont ignorés en silence — voir
-> le piège documenté dans `.gitignore`), et mettre à jour cette section. C'est ce point de
-> synchronisation qui a manqué à la 2.1, dont les entrées se sont accumulées dans le dossier
-> de la 2.0 jusqu'au 2026-08-20.
+> À l'ouverture d'une v2.4 : créer `PersonaDLE 2.4/`, y démarrer les deux fichiers, ajouter
+> son bloc de liste blanche dans `.gitignore` (sinon les fichiers sont ignorés en silence —
+> voir le piège documenté dans `.gitignore`), et mettre à jour cette section. C'est ce point
+> de synchronisation qui a manqué à la 2.1, dont les entrées se sont accumulées dans le
+> dossier de la 2.0 jusqu'au 2026-08-20.
 
 Format d'une entrée `DEV_CHANGELOG.md` :
 

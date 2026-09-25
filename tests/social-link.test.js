@@ -464,6 +464,83 @@ describe("renderSocialLinkGauge", () => {
     expect(profile.bestSocialLinkRank).toBe(5);
   });
 
+  // ── XP déplafonnée au rang 10 (2.3) ──────────────────────────────────────
+  //
+  // Le SERVEUR n'a jamais plafonné l'XP : `add_social_link_xp` additionne sans
+  // borne et seul le rang s'arrête à 10. Mais la jauge masquait le total dès le
+  // rang atteint, si bien que 2 700 et 50 000 XP s'affichaient à l'identique —
+  // et le classement Amitié n'aurait eu aucun moyen de les départager aux yeux
+  // du joueur.
+
+  const gaugeAtMax = (xp) => ({
+    socialLink: {
+      getByFriend: vi.fn().mockResolvedValue({ link_id: 1 }),
+      get: vi.fn().mockResolvedValue({
+        rank: 10,
+        xp,
+        xp_current_rank: 2700,
+        xp_next_rank: null,
+        rank_names: { en: "True Confidant" },
+        today_interactions: [],
+      }),
+    },
+  });
+
+  it("affiche le total d'XP au rang 10, au lieu de le masquer", async () => {
+    window._personadleApi = gaugeAtMax(7700);
+    await renderSocialLinkGauge(freshFriendId(), container);
+
+    const label = container.querySelector(".sl-xp-label").textContent;
+    expect(label).toContain("MAX");
+    expect(label.replace(/[\s,\u202f\u00a0]/g, "")).toContain("7700");
+  });
+
+  it("annonce l'XP gagnée AU-DELÀ du rang 10", async () => {
+    window._personadleApi = gaugeAtMax(7700);
+    await renderSocialLinkGauge(freshFriendId(), container);
+
+    const beyond = container.querySelector(".sl-xp-beyond");
+    expect(beyond, "la ligne d'XP au-delà du rang 10 doit exister").not.toBeNull();
+    // 7700 - 2700 = 5000
+    expect(beyond.textContent.replace(/[\s,\u202f\u00a0]/g, "")).toContain("5000");
+  });
+
+  it("n'affiche pas la ligne « au-delà » quand on vient juste d'atteindre le rang 10", async () => {
+    window._personadleApi = gaugeAtMax(2700);
+    await renderSocialLinkGauge(freshFriendId(), container);
+
+    expect(container.querySelector(".sl-xp-beyond")).toBeNull();
+  });
+
+  it("garde le mémo « comment gagner de l'XP » au rang 10", async () => {
+    // Le masquer revenait à dire « c'est fini » à ceux qui jouent le plus
+    // ensemble, alors que leur XP continue de compter.
+    window._personadleApi = gaugeAtMax(3200);
+    await renderSocialLinkGauge(freshFriendId(), container);
+
+    expect(container.querySelector(".sl-howto")).not.toBeNull();
+  });
+
+  it("garde la barre pleine et le rang figé à 10", async () => {
+    window._personadleApi = gaugeAtMax(50000);
+    await renderSocialLinkGauge(freshFriendId(), container);
+
+    expect(container.querySelector(".sl-bar-fill").style.width).toBe("100%");
+    expect(container.querySelector(".sl-rank-badge").textContent).toContain("Rank 10");
+    expect(container.querySelector(".sl-gauge-wrap").className).toContain("sl-rank-10");
+  });
+
+  it("interpole les variables même dans le texte de repli, sans i18n chargé", async () => {
+    // Sans ça le joueur lit « +{{xp}} XP au-delà du rang 10 » — ce que ce fichier
+    // de test a effectivement attrapé en premier. La jauge peut se rendre avant
+    // i18n, et la clé peut manquer dans une langue.
+    expect(window.i18n, "ce test n'a de sens que sans i18n").toBeUndefined();
+    window._personadleApi = gaugeAtMax(7700);
+    await renderSocialLinkGauge(freshFriendId(), container);
+
+    expect(container.querySelector(".sl-xp-beyond").textContent).not.toContain("{{");
+  });
+
   it("does not lower bestSocialLinkRank when the current rank is below the recorded best", async () => {
     localStorage.setItem("personaUserProfile", JSON.stringify({ bestSocialLinkRank: 7 }));
     window._personadleApi = {
