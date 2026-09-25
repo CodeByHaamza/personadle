@@ -39,9 +39,91 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 13 | `feat/changelog_2_3_pink_ribbon` | Remplissage de la page Nouveautés |
 | 14 | `feat/badges_pin_ux` | Badges épinglés : clic vers la fiche, aperçu du déplacement |
 | 15 | `feat/aoa_kotone_p5x` | All-Out Attack de Kotone (P5X) et nouveau portrait |
+| 17 | `feat/badge_cafe_leblanc` | Badge secret Ko-fi |
 
 ---
 
+## 2026-09-25 — Badge secret « Café Leblanc », au bout du lien Ko-fi
+
+Demande de Hamza : un badge caché, sur le modèle de `github_contributor`, accordé au clic
+du bouton Ko-fi de l'accueil. Image livrée : `kofiBadges_fumee.png`.
+
+### Ce qu'il récompense, et ce qu'il ne peut pas récompenser
+
+**Ko-fi ne dit rien au jeu de ce qui se passe chez lui.** Aucun retour, aucun webhook, rien
+à recouper : le site voit un clic sur un lien sortant, pas un don. Le badge récompense donc
+la **visite**, et son texte le dit ainsi — « You were curious enough to push open the door
+of my cafe. The coffee's on the house — and thanks for stopping by. »
+
+C'est exactement la formulation demandée (« tu as eu la curiosité de consulter mon café »),
+et ce n'est pas un détail de style : un texte qui remercierait d'un *don* affirmerait au
+joueur une chose que personne n'a vérifiée, et qu'un simple clic suffit à obtenir. Un test
+interdit d'y glisser plus tard « donation », « support », « paid », « purchase » ou
+« contribution ».
+
+Rareté `common`, comme `github_contributor` : c'est le même geste, un clic.
+
+### La chaîne, de bout en bout
+
+| Étape | Où |
+|---|---|
+| Le clic pose `visitedKofi` dans le profil local | `index.html`, `onclick` inline du lien |
+| Le catalogue client lit le drapeau | `badgesData.js`, `check(stats, profile)` |
+| Le serveur accorde | `badges.condition_type = 'manual'` |
+
+`manual` est ce que le serveur accepte sur simple demande. C'est déjà le régime de
+`github_contributor`, et le seul possible ici : il n'existe aucune trace côté serveur qui
+permettrait de vérifier quoi que ce soit. À noter que ça ne contredit pas la règle « le
+client ne décide pas de ce qui existe » — le serveur reste seul à écrire, et un badge non
+`manual` demandé sans condition remplie est toujours refusé en 403.
+
+Le drapeau vit dans le `localStorage`, donc un vidage du cache le perd. Sans effet : une
+fois le badge accordé côté serveur, il est acquis (règle de monotonie, cf. CLAUDE.md §7).
+
+### Image
+
+`kofiBadges_fumee.png` → `Badge_Cafe_Leblanc.webp` : 500 × 500, transparence conservée,
+**334 Ko → 22 Ko** (`libwebp` q=82). Le WebP est le format des badges depuis la 2.3.
+
+### Fichiers touchés
+
+- `profile/badges/images/Badge_Cafe_Leblanc.webp` — **nouveau**.
+- `profile/badges/badgesData.js` — l'entrée, posée juste après `github_contributor` pour
+  que les deux badges « lien de l'accueil » se lisent ensemble.
+- `sql/migrations/055_badge_cafe_leblanc.sql` — **nouvelle**, `INSERT IGNORE`.
+- `sql/bdd_mysql.sql` — la même ligne dans le seed. Sans elle,
+  `tests/badgesCatalogParity.test.js` échoue, et c'est son rôle : un badge présent d'un seul
+  côté donne soit un 404 à l'unlock, soit un badge en base que personne ne peut gagner.
+- `index.html` — le lien Ko-fi reçoit `id="kofiLink"`, `rel="noopener"` et le `onclick` qui
+  pose le drapeau, calqué sur le lien GitHub juste au-dessus.
+- `lang/en.json` + les 5 autres — nom, condition et description. Le **nom reste
+  « Café Leblanc » dans toutes les langues** et le badge entre dans la liste `KEEP_ORIGINAL`
+  de `tests/badgesI18n.test.js` : Leblanc est le nom du café de P5, un lieu, pas une
+  expression. Cette liste existe pour que « VO assumée » soit une décision et non un
+  fourre-tout d'oublis — un test vérifie que le nom est bien identique partout.
+- `tests/badge_cafe_leblanc.test.js` — **nouveau**, 5 cas.
+- `tests-e2e/badge_cafe_leblanc.spec.js` — **nouveau**, 2 scénarios.
+- `PersonaDLE_Update.html` — le badge est listé (cinq badges, plus quatre), avec son image
+  et un `???` : sa condition est le jeu lui-même.
+
+### Vérifications
+
+- **Migration jouée pour de vrai** contre la base de dev : 73 → 74 badges, accent conservé
+  (`HEX(name_en)` donne bien `C3A9` pour le `é`), et rejeu sans effet — toujours 74.
+- E2E : le clic pose le drapeau, puis le serveur accorde le badge. Le scénario **négatif**
+  est là aussi — sans le clic, le serveur n'accorde rien. Sans lui, un badge accordé à tout
+  le monde passerait le premier scénario au vert sans rien prouver.
+- Tests unitaires : le badge refuse un profil vide, refuse le drapeau du badge GitHub, et
+  refuse une valeur seulement « vraie » (`"true"`, `1`, `[]`, `{}`) — le drapeau vient du
+  `localStorage`, où tout peut arriver après désérialisation.
+- La navigation vers ko-fi.com est interceptée en E2E : pas de dépendance réseau, et on ne
+  martèle pas leur site à chaque passage de CI.
+
+### À faire avant la release
+
+La **055** est à jouer en production, comme la 054.
+
+---
 ## 2026-09-25 — Une seule Kotone en All-Out Attack, rangée dans P3P
 
 Décision de Hamza, qui revient sur celle de l'entrée précédente : l'ancienne animation

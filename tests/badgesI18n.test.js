@@ -32,6 +32,8 @@ const KEEP_ORIGINAL = new Set([
   // Lot du 2026-09-23 (migration 054)
   "chord_progression", // terme de musique, et nom du personnage (Chord)
   "memento_vivere_mori", // locutions latines, comme burn_my_dread
+  // Lot du 2026-09-25
+  "cafe_leblanc", // « Leblanc » est le nom du café de P5 : un lieu, pas une expression
 ]);
 
 /** Ids de badges réellement définis (les autres clés de `badges` sont de l'UI). */

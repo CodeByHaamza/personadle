@@ -609,7 +609,24 @@
       >
         <img src="./assets/buttons/discord.svg" alt="Discord" width="30" height="30" />
       </a>
-      <a href="https://ko-fi.com/hamzadev" target="_blank" title="kofi">
+      <a
+        href="https://ko-fi.com/hamzadev"
+        target="_blank"
+        rel="noopener"
+        title="kofi"
+        id="kofiLink"
+        onclick="
+          (function () {
+            try {
+              const p = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
+              if (!p.visitedKofi) {
+                p.visitedKofi = true;
+                localStorage.setItem('personaUserProfile', JSON.stringify(p));
+              }
+            } catch (e) {}
+          })()
+        "
+      >
         <img src="./assets/buttons/kofi.svg" alt="Ko-fi" width="30" height="30" />
       </a>
     </div>
@@ -815,9 +832,20 @@
               <span class="pink-petals" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
 
               <div class="v2-header-inner">
-                <svg class="pink-ribbon-mark" viewBox="0 0 120 100" aria-hidden="true" focusable="false">
+                <svg
+                  class="pink-ribbon-mark"
+                  viewBox="0 0 120 100"
+                  aria-hidden="true"
+                  focusable="false"
+                >
                   <!-- Le nœud de Kotone : deux boucles, deux pans, un centre. -->
-                  <g fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+                  <g
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="6"
+                    stroke-linejoin="round"
+                    stroke-linecap="round"
+                  >
                     <path d="M56 46C42 24 16 18 9 31c-7 13 9 29 31 27 7-1 13-5 16-12z" />
                     <path d="M64 46c14-22 40-28 47-15 7 13-9 29-31 27-7-1-13-5-16-12z" />
                     <path d="M52 52C40 70 33 88 41 95c8 7 18-8 21-24" />
@@ -826,17 +854,29 @@
                   <ellipse cx="60" cy="47" rx="11" ry="9" fill="currentColor" />
                 </svg>
                 <div>
-                  <div class="version-title" data-i18n-block="en">🎀 Version 2.3 — Kotone Shiomi</div>
+                  <div class="version-title" data-i18n-block="en">
+                    🎀 Version 2.3 — Kotone Shiomi
+                  </div>
                   <div class="version-date" data-i18n-block="en">September 2026</div>
-                  <div class="version-title" data-i18n-block="fr">🎀 Version 2.3 — Kotone Shiomi</div>
+                  <div class="version-title" data-i18n-block="fr">
+                    🎀 Version 2.3 — Kotone Shiomi
+                  </div>
                   <div class="version-date" data-i18n-block="fr">Septembre 2026</div>
-                  <div class="version-title" data-i18n-block="es">🎀 Versión 2.3 — Kotone Shiomi</div>
+                  <div class="version-title" data-i18n-block="es">
+                    🎀 Versión 2.3 — Kotone Shiomi
+                  </div>
                   <div class="version-date" data-i18n-block="es">Septiembre de 2026</div>
-                  <div class="version-title" data-i18n-block="de">🎀 Version 2.3 — Kotone Shiomi</div>
+                  <div class="version-title" data-i18n-block="de">
+                    🎀 Version 2.3 — Kotone Shiomi
+                  </div>
                   <div class="version-date" data-i18n-block="de">September 2026</div>
-                  <div class="version-title" data-i18n-block="it">🎀 Versione 2.3 — Kotone Shiomi</div>
+                  <div class="version-title" data-i18n-block="it">
+                    🎀 Versione 2.3 — Kotone Shiomi
+                  </div>
                   <div class="version-date" data-i18n-block="it">Settembre 2026</div>
-                  <div class="version-title" data-i18n-block="pt">🎀 Versão 2.3 — Kotone Shiomi</div>
+                  <div class="version-title" data-i18n-block="pt">
+                    🎀 Versão 2.3 — Kotone Shiomi
+                  </div>
                   <div class="version-date" data-i18n-block="pt">Setembro de 2026</div>
                 </div>
               </div>
@@ -848,25 +888,41 @@
               <div data-i18n-block="en">
                 <ul>
                   <li>
-                    ✨ <strong>Animated pictures:</strong> Four of Kotone Shiomi and two of Theodore join the gallery — and an <strong>Animated</strong> tab now shows only the pictures that move. All available right away.
+                    ✨ <strong>Animated pictures:</strong> Four of Kotone Shiomi and two of Theodore
+                    join the gallery — and an <strong>Animated</strong> tab now shows only the
+                    pictures that move. All available right away.
                   </li>
                   <li>
-                    🤝 <strong>The friendship ranking:</strong> The ranking gains a Social Link dimension: it doesn't rank players but <strong>friendships</strong>. And your Social Link XP no longer hides at rank 10 — the rank stops there, the XP doesn't.
+                    🤝 <strong>The friendship ranking:</strong> The ranking gains a Social Link
+                    dimension: it doesn't rank players but <strong>friendships</strong>. And your
+                    Social Link XP no longer hides at rank 10 — the rank stops there, the XP
+                    doesn't.
                   </li>
                   <li>
-                    🎖️ <strong>Your badges, your order:</strong> Drag your pinned badges around, by mouse or finger. And an eye on each badge opens its details <strong>without</strong> pinning it — until now, reading a condition on a phone meant tapping the badge.
+                    🎖️ <strong>Your badges, your order:</strong> Drag your pinned badges around, by
+                    mouse or finger. And an eye on each badge opens its details
+                    <strong>without</strong> pinning it — until now, reading a condition on a phone
+                    meant tapping the badge.
                   </li>
                   <li>
-                    🏅 <strong>Four badges and a title:</strong> Memento Vivere Memento Mori (legendary), Chord Progression, Birds of a Different Feather, a secret one — and Déjà Vu, from Persona 2: Innocent Sin.
+                    🏅 <strong>Four badges and a title:</strong> Memento Vivere Memento Mori
+                    (legendary), Chord Progression, Birds of a Different Feather, a secret one — and
+                    Déjà Vu, from Persona 2: Innocent Sin.
                   </li>
                   <li>
-                    🖼️ <strong>146 new profile pictures:</strong> The gallery goes from 204 to 350. Twenty characters who had none at all finally get one.
+                    🖼️ <strong>146 new profile pictures:</strong> The gallery goes from 204 to 350.
+                    Twenty characters who had none at all finally get one.
                   </li>
                   <li>
-                    💥 <strong>Two new All-Out Attacks:</strong> Luce Notte and Soy Pioneer, from Persona 5: The Phantom X. And « Sun », from Persona 3 Portable, joins Music mode.
+                    💥 <strong>Two new All-Out Attacks:</strong> Luce Notte and Soy Pioneer, from
+                    Persona 5: The Phantom X. And « Sun », from Persona 3 Portable, joins Music
+                    mode.
                   </li>
                   <li>
-                    🛠 <strong>And the fixes:</strong> Eight Personae Expert lore cards were giving the answer away. Opening the game on a second device could wipe your pinned badges. The 60+ age bracket showed red instead of orange. And the Save button in Settings was off-screen.
+                    🛠 <strong>And the fixes:</strong> Eight Personae Expert lore cards were giving
+                    the answer away. Opening the game on a second device could wipe your pinned
+                    badges. The 60+ age bracket showed red instead of orange. And the Save button in
+                    Settings was off-screen.
                   </li>
                 </ul>
                 <div class="pdf-container">
@@ -882,25 +938,41 @@
               <div data-i18n-block="fr">
                 <ul>
                   <li>
-                    ✨ <strong>Portraits animés :</strong> Quatre de Kotone Shiomi et deux de Theodore rejoignent la galerie — et un onglet <strong>Animés</strong> ne montre que les portraits qui bougent. Tous disponibles immédiatement.
+                    ✨ <strong>Portraits animés :</strong> Quatre de Kotone Shiomi et deux de
+                    Theodore rejoignent la galerie — et un onglet <strong>Animés</strong> ne montre
+                    que les portraits qui bougent. Tous disponibles immédiatement.
                   </li>
                   <li>
-                    🤝 <strong>Le classement des amitiés :</strong> Le classement gagne une dimension Social Link : on n'y classe plus des joueurs mais des <strong>amitiés</strong>. Et ton XP de Social Link ne se cache plus au rang 10 — le rang s'arrête là, pas l'XP.
+                    🤝 <strong>Le classement des amitiés :</strong> Le classement gagne une
+                    dimension Social Link : on n'y classe plus des joueurs mais des
+                    <strong>amitiés</strong>. Et ton XP de Social Link ne se cache plus au rang 10 —
+                    le rang s'arrête là, pas l'XP.
                   </li>
                   <li>
-                    🎖️ <strong>Tes badges, ton ordre :</strong> Déplace tes badges épinglés au glisser, à la souris comme au doigt. Et un œil sur chaque badge ouvre sa fiche <strong>sans</strong> l'épingler — jusqu'ici, lire une condition sur téléphone obligeait à le toucher.
+                    🎖️ <strong>Tes badges, ton ordre :</strong> Déplace tes badges épinglés au
+                    glisser, à la souris comme au doigt. Et un œil sur chaque badge ouvre sa fiche
+                    <strong>sans</strong> l'épingler — jusqu'ici, lire une condition sur téléphone
+                    obligeait à le toucher.
                   </li>
                   <li>
-                    🏅 <strong>Quatre badges et un titre :</strong> Memento Vivere Memento Mori (légendaire), Chord Progression, Birds of a Different Feather, un secret — et Déjà Vu, de Persona 2: Innocent Sin.
+                    🏅 <strong>Quatre badges et un titre :</strong> Memento Vivere Memento Mori
+                    (légendaire), Chord Progression, Birds of a Different Feather, un secret — et
+                    Déjà Vu, de Persona 2: Innocent Sin.
                   </li>
                   <li>
-                    🖼️ <strong>146 nouveaux portraits :</strong> La galerie passe de 204 à 350. Vingt personnages qui n'en avaient aucun en ont enfin un.
+                    🖼️ <strong>146 nouveaux portraits :</strong> La galerie passe de 204 à 350.
+                    Vingt personnages qui n'en avaient aucun en ont enfin un.
                   </li>
                   <li>
-                    💥 <strong>Deux nouveaux All-Out Attack :</strong> Luce Notte et Soy Pioneer, de Persona 5: The Phantom X. Et « Sun », de Persona 3 Portable, rejoint le mode Musique.
+                    💥 <strong>Deux nouveaux All-Out Attack :</strong> Luce Notte et Soy Pioneer, de
+                    Persona 5: The Phantom X. Et « Sun », de Persona 3 Portable, rejoint le mode
+                    Musique.
                   </li>
                   <li>
-                    🛠 <strong>Et les correctifs :</strong> Huit fiches de lore en Personae Expert donnaient la réponse. Ouvrir le jeu sur un second appareil pouvait effacer tes badges épinglés. La tranche d'âge 60+ sortait en rouge au lieu de l'orange. Et le bouton Sauvegarder des paramètres était hors champ.
+                    🛠 <strong>Et les correctifs :</strong> Huit fiches de lore en Personae Expert
+                    donnaient la réponse. Ouvrir le jeu sur un second appareil pouvait effacer tes
+                    badges épinglés. La tranche d'âge 60+ sortait en rouge au lieu de l'orange. Et
+                    le bouton Sauvegarder des paramètres était hors champ.
                   </li>
                 </ul>
                 <div class="pdf-container">
@@ -916,25 +988,40 @@
               <div data-i18n-block="es">
                 <ul>
                   <li>
-                    ✨ <strong>Retratos animados:</strong> Cuatro de Kotone Shiomi y dos de Theodore se unen a la galería — y una pestaña <strong>Animados</strong> muestra solo los retratos que se mueven. Todos disponibles de inmediato.
+                    ✨ <strong>Retratos animados:</strong> Cuatro de Kotone Shiomi y dos de Theodore
+                    se unen a la galería — y una pestaña <strong>Animados</strong> muestra solo los
+                    retratos que se mueven. Todos disponibles de inmediato.
                   </li>
                   <li>
-                    🤝 <strong>La clasificación de amistades:</strong> La clasificación gana una dimensión Social Link: ya no clasifica jugadores sino <strong>amistades</strong>. Y tu XP de Social Link ya no se oculta en el rango 10 — el rango se detiene ahí, la XP no.
+                    🤝 <strong>La clasificación de amistades:</strong> La clasificación gana una
+                    dimensión Social Link: ya no clasifica jugadores sino
+                    <strong>amistades</strong>. Y tu XP de Social Link ya no se oculta en el rango
+                    10 — el rango se detiene ahí, la XP no.
                   </li>
                   <li>
-                    🎖️ <strong>Tus insignias, tu orden:</strong> Arrastra tus insignias fijadas, con el ratón o con el dedo. Y un ojo en cada insignia abre su ficha <strong>sin</strong> fijarla — hasta ahora, leer una condición en el móvil obligaba a tocarla.
+                    🎖️ <strong>Tus insignias, tu orden:</strong> Arrastra tus insignias fijadas, con
+                    el ratón o con el dedo. Y un ojo en cada insignia abre su ficha
+                    <strong>sin</strong> fijarla — hasta ahora, leer una condición en el móvil
+                    obligaba a tocarla.
                   </li>
                   <li>
-                    🏅 <strong>Cuatro insignias y un título:</strong> Memento Vivere Memento Mori (legendaria), Chord Progression, Birds of a Different Feather, una secreta — y Déjà Vu, de Persona 2: Innocent Sin.
+                    🏅 <strong>Cuatro insignias y un título:</strong> Memento Vivere Memento Mori
+                    (legendaria), Chord Progression, Birds of a Different Feather, una secreta — y
+                    Déjà Vu, de Persona 2: Innocent Sin.
                   </li>
                   <li>
-                    🖼️ <strong>146 retratos nuevos:</strong> La galería pasa de 204 a 350. Veinte personajes que no tenían ninguno por fin tienen uno.
+                    🖼️ <strong>146 retratos nuevos:</strong> La galería pasa de 204 a 350. Veinte
+                    personajes que no tenían ninguno por fin tienen uno.
                   </li>
                   <li>
-                    💥 <strong>Dos nuevos All-Out Attack:</strong> Luce Notte y Soy Pioneer, de Persona 5: The Phantom X. Y « Sun », de Persona 3 Portable, se une al modo Música.
+                    💥 <strong>Dos nuevos All-Out Attack:</strong> Luce Notte y Soy Pioneer, de
+                    Persona 5: The Phantom X. Y « Sun », de Persona 3 Portable, se une al modo
+                    Música.
                   </li>
                   <li>
-                    🛠 <strong>Y las correcciones:</strong> Ocho fichas de lore en Personae Experto revelaban la respuesta. Abrir el juego en un segundo dispositivo podía borrar tus insignias fijadas. El rango de edad 60+ salía en rojo en vez de naranja.
+                    🛠 <strong>Y las correcciones:</strong> Ocho fichas de lore en Personae Experto
+                    revelaban la respuesta. Abrir el juego en un segundo dispositivo podía borrar
+                    tus insignias fijadas. El rango de edad 60+ salía en rojo en vez de naranja.
                   </li>
                 </ul>
                 <div class="pdf-container">
@@ -950,25 +1037,39 @@
               <div data-i18n-block="de">
                 <ul>
                   <li>
-                    ✨ <strong>Animierte Porträts:</strong> Vier von Kotone Shiomi und zwei von Theodore kommen in die Galerie — und ein Reiter <strong>Animiert</strong> zeigt nur die Porträts, die sich bewegen. Alle sofort verfügbar.
+                    ✨ <strong>Animierte Porträts:</strong> Vier von Kotone Shiomi und zwei von
+                    Theodore kommen in die Galerie — und ein Reiter <strong>Animiert</strong> zeigt
+                    nur die Porträts, die sich bewegen. Alle sofort verfügbar.
                   </li>
                   <li>
-                    🤝 <strong>Die Freundschafts-Rangliste:</strong> Die Rangliste bekommt eine Social-Link-Dimension: sie reiht keine Spieler, sondern <strong>Freundschaften</strong>. Und deine Social-Link-XP versteckt sich auf Rang 10 nicht mehr — der Rang endet dort, die XP nicht.
+                    🤝 <strong>Die Freundschafts-Rangliste:</strong> Die Rangliste bekommt eine
+                    Social-Link-Dimension: sie reiht keine Spieler, sondern
+                    <strong>Freundschaften</strong>. Und deine Social-Link-XP versteckt sich auf
+                    Rang 10 nicht mehr — der Rang endet dort, die XP nicht.
                   </li>
                   <li>
-                    🎖️ <strong>Deine Abzeichen, deine Reihenfolge:</strong> Zieh deine angehefteten Abzeichen um, mit Maus oder Finger. Und ein Auge auf jedem Abzeichen öffnet seine Details, <strong>ohne</strong> es anzuheften.
+                    🎖️ <strong>Deine Abzeichen, deine Reihenfolge:</strong> Zieh deine angehefteten
+                    Abzeichen um, mit Maus oder Finger. Und ein Auge auf jedem Abzeichen öffnet
+                    seine Details, <strong>ohne</strong> es anzuheften.
                   </li>
                   <li>
-                    🏅 <strong>Vier Abzeichen und ein Titel:</strong> Memento Vivere Memento Mori (legendär), Chord Progression, Birds of a Different Feather, ein geheimes — und Déjà Vu, aus Persona 2: Innocent Sin.
+                    🏅 <strong>Vier Abzeichen und ein Titel:</strong> Memento Vivere Memento Mori
+                    (legendär), Chord Progression, Birds of a Different Feather, ein geheimes — und
+                    Déjà Vu, aus Persona 2: Innocent Sin.
                   </li>
                   <li>
-                    🖼️ <strong>146 neue Porträts:</strong> Die Galerie wächst von 204 auf 350. Zwanzig Figuren, die gar keines hatten, bekommen endlich eines.
+                    🖼️ <strong>146 neue Porträts:</strong> Die Galerie wächst von 204 auf 350.
+                    Zwanzig Figuren, die gar keines hatten, bekommen endlich eines.
                   </li>
                   <li>
-                    💥 <strong>Zwei neue All-Out Attacks:</strong> Luce Notte und Soy Pioneer, aus Persona 5: The Phantom X. Und « Sun », aus Persona 3 Portable, kommt in den Musik-Modus.
+                    💥 <strong>Zwei neue All-Out Attacks:</strong> Luce Notte und Soy Pioneer, aus
+                    Persona 5: The Phantom X. Und « Sun », aus Persona 3 Portable, kommt in den
+                    Musik-Modus.
                   </li>
                   <li>
-                    🛠 <strong>Und die Korrekturen:</strong> Acht Lore-Karten in Personae Experte verrieten die Antwort. Das Spiel auf einem zweiten Gerät zu öffnen konnte deine angehefteten Abzeichen löschen. Die Altersgruppe 60+ erschien rot statt orange.
+                    🛠 <strong>Und die Korrekturen:</strong> Acht Lore-Karten in Personae Experte
+                    verrieten die Antwort. Das Spiel auf einem zweiten Gerät zu öffnen konnte deine
+                    angehefteten Abzeichen löschen. Die Altersgruppe 60+ erschien rot statt orange.
                   </li>
                 </ul>
                 <div class="pdf-container">
@@ -984,25 +1085,40 @@
               <div data-i18n-block="it">
                 <ul>
                   <li>
-                    ✨ <strong>Ritratti animati:</strong> Quattro di Kotone Shiomi e due di Theodore entrano nella galleria — e una scheda <strong>Animati</strong> mostra solo i ritratti che si muovono. Tutti disponibili subito.
+                    ✨ <strong>Ritratti animati:</strong> Quattro di Kotone Shiomi e due di Theodore
+                    entrano nella galleria — e una scheda <strong>Animati</strong> mostra solo i
+                    ritratti che si muovono. Tutti disponibili subito.
                   </li>
                   <li>
-                    🤝 <strong>La classifica delle amicizie:</strong> La classifica guadagna una dimensione Social Link: non classifica giocatori ma <strong>amicizie</strong>. E il tuo XP di Social Link non si nasconde più al rango 10 — il rango si ferma lì, l'XP no.
+                    🤝 <strong>La classifica delle amicizie:</strong> La classifica guadagna una
+                    dimensione Social Link: non classifica giocatori ma <strong>amicizie</strong>. E
+                    il tuo XP di Social Link non si nasconde più al rango 10 — il rango si ferma lì,
+                    l'XP no.
                   </li>
                   <li>
-                    🎖️ <strong>I tuoi distintivi, il tuo ordine:</strong> Trascina i distintivi appuntati, con il mouse o con il dito. E un occhio su ciascuno apre la sua scheda <strong>senza</strong> appuntarlo.
+                    🎖️ <strong>I tuoi distintivi, il tuo ordine:</strong> Trascina i distintivi
+                    appuntati, con il mouse o con il dito. E un occhio su ciascuno apre la sua
+                    scheda <strong>senza</strong> appuntarlo.
                   </li>
                   <li>
-                    🏅 <strong>Quattro distintivi e un titolo:</strong> Memento Vivere Memento Mori (leggendario), Chord Progression, Birds of a Different Feather, uno segreto — e Déjà Vu, da Persona 2: Innocent Sin.
+                    🏅 <strong>Quattro distintivi e un titolo:</strong> Memento Vivere Memento Mori
+                    (leggendario), Chord Progression, Birds of a Different Feather, uno segreto — e
+                    Déjà Vu, da Persona 2: Innocent Sin.
                   </li>
                   <li>
-                    🖼️ <strong>146 nuovi ritratti:</strong> La galleria passa da 204 a 350. Venti personaggi che non ne avevano nessuno finalmente ne hanno uno.
+                    🖼️ <strong>146 nuovi ritratti:</strong> La galleria passa da 204 a 350. Venti
+                    personaggi che non ne avevano nessuno finalmente ne hanno uno.
                   </li>
                   <li>
-                    💥 <strong>Due nuovi All-Out Attack:</strong> Luce Notte e Soy Pioneer, da Persona 5: The Phantom X. E « Sun », da Persona 3 Portable, entra nella modalità Musica.
+                    💥 <strong>Due nuovi All-Out Attack:</strong> Luce Notte e Soy Pioneer, da
+                    Persona 5: The Phantom X. E « Sun », da Persona 3 Portable, entra nella modalità
+                    Musica.
                   </li>
                   <li>
-                    🛠 <strong>E le correzioni:</strong> Otto schede di lore in Personae Esperto svelavano la risposta. Aprire il gioco su un secondo dispositivo poteva cancellare i distintivi appuntati. La fascia d'età 60+ usciva in rosso invece che in arancione.
+                    🛠 <strong>E le correzioni:</strong> Otto schede di lore in Personae Esperto
+                    svelavano la risposta. Aprire il gioco su un secondo dispositivo poteva
+                    cancellare i distintivi appuntati. La fascia d'età 60+ usciva in rosso invece
+                    che in arancione.
                   </li>
                 </ul>
                 <div class="pdf-container">
@@ -1018,25 +1134,39 @@
               <div data-i18n-block="pt">
                 <ul>
                   <li>
-                    ✨ <strong>Retratos animados:</strong> Quatro da Kotone Shiomi e dois do Theodore juntam-se à galeria — e um separador <strong>Animados</strong> mostra só os retratos que se mexem. Todos disponíveis de imediato.
+                    ✨ <strong>Retratos animados:</strong> Quatro da Kotone Shiomi e dois do
+                    Theodore juntam-se à galeria — e um separador <strong>Animados</strong> mostra
+                    só os retratos que se mexem. Todos disponíveis de imediato.
                   </li>
                   <li>
-                    🤝 <strong>A classificação das amizades:</strong> A classificação ganha uma dimensão Social Link: não classifica jogadores mas <strong>amizades</strong>. E o teu XP de Social Link já não se esconde no nível 10 — o nível para aí, o XP não.
+                    🤝 <strong>A classificação das amizades:</strong> A classificação ganha uma
+                    dimensão Social Link: não classifica jogadores mas <strong>amizades</strong>. E
+                    o teu XP de Social Link já não se esconde no nível 10 — o nível para aí, o XP
+                    não.
                   </li>
                   <li>
-                    🎖️ <strong>Os teus emblemas, a tua ordem:</strong> Arrasta os emblemas afixados, com o rato ou com o dedo. E um olho em cada emblema abre a sua ficha <strong>sem</strong> o afixar.
+                    🎖️ <strong>Os teus emblemas, a tua ordem:</strong> Arrasta os emblemas afixados,
+                    com o rato ou com o dedo. E um olho em cada emblema abre a sua ficha
+                    <strong>sem</strong> o afixar.
                   </li>
                   <li>
-                    🏅 <strong>Quatro emblemas e um título:</strong> Memento Vivere Memento Mori (lendário), Chord Progression, Birds of a Different Feather, um secreto — e Déjà Vu, de Persona 2: Innocent Sin.
+                    🏅 <strong>Quatro emblemas e um título:</strong> Memento Vivere Memento Mori
+                    (lendário), Chord Progression, Birds of a Different Feather, um secreto — e Déjà
+                    Vu, de Persona 2: Innocent Sin.
                   </li>
                   <li>
-                    🖼️ <strong>146 novos retratos:</strong> A galeria passa de 204 para 350. Vinte personagens que não tinham nenhum finalmente têm um.
+                    🖼️ <strong>146 novos retratos:</strong> A galeria passa de 204 para 350. Vinte
+                    personagens que não tinham nenhum finalmente têm um.
                   </li>
                   <li>
-                    💥 <strong>Dois novos All-Out Attack:</strong> Luce Notte e Soy Pioneer, de Persona 5: The Phantom X. E « Sun », de Persona 3 Portable, junta-se ao modo Música.
+                    💥 <strong>Dois novos All-Out Attack:</strong> Luce Notte e Soy Pioneer, de
+                    Persona 5: The Phantom X. E « Sun », de Persona 3 Portable, junta-se ao modo
+                    Música.
                   </li>
                   <li>
-                    🛠 <strong>E as correções:</strong> Oito fichas de lore no Personae Expert revelavam a resposta. Abrir o jogo num segundo dispositivo podia apagar os emblemas afixados. A faixa etária 60+ saía a vermelho em vez de laranja.
+                    🛠 <strong>E as correções:</strong> Oito fichas de lore no Personae Expert
+                    revelavam a resposta. Abrir o jogo num segundo dispositivo podia apagar os
+                    emblemas afixados. A faixa etária 60+ saía a vermelho em vez de laranja.
                   </li>
                 </ul>
                 <div class="pdf-container">
@@ -1060,22 +1190,65 @@
               <span class="velvet-ornament velvet-ornament--br" aria-hidden="true">❦</span>
 
               <div class="v2-header-inner">
-                <svg class="velvet-pentacle" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
-                  <circle cx="100" cy="100" r="88" fill="none" stroke="currentColor" stroke-width="5" />
-                  <circle cx="100" cy="100" r="78" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="4 7" />
-                  <polygon points="100,18 122,76 184,76 134,112 152,172 100,136 48,172 66,112 16,76 78,76" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" />
-                  <circle cx="100" cy="100" r="14" fill="none" stroke="currentColor" stroke-width="4" />
+                <svg
+                  class="velvet-pentacle"
+                  viewBox="0 0 200 200"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <circle
+                    cx="100"
+                    cy="100"
+                    r="88"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="5"
+                  />
+                  <circle
+                    cx="100"
+                    cy="100"
+                    r="78"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-dasharray="4 7"
+                  />
+                  <polygon
+                    points="100,18 122,76 184,76 134,112 152,172 100,136 48,172 66,112 16,76 78,76"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="6"
+                    stroke-linejoin="round"
+                  />
+                  <circle
+                    cx="100"
+                    cy="100"
+                    r="14"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  />
                 </svg>
                 <div>
-                  <div class="version-title" data-i18n-block="en">📖 Version 2.2 — The Compendium</div>
+                  <div class="version-title" data-i18n-block="en">
+                    📖 Version 2.2 — The Compendium
+                  </div>
                   <div class="version-date" data-i18n-block="en">September 2026</div>
-                  <div class="version-title" data-i18n-block="fr">📖 Version 2.2 — Le Compendium</div>
+                  <div class="version-title" data-i18n-block="fr">
+                    📖 Version 2.2 — Le Compendium
+                  </div>
                   <div class="version-date" data-i18n-block="fr">Septembre 2026</div>
-                  <div class="version-title" data-i18n-block="es">📖 Versión 2.2 — El Compendio</div>
+                  <div class="version-title" data-i18n-block="es">
+                    📖 Versión 2.2 — El Compendio
+                  </div>
                   <div class="version-date" data-i18n-block="es">Septiembre de 2026</div>
-                  <div class="version-title" data-i18n-block="de">📖 Version 2.2 — Das Kompendium</div>
+                  <div class="version-title" data-i18n-block="de">
+                    📖 Version 2.2 — Das Kompendium
+                  </div>
                   <div class="version-date" data-i18n-block="de">September 2026</div>
-                  <div class="version-title" data-i18n-block="it">📖 Versione 2.2 — Il Compendio</div>
+                  <div class="version-title" data-i18n-block="it">
+                    📖 Versione 2.2 — Il Compendio
+                  </div>
                   <div class="version-date" data-i18n-block="it">Settembre 2026</div>
                   <div class="version-title" data-i18n-block="pt">📖 Versão 2.2 — O Compêndio</div>
                   <div class="version-date" data-i18n-block="pt">Setembro de 2026</div>
@@ -1089,28 +1262,48 @@
               <div data-i18n-block="en">
                 <ul>
                   <li>
-                    📖 <strong>The Compendium:</strong> a collection book on your profile — badges, titles, wallpapers, bonds, challenges and feats, every entry dated, with who, and a short note. Public, like your profile.
+                    📖 <strong>The Compendium:</strong> a collection book on your profile — badges,
+                    titles, wallpapers, bonds, challenges and feats, every entry dated, with who,
+                    and a short note. Public, like your profile.
                   </li>
                   <li>
-                    ⚔ <strong>Challenge a friend, on your real score:</strong> the button is there as soon as you land on a mode, but locked until you finish your daily game — a challenge always carries the score you actually made. It stays after a give-up, survives a reload, and works from your friends list too, Expert included.
+                    ⚔ <strong>Challenge a friend, on your real score:</strong> the button is there
+                    as soon as you land on a mode, but locked until you finish your daily game — a
+                    challenge always carries the score you actually made. It stays after a give-up,
+                    survives a reload, and works from your friends list too, Expert included.
                   </li>
                   <li>
-                    👥 <strong>Friends page in three tabs:</strong> Friends, Inbox (messages & challenges, unread count) and Find. Buttons the same size at last, a visible trash icon, one single « + ».
+                    👥 <strong>Friends page in three tabs:</strong> Friends, Inbox (messages &
+                    challenges, unread count) and Find. Buttons the same size at last, a visible
+                    trash icon, one single « + ».
                   </li>
                   <li>
-                    🎯 <strong>Pick your favorite mode:</strong> you choose it now; the mode you do best in gets its own « Best Mode Overall » line, based on your win rate.
+                    🎯 <strong>Pick your favorite mode:</strong> you choose it now; the mode you do
+                    best in gets its own « Best Mode Overall » line, based on your win rate.
                   </li>
                   <li>
-                    ⚙ <strong>Settings everywhere:</strong> the ⚙ button sits next to dark mode on every page, with two new switches to stop profile music autoplay — on your profile, on other players' profiles.
+                    ⚙ <strong>Settings everywhere:</strong> the ⚙ button sits next to dark mode on
+                    every page, with two new switches to stop profile music autoplay — on your
+                    profile, on other players' profiles.
                   </li>
                   <li>
-                    ⚔️ <strong>Three new All-Out Attacks:</strong> Bui Cosmic, Berry Summer and Wonder Shujin, from Persona 5 X.
+                    ⚔️ <strong>Three new All-Out Attacks:</strong> Bui Cosmic, Berry Summer and
+                    Wonder Shujin, from Persona 5 X.
                   </li>
                   <li>
-                    🏅 <strong>Eight titles, six badges and three songs:</strong> S.E.E.S., We Share the Same Soul, I Am Not a Princess, The Case Is Never Closed, Don't Need Your Pity, Take Your Heart, Some Things Don't Burn Out and the legendary Go Beyond as calling cards; Song of Orpheus, Starlight Festival, Shujin Outlaws, Absolute Authority, Don't Waste Your Breath and Same Energy — the first badge earned as a pair — in the collection. « Invitation to Freedom » and both sides of « Light the Fire Up in the Night » join Music mode.
+                    🏅 <strong>Eight titles, six badges and three songs:</strong> S.E.E.S., We Share
+                    the Same Soul, I Am Not a Princess, The Case Is Never Closed, Don't Need Your
+                    Pity, Take Your Heart, Some Things Don't Burn Out and the legendary Go Beyond as
+                    calling cards; Song of Orpheus, Starlight Festival, Shujin Outlaws, Absolute
+                    Authority, Don't Waste Your Breath and Same Energy — the first badge earned as a
+                    pair — in the collection. « Invitation to Freedom » and both sides of « Light
+                    the Fire Up in the Night » join Music mode.
                   </li>
                   <li>
-                    🛠 <strong>And the fixes you asked for:</strong> round buttons that were stretched, Expert stats lined up and readable, a True Confidant that looks the part, Minthe's card no longer giving away her name in French, streaks identical on your profile and your friends'.
+                    🛠 <strong>And the fixes you asked for:</strong> round buttons that were
+                    stretched, Expert stats lined up and readable, a True Confidant that looks the
+                    part, Minthe's card no longer giving away her name in French, streaks identical
+                    on your profile and your friends'.
                   </li>
                 </ul>
                 <div class="pdf-container">
@@ -1126,28 +1319,51 @@
               <div data-i18n-block="fr">
                 <ul>
                   <li>
-                    📖 <strong>Le Compendium :</strong> un carnet de collection sur ton profil — badges, titres, fonds d'écran, liens, défis et exploits, chaque entrée datée, avec qui, et un petit mot. Public, comme ton profil.
+                    📖 <strong>Le Compendium :</strong> un carnet de collection sur ton profil —
+                    badges, titres, fonds d'écran, liens, défis et exploits, chaque entrée datée,
+                    avec qui, et un petit mot. Public, comme ton profil.
                   </li>
                   <li>
-                    ⚔ <strong>Défier un ami, sur ton vrai score :</strong> le bouton est là dès que tu arrives sur un mode, mais verrouillé tant que ta partie du jour n'est pas finie — un défi porte toujours le score que tu as vraiment fait. Il reste après un abandon, survit au rechargement, et marche aussi depuis ta liste d'amis, Expert compris.
+                    ⚔ <strong>Défier un ami, sur ton vrai score :</strong> le bouton est là dès que
+                    tu arrives sur un mode, mais verrouillé tant que ta partie du jour n'est pas
+                    finie — un défi porte toujours le score que tu as vraiment fait. Il reste après
+                    un abandon, survit au rechargement, et marche aussi depuis ta liste d'amis,
+                    Expert compris.
                   </li>
                   <li>
-                    👥 <strong>Page Amis en trois onglets :</strong> Amis, Boîte (messages & défis, non-lus comptés) et Trouver. Des boutons enfin de la même taille, une poubelle visible, un seul « + ».
+                    👥 <strong>Page Amis en trois onglets :</strong> Amis, Boîte (messages & défis,
+                    non-lus comptés) et Trouver. Des boutons enfin de la même taille, une poubelle
+                    visible, un seul « + ».
                   </li>
                   <li>
-                    🎯 <strong>Choisis ton mode favori :</strong> c'est toi qui le choisis ; le mode où tu réussis le mieux a sa propre ligne « Meilleur mode », calculée sur ton taux de victoire.
+                    🎯 <strong>Choisis ton mode favori :</strong> c'est toi qui le choisis ; le mode
+                    où tu réussis le mieux a sa propre ligne « Meilleur mode », calculée sur ton
+                    taux de victoire.
                   </li>
                   <li>
-                    ⚙ <strong>Les paramètres partout :</strong> le bouton ⚙ est à côté du mode sombre sur chaque page, avec deux nouveaux interrupteurs pour couper l'autoplay de la musique — sur ton profil, sur celui des autres.
+                    ⚙ <strong>Les paramètres partout :</strong> le bouton ⚙ est à côté du mode
+                    sombre sur chaque page, avec deux nouveaux interrupteurs pour couper l'autoplay
+                    de la musique — sur ton profil, sur celui des autres.
                   </li>
                   <li>
-                    ⚔️ <strong>Trois nouveaux All-Out Attack :</strong> Bui Cosmic, Berry Summer et Wonder Shujin, de Persona 5 X.
+                    ⚔️ <strong>Trois nouveaux All-Out Attack :</strong> Bui Cosmic, Berry Summer et
+                    Wonder Shujin, de Persona 5 X.
                   </li>
                   <li>
-                    🏅 <strong>Huit titres, six badges et trois musiques :</strong> S.E.E.S., Nous partageons la même âme, Je ne suis pas une princesse, L'affaire n'est jamais close, J'ai pas besoin de ta pitié, Je prends ton cœur, Certaines choses ne s'éteignent pas et le légendaire Go Beyond en calling cards ; Le Chant d'Orphée, Festival Starlight, Hors-la-loi de Shujin, Autorité absolue, Garde ta salive et Même énergie — le premier badge qui se gagne à deux — dans la collection. « Invitation to Freedom » et les deux faces de « Light the Fire Up in the Night » arrivent dans le mode Musique.
+                    🏅 <strong>Huit titres, six badges et trois musiques :</strong> S.E.E.S., Nous
+                    partageons la même âme, Je ne suis pas une princesse, L'affaire n'est jamais
+                    close, J'ai pas besoin de ta pitié, Je prends ton cœur, Certaines choses ne
+                    s'éteignent pas et le légendaire Go Beyond en calling cards ; Le Chant d'Orphée,
+                    Festival Starlight, Hors-la-loi de Shujin, Autorité absolue, Garde ta salive et
+                    Même énergie — le premier badge qui se gagne à deux — dans la collection. «
+                    Invitation to Freedom » et les deux faces de « Light the Fire Up in the Night »
+                    arrivent dans le mode Musique.
                   </li>
                   <li>
-                    🛠 <strong>Et les corrections demandées :</strong> boutons ronds qui étaient étirés, stats Expert alignées et lisibles, un True Confidant qui a de l'allure, la fiche de Minthe qui ne trahit plus son nom en français, une série identique sur ton profil et chez tes amis.
+                    🛠 <strong>Et les corrections demandées :</strong> boutons ronds qui étaient
+                    étirés, stats Expert alignées et lisibles, un True Confidant qui a de l'allure,
+                    la fiche de Minthe qui ne trahit plus son nom en français, une série identique
+                    sur ton profil et chez tes amis.
                   </li>
                 </ul>
                 <div class="pdf-container">
@@ -1163,28 +1379,50 @@
               <div data-i18n-block="es">
                 <ul>
                   <li>
-                    📖 <strong>El Compendio:</strong> un libro de colección en tu perfil — insignias, títulos, fondos, vínculos, desafíos y hazañas, cada entrada con fecha, con quién y una breve nota. Público, como tu perfil.
+                    📖 <strong>El Compendio:</strong> un libro de colección en tu perfil —
+                    insignias, títulos, fondos, vínculos, desafíos y hazañas, cada entrada con
+                    fecha, con quién y una breve nota. Público, como tu perfil.
                   </li>
                   <li>
-                    ⚔ <strong>Desafía a un amigo con tu marca real:</strong> el botón está ahí en cuanto entras en un modo, pero bloqueado hasta que termines tu partida del día — un desafío siempre lleva la marca que hiciste de verdad. Sigue tras rendirte, sobrevive a una recarga y funciona desde tu lista de amigos, Experto incluido.
+                    ⚔ <strong>Desafía a un amigo con tu marca real:</strong> el botón está ahí en
+                    cuanto entras en un modo, pero bloqueado hasta que termines tu partida del día —
+                    un desafío siempre lleva la marca que hiciste de verdad. Sigue tras rendirte,
+                    sobrevive a una recarga y funciona desde tu lista de amigos, Experto incluido.
                   </li>
                   <li>
-                    👥 <strong>Página de amigos en tres pestañas:</strong> Amigos, Bandeja (mensajes y desafíos, no leídos contados) y Buscar. Botones por fin del mismo tamaño, papelera visible, un solo « + ».
+                    👥 <strong>Página de amigos en tres pestañas:</strong> Amigos, Bandeja (mensajes
+                    y desafíos, no leídos contados) y Buscar. Botones por fin del mismo tamaño,
+                    papelera visible, un solo « + ».
                   </li>
                   <li>
-                    🎯 <strong>Elige tu modo favorito:</strong> ahora lo eliges tú; el modo en el que mejor rindes tiene su propia línea « Mejor modo », según tu tasa de victoria.
+                    🎯 <strong>Elige tu modo favorito:</strong> ahora lo eliges tú; el modo en el
+                    que mejor rindes tiene su propia línea « Mejor modo », según tu tasa de
+                    victoria.
                   </li>
                   <li>
-                    ⚙ <strong>Ajustes en todas partes:</strong> el botón ⚙ está junto al modo oscuro en cada página, con dos nuevos interruptores para cortar la reproducción automática de la música — en tu perfil, en el de los demás.
+                    ⚙ <strong>Ajustes en todas partes:</strong> el botón ⚙ está junto al modo oscuro
+                    en cada página, con dos nuevos interruptores para cortar la reproducción
+                    automática de la música — en tu perfil, en el de los demás.
                   </li>
                   <li>
-                    ⚔️ <strong>Tres nuevos All-Out Attack:</strong> Bui Cosmic, Berry Summer y Wonder Shujin, de Persona 5 X.
+                    ⚔️ <strong>Tres nuevos All-Out Attack:</strong> Bui Cosmic, Berry Summer y
+                    Wonder Shujin, de Persona 5 X.
                   </li>
                   <li>
-                    🏅 <strong>Ocho títulos, seis insignias y tres canciones:</strong> S.E.E.S., Compartimos la misma alma, No soy una princesa, El caso nunca se cierra, No necesito tu lástima, Te robaré el corazón, Algunas cosas no se apagan y el legendario Go Beyond como calling cards; El canto de Orfeo, Festival Starlight, Forajidos de Shujin, Autoridad absoluta, No gastes saliva y La misma energía — la primera insignia que se gana en pareja — en la colección. « Invitation to Freedom » y las dos caras de « Light the Fire Up in the Night » llegan al modo Música.
+                    🏅 <strong>Ocho títulos, seis insignias y tres canciones:</strong> S.E.E.S.,
+                    Compartimos la misma alma, No soy una princesa, El caso nunca se cierra, No
+                    necesito tu lástima, Te robaré el corazón, Algunas cosas no se apagan y el
+                    legendario Go Beyond como calling cards; El canto de Orfeo, Festival Starlight,
+                    Forajidos de Shujin, Autoridad absoluta, No gastes saliva y La misma energía —
+                    la primera insignia que se gana en pareja — en la colección. « Invitation to
+                    Freedom » y las dos caras de « Light the Fire Up in the Night » llegan al modo
+                    Música.
                   </li>
                   <li>
-                    🛠 <strong>Y las correcciones pedidas:</strong> botones redondos que salían estirados, estadísticas Experto alineadas y legibles, un True Confidant con más clase, la ficha de Minthe que ya no revela su nombre en francés, una racha idéntica en tu perfil y en el de tus amigos.
+                    🛠 <strong>Y las correcciones pedidas:</strong> botones redondos que salían
+                    estirados, estadísticas Experto alineadas y legibles, un True Confidant con más
+                    clase, la ficha de Minthe que ya no revela su nombre en francés, una racha
+                    idéntica en tu perfil y en el de tus amigos.
                   </li>
                 </ul>
                 <div class="pdf-container">
@@ -1200,28 +1438,51 @@
               <div data-i18n-block="de">
                 <ul>
                   <li>
-                    📖 <strong>Das Kompendium:</strong> ein Sammelbuch auf deinem Profil — Abzeichen, Titel, Hintergründe, Bande, Herausforderungen und Taten, jeder Eintrag datiert, mit wem, und einer kurzen Notiz. Öffentlich, wie dein Profil.
+                    📖 <strong>Das Kompendium:</strong> ein Sammelbuch auf deinem Profil —
+                    Abzeichen, Titel, Hintergründe, Bande, Herausforderungen und Taten, jeder
+                    Eintrag datiert, mit wem, und einer kurzen Notiz. Öffentlich, wie dein Profil.
                   </li>
                   <li>
-                    ⚔ <strong>Freunde mit deiner echten Marke herausfordern:</strong> der Button ist da, sobald du einen Modus öffnest, aber gesperrt, bis dein Tagesspiel beendet ist — eine Herausforderung trägt immer die Marke, die du wirklich erreicht hast. Er bleibt nach dem Aufgeben, überlebt ein Neuladen und funktioniert auch aus deiner Freundesliste, Experte inklusive.
+                    ⚔ <strong>Freunde mit deiner echten Marke herausfordern:</strong> der Button ist
+                    da, sobald du einen Modus öffnest, aber gesperrt, bis dein Tagesspiel beendet
+                    ist — eine Herausforderung trägt immer die Marke, die du wirklich erreicht hast.
+                    Er bleibt nach dem Aufgeben, überlebt ein Neuladen und funktioniert auch aus
+                    deiner Freundesliste, Experte inklusive.
                   </li>
                   <li>
-                    👥 <strong>Freundeseite in drei Tabs:</strong> Freunde, Posteingang (Nachrichten & Herausforderungen, Ungelesene gezählt) und Suchen. Endlich gleich große Buttons, ein sichtbarer Papierkorb, ein einziges « + ».
+                    👥 <strong>Freundeseite in drei Tabs:</strong> Freunde, Posteingang (Nachrichten
+                    & Herausforderungen, Ungelesene gezählt) und Suchen. Endlich gleich große
+                    Buttons, ein sichtbarer Papierkorb, ein einziges « + ».
                   </li>
                   <li>
-                    🎯 <strong>Wähl deinen Lieblingsmodus:</strong> du bestimmst ihn jetzt selbst; der Modus, in dem du am besten bist, bekommt seine eigene Zeile « Bester Modus », nach deiner Siegquote.
+                    🎯 <strong>Wähl deinen Lieblingsmodus:</strong> du bestimmst ihn jetzt selbst;
+                    der Modus, in dem du am besten bist, bekommt seine eigene Zeile « Bester Modus
+                    », nach deiner Siegquote.
                   </li>
                   <li>
-                    ⚙ <strong>Einstellungen überall:</strong> der ⚙-Button sitzt auf jeder Seite neben dem Dunkelmodus, mit zwei neuen Schaltern gegen das automatische Abspielen der Profilmusik — auf deinem Profil, auf dem der anderen.
+                    ⚙ <strong>Einstellungen überall:</strong> der ⚙-Button sitzt auf jeder Seite
+                    neben dem Dunkelmodus, mit zwei neuen Schaltern gegen das automatische Abspielen
+                    der Profilmusik — auf deinem Profil, auf dem der anderen.
                   </li>
                   <li>
-                    ⚔️ <strong>Drei neue All-Out Attacks:</strong> Bui Cosmic, Berry Summer und Wonder Shujin, aus Persona 5 X.
+                    ⚔️ <strong>Drei neue All-Out Attacks:</strong> Bui Cosmic, Berry Summer und
+                    Wonder Shujin, aus Persona 5 X.
                   </li>
                   <li>
-                    🏅 <strong>Acht Titel, sechs Abzeichen und drei Songs:</strong> S.E.E.S., Wir teilen dieselbe Seele, Ich bin keine Prinzessin, Der Fall ist nie abgeschlossen, Spar dir dein Mitleid, Ich nehme dein Herz, Manches erlischt nie und das legendäre Go Beyond als Calling Cards; Orpheus' Lied, Starlight-Festival, Shujin-Gesetzlose, Absolute Autorität, Spar dir deine Worte und Dieselbe Energie — das erste Abzeichen, das man zu zweit verdient — in der Sammlung. „Invitation to Freedom“ und beide Seiten von „Light the Fire Up in the Night“ kommen in den Musik-Modus.
+                    🏅 <strong>Acht Titel, sechs Abzeichen und drei Songs:</strong> S.E.E.S., Wir
+                    teilen dieselbe Seele, Ich bin keine Prinzessin, Der Fall ist nie abgeschlossen,
+                    Spar dir dein Mitleid, Ich nehme dein Herz, Manches erlischt nie und das
+                    legendäre Go Beyond als Calling Cards; Orpheus' Lied, Starlight-Festival,
+                    Shujin-Gesetzlose, Absolute Autorität, Spar dir deine Worte und Dieselbe Energie
+                    — das erste Abzeichen, das man zu zweit verdient — in der Sammlung. „Invitation
+                    to Freedom“ und beide Seiten von „Light the Fire Up in the Night“ kommen in den
+                    Musik-Modus.
                   </li>
                   <li>
-                    🛠 <strong>Und die gewünschten Korrekturen:</strong> verzerrte runde Buttons, ausgerichtete und lesbare Experten-Statistiken, ein True Confidant mit Stil, Minthes Karte, die ihren Namen auf Französisch nicht mehr verrät, eine Serie, die auf deinem Profil und bei deinen Freunden gleich ist.
+                    🛠 <strong>Und die gewünschten Korrekturen:</strong> verzerrte runde Buttons,
+                    ausgerichtete und lesbare Experten-Statistiken, ein True Confidant mit Stil,
+                    Minthes Karte, die ihren Namen auf Französisch nicht mehr verrät, eine Serie,
+                    die auf deinem Profil und bei deinen Freunden gleich ist.
                   </li>
                 </ul>
                 <div class="pdf-container">
@@ -1237,28 +1498,51 @@
               <div data-i18n-block="it">
                 <ul>
                   <li>
-                    📖 <strong>Il Compendio:</strong> un libro della collezione sul tuo profilo — distintivi, titoli, sfondi, legami, sfide e imprese, ogni voce datata, con chi, e una breve nota. Pubblico, come il tuo profilo.
+                    📖 <strong>Il Compendio:</strong> un libro della collezione sul tuo profilo —
+                    distintivi, titoli, sfondi, legami, sfide e imprese, ogni voce datata, con chi,
+                    e una breve nota. Pubblico, come il tuo profilo.
                   </li>
                   <li>
-                    ⚔ <strong>Sfida un amico con il tuo vero punteggio:</strong> il pulsante c'è appena entri in una modalità, ma resta bloccato finché non finisci la partita del giorno — una sfida porta sempre il punteggio che hai davvero fatto. Sopravvive all'abbandono e al ricaricamento, e funziona anche dalla lista amici, Esperto compreso.
+                    ⚔ <strong>Sfida un amico con il tuo vero punteggio:</strong> il pulsante c'è
+                    appena entri in una modalità, ma resta bloccato finché non finisci la partita
+                    del giorno — una sfida porta sempre il punteggio che hai davvero fatto.
+                    Sopravvive all'abbandono e al ricaricamento, e funziona anche dalla lista amici,
+                    Esperto compreso.
                   </li>
                   <li>
-                    👥 <strong>Pagina amici in tre schede:</strong> Amici, Posta (messaggi e sfide, non letti contati) e Cerca. Pulsanti finalmente della stessa dimensione, un cestino visibile, un solo « + ».
+                    👥 <strong>Pagina amici in tre schede:</strong> Amici, Posta (messaggi e sfide,
+                    non letti contati) e Cerca. Pulsanti finalmente della stessa dimensione, un
+                    cestino visibile, un solo « + ».
                   </li>
                   <li>
-                    🎯 <strong>Scegli la tua modalità preferita:</strong> ora la scegli tu; la modalità in cui rendi meglio ha la sua riga « Modalità migliore », in base al tuo tasso di vittoria.
+                    🎯 <strong>Scegli la tua modalità preferita:</strong> ora la scegli tu; la
+                    modalità in cui rendi meglio ha la sua riga « Modalità migliore », in base al
+                    tuo tasso di vittoria.
                   </li>
                   <li>
-                    ⚙ <strong>Impostazioni ovunque:</strong> il pulsante ⚙ è accanto alla modalità scura su ogni pagina, con due nuovi interruttori per fermare la riproduzione automatica della musica — sul tuo profilo, su quello degli altri.
+                    ⚙ <strong>Impostazioni ovunque:</strong> il pulsante ⚙ è accanto alla modalità
+                    scura su ogni pagina, con due nuovi interruttori per fermare la riproduzione
+                    automatica della musica — sul tuo profilo, su quello degli altri.
                   </li>
                   <li>
-                    ⚔️ <strong>Tre nuovi All-Out Attack:</strong> Bui Cosmic, Berry Summer e Wonder Shujin, da Persona 5 X.
+                    ⚔️ <strong>Tre nuovi All-Out Attack:</strong> Bui Cosmic, Berry Summer e Wonder
+                    Shujin, da Persona 5 X.
                   </li>
                   <li>
-                    🏅 <strong>Otto titoli, sei badge e tre brani:</strong> S.E.E.S., Condividiamo la stessa anima, Non sono una principessa, Il caso non è mai chiuso, Non mi serve la tua pietà, Ti rubo il cuore, Certe cose non si spengono e il leggendario Go Beyond come calling card; Il canto di Orfeo, Festival Starlight, Fuorilegge di Shujin, Autorità assoluta, Non sprecare il fiato e Stessa energia — il primo badge che si guadagna in due — nella collezione. « Invitation to Freedom » e le due facce di « Light the Fire Up in the Night » arrivano nella modalità Musica.
+                    🏅 <strong>Otto titoli, sei badge e tre brani:</strong> S.E.E.S., Condividiamo
+                    la stessa anima, Non sono una principessa, Il caso non è mai chiuso, Non mi
+                    serve la tua pietà, Ti rubo il cuore, Certe cose non si spengono e il
+                    leggendario Go Beyond come calling card; Il canto di Orfeo, Festival Starlight,
+                    Fuorilegge di Shujin, Autorità assoluta, Non sprecare il fiato e Stessa energia
+                    — il primo badge che si guadagna in due — nella collezione. « Invitation to
+                    Freedom » e le due facce di « Light the Fire Up in the Night » arrivano nella
+                    modalità Musica.
                   </li>
                   <li>
-                    🛠 <strong>E le correzioni richieste:</strong> pulsanti rotondi che risultavano schiacciati, statistiche Esperto allineate e leggibili, un True Confidant con più stile, la scheda di Minthe che non rivela più il suo nome in francese, una serie identica sul tuo profilo e su quello dei tuoi amici.
+                    🛠 <strong>E le correzioni richieste:</strong> pulsanti rotondi che risultavano
+                    schiacciati, statistiche Esperto allineate e leggibili, un True Confidant con
+                    più stile, la scheda di Minthe che non rivela più il suo nome in francese, una
+                    serie identica sul tuo profilo e su quello dei tuoi amici.
                   </li>
                 </ul>
                 <div class="pdf-container">
@@ -1274,28 +1558,50 @@
               <div data-i18n-block="pt">
                 <ul>
                   <li>
-                    📖 <strong>O Compêndio:</strong> um livro de coleção no teu perfil — emblemas, títulos, fundos, laços, desafios e feitos, cada entrada com data, com quem, e uma pequena nota. Público, como o teu perfil.
+                    📖 <strong>O Compêndio:</strong> um livro de coleção no teu perfil — emblemas,
+                    títulos, fundos, laços, desafios e feitos, cada entrada com data, com quem, e
+                    uma pequena nota. Público, como o teu perfil.
                   </li>
                   <li>
-                    ⚔ <strong>Desafia um amigo com a tua marca real:</strong> o botão está lá assim que entras num modo, mas bloqueado até terminares a tua partida do dia — um desafio leva sempre a marca que fizeste de verdade. Fica depois de desistires, sobrevive a um recarregamento e funciona a partir da lista de amigos, Expert incluído.
+                    ⚔ <strong>Desafia um amigo com a tua marca real:</strong> o botão está lá assim
+                    que entras num modo, mas bloqueado até terminares a tua partida do dia — um
+                    desafio leva sempre a marca que fizeste de verdade. Fica depois de desistires,
+                    sobrevive a um recarregamento e funciona a partir da lista de amigos, Expert
+                    incluído.
                   </li>
                   <li>
-                    👥 <strong>Página de amigos em três separadores:</strong> Amigos, Caixa (mensagens e desafios, não lidos contados) e Procurar. Botões finalmente do mesmo tamanho, um caixote visível, um único « + ».
+                    👥 <strong>Página de amigos em três separadores:</strong> Amigos, Caixa
+                    (mensagens e desafios, não lidos contados) e Procurar. Botões finalmente do
+                    mesmo tamanho, um caixote visível, um único « + ».
                   </li>
                   <li>
-                    🎯 <strong>Escolhe o teu modo favorito:</strong> agora és tu que o escolhes; o modo em que és melhor tem a sua própria linha « Melhor modo », segundo a tua taxa de vitória.
+                    🎯 <strong>Escolhe o teu modo favorito:</strong> agora és tu que o escolhes; o
+                    modo em que és melhor tem a sua própria linha « Melhor modo », segundo a tua
+                    taxa de vitória.
                   </li>
                   <li>
-                    ⚙ <strong>Definições em todo o lado:</strong> o botão ⚙ está ao lado do modo escuro em todas as páginas, com dois novos interruptores para parar a reprodução automática da música — no teu perfil, no dos outros.
+                    ⚙ <strong>Definições em todo o lado:</strong> o botão ⚙ está ao lado do modo
+                    escuro em todas as páginas, com dois novos interruptores para parar a reprodução
+                    automática da música — no teu perfil, no dos outros.
                   </li>
                   <li>
-                    ⚔️ <strong>Três novos All-Out Attack:</strong> Bui Cosmic, Berry Summer e Wonder Shujin, de Persona 5 X.
+                    ⚔️ <strong>Três novos All-Out Attack:</strong> Bui Cosmic, Berry Summer e Wonder
+                    Shujin, de Persona 5 X.
                   </li>
                   <li>
-                    🏅 <strong>Oito títulos, seis emblemas e três músicas:</strong> S.E.E.S., We Share the Same Soul, I Am Not a Princess, The Case Is Never Closed, Don't Need Your Pity, Take Your Heart, Some Things Don't Burn Out e o lendário Go Beyond como calling cards; O canto de Orfeu, Festival Starlight, Foras da lei de Shujin, Autoridade absoluta, Não gaste saliva e A mesma energia — o primeiro emblema que se ganha a dois — na coleção. « Invitation to Freedom » e os dois lados de « Light the Fire Up in the Night » chegam ao modo Música.
+                    🏅 <strong>Oito títulos, seis emblemas e três músicas:</strong> S.E.E.S., We
+                    Share the Same Soul, I Am Not a Princess, The Case Is Never Closed, Don't Need
+                    Your Pity, Take Your Heart, Some Things Don't Burn Out e o lendário Go Beyond
+                    como calling cards; O canto de Orfeu, Festival Starlight, Foras da lei de
+                    Shujin, Autoridade absoluta, Não gaste saliva e A mesma energia — o primeiro
+                    emblema que se ganha a dois — na coleção. « Invitation to Freedom » e os dois
+                    lados de « Light the Fire Up in the Night » chegam ao modo Música.
                   </li>
                   <li>
-                    🛠 <strong>E as correções pedidas:</strong> botões redondos que saíam esticados, estatísticas Expert alinhadas e legíveis, um True Confidant com mais classe, a ficha da Minthe que já não revela o nome em francês, uma sequência igual no teu perfil e no dos teus amigos.
+                    🛠 <strong>E as correções pedidas:</strong> botões redondos que saíam esticados,
+                    estatísticas Expert alinhadas e legíveis, um True Confidant com mais classe, a
+                    ficha da Minthe que já não revela o nome em francês, uma sequência igual no teu
+                    perfil e no dos teus amigos.
                   </li>
                 </ul>
                 <div class="pdf-container">

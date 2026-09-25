@@ -31,7 +31,14 @@ export const BADGE_CATEGORIES = {
  */
 export const SAME_ENERGY_AVATARS = {
   arai: ["Arai.png", "Arai2.png"],
-  chie: ["chie_satonaka_icon.jpg", "Chie.jpg", "Chie2.jpg", "chiesatonaka_revivale.jpg", "chie_pq.jpg", "meme_chie_shut_teddie.jpg"],
+  chie: [
+    "chie_satonaka_icon.jpg",
+    "Chie.jpg",
+    "Chie2.jpg",
+    "chiesatonaka_revivale.jpg",
+    "chie_pq.jpg",
+    "meme_chie_shut_teddie.jpg",
+  ],
 };
 
 /**
@@ -53,7 +60,15 @@ export function wearsAvatar(avatar, files) {
  */
 export const TARGET_SETS = {
   starlight_trio: [
-    ["alloutattack", ["Joker Starlight ( Ren Amamiya )", "Panther Starlight ( Ann Takamaki )", "Mona Starlight ( Morgana )"], 3],
+    [
+      "alloutattack",
+      [
+        "Joker Starlight ( Ren Amamiya )",
+        "Panther Starlight ( Ann Takamaki )",
+        "Mona Starlight ( Morgana )",
+      ],
+      3,
+    ],
   ],
   shujin_outlaws: [
     ["alloutattack", ["Wonder Shujin ( Nagisa Kamishiro )"], 1],
@@ -574,6 +589,22 @@ export const badgesList = [
     check: (stats, profile) => {
       // Ce badge se débloque si le flag 'visitedGithub' est à true dans le profil
       return profile?.visitedGithub === true;
+    },
+  },
+  {
+    id: "cafe_leblanc",
+    name: "Café Leblanc",
+    category: BADGE_CATEGORIES.SECRET,
+    img: BADGE_IMG_BASE + "Badge_Cafe_Leblanc.webp",
+    condition: "???",
+    description:
+      "You were curious enough to push open the door of my café. The coffee's on the house — and thanks for stopping by.",
+    secret: true,
+    check: (stats, profile) => {
+      // Même ressort que `github_contributor` : un drapeau posé par le lien de
+      // l'accueil. Ce n'est pas une preuve de don — on remercie la curiosité,
+      // pas le portefeuille, et Ko-fi ne dit rien au jeu de ce qui s'y passe.
+      return profile?.visitedKofi === true;
     },
   },
   {
