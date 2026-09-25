@@ -39,9 +39,90 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 13 | `feat/changelog_2_3_pink_ribbon` | Remplissage de la page Nouveautés |
 | 14 | `feat/badges_pin_ux` | Badges épinglés : clic vers la fiche, aperçu du déplacement |
 | 15 | `feat/aoa_kotone_p5x` | All-Out Attack de Kotone (P5X) et nouveau portrait |
+| 16 | `fix/badge_modal_prod` | Le détail d'un badge reprend la modale de la production |
 
 ---
 
+## 2026-09-25 — Le détail d'un badge reprend la modale de la production
+
+Retour Hamza : la 2.3 a ajouté des façons de consulter un badge (l'œil de l'atelier, le
+clic sur un badge épinglé), mais elles ouvraient **une autre fenêtre** que celle qui tourne
+en prod. C'est celle de la prod qui reste.
+
+### Deux fenêtres pour la même information
+
+La prod affiche déjà une `.badge-zoom-modal` — au déblocage d'un badge, sur le profil
+public (`profile-view.js`) et sur la carte de partage (`share-card.js`). Le lot
+`feat/badge_inspect` en avait dessiné une seconde (`.badge-inspect__*`), plus sobre. Selon
+le chemin emprunté, le même badge s'affichait donc dans deux habillages différents.
+
+Ce n'était pas un oubli mais une mauvaise décision : j'avais écrit une fiche neuve sans
+regarder ce que la prod montrait déjà. Le défaut ne se voit qu'en comparant deux écrans —
+exactement le genre de chose qu'une revue attrape et pas un test.
+
+### Une seule implémentation
+
+`ouvrirFiche()` produit désormais le balisage de prod, et `showBadgeZoom()`
+(`badgesManager.js`) **passe par elle** au lieu d'avoir sa propre copie :
+
+| Chemin | Avant | Après |
+|---|---|---|
+| Déblocage d'un badge | `showBadgeZoom()`, copie locale | `ouvrirFiche()` |
+| Œil de l'atelier (2.3) | `.badge-inspect__card` | `ouvrirFiche()` |
+| Clic sur un badge épinglé (2.3) | `.badge-inspect__card` | `ouvrirFiche()` |
+
+`profile-view.js` et `share-card.js` gardent leur propre `showBadgeZoom` : elles tournent
+sur d'autres pages, avec leurs propres listes de badges, et produisent **déjà** ce
+balisage. Les unifier demanderait de leur faire importer `badgesManager`, ce qui coûte plus
+que ça ne rapporte tant qu'elles ne divergent pas.
+
+### Ce que le balisage de prod ne savait pas dire
+
+La prod n'ouvrait cette modale qu'après un déblocage, donc **toujours sur un badge obtenu**.
+L'œil rend consultable un badge verrouillé, état qu'aucune de ses lignes n'exprimait : sans
+rien, un badge non gagné s'afficherait exactement comme un badge gagné.
+
+Deux ajouts, aussi discrets que possible plutôt qu'une section de plus :
+
+- `🔒` devant la condition ;
+- `.badge-zoom-content img.is-locked` — l'image en niveaux de gris, comme sa carte dans la
+  grille.
+
+Le reste est identique : conteneur, croix, ordre image / titre / condition / description,
+et la classe `.show` posée à la frame suivante pour l'animation d'entrée.
+
+Ce qui est conservé du lot 2.3, parce que la prod n'en avait pas besoin et que ces chemins
+si : `role="dialog"`, `aria-modal`, le focus posé sur la croix, la fermeture à Échap (qui
+arrête sa propagation pour ne pas refermer AUSSI la modale des badges derrière), et la
+croix activable au clavier.
+
+`construireFiche()` ne bouge pas : un badge secret verrouillé continue de ne montrer ni son
+nom ni sa condition. Sans cette règle, l'œil serait devenu un moyen commode de lire toutes
+les réponses.
+
+### Fichiers touchés
+
+- `profile/badges/badge_inspect.js` — `ouvrirFiche()` rend le balisage de prod.
+- `profile/badges/badgesManager.js` — `showBadgeZoom()` délègue ; sa copie de la modale
+  disparaît.
+- `profile/badges/badges.css` — les règles `.badge-inspect` / `.badge-inspect__*` sont
+  retirées (≈ 70 lignes), remplacées par la seule `img.is-locked`. Le bouton œil
+  (`.badge-inspect-btn`) reste : c'est un élément de la grille, pas de la modale.
+- `tests/badgeInspect.test.js` — sélecteurs mis à jour, **2 cas ajoutés** : le balisage est
+  bien celui de prod et plus aucune classe `badge-inspect__` n'existe ; le cadenas
+  n'apparaît que sur un badge verrouillé.
+- `tests-e2e/badge_inspect.spec.js`, `tests-e2e/badges_reorder.spec.js` — sélecteurs.
+
+### Vérifications
+
+- 8 scénarios E2E des deux fichiers verts, `npm test` à 1520.
+- Rendu comparé à l'écran, en 1280 px et 390 px, dans les deux états : badge débloqué
+  depuis la rangée épinglée, badge **verrouillé** depuis l'œil de l'atelier.
+- Le test « emploie la modale de PRODUCTION » échoue si une fiche maison revient : il
+  vérifie l'absence de toute classe `badge-inspect__`, pas seulement la présence de
+  `.badge-zoom-modal`.
+
+---
 ## 2026-09-25 — Une seule Kotone en All-Out Attack, rangée dans P3P
 
 Décision de Hamza, qui revient sur celle de l'entrée précédente : l'ancienne animation
