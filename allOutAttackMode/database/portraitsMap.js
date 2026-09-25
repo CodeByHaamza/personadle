@@ -89,5 +89,4 @@ export const portraitsMap = {
   // Skins 2.3
   "Luce Notte ( Shoki Ikenami )": "Luce_Notte",
   "Soy Pioneer ( Shun Kano )": "Soy_Pioneer",
-  "Kotone Shiomi ( P5X )": "Kotone_P5X",
 };

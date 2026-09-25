@@ -79,5 +79,4 @@ export const personas = [
   "Berry Summer ( Ichigo Shikano )",
   "Luce Notte ( Shoki Ikenami )",
   "Soy Pioneer ( Shun Kano )",
-  "Kotone Shiomi ( P5X )",
 ];
