@@ -60,9 +60,9 @@ async function amenerAVue(page) {
 }
 
 const ordreAffiche = (page) =>
-  page.locator("#previewBadges .pin-slot--filled").evaluateAll((els) =>
-    els.map((e) => e.dataset.badgeId)
-  );
+  page
+    .locator("#previewBadges .pin-slot--filled")
+    .evaluateAll((els) => els.map((e) => e.dataset.badgeId));
 
 test.describe("Badges épinglés — réordonnancement", () => {
   test("un glissement à la souris change l'ordre, et le serveur le garde", async ({ browser }) => {
@@ -187,7 +187,84 @@ test.describe("Badges épinglés — réordonnancement", () => {
     await cases.nth(0).focus();
     await j.page.keyboard.press("ArrowRight");
 
-    await expect.poll(async () => (await ordreAffiche(j.page))[1], { timeout: 8000 }).toBe(avant[0]);
+    await expect
+      .poll(async () => (await ordreAffiche(j.page))[1], { timeout: 8000 })
+      .toBe(avant[0]);
+
+    await j.ctx.close();
+    await j.api.dispose();
+  });
+});
+
+test.describe("Badges épinglés — consulter et voir où le badge tombe", () => {
+  test("cliquer un badge déjà épinglé ouvre sa fiche", async ({ browser }) => {
+    // Avant ce lot, ce clic ne faisait RIEN : pour relire la condition d'un de
+    // ses propres badges, il fallait rouvrir l'atelier et le retrouver dans la
+    // grille. Le seuil de glissement rend ce clic possible sans casser le geste.
+    const j = await joueurAvecBadges(browser);
+    await gotoSettled(j.page, "/profile/profile.html");
+
+    const cases = j.page.locator("#previewBadges .pin-slot--filled");
+    await expect(cases).toHaveCount(3, { timeout: 15000 });
+    await amenerAVue(j.page);
+    const avant = await ordreAffiche(j.page);
+
+    await cases.nth(1).click();
+
+    const fiche = j.page.locator(".badge-inspect__card");
+    await expect(fiche).toBeVisible({ timeout: 8000 });
+    await expect(fiche.locator(".badge-inspect__name")).not.toBeEmpty();
+    // Un badge épinglé est débloqué par construction : sa condition est lisible.
+    await expect(fiche.locator(".badge-inspect__condition")).not.toBeEmpty();
+
+    // Consulter ne modifie rien — ni l'ordre, ni l'épinglage.
+    expect(await ordreAffiche(j.page)).toEqual(avant);
+    await j.page.locator(".badge-inspect__close").click();
+    await expect(fiche).toBeHidden();
+    await expect(cases).toHaveCount(3);
+
+    await j.ctx.close();
+    await j.api.dispose();
+  });
+
+  test("le badge reste visible à sa future place pendant le glissement", async ({ browser }) => {
+    // Le retour qui a motivé cette version : la première laissait un trou à la
+    // place du badge saisi (« c'est pas intuitif, ça fait trop vide »). On vérifie
+    // donc, POINTEUR ENCORE ENFONCÉ, que le badge est dans la rangée, en
+    // transparence, et déjà à la position qu'il aura au relâchement.
+    const j = await joueurAvecBadges(browser);
+    await gotoSettled(j.page, "/profile/profile.html");
+
+    const cases = j.page.locator("#previewBadges .pin-slot--filled");
+    await expect(cases).toHaveCount(3, { timeout: 15000 });
+    await amenerAVue(j.page);
+    const avant = await ordreAffiche(j.page);
+
+    const a = await cases.nth(0).boundingBox();
+    const b = await cases.nth(1).boundingBox();
+    await j.page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
+    await j.page.mouse.down();
+    await j.page.mouse.move(a.x + a.width / 2 + 20, a.y + a.height / 2, { steps: 5 });
+    await j.page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 8 });
+
+    const saisi = j.page.locator("#previewBadges .pin-slot--dragging");
+    await expect(saisi).toHaveCount(1);
+    // Toujours affiché, et estompé : c'est l'aperçu, pas un trou.
+    await expect(saisi).toBeVisible();
+    const opacite = await saisi.evaluate((e) => parseFloat(getComputedStyle(e).opacity));
+    expect(opacite, "le badge saisi est transparent").toBeGreaterThan(0);
+    expect(opacite, "…mais pas opaque").toBeLessThan(1);
+
+    // Aucune case ne manque, et l'ordre affiché est DÉJÀ le futur ordre.
+    await expect(cases).toHaveCount(3);
+    expect(await ordreAffiche(j.page)).toEqual([avant[1], avant[0], avant[2]]);
+
+    await j.page.mouse.up();
+    await expect
+      .poll(async () => (await ordreAffiche(j.page)).join(), { timeout: 8000 })
+      .toBe([avant[1], avant[0], avant[2]].join());
+    // Le geste terminé, plus rien n'est estompé.
+    await expect(j.page.locator("#previewBadges .pin-slot--dragging")).toHaveCount(0);
 
     await j.ctx.close();
     await j.api.dispose();

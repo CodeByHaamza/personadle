@@ -1255,26 +1255,37 @@ body.darkmode .badge-inspect__card {
   outline-offset: 3px;
 }
 
-/* En cours de déplacement : la case suit le doigt du regard, sans quitter la
-   rangée — un fantôme flottant demanderait de gérer une couche par-dessus, pour
-   un gain nul sur quatre cases côte à côte. */
+/* En cours de déplacement : le badge saisi RESTE dans la rangée, en transparence,
+   à la place exacte qu'il occupera au relâchement. La version précédente le
+   sortait du flux et laissait un trou — « c'est pas intuitif, ça fait trop vide »
+   (retour Hamza du 2026-09-24). Le liseré en pointillés dit « ici, si tu lâches ». */
 .pin-slot--dragging {
   cursor: grabbing;
-  opacity: 0.55;
-  transform: scale(1.08);
+  opacity: 0.45;
+  outline: 2px dashed var(--accent, #e63946);
+  outline-offset: 2px;
+  border-radius: 10px;
   z-index: 2;
 }
 
-/* La case visée s'écarte : c'est ce qui dit où le badge va tomber. */
-.pin-slot--target {
-  transform: translateY(-6px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+/* Les voisins pendant le geste : légèrement estompés, pour que l'œil suive le
+   badge transparent et non la rangée entière. */
+.pinned-slots--dragging .pin-slot--filled:not(.pin-slot--dragging) {
+  opacity: 0.85;
+}
+
+/* Le « + » ne participe pas au réordonnancement : le garder plein à côté de
+   cases estompées le faisait passer pour une destination valide. */
+.pinned-slots--dragging .pin-slot--empty {
+  opacity: 0.35;
+  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .pin-slot--movable,
+  .pin-slot--movable img,
   .pin-slot--dragging,
-  .pin-slot--target {
-    transition: none;
+  .pin-slot--filled {
+    transition: none !important;
   }
 }
