@@ -45,6 +45,140 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-09-25 — Le serveur tranche les déblocages, et la carte locale cesse de mentir
+
+Signalé en production par **Colonel-Maskou** le soir de la sortie : animation de déblocage
+pour *Memento Vivere, Memento Mori* et pour le titre *Déjà Vu* **sans avoir rempli la
+condition**, puis badge impossible à équiper. Sa description est exactement le symptôme :
+« débloqué, finalement non, finalement oui, finalement bug ».
+
+### L'état réel, mesuré en base
+
+La base était saine : **ni le badge ni le titre n'étaient accordés**, et le serveur avait
+raison de refuser.
+
+| Condition | Ce que le serveur voit dans `game_sessions` |
+|---|---|
+| `memento_vivere_mori` | classic **2/2** ✓ · emoji **1/2** · silhouette **1/2** · AOA **1/2** · personae **1/2** · musiques ✓✓ |
+| `p2_deja_vu` | classic **0/2** · silhouette **0/2** |
+
+Sa seule victoire Tatsuya est en **Personae**. Il avait donc raison de dire qu'il n'avait
+jamais fait la condition de Déjà Vu.
+
+### Deux défauts, qui se combinaient
+
+**1. `characterModeMap` comptait des parties que le serveur ne compte pas.**
+
+Cette carte ne vit que dans le `localStorage` du joueur — elle n'existe dans aucune colonne
+de `profiles`, n'est jamais synchronisée, jamais recalée. Le serveur, lui, décide depuis
+`game_sessions`, où **une partie de défi n'est jamais enregistrée** : `condition_check.php`
+le dit explicitement, « elle ne compte pas — voulu ».
+
+Or **quatre modes sur cinq** l'écrivaient quand même sur un défi :
+
+| Mode | Avant |
+|---|---|
+| Classique | ✅ déjà dans le bloc `!wasChallengePlay` |
+| Émoji | ❌ gardé contre l'abandon, pas contre le défi |
+| Silhouette | ❌ hors du garde-fou |
+| Personae | ❌ aucun garde-fou |
+| All-Out Attack | ❌ `checkSpecialBadges()` est appelée **avant** le garde-fou de session |
+
+Les cinq sont désormais alignés sur une seule règle : **la carte n'enregistre que ce que le
+serveur enregistrerait.**
+
+**2. Le client s'accordait le badge sans attendre la réponse.**
+
+```js
+profile.badges.push(badge.id);          // il se l'accorde
+showBadgeNotification(badge);            // il fête
+api.badges.unlock(id).catch(() => {});   // et jette le refus
+```
+
+Le `.catch(() => {})` avalait le 403. L'animation avait déjà joué, le badge était déjà dans
+le profil local, et le refus n'atteignait personne. Au `pullProfileFromCloud` suivant — le
+backend fait autorité — le badge disparaissait ; au rejeu, la condition locale repassait
+mais `_seenBadgeAnimIds` bloquait l'animation. D'où la valse décrite par le joueur.
+
+C'est la règle du CLAUDE.md §7 qui sautait : *« le client ne décide pas de ce qui existe »*.
+
+### Ce qui change
+
+`checkAndUnlockBadges()` devient asynchrone : la condition locale ne fait plus que
+**proposer**, le serveur accorde. Les candidats sont soumis **un par un**, pour qu'un badge
+refusé n'emporte pas ceux de la même fournée qui sont réellement gagnés.
+
+La distinction qui compte :
+
+| Réponse | Décision | Pourquoi |
+|---|---|---|
+| Succès | accordé | — |
+| **401** | accordé en local | Pas connecté : aucun interlocuteur, pas un refus |
+| **4xx** | **retiré** | Le serveur a regardé et dit non |
+| 5xx / réseau | gardé en local | On n'a pas pu demander : punir une connexion instable ferait perdre des badges gagnés |
+
+Pas d'API (hors ligne, hors bridge) : comportement local d'origine conservé.
+
+### Une course ouverte par l'attente, refermée
+
+Attendre le serveur insère un aller-retour réseau entre la lecture du profil et son
+écriture. La sauvegarde **relit** donc le profil et n'y fusionne que les badges accordés,
+au lieu de réécrire l'objet lu au départ — sinon un badge gagné effacerait les stats de fin
+de partie écrites entre-temps.
+
+### Les titres : un trou plus discret
+
+`titles-ui.js` attendait **déjà** le serveur correctement — il porte même le commentaire
+d'un bug identique signalé plus tôt. Mais il décidait lui-même d'avoir affaire à un invité :
+
+```js
+let confirmed = !api?.titles?.unlock || !window._currentUser;
+```
+
+Sur une page de mode, l'authentification n'est pas toujours résolue quand la vérification
+tourne : un joueur **connecté** passait pour un invité, et son titre s'annonçait sans que
+personne n'ait rien demandé. C'est maintenant le serveur qui dit s'il nous connaît — son
+**401** vaut « pas de compte », et l'acquis local tient, pour une raison vérifiée.
+
+### Les cartes déjà polluées : rien à migrer
+
+Elles ne s'auto-réparent pas, et c'est sans conséquence : leur seul effet résiduel est une
+requête refusée, silencieuse. Vérifié que `characterModeMap` ne sert **qu'aux conditions** —
+aucun affichage de progression ne s'en nourrit. Une migration coûterait plus qu'elle ne
+rapporte.
+
+### Écriture morte retirée dans le mode Musique
+
+`modeMusic.js` écrivait dans une clé `localStorage` **`characterModeMap` à part**, que rien
+ne lit : les conditions lisent `profile.characterModeMap`. La brancher aurait été pire que
+l'effacer — la part musicale des ensembles est délibérément vérifiée par le seul serveur
+(le titre d'une chanson n'est pas un nom de personnage), et l'ajouter au client aurait
+recréé la divergence qu'on venait de corriger.
+
+### Fichiers touchés
+
+- `profile/badges/badgesManager.js` — `serveurAccordeBadge()`, `checkAndUnlockBadges()`
+  asynchrone, sauvegarde par fusion.
+- `profile/titles-ui.js` — plus de `window._currentUser`, 401 distingué d'un refus.
+- `emojiMode/`, `silhouetteMode/`, `personaeMode/`, `allOutAttackMode/` — garde-fou de défi.
+- `musicsMode/modeMusic.js` — écriture morte retirée.
+- `tests/badgesManager.test.js` — **7 cas ajoutés**, dont les deux qui échouaient sur le
+  défaut réel avant correction.
+- `tests/titles_reconcile.test.js` — le test « invité » vérifiait que le client ne
+  *demandait pas* ; il vérifie désormais qu'un **401 n'empêche pas** l'acquis local. La
+  garantie utile est la même, la raison est vérifiée au lieu d'être devinée.
+- `tests/dataMiningBadge.test.js` — attente de la promesse.
+
+### Vérifications
+
+- Les deux tests posés avant le correctif échouaient bien sur le vrai défaut
+  (`expected [ 'ace_defective' ] to not include 'ace_defective'`), et passent après.
+- **1532 tests** verts.
+- Les cinq modes contrôlés un par un, accolades comptées, pour vérifier que le garde-fou est
+  réellement **ouvert** au moment de l'écriture — un premier repérage à vue avait manqué le
+  mode Émoji.
+
+---
 ## 2026-09-25 — Le bandeau 2.3 du modal « Nouveautés » gagne ses couches
 
 Retour Hamza : « le bandeau de la 2.3 est encore trop simple, la 2.0 et la 2.2 sont
