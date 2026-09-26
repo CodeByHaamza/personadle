@@ -45,6 +45,78 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-09-26 — Discord : le quotidien peut vivre dans un salon forum
+
+Première pièce du remaniement validée par Hamza. Un fil par jour sous l'annonce :
+aujourd'hui un score posté par un joueur se perd entre deux messages du bot ; dans un fil,
+il **répond** à quelque chose. C'est la seule idée de la liste qui ne demandait aucune
+ligne de code — le webhook accepte déjà `thread_name`.
+
+### Le piège : le type du salon est une dépendance invisible
+
+Un webhook ne peut **pas** poster dans un salon forum sans `thread_name`, et ne peut pas
+poster dans un salon texte **avec** : Discord renvoie 400 dans les deux cas. Le jour où
+`🎲┃daily-personadle` est converti, un cron qui l'ignore s'arrête net — et le rendez-vous
+quotidien devient muet sans que personne ne soit prévenu. Déjà vécu du 9 au 19 septembre
+pour une autre raison (clé fausse) : dix jours de silence.
+
+Donc pas de simple paramètre, mais un **repli automatique dans les deux sens** :
+`personadle_discord_post_thread()` essaie la forme attendue et, sur un 400, réessaie
+l'autre **une fois**. Le salon peut être converti — ou reconverti — sans toucher au code.
+`DISCORD_DAILY_FORUM` n'économise plus qu'un aller-retour dans le cas courant, et le cron
+fonctionne même si la constante ment.
+
+Quand le repli sert, un `warning` le dit dans Admin → Logs : sinon la constante resterait
+fausse indéfiniment et chaque envoi coûterait deux appels en silence.
+
+Ce qui n'est **pas** réessayé : 401, 404, 429, 500. Ceux-là ne sont pas un problème de
+type de salon, et réessayer ne ferait que doubler l'échec en brouillant le log.
+
+### Le weekly aussi, et c'est ce qui aurait cassé
+
+`DISCORD_WEEKLY_WEBHOOK` est **absent du `config.php` de prod** (vérifié) : le récap du
+dimanche part donc dans le salon du quotidien, par le repli prévu. Convertir ce salon en
+forum aurait tué le rendez-vous hebdomadaire — et une fois par semaine, c'est long à
+remarquer. Le weekly passe par le même helper, avec un nom de fil par semaine ISO
+(`🏆 Semaine 39/2026 — top 3`).
+
+Il ne suit la constante que s'il n'a pas de webhook à lui : le jour où Hamza lui donne son
+propre salon, les deux réglages redeviennent indépendants.
+
+### Nom des fils
+
+La **date d'abord** (`🎲 26/09/2026 — Yukari Takeba`) : dans un forum on cherche le jour,
+pas le personnage — le nom de la voix est déjà dans le message. Tronqué à 100 caractères,
+la limite de Discord, sans quoi c'est la requête entière qui est refusée à 6 h du matin.
+
+### Corrigé au passage
+
+Le commentaire de rotation du quotidien parlait encore de « 8 jours » et d'un « cycle de
+48 jours » — faux depuis le passage à 39 voix (117 jours). La contrainte « jamais un
+multiple de 7 » y est maintenant écrite, puisque c'est elle qui a dicté le nombre.
+
+### Vérifications
+
+- `tests/php/DiscordForumThreadTest.php` — **nouveau**, 12 cas. Le poster est injecté,
+  donc les deux sens du repli sont réellement exercés : c'est de la logique qu'on ne
+  déclenche jamais à la main, il faudrait convertir un vrai salon Discord pour la voir
+  passer. Couvre aussi 204 (succès sans `?wait=true`), le double échec qui doit remonter,
+  et un `thread_name` déjà présent dans le payload qui ne doit pas gagner.
+- **32 tests verts** (Discord + weekly) exécutés sur PHP 8.2.33.
+
+⚠️ Docker Desktop étant à l'arrêt, la suite PHP complète n'a pas pu tourner localement, et
+elle n'a **pas** été lancée sur le serveur de production : `DatabaseIntegrationTest` s'y
+connecterait à la base de prod. C'est la CI qui la couvre.
+
+### Ce que Hamza doit faire
+
+1. Convertir `🎲┃daily-personadle` en **salon forum** (Discord : Modifier le salon → Type).
+2. Ajouter `define('DISCORD_DAILY_FORUM', true);` dans `api/config.php` — facultatif, ça
+   n'économise qu'un appel HTTP par jour.
+
+Dans cet ordre ou l'inverse : le repli couvre l'intervalle.
+
+---
 ## 2026-09-26 — Discord : 39 voix au quotidien, portraits et amitiés à l'hebdo
 
 Deux demandes de Hamza sur le bot.

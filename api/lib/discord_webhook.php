@@ -88,3 +88,81 @@ function personadle_discord_escape(string $s): string
 {
     return preg_replace('/([\\\\*_~`|>])/', '\\\\$1', $s) ?? $s;
 }
+
+/**
+ * Nom du fil d'un rendez-vous quotidien, pour un salon **forum**.
+ *
+ * Date d'abord : dans un forum, on cherche le jour, pas le personnage — le nom
+ * de la voix est déjà dans le message. Discord plafonne à 100 caractères et
+ * refuse la requête au-delà, d'où la troncature ici plutôt qu'un 400 à 6 h du
+ * matin.
+ */
+function personadle_discord_thread_name(DateTimeInterface $jour, string $voix): string
+{
+    $nom = '🎲 ' . $jour->format('d/m/Y');
+    $voix = trim($voix);
+    if ($voix !== '') {
+        $nom .= ' — ' . $voix;
+    }
+    return mb_substr($nom, 0, 100);
+}
+
+/**
+ * POST sur un webhook, que le salon soit un forum ou un salon texte.
+ *
+ * ── Pourquoi ce n'est pas un simple paramètre ───────────────────────────────
+ * Un webhook ne peut PAS poster dans un salon forum **sans** `thread_name`, et
+ * ne peut pas poster dans un salon texte **avec** : Discord renvoie 400 dans les
+ * deux cas. Le type du salon est donc une dépendance invisible du cron — le jour
+ * où `🎲┃daily-personadle` est converti en forum, un cron qui ne le sait pas
+ * s'arrête net, et seul le log le dit.
+ *
+ * D'où le repli automatique, dans les deux sens : on essaie la forme attendue,
+ * et si Discord répond 400 on réessaie l'autre **une fois**. Le salon peut être
+ * converti (ou reconverti) sans toucher au code, et `$forumAttendu` ne sert plus
+ * qu'à économiser un aller-retour dans le cas courant.
+ *
+ * Un 400 pour une autre raison (embed malformé) sera lui aussi réessayé une
+ * fois, échouera de nouveau, et remontera — c'est le comportement voulu : deux
+ * appels ratés valent mieux qu'un rendez-vous muet.
+ *
+ * @param callable|null $poster Point d'injection pour les tests ; par défaut
+ *                              `personadle_discord_post`.
+ * @return array{code:int, error:string, body:string, repli?:string}
+ */
+function personadle_discord_post_thread(
+    string $webhook,
+    array $payload,
+    string $threadName,
+    bool $forumAttendu = false,
+    ?callable $poster = null
+): array {
+    $envoyer = $poster ?? 'personadle_discord_post';
+
+    $avecFil = $payload;
+    if ($threadName !== '') {
+        $avecFil['thread_name'] = mb_substr($threadName, 0, 100);
+    }
+    $sansFil = $payload;
+    unset($sansFil['thread_name']);
+
+    // Sans nom de fil utilisable, il n'y a pas de choix à faire.
+    if ($threadName === '') {
+        return $envoyer($webhook, $sansFil);
+    }
+
+    [$premier, $second, $note] = $forumAttendu
+        ? [$avecFil, $sansFil, "le salon n'est pas un forum : posté sans fil, retirer DISCORD_DAILY_FORUM"]
+        : [$sansFil, $avecFil, 'le salon est un forum : posté dans un fil, activer DISCORD_DAILY_FORUM'];
+
+    $r = $envoyer($webhook, $premier);
+    if ((int) ($r['code'] ?? 0) !== 400) {
+        return $r;
+    }
+
+    $r2 = $envoyer($webhook, $second);
+    if ((int) ($r2['code'] ?? 0) >= 200 && (int) $r2['code'] < 300) {
+        $r2['repli'] = $note;
+    }
+    return $r2;
+}
