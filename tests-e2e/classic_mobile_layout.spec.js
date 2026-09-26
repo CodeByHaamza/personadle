@@ -99,3 +99,103 @@ test.describe("Page Classique — haut de page sur mobile", () => {
     await ctx.close();
   });
 });
+
+/**
+ * La rangée Indice + Abandon, sur mobile.
+ *
+ * Deuxième moitié du même symptôme (« obligé de scroller pour répondre »), et
+ * la plus coûteuse : `.hint-giveup-row` est un `flex` avec `flex-wrap: wrap`, et
+ * Classique est le seul mode à y placer DEUX blocs. À 390 px ils faisaient
+ * 229 px chacun pour 380 px disponibles → passage à la ligne, 292 px de haut au
+ * lieu de 136, et le champ de réponse repoussé à 894 px contre 748 en Émoji.
+ *
+ * Le correctif de la 2.3.1 n'avait traité que le `padding-top` (46 px) ; ces
+ * 154 px-là venaient du `padding: 12px 20px` de `.link-wrapper`.
+ *
+ * Le test vérifie l'invariant, pas les valeurs : les deux blocs sur une seule
+ * rangée, et le champ de réponse jamais plus bas que dans un mode de référence.
+ * Figer « 724 px » casserait au premier changement de contenu.
+ */
+test.describe("Page Classique — rangée Indice/Abandon sur mobile", () => {
+  async function rects(page) {
+    return page.evaluate(() => {
+      const r = (sel) => {
+        const el = document.querySelector(sel);
+        if (!el) return null;
+        const b = el.getBoundingClientRect();
+        return { top: b.top, bottom: b.bottom, left: b.left, right: b.right, height: b.height };
+      };
+      return {
+        hint: r(".hint-block"),
+        giveup: r(".giveup-block"),
+        bouton: r("#hintButton"),
+        saisie: r(".input-wrapper"),
+        largeurDoc: document.documentElement.scrollWidth,
+        largeurVue: document.documentElement.clientWidth,
+      };
+    });
+  }
+
+  for (const largeur of [360, 390, 412, 480]) {
+    test(`à ${largeur} px : Indice et Abandon restent côte à côte`, async ({ browser }) => {
+      const ctx = await browser.newContext({ viewport: { width: largeur, height: 844 } });
+      const page = await ctx.newPage();
+      await gotoSettled(page, "/classiqueMode/classiqueMode.html");
+      await page.waitForTimeout(400);
+
+      const g = await rects(page);
+      expect(g.hint, "bloc Indice présent").not.toBeNull();
+      expect(g.giveup, "bloc Abandon présent").not.toBeNull();
+
+      // Côte à côte : leurs bandes verticales se croisent, et l'un est à gauche
+      // de l'autre. C'est la définition d'une rangée, indépendamment des tailles.
+      expect(
+        g.hint.top < g.giveup.bottom && g.hint.bottom > g.giveup.top,
+        "Indice et Abandon sont empilés au lieu d'être côte à côte"
+      ).toBe(true);
+      expect(g.hint.right).toBeLessThanOrEqual(g.giveup.left + 1);
+
+      // Le gain ne doit pas se payer en débordement latéral.
+      expect(
+        g.largeurDoc,
+        "la rangée forcée sur une ligne fait déborder la page horizontalement"
+      ).toBeLessThanOrEqual(g.largeurVue + 2);
+
+      // Cible tactile : CLAUDE.md §7 impose 48 px, le bouton doit rester confortable.
+      expect(
+        g.bouton.bottom - g.bouton.top,
+        "bouton Indice trop bas pour le doigt"
+      ).toBeGreaterThanOrEqual(48);
+      expect(g.bouton.right - g.bouton.left, "bouton Indice trop étroit").toBeGreaterThanOrEqual(
+        48
+      );
+
+      await ctx.close();
+    });
+  }
+
+  test("le champ de réponse n'est pas plus bas que dans les autres modes", async ({ browser }) => {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const page = await ctx.newPage();
+
+    await gotoSettled(page, "/emojiMode/emojiMode.html");
+    await page.waitForTimeout(300);
+    const reference = await rects(page);
+
+    await gotoSettled(page, "/classiqueMode/classiqueMode.html");
+    await page.waitForTimeout(300);
+    const classique = await rects(page);
+
+    expect(reference.saisie, "champ de réponse trouvé en Émoji").not.toBeNull();
+    expect(classique.saisie, "champ de réponse trouvé en Classique").not.toBeNull();
+
+    // Classique porte un bloc de plus (Indice) et 10 px de padding-top en plus :
+    // on tolère une marge, mais plus l'écart d'une rangée entière (146 px avant).
+    expect(
+      classique.saisie.top - reference.saisie.top,
+      "le champ de réponse de Classique est nettement plus bas que celui d'Émoji"
+    ).toBeLessThanOrEqual(24);
+
+    await ctx.close();
+  });
+});
