@@ -45,6 +45,75 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-09-26 — Classique : Indice et Abandon côte à côte sur mobile
+
+Retour de Hamza : « la correction visuelle (pas besoin de scroller pour la réponse en
+Classique) ne s'affiche pas pour les autres, mais moi ça marche ».
+
+### Ce n'était pas un problème de cache
+
+Première hypothèse, écartée par la mesure : la prod sert bien le bon CSS
+(`padding-top: 60px`, `Cache-Control: no-cache`), `sw.js` est en v104, et le service
+worker est en *network-first* sur le CSS avec `cache: "reload"`, `skipWaiting()` et
+`clients.claim()`. Le correctif de la 2.3.1 est donc **déjà actif pour tout le monde**.
+
+⚠️ Au passage, un relevé initial donnait `padding-top: 70px` et un champ de réponse
+introuvable : l'URL interrogée était `classique.html`, qui n'existe pas — le fichier est
+`classiqueMode.html`. C'était la page 404 qui était mesurée. Toute mesure de mise en page
+doit vérifier qu'elle tape la bonne URL avant de conclure.
+
+### Le vrai coupable : 154 px, pas 46
+
+Le correctif de la 2.3.1 ne valait que **46 px** (`padding-top` 96 → 60). L'essentiel de
+l'écart était ailleurs.
+
+`.hint-giveup-row` (global.css §8) est une rangée `flex` en `flex-wrap: wrap`, et
+**Classique est le seul mode à y mettre deux blocs** — les cinq autres n'ont que le bloc
+Abandon, d'où l'absence du symptôme ailleurs.
+
+Mesuré en production à 390 px : chaque bloc fait **229 px** de large, soit 478 px avec le
+gap pour 380 px disponibles → la rangée passe à la ligne et occupe **292 px** de haut au
+lieu de 136. Le champ de réponse démarrait à 894 px, contre 748 px en Émoji : Classique
+était le mode où il fallait scroller le plus loin pour répondre.
+
+Et ce ne sont pas les images qui débordent (173 px) mais le `padding: 12px 20px` de
+`.link-wrapper` (global.css:165), qui ajoute 40 px de large à chaque bloc.
+
+### Le correctif
+
+Rogner ce padding et descendre l'image de 70 à 60 px : bloc à 176 px, deux blocs + gap =
+364 px, ça tient jusqu'à 375 px de large. Le sélecteur `.hint-giveup-row` n'existe que dans
+`classiqueMode.html`, donc la règle ne peut rien casser ailleurs.
+
+**Gain mesuré : 170 px.** Le champ de réponse passe de 894 à 724 px — Classique devient le
+mode où il est le plus haut, **devant** Émoji (748 px). La cible tactile reste à 160×80 px,
+loin au-dessus des 48 px de CLAUDE.md §7, et aucun débordement horizontal n'apparaît.
+
+### Ce qui n'est pas réglé, et pourquoi
+
+Il reste **129 px de scroll à 390×844**. Ils viennent de `.personadle-box` (313 px) et du
+logo, partagés par les six modes. Aucun des six ne tient sur un écran de téléphone
+aujourd'hui — Émoji, le meilleur, demandait déjà 152 px de scroll avant ce lot. Les toucher
+serait une refonte du gabarit commun, pas un correctif, et changerait les six modes d'un
+coup.
+
+### Vérifications
+
+Docker Desktop étant à l'arrêt, la suite E2E n'a pas pu tourner localement. La preuve a été
+faite autrement, et plus directement : **la prod EST l'état non corrigé**. Les invariants du
+test, exécutés contre elle puis contre elle avec le correctif injecté :
+
+| | 360 px | 390 px | 412 px | 480 px | écart vs Émoji |
+|---|---|---|---|---|---|
+| prod telle quelle | échec | échec | échec | échec | 146 px (seuil ≤24) |
+| prod + correctif | OK | OK | OK | OK | −24 px |
+
+- `tests-e2e/classic_mobile_layout.spec.js` — second `describe` ajouté : côte à côte, ordre
+  gauche→droite, pas de débordement horizontal, cible tactile ≥48 px, et le champ de réponse
+  jamais plus bas que dans un mode de référence. Le seuil est relatif à Émoji et non figé à
+  « 724 px », qui casserait au premier changement de contenu.
+
+---
 ## 2026-09-26 — Discord : 39 voix au quotidien, portraits et amitiés à l'hebdo
 
 Deux demandes de Hamza sur le bot.
