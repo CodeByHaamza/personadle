@@ -136,7 +136,16 @@ if ($mention !== '') {
     $payload['content'] = '<@&' . $mention . '>';
 }
 
-$r = personadle_discord_post($webhook, $payload);
+/* Le récap n'a pas de webhook à lui : faute de DISCORD_WEEKLY_WEBHOOK il part
+   dans le salon du quotidien (voir plus haut). Si ce salon devient un forum, un
+   POST sans `thread_name` est refusé en 400 — le rendez-vous du dimanche
+   mourrait en silence, et une fois par semaine c'est long à remarquer. Même
+   helper que le quotidien, même repli automatique dans les deux sens. */
+$forum = defined('DISCORD_DAILY_FORUM') && (bool) DISCORD_DAILY_FORUM
+    && !(defined('DISCORD_WEEKLY_WEBHOOK') && DISCORD_WEEKLY_WEBHOOK !== '');
+$fil = sprintf('🏆 Semaine %s — top 3', $monday->format('W/Y'));
+
+$r = personadle_discord_post_thread($webhook, $payload, $fil, $forum);
 
 // curl_exec() renvoie false sur échec réseau (code 0) ; Discord renvoie 401/404
 // sur webhook révoqué et 429 sur rate limit. Le détail part en log, caviardé.
@@ -147,6 +156,12 @@ if ($r['error'] !== '' || $r['code'] < 200 || $r['code'] >= 300) {
         'body'   => personadle_discord_redact($webhook, substr($r['body'], 0, 300)),
     ]);
     jsonError('Discord webhook call failed (HTTP ' . $r['code'] . ')', 502);
+}
+
+if (isset($r['repli'])) {
+    personadle_log_error($pdo, 'warning', 'Discord weekly : ' . $r['repli'], [
+        'source' => 'cron-discord-weekly',
+    ]);
 }
 
 personadle_log_error($pdo, 'info', 'Discord weekly top 3 posted', [

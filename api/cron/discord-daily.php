@@ -23,6 +23,7 @@
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../lib/event_calendar.php';
+require_once __DIR__ . '/../lib/discord_webhook.php';
 
 requireCronSecret();
 
@@ -921,8 +922,14 @@ $voix = [
     ],
 ];
 
-// Voix par jour, phrase par tour de rotation : la voix revient tous les 8 jours
-// et dit alors la phrase suivante. Cycle complet = 8 × 6 = 48 jours.
+// Voix par jour, phrase par tour de rotation : la voix revient tous les 39 jours
+// et dit alors la phrase suivante. Cycle complet = 39 × 3 = 117 jours, soit ~9
+// passages par personnage et par an.
+//
+// ⚠️ Le nombre de voix ne doit JAMAIS être un multiple de 7 : « jour de l'année
+// % nombre de voix » figerait alors une voix par jour de la semaine, et le
+// joueur qui ne vient que le lundi n'en entendrait qu'une, à vie. 39 laisse un
+// reste de 4.
 $z       = (int) $now->format('z');
 $iVoix   = $z % count($voix);
 $v       = $voix[$iVoix];
@@ -978,29 +985,18 @@ if ($mention !== '') {
     $payload['content'] = '<@&' . $mention . '>';
 }
 
-$body = json_encode($payload, JSON_UNESCAPED_UNICODE);
-if ($body === false) {
-    jsonError('Failed to encode Discord payload', 500);
-}
+/* Le salon peut être un forum (un fil par jour, pour que les scores des joueurs
+   répondent à quelque chose au lieu de se perdre entre deux annonces). Un webhook
+   ne peut pas poster dans un forum sans `thread_name`, ni dans un salon texte avec
+   — d'où le helper, qui se replie tout seul dans les deux sens. `DISCORD_DAILY_FORUM`
+   n'économise qu'un aller-retour : le cron marche même si la constante est fausse. */
+$forum = defined('DISCORD_DAILY_FORUM') && (bool) DISCORD_DAILY_FORUM;
+$fil   = personadle_discord_thread_name($now, $v['nom']);
 
-// curl_init() sans argument : passer l'URL ici peut renvoyer false, et
-// curl_setopt_array(false, …) est une TypeError fatale en PHP 8.
-// « ?wait=true » fait répondre Discord avec le message créé (200) au lieu d'un
-// 204 muet — sinon un webhook révoqué serait indiscernable d'un envoi réussi.
-$ch = curl_init();
-curl_setopt_array($ch, [
-    CURLOPT_URL            => DISCORD_DAILY_WEBHOOK . '?wait=true',
-    CURLOPT_POST           => true,
-    CURLOPT_POSTFIELDS     => $body,
-    CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_CONNECTTIMEOUT => 5,
-    CURLOPT_TIMEOUT        => 15,
-]);
-$reponse = curl_exec($ch);
-$code    = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-$erreur  = curl_error($ch);
-curl_close($ch);
+$envoi   = personadle_discord_post_thread(DISCORD_DAILY_WEBHOOK, $payload, $fil, $forum);
+$code    = $envoi['code'];
+$erreur  = $envoi['error'];
+$reponse = $envoi['body'];
 
 // curl_exec() renvoie false sur échec réseau ($code reste 0) ; Discord renvoie
 // 401/404 sur webhook révoqué et 429 sur rate limit. Les trois sont couverts.
@@ -1012,6 +1008,16 @@ if ($erreur !== '' || $code < 200 || $code >= 300) {
         'body'   => _discordRedact(substr((string) $reponse, 0, 300)),
     ]);
     jsonError('Discord webhook call failed (HTTP ' . $code . ')', 502);
+}
+
+// Le repli a servi : la constante DISCORD_DAILY_FORUM ne dit pas la vérité sur
+// le type du salon. Le message est passé quand même, mais chaque envoi coûte
+// désormais deux appels — et c'est le log qui le signale, pas un joueur.
+if (isset($envoi['repli'])) {
+    personadle_log_error(pdo(), 'warning', 'Discord daily : ' . $envoi['repli'], [
+        'source' => 'cron-discord-daily',
+        'forum_attendu' => $forum ? 'oui' : 'non',
+    ]);
 }
 
 // Trace de succès (Admin → Logs) : un cron hPanel qui ne tourne pas ne laisse
