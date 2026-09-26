@@ -175,13 +175,38 @@ multiple de 7 » y est maintenant écrite, puisque c'est elle qui a dicté le no
 elle n'a **pas** été lancée sur le serveur de production : `DatabaseIntegrationTest` s'y
 connecterait à la base de prod. C'est la CI qui la couvre.
 
-### Ce que Hamza doit faire
+### ⚠️ Rectification du même jour : la conversion est impossible
 
-1. Convertir `🎲┃daily-personadle` en **salon forum** (Discord : Modifier le salon → Type).
-2. Ajouter `define('DISCORD_DAILY_FORUM', true);` dans `api/config.php` — facultatif, ça
-   n'économise qu'un appel HTTP par jour.
+Cette entrée disait « convertir `🎲┃daily-personadle` en salon forum (Discord : Modifier le
+salon → Type) ». **Ça n'existe pas.** Vérifié contre l'API :
 
-Dans cet ordre ou l'inverse : le repli couvre l'intervalle.
+```
+PATCH /channels/1547307604462538783  {"type": 15}
+→ 400  code 50035  "type": "Value must be one of (0, 5)."
+```
+
+Un salon texte ne peut devenir que **texte (0) ou annonces (5)**. Un forum se crée, il ne se
+convertit pas — ce qui impliquerait un salon neuf, donc un **nouveau webhook**, une nouvelle
+valeur de `DISCORD_DAILY_WEBHOOK` en production, et l'abandon de l'historique du salon actuel.
+
+**Décision de Hamza :** on garde le salon, mais **en lecture seule** — on suit le rendez-vous,
+on en parle ailleurs. Appliqué côté Discord : `@everyone` privé d'écriture **et de fils**
+(ouvrir un fil est une façon d'écrire dans le salon), `👑 Fondateur` explicitement autorisé.
+Le trou trouvé au passage : le rôle Membres était déjà privé d'écriture, mais pas `@everyone`
+— un arrivant qui n'avait pas encore accepté les règles pouvait donc écrire.
+
+Le réglage vit dans `setup/permissions_fix.mjs` du dépôt `personadle-discord`, pas dans un
+appel d'API perdu : posé à la main, il serait effacé au prochain passage de ce script.
+
+**Le code de ce lot reste en place et n'est pas à défaire** : il se replie tout seul sur un
+salon texte (un seul appel HTTP), ne coûte rien, et servira tel quel si un vrai salon forum
+est créé un jour. Vérifié en production le 2026-09-26 : **un webhook n'est pas soumis aux
+surcharges de permission du salon** — message de test envoyé par le webhook du quotidien dans
+le salon verrouillé (HTTP 200) puis supprimé (HTTP 204). Le rendez-vous quotidien ne risque
+rien.
+
+Rien à faire côté `api/config.php` : `DISCORD_DAILY_FORUM` reste absent, donc faux, ce qui est
+désormais la bonne valeur.
 
 ---
 ## 2026-09-26 — Discord : 39 voix au quotidien, portraits et amitiés à l'hebdo
