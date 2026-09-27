@@ -45,6 +45,99 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-09-27 — Ce qui est marqué caché est enfin caché
+
+Retour de Hamza : « en bas de la page profil il y a le bouton pour supprimer le profil, il
+doit être dans réglages ». Il **y est** depuis le 2026-09-16 — le bouton de la page n'est
+qu'un relais, marqué `hidden`. Il était simplement **repeint**.
+
+### La cause, et pourquoi elle a frappé deux fois
+
+`[hidden]` n'est `display: none` que dans la feuille du **navigateur**. N'importe quelle règle
+d'auteur posant un `display` la bat, même une règle qui ne visait pas cet élément. Et `.hidden`
+n'était défini **nulle part globalement** : `compendium.css`, `friends/friends.css`,
+`leaderboard.css` et `settings-modal.css` l'avaient chacun rustiné dans leur coin — quatre
+correctifs locaux pour une règle manquante, et `leaderboard.css` portait même un commentaire
+décrivant le piège.
+
+Deux bugs mesurés en production, même cause :
+
+| | Où | Depuis quand c'est visible |
+|---|---|---|
+| `#deleteAccountBtn` « Supprimer mon compte » | page profil, **≤ 480 px** | `.btn-danger { display: flex }` dans la media query de cible tactile |
+| `#navFriendsBadge` pastille rouge **vide** 21×15 px | icône Amis de la barre du bas, **les 8 pages**, toutes largeurs | `.nav-badge { display: flex }` contre un `.hidden` inexistant |
+
+Le second n'avait été signalé par personne et touchait pourtant **tous les joueurs sur toutes
+les pages** : une pastille de notification vide, en permanence.
+
+### Le correctif
+
+Une règle, dans `css/global.css` §0, avant tout le reste :
+
+```css
+[hidden],
+.hidden {
+  display: none !important;
+}
+```
+
+`!important` est assumé : c'est la seule façon de gagner contre une règle d'auteur plus
+spécifique, et c'est exactement ce que font normalize.css et HTML5 Boilerplate pour cette
+raison précise.
+
+**Le rayon d'action a été mesuré avant d'écrire la règle**, page par page sur la production :
+**9 éléments concernés, tous les 9 sont ces deux bugs**. Après injection de la règle, 0 élément
+fantôme sur les 9 pages, et le **nombre d'éléments interactifs est identique partout** — rien
+de légitime ne disparaît. La page profil raccourcit de 88 px : le bouton et sa marge.
+
+Vérifié aussi que la règle ne casse rien : les **13** endroits du code qui écrivent un `display`
+inline (`victoryBox`, `quoteHint`, `rulesModal`…) n'utilisent pas `.hidden`, ils partent d'un
+`style="display:none"`. Un `!important` sur `.hidden` les aurait figés — ce n'est pas le cas.
+
+### Vérifications
+
+- `tests-e2e/hidden_is_hidden.spec.js` — **nouveau**. 36 cas (9 pages × 4 largeurs) qui
+  interdisent la **classe entière** de bug plutôt que de nommer les deux coupables : aucun
+  élément portant `.hidden` ou `[hidden]` ne doit se peindre. Un futur `display:` posé sans y
+  penser sur un sélecteur large le fera échouer, et c'est le but. Plus un cas nommé pour le
+  bouton de suppression, à cinq largeurs, qui vérifie aussi qu'il **reste dans le DOM** — il
+  porte la logique de suppression et sert de relais aux ⚙ Paramètres.
+- 390 et 480 px sont dans la liste parce que c'est là que le bouton apparaissait ; 481 px y est
+  pour que le test distingue les deux côtés de la borne.
+- Aucun test unitaire ne pouvait attraper ça : la classe était bien posée, le DOM était juste,
+  c'est la peinture qui désobéissait. Il fallait un vrai navigateur et une vraie cascade.
+
+### Le doublon, précisément
+
+Hamza a précisé : « il est dans le modal mais aussi en bas de la page profil, donc en double,
+faut garder que celui dans modal ». C'est exactement ce que fait ce correctif — et rien de plus :
+le bouton de la page était déjà `hidden`, il redevient invisible ; celui de la modale
+(`#smDeleteAccount`) ne change pas.
+
+**Le relais reste dans le DOM à dessein.** La modale ⚙ Paramètres ne refait pas la logique de
+suppression : elle appelle `window._personadleDanger.deleteAccount`, qui fait
+`deleteAccountBtn.click()` (`profile/profile-page.js:1053`). C'est le seul risque du correctif,
+donc il a été contrôlé contre la production plutôt que supposé : avec la règle appliquée, le
+relais **reçoit toujours le clic**, et le comportement est **identique** avec et sans elle. Un
+`.click()` sur un élément en `display: none` fonctionne. Un test E2E garde cet invariant — si
+quelqu'un remplace un jour le relais par un vrai bouton, il échouera.
+
+Mesuré aussi, pour être sûr qu'on ne retire pas la capacité : dans la modale, en mobile
+(390×844, 390×667, 360×640), « Supprimer mon compte » est bien atteignable après défilement du
+panneau — non recouvert par le pied collant, et `elementFromPoint` renvoie le bouton lui-même.
+
+### Notes
+
+- **Pas de bump de `CACHE_VERSION`** : le service worker sert le CSS en *network-first* avec
+  `cache: "reload"` (cf. `sw.js`), donc la feuille corrigée arrive sans purge de cache.
+- Les quatre règles `.hidden` locales sont **gardées** : redondantes, plus précises, et encore
+  vraies si une page cessait un jour de charger `global.css`. Les deux commentaires qui
+  affirmaient que « `.hidden` n'est pas une classe utilitaire globale » sont corrigés — ils
+  seraient devenus trompeurs.
+- Prettier voulait reformater `global.css` au passage (l'alignement des tokens de couleur n'y
+  avait jamais été soumis). Reformatage écarté : du bruit sans rapport dans un correctif.
+
+---
 ## 2026-09-26 — Classique : Indice et Abandon côte à côte sur mobile
 
 Retour de Hamza : « la correction visuelle (pas besoin de scroller pour la réponse en
