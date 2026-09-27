@@ -219,6 +219,8 @@ Utiliser `min()`, `clamp()`, `vw`/`vh`. Éviter les largeurs fixes en `px` sur l
 | Chaîne comparée à une fonction SQL | `DATE_FORMAT(col, …) = ?` avec les préparées natives (`EMULATE_PREPARES=false`) : sur la MariaDB d'Hostinger (`skip-character-set-client-handshake`), le paramètre lié est en `utf8mb4_general_ci` et la chaîne produite en `utf8mb4_unicode_ci` → `Illegal mix of collations` → **500**. Vécu en 2.2.6 (`GET /api/titles` pour tous, 30 min). Comparer des **entiers** (`MONTH()`, `DAY()`, `MONTH()*100+DAY()`) ou des dates, jamais des chaînes formatées. Et toute boucle serveur sur des conditions (réconciliation) enveloppe chaque vérification : une condition qui plante est loguée et sautée, pas propagée |
 | La préprod « marche » mais pas la prod | Une préprod ne vaut que si elle reproduit **exactement** la prod : même MariaDB (11.8, `collation_server=utf8mb4_unicode_ci`, `skip-character-set-client-handshake`), même PHP (**8.2**, pas 8.3 — le client MySQL ne négocie pas la même collation), même dump. Les trois écarts ont masqué le bug ci-dessus. Config : `ARG PHP_VERSION=8.2` dans `docker/php/Dockerfile`, override MariaDB dans le dépôt privé `personadle-discord/ops/preprod/`. Avant de dire « ça passe en préprod », vérifier `php -v` et `SELECT @@collation_connection` dedans |
 | Bouton rond/carré rendu ovale | `css/global.css` §18 impose `min-height: 48px; padding: 12px 20px` à **tout** `<button>` (cible tactile). Un bouton-icône avec `width`/`height` propres (pastille 28px, play 34px, ✕ de modale) sort en 28×48. Tout nouveau bouton-icône pose `min-height: 0` dans sa propre règle. Vécu en 2.2 : pastilles de bordure, lecteur de musique, ⚙ Settings, boutons amis |
+| Un salon Discord texte « converti » en forum | **Impossible.** `PATCH /channels/:id {"type":15}` → 400 / 50035, « Value must be one of (0, 5) » : un salon texte ne devient que texte ou annonces. Un forum se **crée**, donc nouveau salon, nouveau webhook, nouvelle valeur de `DISCORD_DAILY_WEBHOOK`, et perte de l'historique. Vécu le 2026-09-26, après avoir annoncé « Modifier le salon → Type », qui n'existe pas. Le code forum de `api/cron/discord-daily.php` se replie tout seul sur un salon texte : le garder ne coûte rien |
+| Webhook et permissions de salon | Un webhook n'est **pas** soumis aux surcharges de permission du salon : le quotidien poste toujours dans un salon passé en lecture seule (vérifié en prod le 2026-09-26, envoi puis suppression). Verrouiller un salon d'annonce ne casse donc pas son cron — mais ça casse le texte qui invitait les joueurs à y écrire |
 
 ---
 
@@ -314,9 +316,25 @@ npm test                  # Tests
 npm run test:watch        # Mode watch
 npm run i18n:check        # Vérifier clés i18n manquantes
 bash setup.sh             # Install backend local (première fois)
-ssh hostinger-personadle  # Accès SSH Hostinger
+ssh hostinger-personadle  # Accès SSH Hostinger (prod : site, base, crons)
+ssh maison                # Serveur maison (bot Discord, préprod, sauvegardes, chien de garde)
 mysql -u u870779941_Hamza -p u870779941_personadle  # MariaDB prod
 ```
+
+> 🧭 **Index complet des commandes d'exploitation** — les deux machines, déployer,
+> regarder ce qui se passe, et les pièges déjà payés : `personadle-discord/ops/COMMANDES.md`
+> (dépôt privé `CodeByHaamza/personadle-discord`). Les alias SSH vivent dans `~/.ssh/config`
+> et ne sont **pas** dans git : sur une machine neuve, il faut les recréer.
+
+**Deux pièges d'exploitation qui ont déjà coûté du temps :**
+
+- **`crontab` n'existe pas** sur le mutualisé Hostinger — les crons sont dans hPanel et
+  ne sont pas lisibles en SSH. Un `crontab -l` vide ne prouve **rien** : pour savoir si un
+  cron tourne, lire ses traces dans la table `error_log`.
+- **`display_errors` est éteint en CLI** sur Hostinger : un script PHP qui plante n'affiche
+  **rien du tout**. Une sortie vide n'est pas « aucun résultat », c'est souvent un fatal muet.
+  Toujours `php -d display_errors=1`. Et ne **jamais** lancer la suite PHPUnit complète sur ce
+  serveur : `DatabaseIntegrationTest` se connecterait à la base de **production**.
 
 ---
 

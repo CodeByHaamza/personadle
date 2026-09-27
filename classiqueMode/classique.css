@@ -689,3 +689,54 @@ body.expert-mode #quoteHint {
     font-size: 0.95rem;
   }
 }
+
+/* =====================================================================
+   INDICE + ABANDON CÔTE À CÔTE SUR MOBILE
+   =====================================================================
+   `.hint-giveup-row` (global.css §8) est une rangée `flex` avec
+   `flex-wrap: wrap`. Classique est le SEUL mode à y mettre deux blocs —
+   les cinq autres n'ont que le bloc Abandon, d'où l'absence du problème
+   ailleurs. Le sélecteur n'existe que dans `classiqueMode.html`, donc ce
+   qui suit ne peut rien casser ailleurs.
+
+   Mesuré en production le 2026-09-26 à 390px : chaque bloc fait 229px de
+   large, soit 478px avec le gap pour 380px disponibles → la rangée passe à
+   la ligne et occupe 292px de haut au lieu de 136. Le champ de réponse
+   démarrait à 894px, contre 748px en Émoji : Classique était le mode où il
+   fallait scroller le plus loin pour répondre, alors que le correctif de la
+   2.3.1 (padding-top 96→60) était censé l'aligner sur les autres. Ce
+   correctif-là n'avait réglé que 46px ; les 154px restants venaient d'ici.
+
+   Ce n'est pas la taille des images qui déborde (173px) mais le
+   `padding: 12px 20px` de `.link-wrapper` (global.css:165), qui ajoute 40px
+   de large à chaque bloc. On le rogne et on descend l'image de 70 à 60px :
+   bloc à 176px, deux blocs + gap = 364px, ça tient jusqu'à 375px de large.
+
+   ⚠️ `height` porte `!important` parce que global.css l'impose déjà à 70px
+   sous 768px — à specificité égale, c'est l'ordre de chargement qui tranche
+   et `classique.css` se charge après (cf. classiqueMode.html).
+
+   La cible tactile reste largement au-dessus des 48px de CLAUDE.md §7 :
+   le bouton mesure 160×80px après correction (contre 213×94 avant).
+
+   Gain mesuré : 170px. Le champ de réponse passe de 894 à 724px à 390px de
+   large — Classique devient le mode où il est le plus haut, devant Émoji.
+   Il reste 129px de scroll à 390×844 : ils viennent de `.personadle-box`
+   (313px) et du logo, partagés par les six modes — les toucher serait une
+   refonte, pas un correctif.
+   --------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .hint-giveup-row {
+    flex-wrap: nowrap;
+    gap: 12px;
+  }
+
+  .hint-giveup-row .link-wrapper {
+    min-width: 0;
+    padding: 10px 6px;
+  }
+
+  .hint-giveup-row .img-wrapper img {
+    height: 60px !important;
+  }
+}

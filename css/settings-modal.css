@@ -249,11 +249,14 @@
   min-height: 18px;
 }
 /* `_save()` pose et retire la classe `hidden` sur cet indicateur depuis toujours,
-   mais aucune règle ne la définissait : ni ici, ni dans global.css, qui ne
-   connaît que `.modal.hidden` et `.sm-danger.hidden`. L'indicateur était donc
-   toujours dans le flux — 18 px de vide sous le bouton en permanence, et une
-   assertion « il est visible » qui ne prouvait rien. Dans un pied collant cette
-   bande coûte de la hauteur utile à chaque ouverture. */
+   mais aucune règle ne la définissait : ni ici, ni dans global.css à l'époque.
+   L'indicateur était donc toujours dans le flux — 18 px de vide sous le bouton en
+   permanence, et une assertion « il est visible » qui ne prouvait rien. Dans un
+   pied collant cette bande coûte de la hauteur utile à chaque ouverture.
+
+   MàJ 2026-09-27 : global.css §0 couvre désormais `[hidden], .hidden` pour tout le
+   site — deux bugs de plus venaient du même manque. Règle gardée, redondante mais
+   plus précise. */
 .sm-save-status.hidden {
   display: none;
 }

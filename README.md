@@ -120,6 +120,7 @@ the Persona's real myth with its name masked. Expert keeps its own targets, stat
 - **146 new profile pictures** (204 → 350), an _Animated_ tab, and _Sun_ from Persona 3 Portable in Music mode.
 - **Lighter**: opening your profile went from 125.6 MB to 13.5 MB, and the heaviest All-Out Attack round from 80.2 MB to 3.2 MB.
 - 2.3.1: badge and title unlocks are decided by the server, an Expert friend challenge no longer wins itself, Kotone's animated pictures stay animated, and the Classic page starts as high as the other modes on mobile.
+- 2.3.2: on phones, Hint and Give Up sit side by side again in Classic — the answer field moved 170 px up — the duplicate "Delete my account" button left the profile page, and the empty notification dot left the Friends icon. On Discord, the daily is announced by 39 voices instead of 8 and the Sunday recap shows the podium's portraits.
 
 <details>
 <summary>2.2 — Profile showcase &amp; Compendium</summary>
@@ -167,7 +168,7 @@ Every pull request runs the whole thing; `main` only receives releases from `dev
 ```
 Vitest + jsdom → 1548 tests unitaires (logique de jeu, backend, streak, i18n, validation données)
 PHPUnit        → tests de logique pure + intégration DB (contrat de schéma)
-Playwright     → 283 E2E sur la stack Docker complète (smoke, API, Social Link)
+Playwright     → 326 E2E sur la stack Docker complète (smoke, API, Social Link)
 PHPStan        → analyse statique PHP niveau 5 · Psalm → taint analysis
 ESLint+Prettier→ lint + format · i18n / data / daily-pool consistency checks
 ```
