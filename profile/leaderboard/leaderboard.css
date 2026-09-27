@@ -746,10 +746,15 @@
   box-shadow: 0 2px 12px rgba(150, 70, 255, 0.4);
 }
 
-/* `.hidden` n'est pas une classe utilitaire globale sur cette page : seules
-   `.modal.hidden` et `.lb-pagination.hidden` existaient. Sans cette règle, les
-   groupes de filtres sans objet en mode Amitiés restaient affichés — la classe
-   était bien posée, mais ne peignait rien. */
+/* `.hidden` ne peignait rien sur cette page : seules `.modal.hidden` et
+   `.lb-pagination.hidden` existaient. Sans cette règle, les groupes de filtres
+   sans objet en mode Amitiés restaient affichés — la classe était bien posée,
+   mais ne peignait rien.
+
+   MàJ 2026-09-27 : `global.css` §0 définit désormais `[hidden], .hidden` en
+   `display: none !important` pour tout le site, donc cette règle est redondante.
+   Gardée parce qu'elle est plus précise et ne coûte rien — et parce qu'elle reste
+   vraie si cette page cessait un jour de charger `global.css`. */
 .lb-filter-group.hidden {
   display: none;
 }

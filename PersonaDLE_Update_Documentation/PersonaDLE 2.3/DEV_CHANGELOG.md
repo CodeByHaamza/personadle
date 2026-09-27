@@ -45,6 +45,368 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-09-27 — Release 2.3.2
+
+Sortie de ce qui s'était accumulé sur `develop` depuis la 2.3.1. **Aucune migration à
+jouer** : la prod est déjà à la 055, et ce lot n'ajoute aucun fichier SQL. `schema:check-prod`
+passé avant le merge — « aucune dérive : colonnes et contraintes UNIQUE conformes ».
+
+### Contenu
+
+- **Classique sur téléphone** — Indice et Abandon côte à côte, le champ de réponse remonte de
+  170 px (le correctif de la 2.3.1 n'en avait réglé que 46).
+- **`[hidden]` et `.hidden` enfin honorés** — le bouton « Supprimer mon compte » en double sur
+  la page profil, et une pastille de notification vide sur l'icône Amis, sur les huit pages.
+- **Discord** — le quotidien passe de 8 à **39 voix** ; le récap du dimanche montre les
+  portraits du podium et les trois amitiés les plus fortes ; les deux crons savent poster dans
+  un salon forum, avec repli automatique.
+- Documentation : la conversion d'un salon texte en forum est impossible (Discord la refuse),
+  et l'index des commandes d'exploitation.
+
+### Cache
+
+`CACHE_VERSION` v104 → **v105**. Le service worker sert le CSS et le JS en *network-first*,
+donc la feuille corrigée arrivait de toute façon ; le bump est là pour les images et les sons,
+qui sont en *cache-first* — et parce qu'un joueur déjà venu est le seul que ça concerne.
+
+### Ce que la release NE contient pas
+
+Les commandes `/statut`, `/annonce`, `/sync` et le passage du salon du quotidien en lecture
+seule ne sont **pas** dans ce lot : ils vivent dans le dépôt `personadle-discord` et sur le
+serveur maison, déjà déployés. Seuls les crons Discord sont hébergés ici.
+
+---
+## 2026-09-27 — Ce qui est marqué caché est enfin caché
+
+Retour de Hamza : « en bas de la page profil il y a le bouton pour supprimer le profil, il
+doit être dans réglages ». Il **y est** depuis le 2026-09-16 — le bouton de la page n'est
+qu'un relais, marqué `hidden`. Il était simplement **repeint**.
+
+### La cause, et pourquoi elle a frappé deux fois
+
+`[hidden]` n'est `display: none` que dans la feuille du **navigateur**. N'importe quelle règle
+d'auteur posant un `display` la bat, même une règle qui ne visait pas cet élément. Et `.hidden`
+n'était défini **nulle part globalement** : `compendium.css`, `friends/friends.css`,
+`leaderboard.css` et `settings-modal.css` l'avaient chacun rustiné dans leur coin — quatre
+correctifs locaux pour une règle manquante, et `leaderboard.css` portait même un commentaire
+décrivant le piège.
+
+Deux bugs mesurés en production, même cause :
+
+| | Où | Depuis quand c'est visible |
+|---|---|---|
+| `#deleteAccountBtn` « Supprimer mon compte » | page profil, **≤ 480 px** | `.btn-danger { display: flex }` dans la media query de cible tactile |
+| `#navFriendsBadge` pastille rouge **vide** 21×15 px | icône Amis de la barre du bas, **les 8 pages**, toutes largeurs | `.nav-badge { display: flex }` contre un `.hidden` inexistant |
+
+Le second n'avait été signalé par personne et touchait pourtant **tous les joueurs sur toutes
+les pages** : une pastille de notification vide, en permanence.
+
+### Le correctif
+
+Une règle, dans `css/global.css` §0, avant tout le reste :
+
+```css
+[hidden],
+.hidden {
+  display: none !important;
+}
+```
+
+`!important` est assumé : c'est la seule façon de gagner contre une règle d'auteur plus
+spécifique, et c'est exactement ce que font normalize.css et HTML5 Boilerplate pour cette
+raison précise.
+
+**Le rayon d'action a été mesuré avant d'écrire la règle**, page par page sur la production :
+**9 éléments concernés, tous les 9 sont ces deux bugs**. Après injection de la règle, 0 élément
+fantôme sur les 9 pages, et le **nombre d'éléments interactifs est identique partout** — rien
+de légitime ne disparaît. La page profil raccourcit de 88 px : le bouton et sa marge.
+
+Vérifié aussi que la règle ne casse rien : les **13** endroits du code qui écrivent un `display`
+inline (`victoryBox`, `quoteHint`, `rulesModal`…) n'utilisent pas `.hidden`, ils partent d'un
+`style="display:none"`. Un `!important` sur `.hidden` les aurait figés — ce n'est pas le cas.
+
+### Vérifications
+
+- `tests-e2e/hidden_is_hidden.spec.js` — **nouveau**. 36 cas (9 pages × 4 largeurs) qui
+  interdisent la **classe entière** de bug plutôt que de nommer les deux coupables : aucun
+  élément portant `.hidden` ou `[hidden]` ne doit se peindre. Un futur `display:` posé sans y
+  penser sur un sélecteur large le fera échouer, et c'est le but. Plus un cas nommé pour le
+  bouton de suppression, à cinq largeurs, qui vérifie aussi qu'il **reste dans le DOM** — il
+  porte la logique de suppression et sert de relais aux ⚙ Paramètres.
+- 390 et 480 px sont dans la liste parce que c'est là que le bouton apparaissait ; 481 px y est
+  pour que le test distingue les deux côtés de la borne.
+- Aucun test unitaire ne pouvait attraper ça : la classe était bien posée, le DOM était juste,
+  c'est la peinture qui désobéissait. Il fallait un vrai navigateur et une vraie cascade.
+
+### Le doublon, précisément
+
+Hamza a précisé : « il est dans le modal mais aussi en bas de la page profil, donc en double,
+faut garder que celui dans modal ». C'est exactement ce que fait ce correctif — et rien de plus :
+le bouton de la page était déjà `hidden`, il redevient invisible ; celui de la modale
+(`#smDeleteAccount`) ne change pas.
+
+**Le relais reste dans le DOM à dessein.** La modale ⚙ Paramètres ne refait pas la logique de
+suppression : elle appelle `window._personadleDanger.deleteAccount`, qui fait
+`deleteAccountBtn.click()` (`profile/profile-page.js:1053`). C'est le seul risque du correctif,
+donc il a été contrôlé contre la production plutôt que supposé : avec la règle appliquée, le
+relais **reçoit toujours le clic**, et le comportement est **identique** avec et sans elle. Un
+`.click()` sur un élément en `display: none` fonctionne. Un test E2E garde cet invariant — si
+quelqu'un remplace un jour le relais par un vrai bouton, il échouera.
+
+Mesuré aussi, pour être sûr qu'on ne retire pas la capacité : dans la modale, en mobile
+(390×844, 390×667, 360×640), « Supprimer mon compte » est bien atteignable après défilement du
+panneau — non recouvert par le pied collant, et `elementFromPoint` renvoie le bouton lui-même.
+
+### Notes
+
+- **Pas de bump de `CACHE_VERSION`** : le service worker sert le CSS en *network-first* avec
+  `cache: "reload"` (cf. `sw.js`), donc la feuille corrigée arrive sans purge de cache.
+- Les quatre règles `.hidden` locales sont **gardées** : redondantes, plus précises, et encore
+  vraies si une page cessait un jour de charger `global.css`. Les deux commentaires qui
+  affirmaient que « `.hidden` n'est pas une classe utilitaire globale » sont corrigés — ils
+  seraient devenus trompeurs.
+- Prettier voulait reformater `global.css` au passage (l'alignement des tokens de couleur n'y
+  avait jamais été soumis). Reformatage écarté : du bruit sans rapport dans un correctif.
+
+---
+## 2026-09-26 — Classique : Indice et Abandon côte à côte sur mobile
+
+Retour de Hamza : « la correction visuelle (pas besoin de scroller pour la réponse en
+Classique) ne s'affiche pas pour les autres, mais moi ça marche ».
+
+### Ce n'était pas un problème de cache
+
+Première hypothèse, écartée par la mesure : la prod sert bien le bon CSS
+(`padding-top: 60px`, `Cache-Control: no-cache`), `sw.js` est en v104, et le service
+worker est en *network-first* sur le CSS avec `cache: "reload"`, `skipWaiting()` et
+`clients.claim()`. Le correctif de la 2.3.1 est donc **déjà actif pour tout le monde**.
+
+⚠️ Au passage, un relevé initial donnait `padding-top: 70px` et un champ de réponse
+introuvable : l'URL interrogée était `classique.html`, qui n'existe pas — le fichier est
+`classiqueMode.html`. C'était la page 404 qui était mesurée. Toute mesure de mise en page
+doit vérifier qu'elle tape la bonne URL avant de conclure.
+
+### Le vrai coupable : 154 px, pas 46
+
+Le correctif de la 2.3.1 ne valait que **46 px** (`padding-top` 96 → 60). L'essentiel de
+l'écart était ailleurs.
+
+`.hint-giveup-row` (global.css §8) est une rangée `flex` en `flex-wrap: wrap`, et
+**Classique est le seul mode à y mettre deux blocs** — les cinq autres n'ont que le bloc
+Abandon, d'où l'absence du symptôme ailleurs.
+
+Mesuré en production à 390 px : chaque bloc fait **229 px** de large, soit 478 px avec le
+gap pour 380 px disponibles → la rangée passe à la ligne et occupe **292 px** de haut au
+lieu de 136. Le champ de réponse démarrait à 894 px, contre 748 px en Émoji : Classique
+était le mode où il fallait scroller le plus loin pour répondre.
+
+Et ce ne sont pas les images qui débordent (173 px) mais le `padding: 12px 20px` de
+`.link-wrapper` (global.css:165), qui ajoute 40 px de large à chaque bloc.
+
+### Le correctif
+
+Rogner ce padding et descendre l'image de 70 à 60 px : bloc à 176 px, deux blocs + gap =
+364 px, ça tient jusqu'à 375 px de large. Le sélecteur `.hint-giveup-row` n'existe que dans
+`classiqueMode.html`, donc la règle ne peut rien casser ailleurs.
+
+**Gain mesuré : 170 px.** Le champ de réponse passe de 894 à 724 px — Classique devient le
+mode où il est le plus haut, **devant** Émoji (748 px). La cible tactile reste à 160×80 px,
+loin au-dessus des 48 px de CLAUDE.md §7, et aucun débordement horizontal n'apparaît.
+
+### Ce qui n'est pas réglé, et pourquoi
+
+Il reste **129 px de scroll à 390×844**. Ils viennent de `.personadle-box` (313 px) et du
+logo, partagés par les six modes. Aucun des six ne tient sur un écran de téléphone
+aujourd'hui — Émoji, le meilleur, demandait déjà 152 px de scroll avant ce lot. Les toucher
+serait une refonte du gabarit commun, pas un correctif, et changerait les six modes d'un
+coup.
+
+### Vérifications
+
+Docker Desktop étant à l'arrêt, la suite E2E n'a pas pu tourner localement. La preuve a été
+faite autrement, et plus directement : **la prod EST l'état non corrigé**. Les invariants du
+test, exécutés contre elle puis contre elle avec le correctif injecté :
+
+| | 360 px | 390 px | 412 px | 480 px | écart vs Émoji |
+|---|---|---|---|---|---|
+| prod telle quelle | échec | échec | échec | échec | 146 px (seuil ≤24) |
+| prod + correctif | OK | OK | OK | OK | −24 px |
+
+- `tests-e2e/classic_mobile_layout.spec.js` — second `describe` ajouté : côte à côte, ordre
+  gauche→droite, pas de débordement horizontal, cible tactile ≥48 px, et le champ de réponse
+  jamais plus bas que dans un mode de référence. Le seuil est relatif à Émoji et non figé à
+  « 724 px », qui casserait au premier changement de contenu.
+## 2026-09-26 — Discord : le quotidien peut vivre dans un salon forum
+
+Première pièce du remaniement validée par Hamza. Un fil par jour sous l'annonce :
+aujourd'hui un score posté par un joueur se perd entre deux messages du bot ; dans un fil,
+il **répond** à quelque chose. C'est la seule idée de la liste qui ne demandait aucune
+ligne de code — le webhook accepte déjà `thread_name`.
+
+### Le piège : le type du salon est une dépendance invisible
+
+Un webhook ne peut **pas** poster dans un salon forum sans `thread_name`, et ne peut pas
+poster dans un salon texte **avec** : Discord renvoie 400 dans les deux cas. Le jour où
+`🎲┃daily-personadle` est converti, un cron qui l'ignore s'arrête net — et le rendez-vous
+quotidien devient muet sans que personne ne soit prévenu. Déjà vécu du 9 au 19 septembre
+pour une autre raison (clé fausse) : dix jours de silence.
+
+Donc pas de simple paramètre, mais un **repli automatique dans les deux sens** :
+`personadle_discord_post_thread()` essaie la forme attendue et, sur un 400, réessaie
+l'autre **une fois**. Le salon peut être converti — ou reconverti — sans toucher au code.
+`DISCORD_DAILY_FORUM` n'économise plus qu'un aller-retour dans le cas courant, et le cron
+fonctionne même si la constante ment.
+
+Quand le repli sert, un `warning` le dit dans Admin → Logs : sinon la constante resterait
+fausse indéfiniment et chaque envoi coûterait deux appels en silence.
+
+Ce qui n'est **pas** réessayé : 401, 404, 429, 500. Ceux-là ne sont pas un problème de
+type de salon, et réessayer ne ferait que doubler l'échec en brouillant le log.
+
+### Le weekly aussi, et c'est ce qui aurait cassé
+
+`DISCORD_WEEKLY_WEBHOOK` est **absent du `config.php` de prod** (vérifié) : le récap du
+dimanche part donc dans le salon du quotidien, par le repli prévu. Convertir ce salon en
+forum aurait tué le rendez-vous hebdomadaire — et une fois par semaine, c'est long à
+remarquer. Le weekly passe par le même helper, avec un nom de fil par semaine ISO
+(`🏆 Semaine 39/2026 — top 3`).
+
+Il ne suit la constante que s'il n'a pas de webhook à lui : le jour où Hamza lui donne son
+propre salon, les deux réglages redeviennent indépendants.
+
+### Nom des fils
+
+La **date d'abord** (`🎲 26/09/2026 — Yukari Takeba`) : dans un forum on cherche le jour,
+pas le personnage — le nom de la voix est déjà dans le message. Tronqué à 100 caractères,
+la limite de Discord, sans quoi c'est la requête entière qui est refusée à 6 h du matin.
+
+### Corrigé au passage
+
+Le commentaire de rotation du quotidien parlait encore de « 8 jours » et d'un « cycle de
+48 jours » — faux depuis le passage à 39 voix (117 jours). La contrainte « jamais un
+multiple de 7 » y est maintenant écrite, puisque c'est elle qui a dicté le nombre.
+
+### Vérifications
+
+- `tests/php/DiscordForumThreadTest.php` — **nouveau**, 12 cas. Le poster est injecté,
+  donc les deux sens du repli sont réellement exercés : c'est de la logique qu'on ne
+  déclenche jamais à la main, il faudrait convertir un vrai salon Discord pour la voir
+  passer. Couvre aussi 204 (succès sans `?wait=true`), le double échec qui doit remonter,
+  et un `thread_name` déjà présent dans le payload qui ne doit pas gagner.
+- **32 tests verts** (Discord + weekly) exécutés sur PHP 8.2.33.
+
+⚠️ Docker Desktop étant à l'arrêt, la suite PHP complète n'a pas pu tourner localement, et
+elle n'a **pas** été lancée sur le serveur de production : `DatabaseIntegrationTest` s'y
+connecterait à la base de prod. C'est la CI qui la couvre.
+
+### ⚠️ Rectification du même jour : la conversion est impossible
+
+Cette entrée disait « convertir `🎲┃daily-personadle` en salon forum (Discord : Modifier le
+salon → Type) ». **Ça n'existe pas.** Vérifié contre l'API :
+
+```
+PATCH /channels/1547307604462538783  {"type": 15}
+→ 400  code 50035  "type": "Value must be one of (0, 5)."
+```
+
+Un salon texte ne peut devenir que **texte (0) ou annonces (5)**. Un forum se crée, il ne se
+convertit pas — ce qui impliquerait un salon neuf, donc un **nouveau webhook**, une nouvelle
+valeur de `DISCORD_DAILY_WEBHOOK` en production, et l'abandon de l'historique du salon actuel.
+
+**Décision de Hamza :** on garde le salon, mais **en lecture seule** — on suit le rendez-vous,
+on en parle ailleurs. Appliqué côté Discord : `@everyone` privé d'écriture **et de fils**
+(ouvrir un fil est une façon d'écrire dans le salon), `👑 Fondateur` explicitement autorisé.
+Le trou trouvé au passage : le rôle Membres était déjà privé d'écriture, mais pas `@everyone`
+— un arrivant qui n'avait pas encore accepté les règles pouvait donc écrire.
+
+Le réglage vit dans `setup/permissions_fix.mjs` du dépôt `personadle-discord`, pas dans un
+appel d'API perdu : posé à la main, il serait effacé au prochain passage de ce script.
+
+**Le code de ce lot reste en place et n'est pas à défaire** : il se replie tout seul sur un
+salon texte (un seul appel HTTP), ne coûte rien, et servira tel quel si un vrai salon forum
+est créé un jour. Vérifié en production le 2026-09-26 : **un webhook n'est pas soumis aux
+surcharges de permission du salon** — message de test envoyé par le webhook du quotidien dans
+le salon verrouillé (HTTP 200) puis supprimé (HTTP 204). Le rendez-vous quotidien ne risque
+rien.
+
+Rien à faire côté `api/config.php` : `DISCORD_DAILY_FORUM` reste absent, donc faux, ce qui est
+désormais la bonne valeur.
+
+---
+## 2026-09-26 — Discord : 39 voix au quotidien, portraits et amitiés à l'hebdo
+
+Deux demandes de Hamza sur le bot.
+
+### Le quotidien passe de 8 à 39 voix
+
+Les huit d'origine brisent le quatrième mur **dans les jeux** — Velvet Room et mascottes —
+ce qui justifiait qu'elles s'adressent au joueur. Le cast principal n'a pas ce privilège :
+plutôt que de le leur prêter, ils parlent **comme à quelqu'un qui joue à côté d'eux**.
+
+31 voix ajoutées, 3 répliques chacune, FR et EN, chacune accrochée à ce qui rend le
+personnage reconnaissable — le baseball de Junpei, les crises de rire de Yukiko, le chou
+d'Adachi, les vingt minutes que Yusuke passe à contempler **sans répondre**, le jardinage
+de Haru qui finit en menace polie.
+
+**Joker parle**, ainsi que Makoto Yuki et Kotone Shiomi. Je les avais d'abord écrits en
+didascalies au motif qu'ils sont des protagonistes muets — c'est une convention de jeu, pas
+une règle, et Hamza a tranché. Koromaru garde les siennes : c'est un chien.
+
+**39 voix** : la contrainte du fichier interdit tout multiple de 7, sinon « jour de l'année
+% 7 » fige une voix par jour de la semaine et le joueur du lundi n'en voit qu'une, à vie.
+39 laisse un reste de 4. Cycle complet de 117 jours, chaque personnage parle ~9 fois par an.
+
+**Les 39 avatars ont été contrôlés un par un contre la production.** Discord télécharge
+l'image lui-même : un chemin faux donne une pastille vide, sans la moindre erreur. Au
+passage, le premier contrôle renvoyait `000` partout — c'était la boucle de test qui
+traînait des retours chariot Windows, pas les URL.
+
+### L'hebdomadaire montre les portraits et les amitiés
+
+Demande : « dans le weekly on fait le top 3 des joueurs, si ils ont une pdp on l'affiche,
+et les meilleurs amis pareil, avec un message qui change ».
+
+**Le piège est le stockage des portraits.** Un portrait recadré vit en **base64** dans
+`profiles.avatar_data` (`data:image/png;base64,…`), et Discord va CHERCHER l'image à une
+adresse — il ne sait rien faire d'une data-URL. Seuls les portraits de galerie non recadrés
+laissent un chemin exploitable.
+
+Mesuré en production : **43 profils sur 328** ont une adresse utilisable, soit 13 %. Le
+portrait est donc **un bonus, jamais la structure** : le podium reste entièrement lisible en
+texte, et un encart illustré s'ajoute uniquement pour les joueurs qui en ont un. Aucun
+encart vide, aucune image cassée — c'est ce que Discord afficherait sinon.
+
+`personadle_weekly_avatar_url()` refuse tout ce qui n'est pas un fichier de la galerie :
+data-URL, URL externe, remontée de dossier, nom hors liste blanche. Ces valeurs viennent de
+la base, donc d'une saisie utilisateur passée par l'API — elles ne doivent pas devenir une
+adresse qu'on demande à Discord d'aller chercher.
+
+**Les amitiés ne sont pas bornées à la semaine**, contrairement aux victoires. Une amitié se
+construit dans la durée ; un classement hebdomadaire des liens ne dirait que « qui a joué
+ensemble ces sept jours ». C'est donc le classement de tous les temps, trié par XP comme la
+page Amitié — le rang plafonne à 10 et donnerait des dizaines d'ex æquo.
+
+**Le mot d'accueil de Margaret tourne** sur 7 phrases. Le nombre n'est pas neutre : s'il
+divisait 52 sans reste, la même phrase retomberait sur la même semaine chaque année et le
+rendez-vous deviendrait un calendrier fixe. 52 = 7 × 7 + 3, la rotation dérive. Un test
+l'impose plutôt que de compter sur la vigilance.
+
+### Vérifications
+
+- `tests/php/WeeklyDigestTest.php` — **nouveau**, 16 cas / 38 assertions. Dont la remontée
+  de dossier, l'URL externe, le pseudo en Markdown qui détournerait la mise en forme, et le
+  fait que 52 ne soit pas divisible par le nombre de phrases.
+- **395 tests PHPUnit** verts, syntaxe PHP validée dans le conteneur.
+- Chacune des 39 voix contrôlée : 3 répliques **complètes** (titre, FR, EN, relance). Une
+  réplique amputée passerait sinon en production sans erreur.
+- Aucune réplique ne dépasse 165 caractères — au-delà, c'est illisible sur téléphone.
+
+### Laissé de côté
+
+Sojiro, Dojima et Elizabeth n'ont **pas d'avatar** dans `img/avatar/`. Ils ne sont pas dans
+le casting : leur coller le portrait d'un autre aurait été pire que leur absence.
+
+---
 ## 2026-09-25 — La page Classique démarrait 46 px plus bas que les cinq autres
 
 « Sur l'écran d'ami, la page Classique n'a pas la nouvelle taille adaptée, obligé de
