@@ -45,6 +45,37 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-09-27 — Release 2.3.2
+
+Sortie de ce qui s'était accumulé sur `develop` depuis la 2.3.1. **Aucune migration à
+jouer** : la prod est déjà à la 055, et ce lot n'ajoute aucun fichier SQL. `schema:check-prod`
+passé avant le merge — « aucune dérive : colonnes et contraintes UNIQUE conformes ».
+
+### Contenu
+
+- **Classique sur téléphone** — Indice et Abandon côte à côte, le champ de réponse remonte de
+  170 px (le correctif de la 2.3.1 n'en avait réglé que 46).
+- **`[hidden]` et `.hidden` enfin honorés** — le bouton « Supprimer mon compte » en double sur
+  la page profil, et une pastille de notification vide sur l'icône Amis, sur les huit pages.
+- **Discord** — le quotidien passe de 8 à **39 voix** ; le récap du dimanche montre les
+  portraits du podium et les trois amitiés les plus fortes ; les deux crons savent poster dans
+  un salon forum, avec repli automatique.
+- Documentation : la conversion d'un salon texte en forum est impossible (Discord la refuse),
+  et l'index des commandes d'exploitation.
+
+### Cache
+
+`CACHE_VERSION` v104 → **v105**. Le service worker sert le CSS et le JS en *network-first*,
+donc la feuille corrigée arrivait de toute façon ; le bump est là pour les images et les sons,
+qui sont en *cache-first* — et parce qu'un joueur déjà venu est le seul que ça concerne.
+
+### Ce que la release NE contient pas
+
+Les commandes `/statut`, `/annonce`, `/sync` et le passage du salon du quotidien en lecture
+seule ne sont **pas** dans ce lot : ils vivent dans le dépôt `personadle-discord` et sur le
+serveur maison, déjà déployés. Seuls les crons Discord sont hébergés ici.
+
+---
 ## 2026-09-27 — Ce qui est marqué caché est enfin caché
 
 Retour de Hamza : « en bas de la page profil il y a le bouton pour supprimer le profil, il
