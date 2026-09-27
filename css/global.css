@@ -8,6 +8,44 @@
    ============================================================= */
 
 /* =====================================================
+   0. CACHER, POUR DE BON
+   =====================================================
+   `[hidden]` n'est `display: none` que dans la feuille du NAVIGATEUR. N'importe
+   quelle règle d'auteur qui pose un `display` la bat — y compris une règle qui
+   ne visait pas cet élément en particulier. Et `.hidden` n'était, jusqu'ici,
+   défini nulle part globalement : chaque page l'a rustiné dans son coin
+   (`compendium.css`, `friends/friends.css`, `leaderboard.css`,
+   `settings-modal.css`), et la moitié du site vivait sans.
+
+   Deux bugs mesurés en production le 2026-09-27, tous deux de cette cause :
+
+   1. `#deleteAccountBtn` — le bouton « Supprimer mon compte », volontairement
+      `hidden` depuis qu'il a déménagé dans les ⚙ Paramètres (2026-09-16), était
+      visible en bas de la page profil **sous 480 px** : la media query donne
+      `display: flex` à `.btn-danger` pour la cible tactile, ce qui écrase le
+      `hidden`. Exactement ce que le déménagement voulait éviter — « c'est trop
+      facile de supprimer son compte ».
+   2. `#navFriendsBadge` — une pastille rouge **vide** de 21×15 px collée à
+      l'icône Amis de la barre du bas, sur les **huit** pages, à toutes les
+      largeurs. `.nav-badge { display: flex }` contre un `.hidden` inexistant.
+
+   D'où cette règle, placée avant tout le reste et volontairement `!important` :
+   c'est la seule façon de gagner contre une règle d'auteur plus spécifique, et
+   c'est ce que font normalize.css et HTML5 Boilerplate pour la même raison.
+
+   ⚠️ Conséquence : pour révéler un élément il faut **retirer la classe ou
+   l'attribut** — un `style.display` inline ne suffira plus. Vérifié avant de
+   poser la règle : les 13 endroits du code qui écrivent un `display` inline
+   (`victoryBox`, `quoteHint`, `rulesModal`…) n'utilisent pas `.hidden`, ils
+   partent d'un `style="display:none"`. Rien à réécrire.
+   ===================================================== */
+
+[hidden],
+.hidden {
+  display: none !important;
+}
+
+/* =====================================================
    0. DESIGN TOKENS — Charte couleurs unifiée
    Toutes les valeurs répétées dans le CSS viennent d'ici.
    ===================================================== */
