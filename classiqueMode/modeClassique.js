@@ -555,7 +555,20 @@ function checkGuess(name, target, forceReveal = false) {
     giveUpButton.style.pointerEvents = "none";
     giveUpButton.style.opacity = "0.5";
     gameOver = true;
-    document.querySelector(".input-row")?.classList.add("hidden");
+    // ⚠️ Ne PAS masquer `.input-row` en fin de partie : le bouton **Rejouer**
+    // (`#resetButton`) vit dedans, et rien ne retire jamais la classe — le joueur
+    // resterait bloqué jusqu'au rechargement de la page.
+    //
+    // Les trois fins de partie ajoutaient `.hidden` à `.input-row`. Ça n'a jamais
+    // rien fait tant que `.hidden` n'était défini nulle part globalement ; la règle
+    // `[hidden], .hidden { display: none !important }` de la 2.3.2 l'a rendue
+    // vraie, et le Rejouer a disparu de Classique — en normal comme en Expert.
+    // Les cinq autres modes ne masquent pas leur rangée : Classique était le seul,
+    // et seulement par du code mort.
+    //
+    // Les contrôles sont de toute façon déjà neutralisés juste au-dessus
+    // (`textbar.disabled`, pointer-events, Give Up grisé) : les masquer en plus
+    // n'apportait rien et coûtait le Rejouer.
     document.getElementById("autocompleteList")?.classList.add("hidden");
 
     // !forceReveal : un Give Up ne doit jamais se logger comme une victoire —
@@ -727,7 +740,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     textbar.disabled = true;
     guessButton.disabled = true;
     setGiveUpEnabled(false);
-    document.querySelector(".input-row")?.classList.add("hidden");
     document.getElementById("autocompleteList")?.classList.add("hidden");
     revealNextLink({ nextHref: "../emojiMode/emojiMode.html" });
     fillVictoryBox(target.nom, false);
@@ -801,7 +813,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     giveUpButton.style.pointerEvents = "none";
     giveUpButton.style.opacity = "0.5";
     gameOver = true;
-    document.querySelector(".input-row")?.classList.add("hidden");
     document.getElementById("autocompleteList")?.classList.add("hidden");
 
     if (!history.includes(target.nom)) {
