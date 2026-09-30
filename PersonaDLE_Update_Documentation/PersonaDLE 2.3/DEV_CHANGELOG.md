@@ -45,6 +45,60 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-09-30 — Hotfix 2.3.3 : le bouton Rejouer avait disparu de Classique
+
+Signalé par Hamza : en Classique, gagné ou perdu, normal ou Expert, plus aucun moyen de
+relancer une partie. **Régression introduite par la 2.3.2**, par le correctif `hidden`
+lui-même.
+
+### Ce qui s'est passé
+
+`modeClassique.js` ajoutait `.hidden` à `.input-row` dans ses **trois** fins de partie. Or
+`#resetButton` — le bouton Rejouer — vit **dans** cette rangée.
+
+Tant que `.hidden` n'était défini nulle part globalement, ces lignes ne faisaient rien et
+personne ne les avait remarquées. La règle `[hidden], .hidden { display: none !important }`
+livrée en 2.3.2 les a rendues vraies.
+
+Deux aggravations :
+
+- **rien ne retire jamais la classe** — une fois masquée, la rangée ne revient pas de la
+  partie : le joueur est bloqué jusqu'au rechargement complet de la page ;
+- **aucun des cinq autres modes** ne masque sa rangée de saisie. Classique était le seul, et
+  seulement par du code mort.
+
+### Pourquoi la vérification de la 2.3.2 ne l'a pas vu
+
+Le rayon d'action de la règle avait pourtant été mesuré page par page sur la production
+avant de l'écrire — mais sur des pages **fraîchement chargées**. L'état « partie terminée »
+n'est jamais atteint par un simple `goto` : la régression était hors de portée de la mesure.
+
+C'est une lacune de méthode, pas de malchance : une règle CSS globale doit être éprouvée sur
+les **états** de l'application, pas seulement sur ses pages au chargement.
+
+### Le correctif
+
+Les trois lignes retirées. Sans effet fonctionnel : le code neutralise déjà les contrôles
+juste au-dessus (`textbar.disabled`, `pointer-events: none` sur Valider, Give Up grisé).
+Masquer la rangée en plus n'apportait rien et coûtait le Rejouer. Classique se comporte de
+nouveau comme les cinq autres modes.
+
+### Vérifications
+
+- `tests-e2e/classic_replay_button.spec.js` — **nouveau**. Joue une partie jusqu'à
+  l'abandon, puis vérifie que Rejouer est visible, **réellement cliquable**
+  (`elementFromPoint`, parce qu'un bouton « visible » peut être recouvert ou à zéro pixel),
+  et qu'un clic relance bien une partie. Deux largeurs, plus le parcours complet.
+- `CACHE_VERSION` v105 → **v106**. Le JS est servi en *network-first*, donc le correctif
+  arrivait de toute façon ; le bump est là par principe de release.
+
+### Angle mort connu, pas corrigé ici
+
+`prod_smoke.sh` (serveur maison) a trouvé un **débordement horizontal de 14 px sur la page
+profil** à 390 px, et 13 px à 480 px. Réel, antérieur, sans rapport avec ce hotfix — traité
+séparément pour que ce lot ne contienne que la régression.
+
+---
 ## 2026-09-27 — Release 2.3.2
 
 Sortie de ce qui s'était accumulé sur `develop` depuis la 2.3.1. **Aucune migration à
