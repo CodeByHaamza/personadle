@@ -243,7 +243,7 @@ PersonaDLE started as a small team in spring 2025. These people shaped its early
 ### Thanks
 
 - **[Smashdle](https://smashdle.net/)** (Pimeko) for the concept, **[Pokedle](https://github.com/maxm33/pokedle)** for the early codebase reference.
-- <img src="img/credits/arati_youtube.jpg" width="22" height="22" alt="" align="absmiddle"> **Arati** ([YouTube](https://www.youtube.com/@Arati_Persona) · [X](https://x.com/Arati)) for featuring PersonaDLE, and <img src="img/credits/faz_youtube.jpg" width="22" height="22" alt="" align="absmiddle"> **[Faz](https://www.youtube.com/@FazPersona)** for the All-Out Attack footage.
+- <img src="img/credits/arati_youtube.jpg" width="22" height="22" alt="" align="absmiddle"> **[Arati](https://www.youtube.com/@Arati_Persona)** for featuring PersonaDLE, and <img src="img/credits/faz_youtube.jpg" width="22" height="22" alt="" align="absmiddle"> **[Faz](https://www.youtube.com/@FazPersona)** for the All-Out Attack footage.
 - The **[Megami Tensei Wiki](https://megamitensei.fandom.com/)** for character data, r/persona4golden and both Discord servers for testing and endless feedback.
 - **Atlus / SEGA** for the universe, **Shoji Meguro** for the music.
 
