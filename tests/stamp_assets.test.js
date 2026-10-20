@@ -9,7 +9,12 @@
 import { describe, it, expect } from "vitest";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { stampHtml, collectImportedFiles } from "../scripts/stamp_assets.js";
+import {
+  stampHtml,
+  collectImportedFiles,
+  cacheFirstFingerprint,
+  stampServiceWorker,
+} from "../scripts/stamp_assets.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const abs = (p) => join(ROOT, p);
@@ -113,5 +118,75 @@ describe("collectImportedFiles", () => {
     const set = collectImportedFiles([], ["index.html"], read);
     expect(set.has(abs("js/streak-recovery.js"))).toBe(true);
     expect(set.has(abs("entry.js"))).toBe(false);
+  });
+});
+
+describe("cacheFirstFingerprint / stampServiceWorker", () => {
+  const stage = (entries) => entries.map(([p, b]) => `100644 ${b} 0\t${p}`).join("\0") + "\0";
+
+  it("changes when a cache-first asset changes, not when code changes", () => {
+    const base = cacheFirstFingerprint(
+      stage([
+        ["img/a.png", "aaa"],
+        ["js/x.js", "111"],
+      ])
+    );
+    expect(
+      cacheFirstFingerprint(
+        stage([
+          ["img/a.png", "aaa"],
+          ["js/x.js", "222"],
+        ])
+      )
+    ).toBe(base);
+    expect(
+      cacheFirstFingerprint(
+        stage([
+          ["img/a.png", "bbb"],
+          ["js/x.js", "111"],
+        ])
+      )
+    ).not.toBe(base);
+  });
+
+  it("ignores files the site never serves (docs, tests, changelogs)", () => {
+    const base = cacheFirstFingerprint(stage([["img/a.png", "aaa"]]));
+    expect(
+      cacheFirstFingerprint(
+        stage([
+          ["img/a.png", "aaa"],
+          ["docs/roadmap/persona-6.jpg", "zzz"],
+          ["PersonaDLE_Update_Documentation/PersonaDLE 2.3/x.png", "yyy"],
+        ])
+      )
+    ).toBe(base);
+  });
+
+  it("does not depend on listing order", () => {
+    const a = cacheFirstFingerprint(
+      stage([
+        ["img/a.png", "1"],
+        ["font/f.ttf", "2"],
+      ])
+    );
+    const b = cacheFirstFingerprint(
+      stage([
+        ["font/f.ttf", "2"],
+        ["img/a.png", "1"],
+      ])
+    );
+    expect(a).toBe(b);
+  });
+
+  it("rewrites only the CACHE_VERSION constant", () => {
+    const src =
+      'const X = 1;\nconst CACHE_VERSION = "personadle-v106";\nconst Y = "personadle-v106";';
+    expect(stampServiceWorker(src, "abc123")).toBe(
+      'const X = 1;\nconst CACHE_VERSION = "personadle-abc123";\nconst Y = "personadle-v106";'
+    );
+  });
+
+  it("fails loudly when the constant is missing", () => {
+    expect(() => stampServiceWorker("const OTHER = 1;", "x")).toThrow(/CACHE_VERSION/);
   });
 });

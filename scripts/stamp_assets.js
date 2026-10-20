@@ -22,6 +22,12 @@
  * versionnée : son `?v=` la séparerait de l'instance que les autres modules
  * importent. Le script retire même un `?v=` déjà posé sur un tel module.
  *
+ * `sw.js` : son `CACHE_VERSION` devient l'empreinte des fichiers que le service
+ * worker sert en cache-first (images, sons, polices…). Le bump manuel s'oubliait
+ * (CLAUDE.md §7, « Assets périmés après un déploiement ») ; une empreinte change
+ * dès qu'un de ces fichiers change, et seulement dans ce cas. Calculée depuis
+ * l'index git (`git ls-files -s`) : stager les médias AVANT de tamponner.
+ *
  * Limite assumée : les dépendances d'un module d'entrée ne sont pas versionnées.
  * C'est le `Cache-Control: no-cache` du `.htaccess` (revalidation, 304) et le
  * network-first de `sw.js` qui les tiennent fraîches — pas ce script.
@@ -69,6 +75,42 @@ export function contentHash(absPath) {
     );
   }
   return hashCache.get(absPath);
+}
+
+/** Fichiers servis en cache-first par sw.js (§5 de sa stratégie de fetch). */
+const CACHE_FIRST_EXT =
+  /\.(?:png|jpe?g|gif|webp|avif|svg|ico|mp3|ogg|wav|m4a|mp4|webm|ttf|otf|woff2?)$/i;
+const NOT_SITE =
+  /^(?:tests|tests-e2e|scripts|docker|docs|sql|\.github|PersonaDLE_Update_Documentation)\//;
+
+/**
+ * Empreinte de l'ensemble des fichiers cache-first : chemin + blob git de
+ * chacun, triés. Lit l'index git plutôt que les fichiers (≈ 1 Go de médias).
+ */
+export function cacheFirstFingerprint(lsFilesStage) {
+  const lines = lsFilesStage
+    .split("\0")
+    .filter(Boolean)
+    .map((l) => {
+      const [meta, path] = l.split("\t");
+      return { path, blob: meta.split(" ")[1] };
+    })
+    .filter(({ path }) => CACHE_FIRST_EXT.test(path) && !NOT_SITE.test(path))
+    .map(({ path, blob }) => `${path} ${blob}`)
+    .sort();
+  return createHash("sha256").update(lines.join("\n")).digest("hex").slice(0, 10);
+}
+
+const CACHE_VERSION_RE = /(const CACHE_VERSION = )(["'])[^"']*\2;/;
+
+/** Réécrit la constante CACHE_VERSION de sw.js. */
+export function stampServiceWorker(source, fingerprint) {
+  if (!CACHE_VERSION_RE.test(source))
+    throw new Error("sw.js : constante CACHE_VERSION introuvable");
+  return source.replace(
+    CACHE_VERSION_RE,
+    (_, decl, q) => `${decl}${q}personadle-${fingerprint}${q};`
+  );
 }
 
 /** Code jamais chargé par une page : tests, outillage, configs à la racine. */
@@ -171,13 +213,24 @@ function main() {
     }
   }
 
+  const swPath = join(ROOT, "sw.js");
+  if (existsSync(swPath)) {
+    const before = readFileSync(swPath, "utf8");
+    const stage = execFileSync("git", ["ls-files", "-s", "-z"], { cwd: ROOT, maxBuffer: 64 << 20 });
+    const after = stampServiceWorker(before, cacheFirstFingerprint(stage.toString("utf8")));
+    if (after !== before) {
+      drift.push("sw.js");
+      if (!CHECK) writeFileSync(swPath, after);
+    }
+  }
+
   if (missing.length) {
     console.error("❌ Référence(s) vers un fichier absent du dépôt :");
     for (const m of missing) console.error(`   - ${m}`);
   }
   if (drift.length && !REFS_ONLY) {
     const verb = CHECK ? "à re-tamponner" : "re-tamponné(s)";
-    console[CHECK ? "error" : "log"](`${CHECK ? "❌" : "✏️ "} ${drift.length} page(s) ${verb} :`);
+    console[CHECK ? "error" : "log"](`${CHECK ? "❌" : "✏️ "} ${drift.length} fichier(s) ${verb} :`);
     for (const f of drift)
       console[CHECK ? "error" : "log"](`   - ${relative(ROOT, join(ROOT, f))}`);
     if (CHECK) console.error("   → npm run assets:stamp");
@@ -185,7 +238,7 @@ function main() {
     console.log(
       REFS_ONLY
         ? "✅ Tous les JS/CSS cités par les pages existent"
-        : "✅ ?v= à jour sur toutes les pages"
+        : "✅ ?v= à jour sur toutes les pages, CACHE_VERSION de sw.js à jour"
     );
   }
   if (missing.length || (CHECK && !REFS_ONLY && drift.length)) process.exit(1);

@@ -100,10 +100,10 @@ dépendent pas de l'API.
 - **Partage de résultat façon Wordle** : aucun mode n'a de bouton « copier mon résultat »
   (grille d'emojis 🟩🟨🟥 + n° du jour + lien). Sur un *-dle*, c'est le premier canal
   d'acquisition — et ça se branche en un point dans `gameCore.js`.
-- **Hors ligne : `sw.js` ne retrouve pas les fichiers versionnés.** `PRECACHE_URLS` est
+- ✅ *(fait, PR de la série gelée)* **Hors ligne : `sw.js` ne retrouve pas les fichiers versionnés.** `PRECACHE_URLS` est
   sans `?v=`, les pages demandent `?v=…` → le repli de `networkFirstWithFallback` rate.
   Une ligne : `caches.match(request, { ignoreSearch: true })` dans le seul repli réseau.
-- **`CACHE_VERSION` calculé plutôt que bumpé** : à la release, `assets:stamp` peut poser
+- ✅ *(fait, même PR)* **`CACHE_VERSION` calculé plutôt que bumpé** : à la release, `assets:stamp` peut poser
   dans `sw.js` une empreinte des fichiers précachés + médias cache-first. Le bump oublié
   (piège du §7 de CLAUDE.md) disparaît.
 - **`index.html` : 186 Ko** (153 Ko le 09-13) — le modal Nouveautés embarque toutes les
