@@ -8,7 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 1548 tests Vitest (86 suites), 407 méthodes PHPUnit, 329 tests E2E,
+> Vérifié le 2026-08-26 : 1555 tests Vitest (87 suites), 415 méthodes PHPUnit, 329 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
@@ -21,6 +21,12 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
 > 📖 Procédure complète (ordre, sauvegarde, vérification, **retour arrière**) :
 > [`DEPLOY.md`](DEPLOY.md) § « Release majeure ». Cette liste-ci ne suit que l'état
 > d'avancement.
+
+- [ ] *(optionnel, 2.3)* **Erreurs JS des joueurs** : créer un salon Discord **privé** (staff),
+      un webhook dedans, et ajouter `define('DISCORD_ERRORS_WEBHOOK', '…');` au `config.php` de
+      prod (cf. `api/config.example.php`). Sans lui, `api/client_errors.php` range quand même
+      les erreurs dans `error_log` (admin) — seule l'alerte Discord manque. Aucune migration :
+      la déduplication passe par `rate_limits`, qui existe déjà.
 
 - [x] Jouer `sql/migrations/029_badge_gyotre.sql` et `030_titles_junes_investigation.sql`.
       **Oubliées de cette liste jusqu'au 2026-09-01** : elles datent du lot de contenu 2.1

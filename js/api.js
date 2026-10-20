@@ -17,6 +17,11 @@
  * Déploiement Hostinger à venir — les appels vers personadle.net échoueront jusqu'à la mise en prod.
  */
 
+// Remontée des erreurs JS non rattrapées (js/error_reporter.js) : api.js est
+// chargé par toutes les pages, c'est le point d'installation unique.
+import { installErrorReporter } from "./error_reporter.js";
+installErrorReporter();
+
 // ─────────────────────────────────────────────────────────
 // CONFIGURATION
 // ─────────────────────────────────────────────────────────

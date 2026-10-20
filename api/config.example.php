@@ -70,3 +70,8 @@ define('DISCORD_DAILY_MENTION_ROLE', '1550573338336698521');
 // Le rôle mentionné est optionnel — même règle que le quotidien : opt-in seulement.
 define('DISCORD_WEEKLY_WEBHOOK', '');
 define('DISCORD_WEEKLY_MENTION_ROLE', '');
+
+// Erreurs JavaScript des joueurs (api/client_errors.php, 2026-10-20) : webhook d'un
+// salon PRIVÉ (staff) où signaler chaque NOUVELLE erreur, une fois par heure au plus.
+// Vide ou absent => les erreurs sont seulement rangées dans error_log (admin).
+define('DISCORD_ERRORS_WEBHOOK', '');
