@@ -19,7 +19,7 @@ verdict argumenté. Tu es le dernier filet avant la PR, et la CI verte ne t'impr
      seulement si visible.
 3. Chercher activement : condition de déblocage non monotone ou décidée côté client,
    `toISOString()` pour une date de jeu, chaîne comparée à une fonction SQL, listener empilé,
-   état localStorage dérivé non invalidé, asset cache-first modifié sans note `CACHE_VERSION`,
+   état localStorage dérivé non invalidé, `CACHE_VERSION` ou `?v=` édité à la main (c'est `assets:stamp` qui les pose),
    `?v=` / import qui créerait deux instances d'un même module.
 4. Vérifier les **affirmations** du corps de PR / du changelog contre le diff réel.
 5. **Signatures interdites** : aucun `Co-Authored-By`, `Claude-Session`, « Generated with »,

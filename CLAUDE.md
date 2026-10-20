@@ -210,7 +210,7 @@ Utiliser `min()`, `clamp()`, `vw`/`vh`. Éviter les largeurs fixes en `px` sur l
 | `foo.php` + dossier `foo/` coexistants dans `api/` | `api/.htaccess` teste `.php -f` **avant** `-d` (sinon le dossier gagne toujours et le stub `.php` est inatteignable, même avec le slash final) |
 | Une `animation` CSS écrase le style inline | Une animation en cours bat les déclarations normales, **inline compris**. Ne jamais animer une propriété que le JS pilote en inline (`transform`, `opacity`). Vécu en 2.1 : `popInSilhouette` révélait la silhouette avant le premier flash en Expert |
 | `filter: brightness(0)` / `blur()` ne cachent rien | Un filtre CSS est un effet de peinture : « clic droit → Copier l'image » rend l'original. Pour masquer une réponse, cuire l'effet dans les pixels (`js/silhouette_mask.js`) — le filtre CSS ne reste qu'un filet |
-| Assets périmés après un déploiement | Bumper `CACHE_VERSION` dans `sw.js` (sinon `activate` ne purge rien et le cache-first sert l'ancien). Invisible en test : seuls les joueurs **déjà venus** sont touchés |
+| Assets périmés après un déploiement | `CACHE_VERSION` de `sw.js` doit changer (sinon `activate` ne purge rien et le cache-first sert l'ancien). Invisible en test : seuls les joueurs **déjà venus** sont touchés. Depuis le 2026-10-20, `npm run assets:stamp` y pose l'empreinte des fichiers cache-first — ne plus le bumper à la main |
 | Condition de déblocage non monotone | Un accès **gagné ne doit jamais se reperdre**. Toute condition doit être cumulative (`COUNT` à vie) ou un `MAX` sur l'historique — jamais une valeur « en cours ». Vécu en 2.1 : `mode_consecutive_perfects` renvoyait la série courante, donc 3 Modes Expert se re-verrouillaient à la première partie ratée, et une partie Expert en cours était refusée en 403 |
 | Une migration écrite ≠ une migration jouée | `sql/migrations/` n'est PAS le reflet de la prod — une migration vit sur `develop` jusqu'à la release. Seule source fiable : `SELECT version FROM schema_migrations`. Vécu en 2.1 : 029/030 oubliées de la checklist |
 | Colonne « cosmétique » absente en prod | La BDD prod vient d'une archive de 2026-05 : jusqu'à la **048**, quatre colonnes de `bdd_mysql.sql` n'y existaient pas parce qu'« aucun code ne les lisait » (025). Vécu à la release 2.2 : la 044 refusée (`titles.description_*`), puis le Compendium en 500 pour tout le monde (`ORDER BY ut.id`, `user_titles.id` absente). Depuis la 048, **prod = référence colonne pour colonne** et ça doit le rester : plus d'exception « cosmétique ». Avant chaque release, `npm run schema:check-prod` sur le serveur, et rejouer toute migration qui INSERT contre le `SHOW CREATE TABLE` de la prod (recréé dans Docker), pas seulement contre `bdd_mysql.sql` |
@@ -276,6 +276,8 @@ branches qui touchent `global.css` entrent en conflit sur ~16 pages.
   `?v=` : `x.js?v=a` et `x.js` seraient deux modules, donc deux instances. Le script le gère.
 - Les dépendances d'un module (ses `import`) ne sont pas versionnées : c'est le `no-cache` du
   `.htaccess` et le network-first de `sw.js` qui les tiennent fraîches.
+- Le même script pose `CACHE_VERSION` dans `sw.js` = empreinte (index git) des fichiers servis
+  en cache-first : images, sons, polices. Stager les médias **avant** `assets:stamp`.
 
 ---
 

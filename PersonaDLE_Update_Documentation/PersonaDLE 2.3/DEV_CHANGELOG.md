@@ -114,6 +114,16 @@ chaque déploiement.
   les PR vers `main`. Étape ajoutée à la checklist de `DEPLOY.md`, section ajoutée au §8 de
   `CLAUDE.md`.
 - Les 16 pages sont tamponnées dans ce lot (point de départ).
+- **`CACHE_VERSION` de `sw.js` calculé, plus bumpé.** Le même script y pose
+  `personadle-<empreinte>`, où l'empreinte couvre chemin + blob git de chaque fichier servi
+  en cache-first (images, sons, polices ; hors docs, tests, changelogs). Lue dans l'index
+  git (`git ls-files -s`) plutôt qu'en relisant ≈ 1 Go de médias : il faut donc stager les
+  médias avant de tamponner, ce que dit la checklist de `DEPLOY.md`. Le piège du §7
+  (« Assets périmés après un déploiement ») passe de « penser à bumper » à « rien à faire ».
+- **Repli hors ligne de `sw.js` : `ignoreSearch` en second essai.** Le précache stocke
+  `global.css`, les pages demandent `global.css?v=…` : hors ligne, le repli de
+  `networkFirstWithFallback` ne trouvait rien. Il tente maintenant l'URL exacte, puis la
+  même sans query string. Le cache-first, lui, garde la correspondance exacte.
 
 ### 3. Équipe de sous-agents (`.claude/agents/`, CLAUDE.md §14)
 
@@ -124,10 +134,6 @@ de `.claude/` à `.claude/*` + `!.claude/agents/` (les réglages personnels rest
 
 ### Angles morts connus
 
-- `PRECACHE_URLS` de `sw.js` liste les URLs **sans** `?v=` ; les pages demandent la version
-  tamponnée → le repli hors ligne de `networkFirstWithFallback` rate ces fichiers. Déjà vrai
-  avant ce lot pour `global.css?v=12` & co : pas une régression, mais à corriger
-  (`caches.match(request, { ignoreSearch: true })` dans le seul repli réseau).
 - Les dépendances d'un module d'entrée ne sont pas versionnées (limite assumée, documentée
   dans le script) : le `no-cache` du `.htaccess` les tient fraîches.
 - `index.html` lance toujours la pop-up automatique **uniquement** après la trace

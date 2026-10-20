@@ -151,7 +151,7 @@ export async function renderMaintenance() {
         <label>Retour prévu (informatif, heure Paris)<input id="maint-until" type="datetime-local" value="${toLocalInput(m.until)}"></label>
       </div>
       <button class="btn-secondary" id="maint-save" style="margin-top:10px">💾 Enregistrer le message</button>
-      <p class="mod-hint">Conseil : publie d'abord une <strong>annonce</strong> « maintenance à venir » quelques heures avant, puis ferme le site ici. Pense au <code>CACHE_VERSION</code> du service worker si tu déploies du code pendant la fermeture.</p>
+      <p class="mod-hint">Conseil : publie d'abord une <strong>annonce</strong> « maintenance à venir » quelques heures avant, puis ferme le site ici. Si tu déploies pendant la fermeture, lance <code>npm run assets:stamp</code> avant (il recalcule le <code>CACHE_VERSION</code> du service worker).</p>
     </div>`;
 
   const save = async (extra = {}) => {

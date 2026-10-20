@@ -32,8 +32,8 @@ décris précisément le contrat attendu (méthode, route, corps, réponse) au s
   sur un conteneur. Dark mode via `.darkmode` sur `<body>`.
 - Le backend est la source de vérité (`pullProfileFromCloud()`) ; un état dérivé du
   localStorage doit être invalidé sur **tous** ses chemins d'écriture (§13).
-- Changement d'un asset servi en cache-first (images, sons) → signaler au superviseur que
-  `CACHE_VERSION` de `sw.js` devra être bumpé à la release.
+- Changement d'un asset servi en cache-first (images, sons) → rien à bumper à la main :
+  `npm run assets:stamp` recalcule `CACHE_VERSION` à la release. Ne jamais l'éditer.
 - Nouveaux fichiers en `snake_case`.
 
 ## Avant de rendre la main
