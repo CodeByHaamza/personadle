@@ -42,6 +42,56 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 16 | `fix/badge_modal_prod` | Le détail d'un badge reprend la modale de la production |
 | 17 | `feat/badge_cafe_leblanc` | Badge secret Ko-fi |
 | 18 | `perf/aoa_reencode_hd` | Les 33 animations AOA en 1080p au calibre des autres |
+| 23 | `feat/remontee_erreurs_js` | Les erreurs JS des joueurs remontent dans l'admin et sur Discord |
+
+---
+
+## 2026-10-20 — Les erreurs JavaScript des joueurs remontent toutes seules
+
+Les derniers incidents de prod (titres en 500 en 2.2.6, bouton Rejouer disparu en 2.3.3)
+sont arrivés par des joueurs. Aucun code ne captait les erreurs du navigateur.
+
+### Client — `js/error_reporter.js`
+
+- Écoute `error` et `unhandledrejection`, installé une fois par page depuis `js/api.js`
+  (chargé partout). **Désactivé** sur `localhost` (la console suffit) et sous jsdom.
+- Retenue : 5 envois max par page, chaque erreur une seule fois ; bruit écarté (extensions,
+  « Script error. » de scripts tiers, boucle ResizeObserver, **réseau coupé** — un joueur
+  hors ligne n'est pas un bug).
+- Envoie message, fichier/ligne, pile (1 500 car.), **chemin** de la page (sans query
+  string ni hash : `?view=` ou un jeton n'en sortent pas), navigateur. Ni saisie, ni
+  localStorage, ni identité. `navigator.sendBeacon` : survit à la fermeture de la page.
+
+### Serveur — `api/client_errors.php` + `api/lib/client_errors.php`
+
+- Fichier plat à la racine d'`api/` (pas de dossier homonyme → pas de 301 sur le POST).
+- Ouvert aux invités : **limité à 30 / 15 min par IP**, corps re-tronqué champ par champ,
+  caractères de contrôle retirés, mêmes filtres de bruit que le client.
+- **Empreinte** = message (chiffres neutralisés) + première ligne de pile (`?v=` retiré) :
+  même bug chez 200 joueurs et sur deux déploiements = une empreinte. Une empreinte n'est
+  écrite dans `error_log` (source `client`, niveau `warning`) et signalée qu'**une fois par
+  heure** — via `rate_limits`, même upsert que `rateLimit()`, donc aucune migration.
+- Alerte Discord optionnelle (`DISCORD_ERRORS_WEBHOOK`, salon privé) :
+  `allowed_mentions: { parse: [] }`, `@` neutralisé — un texte client ne doit jamais pinger.
+- Pas de CSRF : rien n'est modifié au nom de l'utilisateur, et `sendBeacon` ne pose pas
+  d'en-tête. Réponse 204 dans tous les cas.
+
+### Tests
+
+- `tests/error_reporter.test.js` (bruit, déduplication, plafond, ne lève jamais, chemin
+  sans query string) ; `tests/php/ClientErrorsTest.php` (troncature, valeurs non scalaires,
+  bruit, empreintes, payload Discord sans mention) ; test d'intégration
+  `testClientErrorFingerprintIsNewOncePerWindow` (rate_limits réel).
+- PHPUnit n'a pas pu être téléchargé dans mon environnement (`phar.phpunit.de` bloqué) :
+  `ClientErrorsTest` a tourné sur un exécuteur minimal local (7/7), le test d'intégration
+  tournera en CI.
+
+### Angles morts connus
+
+- La table `error_log` n'a pas de rétention : si une erreur massive passait le filtre, elle
+  s'y écrirait une fois par heure et par empreinte — borné, mais à surveiller les premiers
+  jours dans l'admin.
+- Les erreurs des pages sans `api.js` (FAQ, confidentialité) ne remontent pas.
 
 ---
 
