@@ -298,3 +298,188 @@ body.darkmode .nav-toast {
   color: #ff6b77;
   stroke: #ff6b77;
 }
+
+/* =====================================================
+   10. ITEM « JOUER » + FEUILLE DES MODES (js/bottomNav.js)
+   ===================================================== */
+
+/* <button> : neutraliser le gabarit tactile global (global.css §18) — la
+   barre a déjà sa propre hauteur de 62 px. */
+.nav-item--play {
+  min-height: 0;
+  margin: 0;
+}
+
+.nav-item--play svg path {
+  fill: currentColor;
+  stroke: none;
+}
+
+.nav-badge--play.nav-badge--done {
+  background: #2e9b57;
+}
+
+/* Cinq items (six pour un admin) doivent tenir en 320 px. */
+@media (max-width: 480px) {
+  .bottom-nav {
+    justify-content: space-evenly;
+  }
+
+  .nav-item {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 6px 2px;
+  }
+
+  .nav-label {
+    font-size: 0.56em;
+    letter-spacing: 0.03em;
+  }
+}
+
+.play-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 700; /* au-dessus de la barre (500) et de l'autocomplétion (600) */
+  pointer-events: none;
+}
+
+.play-sheet.is-open {
+  pointer-events: auto;
+}
+
+.play-sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.play-sheet.is-open .play-sheet-backdrop {
+  opacity: 1;
+}
+
+.play-sheet-panel {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: min(480px, 100%);
+  box-sizing: border-box;
+  padding: 10px 16px calc(78px + env(safe-area-inset-bottom, 0px));
+  background: #fff;
+  border-top: 3px solid #e63946;
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.25);
+  transform: translate(-50%, 100%);
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.play-sheet.is-open .play-sheet-panel {
+  transform: translate(-50%, 0);
+}
+
+.play-sheet-handle {
+  width: 42px;
+  height: 4px;
+  margin: 0 auto 10px;
+  border-radius: 4px;
+  background: #ddd;
+}
+
+.play-sheet-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 4px 10px;
+  font: 800 1rem/1.2 Arial, sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #1a1a1a;
+}
+
+.play-sheet-count {
+  font-size: 0.85em;
+  color: #e63946;
+}
+
+.play-sheet-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.play-sheet-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 8px;
+  align-items: center;
+  min-height: 56px;
+  padding: 8px 10px;
+  border: 2px solid #eee;
+  border-radius: 12px;
+  color: #1a1a1a;
+  text-decoration: none;
+  font-family: Arial, sans-serif;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.play-sheet-item:hover,
+.play-sheet-item:focus-visible {
+  border-color: #e63946;
+  outline: none;
+}
+
+.play-sheet-item:active {
+  transform: scale(0.97);
+}
+
+.play-sheet-item.is-here {
+  border-color: #e63946;
+  background: rgba(230, 57, 70, 0.06);
+}
+
+.play-sheet-icon {
+  grid-row: span 2;
+  font-size: 1.4rem;
+}
+
+.play-sheet-name {
+  font-weight: 800;
+  font-size: 0.92rem;
+}
+
+.play-sheet-state {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.play-sheet-state--done {
+  color: #2e9b57;
+}
+
+body.darkmode .play-sheet-panel {
+  background: #141414;
+}
+
+body.darkmode .play-sheet-title,
+body.darkmode .play-sheet-item {
+  color: #eee;
+}
+
+body.darkmode .play-sheet-item {
+  border-color: #2a2a2a;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .play-sheet-panel,
+  .play-sheet-backdrop {
+    transition: none;
+  }
+}

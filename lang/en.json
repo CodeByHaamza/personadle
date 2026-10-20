@@ -1550,5 +1550,18 @@
   "notice": {
     "from_team": "Message from the team",
     "ack": "Understood"
+  },
+  "nav": {
+    "home": "Home",
+    "play": "Play",
+    "ranking": "Ranking",
+    "friends": "Friends",
+    "profile": "Profile",
+    "play_title": "Today's modes",
+    "play_done": "Played",
+    "play_todo": "To play",
+    "play_left": "{{count}} left today",
+    "play_all_done": "All modes played today",
+    "home_status_done": "Played today"
   }
 }
