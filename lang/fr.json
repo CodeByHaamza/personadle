@@ -1521,6 +1521,14 @@
     "error_offline": "Tu sembles hors ligne. Réessaie.",
     "error_generic": "Récupération indisponible pour le moment. Réessaie."
   },
+  "share": {
+    "button": "Partager mon résultat",
+    "copied": "Résultat copié — colle-le où tu veux !",
+    "failed": "Impossible de copier le résultat.",
+    "one_try": "✅ Du premier coup !",
+    "tries": "✅ {{count}} essais",
+    "gave_up": "🏳️ Abandon après {{count}} essais"
+  },
   "reset_password": {
     "title": "🔐 Réinitialise ton mot de passe",
     "subtitle": "Choisis un nouveau mot de passe pour ton compte PersonaDLE.",
