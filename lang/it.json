@@ -403,6 +403,7 @@
     "fav_mode_pick_label": "Modalità preferita",
     "fav_mode_none": "Nessuna",
     "stat_current_streak_label": "Serie attuale",
+    "stat_frozen_streak_label": "Serie congelata",
     "mode_col_mode": "Modalità",
     "mode_col_games": "Partite / Win %",
     "song_title": "Canzone del profilo",
@@ -1516,7 +1517,8 @@
     "description": "Jack Frost può ripristinarla — una volta ogni 2 mesi.",
     "restore_button": "🔥 Ripristina la mia serie!",
     "cancel_button": "Non ora",
-    "profile_btn": "❄️ Riaccendi — 0 → {{count}} giorni",
+    "profile_btn": "❄️ Chiama Jack Frost — torna a {{count}} giorni",
+    "profile_cooldown": "🧊 Jack Frost riposa — di ritorno tra {{count}} giorni",
     "error_cooldown": "Ripristino in cooldown — riprova più tardi.",
     "error_offline": "Sembri offline. Riprova.",
     "error_generic": "Ripristino non disponibile al momento. Riprova."

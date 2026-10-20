@@ -403,6 +403,7 @@
     "fav_mode_pick_label": "Modo favorito",
     "fav_mode_none": "Ninguno",
     "stat_current_streak_label": "Racha actual",
+    "stat_frozen_streak_label": "Racha congelada",
     "mode_col_mode": "Modo",
     "mode_col_games": "Partidas / Win %",
     "song_title": "Canción de perfil",
@@ -1516,7 +1517,8 @@
     "description": "Jack Frost puede restaurarla — una vez cada 2 meses.",
     "restore_button": "🔥 ¡Restaurar mi racha!",
     "cancel_button": "Ahora no",
-    "profile_btn": "❄️ Reavivar — 0 → {{count}} días",
+    "profile_btn": "❄️ Llamar a Jack Frost — volver a {{count}} días",
+    "profile_cooldown": "🧊 Jack Frost descansa — vuelve en {{count}} días",
     "error_cooldown": "Recuperación en espera — inténtalo más tarde.",
     "error_offline": "Parece que estás sin conexión. Inténtalo de nuevo.",
     "error_generic": "Recuperación no disponible ahora mismo. Inténtalo de nuevo."

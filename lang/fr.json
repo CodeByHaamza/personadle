@@ -403,6 +403,7 @@
     "fav_mode_pick_label": "Mode favori",
     "fav_mode_none": "Aucun",
     "stat_current_streak_label": "Série actuelle",
+    "stat_frozen_streak_label": "Série gelée",
     "mode_col_mode": "Mode",
     "mode_col_games": "Parties / Win %",
     "song_title": "Chanson de profil",
@@ -1516,7 +1517,8 @@
     "description": "Jack Frost peut la restaurer — une fois tous les 2 mois.",
     "restore_button": "🔥 Restaurer ma série !",
     "cancel_button": "Plus tard",
-    "profile_btn": "❄️ Rallumer — 0 → {{count}} jours",
+    "profile_btn": "❄️ Appeler Jack Frost — retour à {{count}} jours",
+    "profile_cooldown": "🧊 Jack Frost se repose — de retour dans {{count}} jours",
     "error_cooldown": "Récupération en cooldown — réessaie plus tard.",
     "error_offline": "Tu sembles hors ligne. Réessaie.",
     "error_generic": "Récupération indisponible pour le moment. Réessaie."

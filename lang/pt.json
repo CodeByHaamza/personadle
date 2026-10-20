@@ -403,6 +403,7 @@
     "fav_mode_pick_label": "Modo favorito",
     "fav_mode_none": "Nenhum",
     "stat_current_streak_label": "Sequência Atual",
+    "stat_frozen_streak_label": "Sequência Congelada",
     "mode_col_mode": "Modo",
     "mode_col_games": "Partidas / % Vitórias",
     "song_title": "Música do Perfil",
@@ -1516,7 +1517,8 @@
     "description": "O Jack Frost pode restaurá-la — uma vez a cada 2 meses.",
     "restore_button": "🔥 Restaurar a minha sequência!",
     "cancel_button": "Agora não",
-    "profile_btn": "❄️ Reacender — 0 → {{count}} dias",
+    "profile_btn": "❄️ Chamar Jack Frost — voltar a {{count}} dias",
+    "profile_cooldown": "🧊 Jack Frost está descansando — volta em {{count}} dias",
     "error_cooldown": "A recuperação está em espera — tenta mais tarde.",
     "error_offline": "Parece que estás sem ligação. Tenta novamente.",
     "error_generic": "Recuperação indisponível de momento. Tenta novamente."

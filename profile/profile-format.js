@@ -4,6 +4,8 @@
  * qui affichent tous deux le streak et le lecteur de musique de profil.
  */
 
+import { shiftDateKey } from "../js/gameCore.js";
+
 /** Détermine le palier visuel (0-5) d'un streak pour les effets de flammes. */
 export function getStreakTier(streak) {
   if (streak >= 30) return 5;
@@ -12,6 +14,34 @@ export function getStreakTier(streak) {
   if (streak >= 3) return 2;
   if (streak >= 1) return 1;
   return 0;
+}
+
+/**
+ * Série que Jack Frost peut rendre, vue depuis la page profil.
+ *
+ * Deux états, parce que la série cassée n'existe nulle part sous la forme « 0 » :
+ *  - `frozen` : pas joué hier ni aujourd'hui (Paris). `streak` (local comme
+ *    `global_streak` du serveur) garde l'ancienne valeur jusqu'à la prochaine
+ *    partie : elle est morte, mais pas encore remise à 1 → on l'affiche gelée.
+ *  - `broken` : le joueur a rejoué, la série est repartie à 1 et profileStats.js
+ *    a posé la trace `streakRecovery.previousStreak`.
+ * Le bouton du profil testait `streak === 0`, valeur que le jeu n'écrit jamais
+ * après une première partie : il ne s'affichait pour personne.
+ *
+ * @param {{streak?:number, lastPlayedKey?:string|null, todayKey:string, previousStreak?:number}} p
+ *   `lastPlayedKey` et `todayKey` en "YYYY-MM-DD" heure de Paris (parisDateKey()).
+ * @returns {{state: "frozen"|"broken"|null, value: number}}
+ */
+export function getRecoverableStreak({ streak = 0, lastPlayedKey = null, todayKey, previousStreak = 0 }) {
+  if (lastPlayedKey && streak > 1 && lastPlayedKey < shiftDateKey(todayKey, -1)) {
+    return { state: "frozen", value: streak };
+  }
+  // Une série reconstruite au-delà de l'ancienne rend la trace sans objet : le
+  // serveur garde GREATEST(), la récupération ne ferait que brûler le crédit.
+  if (previousStreak > 1 && previousStreak > streak) {
+    return { state: "broken", value: previousStreak };
+  }
+  return { state: null, value: 0 };
 }
 
 /** Formate un nombre de secondes en "m:ss" pour le lecteur de musique de profil. */
