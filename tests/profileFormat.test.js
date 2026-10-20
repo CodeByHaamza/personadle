@@ -5,7 +5,14 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { getStreakTier, formatSongTime, bestModeOverall, needsAvatarOrigin, statsForUnlocks } from "../profile/profile-format.js";
+import {
+  getStreakTier,
+  getRecoverableStreak,
+  formatSongTime,
+  bestModeOverall,
+  needsAvatarOrigin,
+  statsForUnlocks,
+} from "../profile/profile-format.js";
 
 describe("getStreakTier", () => {
   it("returns tier 0 for no streak", () => {
@@ -23,6 +30,64 @@ describe("getStreakTier", () => {
     expect(getStreakTier(29)).toBe(4);
     expect(getStreakTier(30)).toBe(5);
     expect(getStreakTier(365)).toBe(5);
+  });
+});
+
+describe("getRecoverableStreak", () => {
+  const todayKey = "2026-10-20";
+
+  it("freezes a streak whose last game is older than yesterday", () => {
+    expect(getRecoverableStreak({ streak: 15, lastPlayedKey: "2026-10-18", todayKey })).toEqual({
+      state: "frozen",
+      value: 15,
+    });
+  });
+
+  it("keeps a streak alive when the last game was yesterday or today", () => {
+    expect(
+      getRecoverableStreak({ streak: 15, lastPlayedKey: "2026-10-19", todayKey }).state
+    ).toBeNull();
+    expect(
+      getRecoverableStreak({ streak: 15, lastPlayedKey: todayKey, todayKey }).state
+    ).toBeNull();
+  });
+
+  it("uses Paris calendar days across a month boundary", () => {
+    expect(
+      getRecoverableStreak({ streak: 4, lastPlayedKey: "2026-09-30", todayKey: "2026-10-01" }).state
+    ).toBeNull();
+    expect(
+      getRecoverableStreak({ streak: 4, lastPlayedKey: "2026-09-29", todayKey: "2026-10-01" }).state
+    ).toBe("frozen");
+  });
+
+  it("never freezes a 1-day streak (nothing for Jack Frost to give back)", () => {
+    expect(
+      getRecoverableStreak({ streak: 1, lastPlayedKey: "2026-10-01", todayKey }).state
+    ).toBeNull();
+  });
+
+  it("does not freeze without a known last game", () => {
+    expect(getRecoverableStreak({ streak: 15, lastPlayedKey: null, todayKey }).state).toBeNull();
+  });
+
+  it("offers the broken streak once the player has played again (streak back to 1)", () => {
+    expect(
+      getRecoverableStreak({ streak: 1, lastPlayedKey: todayKey, todayKey, previousStreak: 9 })
+    ).toEqual({ state: "broken", value: 9 });
+  });
+
+  it("drops the trace once the new streak caught up with the old one", () => {
+    expect(
+      getRecoverableStreak({ streak: 9, lastPlayedKey: todayKey, todayKey, previousStreak: 9 })
+        .state
+    ).toBeNull();
+  });
+
+  it("prefers the current frozen streak over an older trace", () => {
+    expect(
+      getRecoverableStreak({ streak: 6, lastPlayedKey: "2026-10-10", todayKey, previousStreak: 20 })
+    ).toEqual({ state: "frozen", value: 6 });
   });
 });
 
@@ -95,9 +160,23 @@ describe("needsAvatarOrigin — portrait recadré sans origine connue (052)", ()
 describe("statsForUnlocks — normal + Expert pour les déblocages (décision du 2026-09-19)", () => {
   it("additionne compteurs et modeWins, prend le max des records, et retire la clé expert", () => {
     const s = {
-      wins: 30, giveups: 5, games: 35, perfectWins: 20, streakRecord: 4,
-      modeWins: { AllOutAttack: 30 }, modeCount: { AllOutAttack: 35 }, streak: 2,
-      expert: { wins: 10, giveups: 2, games: 12, perfectWins: 5, streakRecord: 9, modeWins: { AllOutAttack: 10, Music: 1 }, modeCount: { AllOutAttack: 12, Music: 1 } },
+      wins: 30,
+      giveups: 5,
+      games: 35,
+      perfectWins: 20,
+      streakRecord: 4,
+      modeWins: { AllOutAttack: 30 },
+      modeCount: { AllOutAttack: 35 },
+      streak: 2,
+      expert: {
+        wins: 10,
+        giveups: 2,
+        games: 12,
+        perfectWins: 5,
+        streakRecord: 9,
+        modeWins: { AllOutAttack: 10, Music: 1 },
+        modeCount: { AllOutAttack: 12, Music: 1 },
+      },
     };
     const v = statsForUnlocks(s);
     expect(v.wins).toBe(40);

@@ -403,6 +403,7 @@
     "fav_mode_pick_label": "Lieblingsmodus",
     "fav_mode_none": "Keiner",
     "stat_current_streak_label": "Aktuelle Serie",
+    "stat_frozen_streak_label": "Eingefrorene Serie",
     "mode_col_mode": "Modus",
     "mode_col_games": "Runden / Win %",
     "song_title": "Profilsong",
@@ -1516,7 +1517,8 @@
     "description": "Jack Frost kann sie wiederherstellen — einmal alle 2 Monate.",
     "restore_button": "🔥 Meine Serie wiederherstellen!",
     "cancel_button": "Nicht jetzt",
-    "profile_btn": "❄️ Wiederbeleben — 0 → {{count}} Tage",
+    "profile_btn": "❄️ Jack Frost rufen — zurück auf {{count}} Tage",
+    "profile_cooldown": "🧊 Jack Frost ruht sich aus — wieder da in {{count}} Tagen",
     "error_cooldown": "Wiederherstellung in Abklingzeit — versuch es später.",
     "error_offline": "Du scheinst offline zu sein. Bitte versuch es erneut.",
     "error_generic": "Wiederherstellung derzeit nicht verfügbar. Bitte versuch es erneut."
