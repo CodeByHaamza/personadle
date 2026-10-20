@@ -401,3 +401,38 @@ Knowledge graph dans `graphify-out/`.
   acquises
 - CI verte insuffisante si elle ne peut pas exécuter le scénario concerné (replay
   migration sur base vierge, config testée sans override d'env) → le signaler
+---
+
+## 14. Orchestration par sous-agents
+
+> Posé le 2026-10-20. Pour les lots qui touchent plusieurs couches (contenu + front + serveur).
+> Une tâche courte et locale se fait directement, sans délégation : chaque agent démarre
+> à froid et relit le contexte, c'est le chemin cher.
+
+**Le superviseur, c'est la session principale.** Un sous-agent ne peut pas en lancer un autre :
+il n'y a donc pas d'agent « superviseur » à part — c'est la conversation avec Hamza qui
+découpe, délègue, arbitre, et seule elle **commit et pousse** (une seule main sur
+l'historique, et la règle « aucune signature d'outil » du §4 tenue à un seul endroit).
+
+| Agent (`.claude/agents/`) | Rôle | Écrit ? |
+|---|---|---|
+| `persona-data` | Datasets de jeu, lore, multi-wielders, pools quotidiens | données |
+| `frontend` | JS/CSS/HTML, i18n 6 langues, responsive, `sw.js` | front |
+| `backend-php` | API PHP/PDO, migrations, `.htaccess`, déblocages serveur | back |
+| `test-qa` | Tests manquants + batterie complète, résultats réels | tests seulement |
+| `reviewer` | Diff confronté aux §4, §7, §9, §13 — verdict argumenté | **rien** |
+
+Les fichiers sont en `snake_case` (règle du §4) ; le champ `name:` est en kebab-case, seul
+format accepté par Claude Code pour un identifiant d'agent.
+
+**Déroulé d'un lot :**
+
+1. **Cadrer** (superviseur) — reformuler la demande, découper par couche, fixer les
+   contrats entre couches (route, corps, réponse) **avant** de déléguer.
+2. **Produire** — `persona-data` / `frontend` / `backend-php`, en parallèle seulement si les
+   couches ne se touchent pas ; sinon dans l'ordre données → serveur → front.
+3. **Prouver** — `test-qa` sur le diff complet.
+4. **Relire** — `reviewer` ; tout « Bloquant » repart à l'étape 2.
+5. **Livrer** (superviseur) — `DEV_CHANGELOG.md` de la version en cours (§9), commit sans
+   signature (`git log -1 --format=%B`), PR vers `develop`.
+
