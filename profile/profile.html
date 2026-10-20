@@ -1120,6 +1120,12 @@
       initBottomNav();
     </script>
 
+    <script type="module">
+      // Mobile : sections secondaires repliables (stats en 2 colonnes : profile-page.css).
+      import { initProfileMobile } from "./profile_mobile.js";
+      initProfileMobile();
+    </script>
+
     <!-- =====================================================
      5. MODALES AUTH — Login / Register
      Branchées sur api.auth.* (js/api.js).

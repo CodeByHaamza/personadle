@@ -1550,5 +1550,18 @@
   "notice": {
     "from_team": "Mensaje del equipo",
     "ack": "Entendido"
+  },
+  "nav": {
+    "home": "Inicio",
+    "play": "Jugar",
+    "ranking": "Ranking",
+    "friends": "Amigos",
+    "profile": "Perfil",
+    "play_title": "Modos de hoy",
+    "play_done": "Jugado",
+    "play_todo": "Por jugar",
+    "play_left": "Quedan {{count}} hoy",
+    "play_all_done": "Todos los modos jugados hoy",
+    "home_status_done": "Jugado hoy"
   }
 }

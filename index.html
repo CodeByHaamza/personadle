@@ -3993,6 +3993,12 @@
     </script>
 
     <script type="module">
+      // Pastilles « joué aujourd'hui » + News/Daily rangés sous le titre (mobile).
+      import { initHomeMobile } from "./js/home_mobile.js";
+      initHomeMobile();
+    </script>
+
+    <script type="module">
       import { initNotifications } from "./js/notifications.js";
       import { checkStreakRecovery } from "./js/streak-recovery.js";
       import { pullProfileFromCloud, pushLangToCloud } from "./js/cloud-sync.js";

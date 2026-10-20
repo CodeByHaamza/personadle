@@ -5476,3 +5476,64 @@ body.darkmode .share-modal-title {
 body.darkmode .danger-consequences {
   color: #bbb;
 }
+
+/* =====================================================
+   PROFIL SUR TÉLÉPHONE — 2026-10-20 (profile/profile_mobile.js)
+   Mesuré en 390×844 : 3,3 écrans, dont 10 tuiles de stats en une colonne.
+   ===================================================== */
+@media (max-width: 480px) {
+  /* Deux colonnes : la moitié de la hauteur. Les tuiles « full » (première
+     partie, série à 30+ jours) gardent toute la largeur. */
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px;
+  }
+
+  .stats-grid .stat-item {
+    padding: 8px 10px;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  /* La série (avec ses flocons/flammes de part et d'autre) garde toute la
+     largeur : en demi-colonne, son libellé était tronqué. */
+  .stats-grid .stat-item--full,
+  .stats-grid .stat-streak {
+    grid-column: 1 / -1;
+  }
+
+  .stats-grid .stat-label {
+    font-size: 0.62rem;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.2;
+  }
+
+  /* Sections repliables : un tap sur le titre. */
+  .profile-card.is-collapsible > .card-title {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+  }
+
+  .profile-card.is-collapsible > .card-title::after {
+    content: "▾";
+    margin-left: auto;
+    font-size: 1.1em;
+    transition: transform 0.2s ease;
+  }
+
+  .profile-card.is-collapsed > .card-title::after {
+    transform: rotate(-90deg);
+  }
+
+  .profile-card.is-collapsed > :not(.card-title) {
+    display: none !important;
+  }
+
+  .profile-card.is-collapsed > .card-title {
+    margin-bottom: 0;
+  }
+}
