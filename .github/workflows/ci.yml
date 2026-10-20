@@ -55,6 +55,18 @@ jobs:
       - name: Check daily target pools are up to date
         run: npm run pools:check
 
+      # ?v= des JS/CSS cités par les pages (scripts/stamp_assets.js). Partout : aucune
+      # page ne cite un fichier absent. Vers `main` seulement (release, hotfix — ce
+      # que Hostinger déploie) : chaque ?v= est l'empreinte du contenu actuel. Pas
+      # sur develop, sinon deux branches qui touchent global.css se disputeraient
+      # ~16 pages en conflit.
+      - name: Check pages only reference existing JS/CSS
+        run: npm run assets:refs
+
+      - name: Check asset ?v= stamps are up to date (release to main)
+        if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
+        run: npm run assets:check
+
       # Non bloquant tant que le repo n'est pas entièrement formaté (cf. AMELIORATIONS.md §8).
       - name: Check Prettier formatting (non-blocking)
         run: npm run format:check

@@ -263,6 +263,20 @@ un pool de tirage :
 - `npm run pools:check` — vérifie sans écrire (utilisé en CI, échoue si désynchronisé)
 - Le hook pre-commit régénère et re-stage automatiquement si nécessaire
 
+### 🏷️ `?v=` des JS/CSS — ne JAMAIS les écrire à la main
+
+Le `?v=` de chaque JS/CSS cité par une page HTML est l'**empreinte de son contenu**
+(`scripts/stamp_assets.js`), posée **à la release** — pas à chaque commit, sinon deux
+branches qui touchent `global.css` entrent en conflit sur ~16 pages.
+
+- `npm run assets:stamp` — sur la branche de release (checklist de `DEPLOY.md`)
+- `npm run assets:check` — exigé par la CI sur toute PR vers `main` (release, hotfix)
+- `npm run assets:refs` — exigé partout : aucune page ne cite un fichier absent
+- Un `<script type="module" src>` qu'un autre module importe (ex. `js/api.js`) reste **sans**
+  `?v=` : `x.js?v=a` et `x.js` seraient deux modules, donc deux instances. Le script le gère.
+- Les dépendances d'un module (ses `import`) ne sont pas versionnées : c'est le `no-cache` du
+  `.htaccess` et le network-first de `sw.js` qui les tiennent fraîches.
+
 ---
 
 ## 9. Documentation des mises à jour
