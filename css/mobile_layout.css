@@ -1,0 +1,187 @@
+/* =============================================================
+   mobile_layout.css — Les 6 modes sur téléphone (≤ 480 px)
+
+   Mesuré le 2026-10-20 (Chromium, 360×740 et 390×844) : dans AUCUN mode le
+   champ de réponse n'était visible au premier écran — de 781 px (Classique)
+   à 1 221 px (Personae) pour un écran de 844, sous la barre du bas. Le geste
+   principal du jeu demandait un défilement à chaque essai.
+
+   Deux leviers, chargés APRÈS global.css et le CSS du mode :
+     1. l'en-tête se compacte (logo, bascule Expert, encart titre, Indice/Abandon) ;
+     2. la ligne de saisie s'ANCRE en bas, au-dessus de la barre de navigation
+        (position: sticky) : visible quel que soit l'indice affiché au-dessus
+        (silhouette, animation, lecteur), sans réordonner le DOM des 6 modes.
+
+   Sélecteurs génériques (h1[data-i18n^="modes."], .input-row…) : les 6 pages
+   n'ont pas le même balisage d'encart, mais partagent ces repères.
+   Garde-fou : tests-e2e/mobile_input_visible.spec.js.
+   ============================================================= */
+
+@media (max-width: 480px) {
+  :root {
+    --mobile-nav-h: 62px; /* .bottom-nav, css/bottomNav.css */
+  }
+
+  /* ── 1. En-tête compact ──────────────────────────────────── */
+
+  #imgHomePage {
+    width: min(210px, 56vw);
+  }
+
+  .expert-toggle-zone {
+    margin: 2px auto 4px;
+  }
+
+  .expert-toggle {
+    min-height: 0;
+    padding: 6px 14px;
+    font-size: 0.72rem;
+  }
+
+  /* Encart titre : même texte, moitié moins haut. */
+  h1[data-i18n^="modes."] {
+    font-size: 1.12rem;
+    line-height: 1.25;
+    margin: 4px 0;
+  }
+
+  p[data-i18n^="modes."][data-i18n$=".subtitle"] {
+    font-size: 0.82rem;
+    margin: 2px 0 0;
+  }
+
+  div:has(> div > h1[data-i18n^="modes."]),
+  .personadle-box {
+    padding-top: 8px !important;
+    padding-bottom: 10px !important;
+    margin-top: 6px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .rules-link-wrapper .img-wrapper img {
+    height: 40px !important;
+  }
+
+  /* Indice / Abandon : les boutons image passent de 100 à 56 px. */
+  .hint-block .img-wrapper img,
+  .giveup-block .img-wrapper img {
+    height: 56px !important;
+  }
+
+  .hint-giveup-row {
+    margin-top: 4px;
+    margin-bottom: 4px;
+    gap: 6px;
+  }
+
+  /* ── 2. Saisie ancrée au-dessus de la barre du bas ──────── */
+
+  .input-wrapper {
+    position: sticky;
+    bottom: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px));
+    z-index: 450; /* sous .bottom-nav (500) et l'autocomplétion (600) */
+    margin-top: 8px;
+    gap: 0;
+  }
+
+  /* La BARRE = la ligne Rejouer | champ | Valider. Classique la nomme
+     .input-row ; les 5 autres modes la posent en <div> stylé inline, premier
+     enfant de .input-wrapper (d'où les !important, pour battre l'inline).
+     Le fond est sur la barre, pas sur le wrapper : en fin de partie, certains
+     modes masquent la ligne (.hidden) — le wrapper ne doit pas laisser une
+     bande vide collée au-dessus de la barre du bas. */
+  .input-wrapper > :is(.input-row, div:first-child) {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+    max-width: 480px;
+    margin: 0 !important;
+    padding: 6px 8px;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 2px solid #e63946;
+    box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.12);
+  }
+
+  .input-wrapper > :is(.input-row, div:first-child).hidden {
+    display: none !important;
+  }
+
+  body.darkmode .input-wrapper > :is(.input-row, div:first-child) {
+    background: rgba(18, 18, 24, 0.94);
+  }
+
+  /* Le champ prend toute la place restante entre les deux boutons. */
+  .input-wrapper :is(.textbar-container, div:has(> input[type="text"])) {
+    order: 0 !important;
+    flex: 1 1 auto !important;
+    max-width: none !important;
+    min-width: 0;
+    width: auto !important;
+    gap: 0 !important;
+  }
+
+  .input-wrapper input[type="text"] {
+    width: 100% !important;
+    min-width: 0;
+    box-sizing: border-box;
+    font-size: 16px; /* < 16 px : iOS zoome au focus */
+    padding: 9px 12px;
+  }
+
+  /* Rejouer / Valider : vignettes de 34 px de haut au lieu de 90. */
+  .input-wrapper :is(.button-left, .button-right) {
+    flex: 0 0 auto !important;
+  }
+
+  /* L'image fait 34 px, la cible tactile reste à 44 × 48 (CLAUDE.md §7). */
+  .input-wrapper :is(#resetButton, #guessButton) {
+    flex: 0 0 auto !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    height: auto !important;
+    min-height: 44px;
+    min-width: 48px;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .input-wrapper :is(#resetButton, #guessButton) .img-wrapper img {
+    height: 34px !important;
+    width: auto;
+  }
+
+  .input-wrapper :is(#resetButton, #guessButton) .shape-wrapper {
+    display: none;
+  }
+
+  /* Ancrée en bas, la liste s'ouvre VERS LE HAUT : vers le bas, elle passerait
+     sous la barre de navigation. */
+  .input-wrapper .autocomplete-items {
+    top: auto;
+    bottom: 100%;
+    margin-top: 0 !important;
+    margin-bottom: 6px;
+    max-height: min(46vh, 320px);
+    width: calc(100% - 16px);
+    max-width: none;
+  }
+
+  .input-wrapper .list-options img {
+    width: 56px;
+    height: 56px;
+  }
+
+  /* La place laissée sous le dernier résultat : sans elle, la ligne ancrée
+     recouvre la fin de l'historique des essais. */
+  body {
+    padding-bottom: calc(var(--mobile-nav-h) + 72px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
