@@ -196,8 +196,13 @@ graphify-out/
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Outils de développement personnel (Claude Code, Superpowers)
+# Exception : `.claude/agents/` est versionné — c'est l'équipe de sous-agents du
+# dépôt (CLAUDE.md §14), partagée comme le reste de l'outillage. Les réglages
+# personnels (settings.local.json…) restent ignorés. `.claude/*` et non
+# `.claude/` : un dossier ignoré en entier ne peut pas ré-inclure un enfant.
 # ─────────────────────────────────────────────────────────────────────────────
-.claude/
+.claude/*
+!.claude/agents/
 .superpowers/
 docs/superpowers/
 
