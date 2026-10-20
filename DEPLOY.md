@@ -60,6 +60,9 @@ production continue de tourner sans les voir.
 - [ ] Les entrées de changelog joueur et dev de la version sont écrites (CLAUDE.md §9)
 - [ ] `CACHE_VERSION` a été bumpé dans `sw.js` — sinon les assets servis en cache-first
       restent ceux de la version précédente chez les joueurs déjà venus
+- [ ] `npm run assets:stamp` lancé sur la branche de release (et committé) — réécrit le `?v=`
+      de chaque JS/CSS cité par les pages avec l'empreinte de son contenu. La CI le refuse
+      sur toute PR vers `main` si un `?v=` est périmé (`npm run assets:check`)
 - [ ] Créneau choisi **hors heure de pointe** : `sw.js` envoie `SW_UPDATED` à tous les onglets
       ouverts, qui se rechargent. L'état de partie survit (il vit dans `localStorage`), mais
       une lecture audio en cours s'arrête
