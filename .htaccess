@@ -19,12 +19,18 @@ ErrorDocument 404 /pages/404.html
 # 'unsafe-inline' reste nécessaire : le site est en vanilla JS sans build step, avec des
 # <script>/style="" inline sur la plupart des pages — les retirer demanderait d'externaliser
 # tous ces scripts, un chantier séparé (voir AMELIORATIONS.md #7).
+# Manifeste de l'application installable (PWA, 2026-10-20) : Apache ne connaît pas
+# l'extension, et un manifeste servi en text/plain est ignoré par certains navigateurs.
+AddType application/manifest+json .webmanifest
+
+# Polices : auto-hébergées depuis le 2026-10-20 (css/fonts.css, font/google/) — la CSP
+# n'autorise plus fonts.googleapis.com / fonts.gstatic.com.
 <IfModule mod_headers.c>
     # Aucune page n'utilise caméra, micro ni géolocalisation : on le dit au navigateur
     # (audit du 2026-09-13, AMELIORATIONS.md §4).
     Header set Permissions-Policy "camera=(), microphone=(), geolocation=()"
     <FilesMatch "\.html$">
-        Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://pub-39a737fc7a9c44c08b7701bdd4b2de4a.r2.dev; connect-src 'self' https://*.pusher.com wss://*.pusher.com; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
+        Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://pub-39a737fc7a9c44c08b7701bdd4b2de4a.r2.dev; connect-src 'self' https://*.pusher.com wss://*.pusher.com; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
     </FilesMatch>
 </IfModule>
 
