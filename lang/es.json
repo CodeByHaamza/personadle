@@ -1521,6 +1521,14 @@
     "error_offline": "Parece que estás sin conexión. Inténtalo de nuevo.",
     "error_generic": "Recuperación no disponible ahora mismo. Inténtalo de nuevo."
   },
+  "share": {
+    "button": "Compartir mi resultado",
+    "copied": "Resultado copiado — ¡pégalo donde quieras!",
+    "failed": "No se pudo copiar el resultado.",
+    "one_try": "✅ ¡A la primera!",
+    "tries": "✅ {{count}} intentos",
+    "gave_up": "🏳️ Me rendí tras {{count}} intentos"
+  },
   "reset_password": {
     "title": "🔐 Restablece tu contraseña",
     "subtitle": "Elige una nueva contraseña para tu cuenta de PersonaDLE.",

@@ -1521,6 +1521,14 @@
     "error_offline": "Sembri offline. Riprova.",
     "error_generic": "Ripristino non disponibile al momento. Riprova."
   },
+  "share": {
+    "button": "Condividi il risultato",
+    "copied": "Risultato copiato — incollalo dove vuoi!",
+    "failed": "Impossibile copiare il risultato.",
+    "one_try": "✅ Al primo colpo!",
+    "tries": "✅ {{count}} tentativi",
+    "gave_up": "🏳️ Arreso dopo {{count}} tentativi"
+  },
   "reset_password": {
     "title": "🔐 Reimposta la tua password",
     "subtitle": "Scegli una nuova password per il tuo account PersonaDLE.",

@@ -4166,3 +4166,63 @@ body.expert-mode {
     animation: none;
   }
 }
+
+/* =============================================================================
+   PARTAGER MON RÉSULTAT (js/share_result.js) — 2026-10-20
+   Monté en tête de #modeNavigationContainer en fin de partie.
+   ============================================================================= */
+.btn-share-result {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 9px 22px;
+  min-height: 44px;
+  background: #fff;
+  color: #1a1a1a;
+  border: 2px solid #1a1a1a;
+  border-radius: 100px;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 #e63946;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.btn-share-result:hover,
+.btn-share-result:focus-visible {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 #e63946;
+}
+
+.btn-share-result:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #e63946;
+}
+
+body.darkmode .btn-share-result {
+  background: #141414;
+  color: #fff;
+  border-color: #fff;
+}
+
+.share-result-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 90px;
+  transform: translateX(-50%);
+  z-index: 1200;
+  padding: 8px 18px;
+  border-radius: 20px;
+  background: #1a1a1a;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}

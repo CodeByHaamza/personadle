@@ -42,6 +42,52 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 16 | `fix/badge_modal_prod` | Le détail d'un badge reprend la modale de la production |
 | 17 | `feat/badge_cafe_leblanc` | Badge secret Ko-fi |
 | 18 | `perf/aoa_reencode_hd` | Les 33 animations AOA en 1080p au calibre des autres |
+| 21 | `feat/partage_resultat` | « Partager mon résultat » façon Wordle dans les 6 modes |
+
+---
+
+## 2026-10-20 — « Partager mon résultat », façon Wordle
+
+Le premier canal d'acquisition d'un jeu « -dle » est la grille d'emojis collée dans un
+groupe ; aucun des six modes n'en avait. Le texte ne révèle jamais la cible :
+
+```
+PersonaDLE 🔤 Classic — 20/10
+🟥🟨🟥🟩🟥🟥🟨
+🟩🟩🟩🟩🟩🟩🟩
+✅ 2 essais
+https://personadle.net
+```
+
+Classique partage sa vraie grille (lue dans `#output`, remise dans l'ordre de jeu — les
+lignes y sont insérées de la plus récente à la plus ancienne). Les cinq autres modes,
+sans grille d'attributs, partagent la suite ❌❌✅ ou 🏳️. Expert est signalé (⚡).
+Téléphone : feuille de partage native (`navigator.share`) ; ailleurs : presse-papiers.
+
+### Câblage — zéro appel ajouté dans les modes
+
+Les six modes affichent leur fin de partie chacun à sa façon ; ils ont en commun deux
+fonctions de `gameCore.js` :
+
+- `buildGameSession()` écrit `lastGameResult` (portée, identifiant de partie, résultat,
+  essais, Expert) — **en synchrone**, pour être là avant le montage du bouton ;
+- `revealNextLink()`, appelé en fin de partie **et au rechargement** d'une partie finie,
+  monte le bouton par `import("./share_result.js")` — dynamique, car `share_result.js`
+  importe `gameCore.js` (un import statique ferait un cycle).
+
+Le bouton n'apparaît que si le résultat retenu porte l'identifiant de la partie affichée
+(`gameId_<scope>`) : une partie de défi (non enregistrée) ou un résultat d'hier n'en a
+pas. Ni la cible ni les noms proposés ne sont stockés dans `lastGameResult`.
+
+### Angles morts connus
+
+- Une partie terminée **avant** cette version n'a pas de `lastGameResult` : pas de bouton
+  jusqu'à la partie suivante.
+- La grille de Classique est lue dans le DOM : si la présentation de `#output` change
+  (classes `guess-row` / `guess-cell` / `correct|misplaced|wrong`), le test
+  `readClassicGrid` le signalera.
+- `MODE_ICON` existe aussi dans `js/daily_status.js` (PR navigation mobile) : à fusionner
+  une fois les deux PR mergées.
 
 ---
 

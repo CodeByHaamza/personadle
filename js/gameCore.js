@@ -930,6 +930,9 @@ export function revealNextLink({ nextHref = "", prevHref = null } = {}) {
 
   if (nav) {
     nav.style.display = "flex";
+    // Bouton « Partager mon résultat » : la fin de partie des six modes passe ici,
+    // rechargement compris. Import dynamique (cycle évité, voir buildGameSession).
+    import("./share_result.js").then((m) => m.mountShareButton()).catch(() => {});
     // Delay the scroll so the layout has time to update
     setTimeout(() => {
       nav.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -1152,6 +1155,28 @@ export function buildGameSession({
   isExpert = false,
   clientSessionId = "",
 }) {
+  const id = clientSessionId || newId();
+  // « Partager mon résultat » (js/share_result.js, clé LAST_RESULT_KEY) : le
+  // résultat de la partie qui se termine, rattaché à son identifiant. Écrit ici,
+  // en synchrone, pour être là avant que revealNextLink() monte le bouton.
+  if (_currentScope && clientSessionId) {
+    try {
+      localStorage.setItem(
+        "lastGameResult",
+        JSON.stringify({
+          scope: _currentScope,
+          id,
+          mode,
+          result,
+          attempts,
+          isExpert,
+          day: currentGameDay(),
+        })
+      );
+    } catch {
+      /* stockage plein ou bloqué : pas de bouton de partage, rien de cassé */
+    }
+  }
   return {
     // Clé backend canonique, quelle que soit la graphie passée par le mode
     // ("AllOutAttack", "All Out Attack", "Classic"…). Voir normalizeModeKey().
@@ -1174,7 +1199,7 @@ export function buildGameSession({
     // Passer markGameLogged() ici plutôt que de laisser le défaut : l'identifiant
     // est alors stable pour toute la partie, donc un ré-enregistrement après perte
     // du flag local (autre onglet, nettoyage navigateur) est refusé côté base.
-    client_session_id: clientSessionId || newId(),
+    client_session_id: id,
     // Suite ordonnée des essais, le bon en dernier si gagné (migration 041) —
     // c'est ce que « comparer nos parties » montre aux amis.
     guesses: _guessesForSession(result, targetName),
