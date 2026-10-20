@@ -1521,6 +1521,14 @@
     "error_offline": "Parece que estás sem ligação. Tenta novamente.",
     "error_generic": "Recuperação indisponível de momento. Tenta novamente."
   },
+  "share": {
+    "button": "Partilhar resultado",
+    "copied": "Resultado copiado — cola onde quiseres!",
+    "failed": "Não foi possível copiar o resultado.",
+    "one_try": "✅ À primeira!",
+    "tries": "✅ {{count}} tentativas",
+    "gave_up": "🏳️ Desisti após {{count}} tentativas"
+  },
   "reset_password": {
     "title": "🔐 Repõe a tua palavra-passe",
     "subtitle": "Escolhe uma nova palavra-passe para a tua conta PersonaDLE.",

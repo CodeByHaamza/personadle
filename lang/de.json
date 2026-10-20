@@ -1521,6 +1521,14 @@
     "error_offline": "Du scheinst offline zu sein. Bitte versuch es erneut.",
     "error_generic": "Wiederherstellung derzeit nicht verfügbar. Bitte versuch es erneut."
   },
+  "share": {
+    "button": "Ergebnis teilen",
+    "copied": "Ergebnis kopiert — füge es überall ein!",
+    "failed": "Ergebnis konnte nicht kopiert werden.",
+    "one_try": "✅ Beim ersten Versuch!",
+    "tries": "✅ {{count}} Versuche",
+    "gave_up": "🏳️ Aufgegeben nach {{count}} Versuchen"
+  },
   "reset_password": {
     "title": "🔐 Setze dein Passwort zurück",
     "subtitle": "Wähle ein neues Passwort für dein PersonaDLE-Konto.",
