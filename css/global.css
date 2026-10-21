@@ -4166,3 +4166,99 @@ body.expert-mode {
     animation: none;
   }
 }
+/* =====================================================================
+   20. ÉCRAN LARGE MAIS COURT — LE BANDEAU SE COMPRIME
+   =====================================================================
+   Tout le responsive du projet (CLAUDE.md §6) ne connaissait que des
+   LARGEURS : 480 / 768 / 1024 px. Avant ce bloc il n'existait **aucune**
+   media query sur la hauteur dans l'ensemble du CSS — vérifié fichier par
+   fichier le 2026-10-21.
+
+   Conséquence : la barre de réponse se place à la MÊME ordonnée quelle que
+   soit la hauteur de la fenêtre, parce que tout ce qui la précède est
+   dimensionné en px ou par la largeur. `#imgHomePage` est l'exemple pur :
+   `width: min(460px, 80vw)` + `height: auto`, donc sa hauteur suit la
+   LARGEUR disponible et jamais la place verticale restante.
+
+   Relevé le 2026-10-21 à 1536×864 — la résolution de bureau la plus
+   répandue, et un écran que tous les points de rupture en largeur
+   considèrent comme large, donc confortable :
+
+     mode         saisie à y=   défilement pour l'atteindre
+     Silhouette   1475          611 px
+     Personae     1309          445 px
+     AOA          1285          421 px
+     Musique       963           99 px
+     Émoji         842          tient, à 22 px près
+     Classique     766          tient, mais les résultats démarrent à 830
+
+   C'est l'explication de « ça marche chez moi et pas chez les joueurs » :
+   sur un écran de 1080 px de haut la page tient pile, sur tout écran plus
+   court elle défile. Le correctif « Indice et Abandon côte à côte »
+   (2.3.2) traitait le même symptôme, mais sous `max-width: 900px` — donc
+   jamais sur un PC.
+
+   PORTÉE VOLONTAIREMENT ÉTROITE : `min-width: 901px` ET `max-height: 900px`,
+   c'est-à-dire large mais court. La borne 901 s'aligne sur le
+   `max-width: 900px` de `classique.css`, donc les deux blocs ne se
+   chevauchent jamais et le calibrage mobile — ajusté au pixel en 2.3.2 —
+   n'est pas touché. Là où la page tenait déjà, rien ne change.
+
+   Les valeurs sont en `clamp()` avec du `vh` plutôt qu'un nouveau palier
+   en px dur : la compression est continue, de 900 px de haut jusqu'aux
+   petits portables (CLAUDE.md §6).
+
+   ⚠️ ANGLE MORT ASSUMÉ : Silhouette, AOA et Personae gardent un
+   dépassement après ce correctif. Il vient de leur grande image, pas du
+   bandeau partagé. Les dimensionner en `vh` touche la lisibilité du jeu
+   lui-même (une silhouette trop petite change la difficulté) : c'est un
+   lot à part, pas un sous-produit de celui-ci.
+   --------------------------------------------------------------------- */
+@media (min-width: 901px) and (max-height: 900px) {
+  /* Le logo est la plus grosse pièce du bandeau : 175 px de haut dès
+     1536 px de large. On le borne par sa HAUTEUR — `width: auto` conserve
+     le ratio — puisque c'est la hauteur qui manque, pas la largeur. */
+  #imgHomePage {
+    width: auto;
+    max-width: min(460px, 80vw);
+    height: clamp(72px, 13vh, 175px);
+    margin-top: 8px;
+  }
+
+  /* Pilule Expert / « Défier un ami » : ses seules marges verticales
+     valaient 36 px. */
+  .expert-toggle-zone {
+    margin: 8px auto 12px;
+  }
+
+  /* Bandeau de consigne des cinq autres modes — Classique a sa propre
+     `.personadle-box`, comprimée dans `classique.css`. 30 px de padding
+     ET 30 px de marge, en haut comme en bas : 120 px de hauteur qui ne
+     portent aucune information. */
+  .emoji-hint-zone {
+    padding: 14px 30px;
+    margin: 12px auto;
+  }
+
+  /* Rangée Indice + Abandon : 166 px de haut sur desktop, dont 24 px de
+     padding vertical imposé à tout `.link-wrapper` par le §18 (cible
+     tactile). On rogne le padding et on borne l'image par sa hauteur —
+     même technique que le correctif mobile de la 2.3.2, qui tourne en
+     production depuis, donc les formes SVG décoratives suivent (elles
+     sont en absolu dans `.link-wrapper`, qui reste en `fit-content`). */
+  .hint-giveup-row {
+    margin-top: 10px;
+    gap: 20px;
+  }
+
+  .hint-giveup-row .link-wrapper {
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  .hint-giveup-row .img-wrapper img {
+    width: auto;
+    height: clamp(52px, 9vh, 100px);
+    margin: 0 auto;
+  }
+}
