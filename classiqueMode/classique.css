@@ -740,3 +740,40 @@ body.expert-mode #quoteHint {
     height: 60px !important;
   }
 }
+
+/* =====================================================================
+   ÉCRAN LARGE MAIS COURT — LA BOÎTE D'EN-TÊTE SE COMPRIME
+   =====================================================================
+   Pendant, côté Classique, du bloc §20 de `global.css`, qui porte le
+   raisonnement complet et les mesures. Ici seule `.personadle-box` est
+   concernée : elle remplace `.emoji-hint-zone` dans ce mode, donc elle
+   échappait à la compression faite pour les cinq autres.
+
+   Elle vaut 172 px à 1536×864 : 60 px de padding vertical, un `h1` de
+   62 px et sa marge de 15 px. C'est le deuxième poste du bandeau après le
+   logo, et les résultats commençaient à 830 px — soit 34 px de visible
+   sous la barre de saisie sur cette résolution.
+
+   Le commentaire de la 2.3.2 plus bas dans ce fichier jugeait que toucher
+   à cette boîte serait « une refonte, pas un correctif ». C'était exact
+   dans son contexte : il s'agissait d'y toucher POUR TOUT LE MONDE. Sous
+   condition de hauteur, le compromis est différent — on ne change rien là
+   où la page tenait déjà.
+
+   Même portée que le §20 de `global.css` (`min-width: 901px`), donc aucun
+   recouvrement avec le `max-width: 900px` mobile de ce fichier.
+   --------------------------------------------------------------------- */
+@media (min-width: 901px) and (max-height: 900px) {
+  .personadle-box {
+    padding: 14px 40px;
+  }
+
+  .personadle-box h1 {
+    margin-bottom: 8px;
+    font-size: clamp(19px, 2.6vh, 26px);
+  }
+
+  .personadle-box p {
+    font-size: 15px;
+  }
+}
