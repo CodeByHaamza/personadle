@@ -452,8 +452,10 @@ Léo et Damien, `reset --hard` sur Hostinger, PR ouvertes à recréer**. À ne f
       morte `$expertModes`).
 - [ ] **Déploiement : étape de migration** dans le hook Hostinger, ou règle écrite « migration
       en prod avant merge vers main ». Aujourd'hui le code précède systématiquement le schéma.
-- [ ] **Template de PR GitHub** reprenant la Definition of Done de CLAUDE.md §13, pour la
-      rendre exécutable au lieu de la laisser en prose.
+- [x] **Template de PR GitHub** reprenant la Definition of Done de CLAUDE.md §13, pour la
+      rendre exécutable au lieu de la laisser en prose. Fait le 2026-09-13 (`1eef25a`) :
+      `.github/PULL_REQUEST_TEMPLATE.md`, cases par type de changement (migration, PHP,
+      i18n, données, assets, état dérivé, config) + docs + angles morts.
 - [ ] **5 PR dependabot ouvertes** — dont `vitest` 2 → 4, une majeure qui touche 778 tests.
       **Uniquement des devDependencies** : maintenance d'outillage, pas un sujet de sécurité.
       Lot à part.
