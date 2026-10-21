@@ -45,6 +45,124 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-10-21 — Hotfix sécurité : PHP2Shell mitigé, et une fuite d'identifiants fermée
+
+Deux failles critiques du **moteur** PHP sont publiées ce jour (PHP2Shell, CVE-2026-109618 et
+CVE-2026-109619) : deux *use-after-free* exploitables en **exécution de code à distance non
+authentifiée**. Elles sont atteintes pendant que PHP parse la requête, donc **avant** qu'une
+seule ligne de `api/` ne s'exécute — notre code n'y change rien. Cloudflare a observé des
+tentatives dès 07:43 UTC, soit avant même la publication du correctif à 14:00 UTC.
+
+En auditant la prod pour mesurer l'exposition, on a trouvé **une seconde fuite, sans rapport
+et plus grave** : les identifiants de la base de production étaient servis en clair.
+
+### Pourquoi une règle `.htaccess` et pas une mise à jour de PHP
+
+Les correctifs sont dans PHP 8.2.35 / 8.3.36 / 8.4.27 / 8.5.12. Relevé sur le serveur le jour
+même : **aucune version proposée par Hostinger n'est à jour** — 8.2.34, 8.3.35, 8.4.26 et
+8.5.11, toutes buildées le 30/09. Changer de version dans hPanel ne corrige donc rien, et
+monter en 8.3 rouvrirait au passage le bug de collation de la 2.2.6 (§7 du CLAUDE.md).
+
+Un `.user.ini` ne servirait à rien non plus : l'hébergeur a vidé `user_ini.filename`, les
+fichiers ne sont **jamais lus**. Vérifié avant d'en écrire un.
+
+`session.upload_progress.enabled` est déjà à `Off` en prod, ce qui atténue une partie de la
+109618 — mais Sansec est explicite : ce réglage seul ne suffit pas, la fuite mémoire fonctionne
+même sans `session_start()`.
+
+Reste donc un seul levier : **tous les exploits connus passent par une requête
+`multipart/form-data`**. Audit du dépôt : **zéro** `$_FILES`, **zéro** `FormData`, **zéro**
+`enctype` sur 2157 fichiers suivis — tout passe en JSON via `js/api.js`. Refuser le multipart
+ne coûte aucune fonctionnalité.
+
+### Le piège qui a failli rendre la mitigation inutile
+
+La première version de la règle était un `RewriteRule ... [F]` dans le `.htaccess` de la
+racine. Mesure avant correction :
+
+| Requête | Attendu | Obtenu |
+|---|---|---|
+| `POST` multipart sur `/` | 403 | 403 ✅ |
+| `POST` multipart sur `/api/auth/login` | 403 | **400** ❌ |
+
+Un 400 signifie que **PHP a parsé le corps de la requête** : la mitigation était contournée
+exactement là où elle compte. Cause : les règles `mod_rewrite` d'un `.htaccess` de sous-dossier
+**écrasent** celles du parent, elles ne s'héritent pas. `api/` a le sien — comme 13 de ses
+sous-dossiers. La règle de la racine ne couvrait donc que la racine, c'est-à-dire le seul
+endroit où aucun PHP ne tourne.
+
+Corrigé par un filtre `SetEnvIfNoCase` + `Require not env`, qui relève de l'autorisation et
+**s'hérite**, lui, dans tous les sous-dossiers. La règle `rewrite` est conservée en second
+rideau, et doublée dans `api/.htaccess` au cas où LiteSpeed traiterait l'héritage autrement.
+Dupliquer la règle dans les 14 `.htaccess` a été écarté : le quinzième dossier l'oublierait en
+silence, exactement le piège déjà documenté au §7.
+
+### La fuite d'identifiants (trouvée en auditant, sans rapport avec la CVE)
+
+`git status` du webroot de prod — le webroot est un clone git, donc tout fichier étranger s'y
+voit — a sorti un seul fichier hors git : `api/config.php.bak-20260909`.
+
+`GET https://personadle.net/api/config.php.bak-20260909` renvoyait **HTTP 200** et le source
+PHP en clair : `DB_NAME`, `DB_USER` et le mot de passe de la base de **production**. Aucun
+exploit nécessaire, juste l'URL.
+
+Cause : `api/.htaccess` ne refuse que les noms **exacts** `^(config|bootstrap)\.php$`. Une
+copie ne matche pas, et un `.php` que PHP n'exécute pas est du code source en texte brut.
+
+- **Fuite fermée immédiatement** : fichier déplacé hors du webroot vers
+  `~/backups_hors_web/` (déplacé et non supprimé — la fuite s'arrête, le backup est conservé).
+  L'URL renvoie 404, le site répond normalement.
+- **Correction de fond** : une règle de la racine refuse désormais le **motif** et non un nom
+  précis — tout nom contenant `.php.` ou terminé par un suffixe de sauvegarde
+  (`.bak`, `.old`, `.orig`, `.save`, `.swp`, `~`…, avec une queue numérique optionnelle).
+  Vérifié : sur 2157 fichiers suivis, **0** matche cette règle, donc aucun asset servi ne peut
+  être refusé par erreur.
+
+### Vérification
+
+Matrice de requêtes réelles contre la stack Docker (Apache), pas une lecture du fichier :
+
+| Requête | Attendu | Obtenu |
+|---|---|---|
+| `GET /` | 200 | 200 |
+| `GET /css/global.css` · `/js/api.js` | 200 | 200 |
+| `POST` JSON `/api/auth/login` | 401 | 401 |
+| `GET /api/titles/` | 401 | 401 |
+| `POST` multipart `/` | 403 | 403 |
+| `POST` multipart `/api/auth/login` | 403 | 403 |
+| `POST` multipart `/api/user/stats` | 403 | 403 |
+| `POST` multipart `/api/friends/` | 403 | 403 |
+| `GET` leurres `config.php.bak-20260909`, `config.php.old`, `api.js.bak`, `gameCore.js~` | 403 | 403 |
+
+Le log Apache confirme le point essentiel : `authz_core ... client denied by server
+configuration`, donc le refus tombe **avant** l'invocation de PHP, pas dedans.
+
+E2E : **316 passés, 1 échec**, sur base vierge. L'échec (`profile_atelier.spec.js:459`, copie
+presse-papiers) est **pré-existant** — la même suite sans la modification, sur base vierge
+également, échoue sur exactement le même test. Il passe isolé : c'est l'écriture presse-papiers
+qui réclame le focus du document, perdu sous charge parallèle.
+
+### Angles morts connus
+
+- **La mitigation n'est pas un correctif.** Tant qu'Hostinger n'aura pas déployé 8.2.35, le
+  moteur reste vulnérable ; on ne ferme que le chemin d'exploitation connu. À surveiller avec
+  `ssh hostinger-personadle php -v`, et **retirer les deux règles multipart** une fois la
+  version patchée servie — sinon elles produiront un 403 incompréhensible le jour où on
+  ajoutera un vrai upload.
+- **Le mot de passe de la base a été exposé** pendant une durée inconnue (fichier daté du
+  2026-09-09). Aucune trace d'intrusion : `git status` du webroot est propre, aucun `.php`
+  modifié depuis 10 jours, aucun fichier déposé. `DB_HOST` vaut `localhost`, donc la base n'est
+  pas joignable de l'extérieur sans un autre point d'appui. **La rotation du mot de passe reste
+  à faire** (hPanel + `api/config.php`) : décision de Hamza, hors périmètre de ce hotfix.
+- **Les logs d'accès ne sont pas lisibles en SSH** sur le mutualisé (§10) : impossible de
+  confirmer ou d'exclure des tentatives par les logs. L'intégrité a donc été établie autrement,
+  par l'état git du webroot.
+- La suite E2E **n'est pas idempotente** entre deux exécutions sans `docker compose down -v` :
+  les tests écrivent en base et un second run voit des badges déjà accordés. Et l'enchaîner
+  trop souvent déclenche le rate-limit du `globalSetup` (429, table `rate_limits`). Constaté en
+  établissant la baseline, à traiter dans son propre lot.
+---
+
 ## 2026-09-30 — Hotfix 2.3.3 : le bouton Rejouer avait disparu de Classique
 
 Signalé par Hamza : en Classique, gagné ou perdu, normal ou Expert, plus aucun moyen de
