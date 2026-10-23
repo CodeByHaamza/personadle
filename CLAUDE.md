@@ -38,11 +38,11 @@ personadle/
 ├── js/                  ← gameCore.js, api.js, auth.js, i18n.js, cloud-sync.js…
 ├── css/                 ← global.css + un CSS par composant
 ├── database/            ← characters_clean.js, personas.js, quotes.js, portraits/
-├── lang/                ← en.json (source de vérité, 1314 clés), fr/es/de/it/pt.json
+├── lang/                ← en.json (source de vérité, 1316 clés), fr/es/de/it/pt.json
 ├── classiqueMode/  emojiMode/  allOutAttackMode/  silhouetteMode/  personaeMode/  musicsMode/
 ├── profile/             ← profile-page.js, badges/, friends/, leaderboard/
 ├── api/                 ← PHP REST (auth/, user/, messages/, social-links/, leaderboard/…)
-├── tests/               ← 86 suites Vitest (1548 tests) + tests/php/ (PHPUnit)
+├── tests/               ← 87 suites Vitest (1577 tests) + tests/php/ (PHPUnit)
 └── sql/                 ← bdd_mysql.sql (30 tables)
 ```
 
@@ -210,7 +210,7 @@ Utiliser `min()`, `clamp()`, `vw`/`vh`. Éviter les largeurs fixes en `px` sur l
 | `foo.php` + dossier `foo/` coexistants dans `api/` | `api/.htaccess` teste `.php -f` **avant** `-d` (sinon le dossier gagne toujours et le stub `.php` est inatteignable, même avec le slash final) |
 | Une `animation` CSS écrase le style inline | Une animation en cours bat les déclarations normales, **inline compris**. Ne jamais animer une propriété que le JS pilote en inline (`transform`, `opacity`). Vécu en 2.1 : `popInSilhouette` révélait la silhouette avant le premier flash en Expert |
 | `filter: brightness(0)` / `blur()` ne cachent rien | Un filtre CSS est un effet de peinture : « clic droit → Copier l'image » rend l'original. Pour masquer une réponse, cuire l'effet dans les pixels (`js/silhouette_mask.js`) — le filtre CSS ne reste qu'un filet |
-| Assets périmés après un déploiement | Bumper `CACHE_VERSION` dans `sw.js` (sinon `activate` ne purge rien et le cache-first sert l'ancien). Invisible en test : seuls les joueurs **déjà venus** sont touchés |
+| Assets périmés après un déploiement | `CACHE_VERSION` de `sw.js` doit changer (sinon `activate` ne purge rien et le cache-first sert l'ancien). Invisible en test : seuls les joueurs **déjà venus** sont touchés. Depuis le 2026-10-20, `npm run assets:stamp` y pose l'empreinte des fichiers cache-first — ne plus le bumper à la main |
 | Condition de déblocage non monotone | Un accès **gagné ne doit jamais se reperdre**. Toute condition doit être cumulative (`COUNT` à vie) ou un `MAX` sur l'historique — jamais une valeur « en cours ». Vécu en 2.1 : `mode_consecutive_perfects` renvoyait la série courante, donc 3 Modes Expert se re-verrouillaient à la première partie ratée, et une partie Expert en cours était refusée en 403 |
 | Une migration écrite ≠ une migration jouée | `sql/migrations/` n'est PAS le reflet de la prod — une migration vit sur `develop` jusqu'à la release. Seule source fiable : `SELECT version FROM schema_migrations`. Vécu en 2.1 : 029/030 oubliées de la checklist |
 | Colonne « cosmétique » absente en prod | La BDD prod vient d'une archive de 2026-05 : jusqu'à la **048**, quatre colonnes de `bdd_mysql.sql` n'y existaient pas parce qu'« aucun code ne les lisait » (025). Vécu à la release 2.2 : la 044 refusée (`titles.description_*`), puis le Compendium en 500 pour tout le monde (`ORDER BY ut.id`, `user_titles.id` absente). Depuis la 048, **prod = référence colonne pour colonne** et ça doit le rester : plus d'exception « cosmétique ». Avant chaque release, `npm run schema:check-prod` sur le serveur, et rejouer toute migration qui INSERT contre le `SHOW CREATE TABLE` de la prod (recréé dans Docker), pas seulement contre `bdd_mysql.sql` |
@@ -227,7 +227,7 @@ Utiliser `min()`, `clamp()`, `vw`/`vh`. Éviter les largeurs fixes en `px` sur l
 ## 8. Tests & qualité
 
 - `npm test` · `npm run test:watch` · `npm run test:coverage`
-- **1548 tests** (Vitest + jsdom), 86 suites dans `tests/` (`gameCore`, `backend`, `auth`, `i18n`,
+- **1577 tests** (Vitest + jsdom), 87 suites dans `tests/` (`gameCore`, `backend`, `auth`, `i18n`,
   `social-link`, `profilePage`, `badgesManager`, `badgesConditions`, `streakFlow.integration`,
   `streakRecovery`, `validateCharacters`, `formatPlayTime`… — cf. `tests/` pour la liste à jour)
 - `npm run lint` (ESLint flat config) · `npm run data:check` (schéma personnages) · `npm run i18n:check`
@@ -262,6 +262,22 @@ un pool de tirage :
 - `npm run pools:build` — régénère `api/data/daily_pools.json`
 - `npm run pools:check` — vérifie sans écrire (utilisé en CI, échoue si désynchronisé)
 - Le hook pre-commit régénère et re-stage automatiquement si nécessaire
+
+### 🏷️ `?v=` des JS/CSS — ne JAMAIS les écrire à la main
+
+Le `?v=` de chaque JS/CSS cité par une page HTML est l'**empreinte de son contenu**
+(`scripts/stamp_assets.js`), posée **à la release** — pas à chaque commit, sinon deux
+branches qui touchent `global.css` entrent en conflit sur ~16 pages.
+
+- `npm run assets:stamp` — sur la branche de release (checklist de `DEPLOY.md`)
+- `npm run assets:check` — exigé par la CI sur toute PR vers `main` (release, hotfix)
+- `npm run assets:refs` — exigé partout : aucune page ne cite un fichier absent
+- Un `<script type="module" src>` qu'un autre module importe (ex. `js/api.js`) reste **sans**
+  `?v=` : `x.js?v=a` et `x.js` seraient deux modules, donc deux instances. Le script le gère.
+- Les dépendances d'un module (ses `import`) ne sont pas versionnées : c'est le `no-cache` du
+  `.htaccess` et le network-first de `sw.js` qui les tiennent fraîches.
+- Le même script pose `CACHE_VERSION` dans `sw.js` = empreinte (index git) des fichiers servis
+  en cache-first : images, sons, polices. Stager les médias **avant** `assets:stamp`.
 
 ---
 
@@ -387,3 +403,39 @@ Knowledge graph dans `graphify-out/`.
   acquises
 - CI verte insuffisante si elle ne peut pas exécuter le scénario concerné (replay
   migration sur base vierge, config testée sans override d'env) → le signaler
+
+---
+
+## 14. Orchestration par sous-agents
+
+> Posé le 2026-10-20. Pour les lots qui touchent plusieurs couches (contenu + front + serveur).
+> Une tâche courte et locale se fait directement, sans délégation : chaque agent démarre
+> à froid et relit le contexte, c'est le chemin cher.
+
+**Le superviseur, c'est la session principale.** Un sous-agent ne peut pas en lancer un autre :
+il n'y a donc pas d'agent « superviseur » à part — c'est la conversation avec Hamza qui
+découpe, délègue, arbitre, et seule elle **commit et pousse** (une seule main sur
+l'historique, et la règle « aucune signature d'outil » du §4 tenue à un seul endroit).
+
+| Agent (`.claude/agents/`) | Rôle | Écrit ? |
+|---|---|---|
+| `persona-data` | Datasets de jeu, lore, multi-wielders, pools quotidiens | données |
+| `frontend` | JS/CSS/HTML, i18n 6 langues, responsive, `sw.js` | front |
+| `backend-php` | API PHP/PDO, migrations, `.htaccess`, déblocages serveur | back |
+| `test-qa` | Tests manquants + batterie complète, résultats réels | tests seulement |
+| `reviewer` | Diff confronté aux §4, §7, §9, §13 — verdict argumenté | **rien** |
+
+Les fichiers sont en `snake_case` (règle du §4) ; le champ `name:` est en kebab-case, seul
+format accepté par Claude Code pour un identifiant d'agent.
+
+**Déroulé d'un lot :**
+
+1. **Cadrer** (superviseur) — reformuler la demande, découper par couche, fixer les
+   contrats entre couches (route, corps, réponse) **avant** de déléguer.
+2. **Produire** — `persona-data` / `frontend` / `backend-php`, en parallèle seulement si les
+   couches ne se touchent pas ; sinon dans l'ordre données → serveur → front.
+3. **Prouver** — `test-qa` sur le diff complet.
+4. **Relire** — `reviewer` ; tout « Bloquant » repart à l'étape 2.
+5. **Livrer** (superviseur) — `DEV_CHANGELOG.md` de la version en cours (§9), commit sans
+   signature (`git log -1 --format=%B`), PR vers `develop`.
+

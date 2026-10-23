@@ -6,6 +6,125 @@
 
 ---
 
+# 🧭 Audit du 2026-10-20 — modes bonus, navigation mobile, et la suite
+
+> Demande de Hamza : sous-agents, Cemantix/Pedantix, navigation mobile, `?v=` unifié, série
+> gelée + Jack Frost au profil, « et d'autres suggestions peu importe le scope ». Les idées
+> 1, 4 et 5 sont **livrées** dans la PR du jour (détail : `PersonaDLE 2.3/DEV_CHANGELOG.md`,
+> entrée du 2026-10-20). Ci-dessous : les deux chantiers à trancher, puis le reste.
+
+## A. 💡 Cemantix & Pedantix — une « salle à part », pas un 7e et 8e mode
+
+**Avis** : tu as raison de ne pas les mettre au niveau des 6 modes. Ils ne partagent rien
+avec le moteur de PersonaDLE (pas de base de personnages à comparer, pas de grille
+🟩🟨🟥) et ils sont **mono-langue par nature** (un mot secret français n'a pas de score en
+espagnol). Proposition : une page `arcade/` (« Salle Velvet » ou « Les à-côtés »), une
+seule bannière sous les 6 modes, **hors** série globale, classement et badges au départ —
+on les y fait entrer seulement s'ils prennent.
+
+**Ne pas reprendre les noms** « Cemantix » / « Pédantix » (ce sont les jeux de quelqu'un
+d'autre) : par exemple **Cognition** (le sémantique — clin d'œil au Metaverse) et
+**Archives de Velvet** (l'article masqué).
+
+### A1. Archives de Velvet (façon Pédantix) — à faire en premier
+
+- Un texte par personnage (~150 mots), tous les mots masqués sauf les mots-outils ; on
+  propose des mots, ils se révèlent en place ; gagné quand le **nom** du personnage tombe.
+- **Le texte ne doit jamais arriver en clair au client** (sinon : outils de dev → réponse) :
+  le serveur renvoie la longueur de chaque mot masqué, puis
+  `POST /api/arcade/archives/guess {word}` → positions révélées. Le texte du jour vit en
+  base, comme la cible quotidienne (même anti-triche que `api/lib/daily_target.php`).
+- **Contenu = le vrai coût.** Écrire nos propres textes (ou Wikipédia, CC BY-SA 4.0 :
+  attribution + partage à l'identique sur le texte). Éviter le copier-coller Fandom.
+  Démarrer FR + EN uniquement, ~60 personnages = 2 mois de jours.
+- Normalisation des propositions : casse, accents, pluriel simple, petite table de
+  synonymes (Shadow/Ombre…). Réutilise `database/characters_clean.js` pour le tirage.
+- Estimation : ~1 semaine de code + l'écriture des textes (agent `persona-data`).
+
+### A2. Cognition (façon Cémantix)
+
+- Un mot secret, chaque proposition reçoit une **proximité sémantique** (°C, rang /1000).
+- Il faut des *word embeddings* (fastText `cc.fr.300` / `cc.en.300`, plusieurs Go) :
+  **impossible à faire tourner sur le mutualisé Hostinger**. Donc **pré-calcul hors ligne**
+  (script Python sur le serveur maison) : pour chaque mot secret, ses 1 000 plus proches
+  voisins + score → un JSON par jour, lu par `GET /api/arcade/cognition/score?word=`. Un mot
+  hors des 1 000 → score calculé à la volée impossible → on affiche « froid » (c'est ce que
+  font les jeux du genre au-delà du top 1000).
+- Mots secrets tirés d'une liste thématique Persona (tarot, ombre, masque, velours…) **qui
+  existent dans le vocabulaire du modèle** — les noms propres du lore n'y sont souvent pas.
+- Estimation : 1 à 2 semaines (pipeline de pré-calcul + UI + endpoint).
+
+## B. 🟠 Navigation mobile — constats mesurés
+
+Mesuré le 2026-10-20 en Chromium 390×844 (taille iPhone 12–15), **site servi en statique
+sans backend** : à revérifier sur la prod avec un compte, mais les ordres de grandeur ne
+dépendent pas de l'API.
+
+| Page | Hauteur | Constat |
+|---|---|---|
+| Accueil | 2,0 écrans | 6 bannières pleine largeur (~150 px + ~50 px de marge). Au premier écran : 2,5 modes ; le 3e est masqué par les pastilles flottantes News / Daily Reset **et** la barre du bas. Aucune bannière ne dit si le mode est déjà joué aujourd'hui. |
+| Classique | 1,3 écran | **Le champ de saisie et « Submit » sont sous la barre du bas** au premier écran (Submit vers 890 px pour 844). L'en-tête prend ~250 px : 3 contrôles (filtres, daltonien, thème + ⚙), logo ~120 px, bouton Expert. |
+| Profil | 3,3 écrans | Les 10 tuiles de stats sont empilées en **une** colonne ; Badges, Code événement, Partage, Wallpapers s'enchaînent sans repli. |
+
+**Propositions, par ordre de gain :**
+
+1. **Mode de jeu : la saisie au premier écran.** ≤ 480 px : logo réduit (~48 px) ou retiré
+   des pages de mode (la barre du bas suffit à rentrer), filtres + daltonien + thème
+   regroupés dans **un** menu ⚙, champ de saisie remonté juste sous l'en-tête. Garde-fou :
+   un test E2E viewport 390 qui vérifie, pour les 6 modes, que l'input est visible sans
+   défiler.
+2. **Barre du bas : un item « Jouer »** qui ouvre une feuille avec les 6 modes et leur état
+   du jour (✓ gagné / ✗ abandonné / ⏳ à jouer). C'est le vrai gain de navigation : passer
+   d'un mode à l'autre sans repasser par l'accueil.
+3. **Accueil : grille 2 colonnes ≤ 480 px** (les 6 modes tiennent dans un écran) avec la
+   même pastille d'état ; News / Daily Reset rentrent dans l'en-tête au lieu de flotter.
+4. **Profil : stats en 2 colonnes** et sections repliables — ou 3 onglets
+   *Stats · Collection · Personnaliser*, sur le modèle des onglets de l'Atelier.
+
+À valider visuellement avec Damien avant d'écrire une ligne (agent `frontend` ensuite).
+
+## C. Autres suggestions — tout scope confondu
+
+### 🔴 À faire vite
+
+- **Anti-triche : toujours en phase 1.** `api/sessions.php` logue `Daily target mismatch` et
+  **accepte** la partie (vérifié aujourd'hui). La « marche 1 » de l'audit du 09-13 (compter
+  les faux positifs dans `error_logs`, puis rejeter en 422 la première session du jour) reste
+  une journée de travail et protège le classement.
+- **Images du profil : toujours 225 Mo.** 30 badges sont encore des PNG de 6–8 Mo
+  (`Chinesse_new_year.png` : 8 Mo, affiché en 80 px) et `profile/Wallpaper/` pèse 115 Mo.
+  C'est le premier coût mobile du site, devant tout ce qui est en section B.
+
+### 🟠 Prochaines PR
+
+- **Partage de résultat façon Wordle** : aucun mode n'a de bouton « copier mon résultat »
+  (grille d'emojis 🟩🟨🟥 + n° du jour + lien). Sur un *-dle*, c'est le premier canal
+  d'acquisition — et ça se branche en un point dans `gameCore.js`.
+- ✅ *(fait, PR de la série gelée)* **Hors ligne : `sw.js` ne retrouve pas les fichiers versionnés.** `PRECACHE_URLS` est
+  sans `?v=`, les pages demandent `?v=…` → le repli de `networkFirstWithFallback` rate.
+  Une ligne : `caches.match(request, { ignoreSearch: true })` dans le seul repli réseau.
+- ✅ *(fait, même PR)* **`CACHE_VERSION` calculé plutôt que bumpé** : à la release, `assets:stamp` peut poser
+  dans `sw.js` une empreinte des fichiers précachés + médias cache-first. Le bump oublié
+  (piège du §7 de CLAUDE.md) disparaît.
+- **`index.html` : 186 Ko** (153 Ko le 09-13) — le modal Nouveautés embarque toutes les
+  versions × 6 langues : charger les anciennes à l'ouverture.
+- **Polices Google auto-hébergées** (`font/` n'a que `Persona5Font.ttf`) — toujours ouvert.
+- **Dependabot** : #171 (jsdom 30, majeure) ouverte depuis le 09-21 et #228 (groupe de 6) :
+  un lot d'outillage dédié, pour ne pas les laisser pourrir.
+
+### 💡 Produit
+
+- **Rappel « ta série va geler »** : maintenant que la série gelée se voit, le meilleur
+  Jack Frost est celui dont on n'a pas besoin. Piste légère : le bot Discord existant, en DM
+  opt-in le soir (suppose de lier compte Discord ↔ compte PersonaDLE — à vérifier) ; sinon le
+  push PWA écarté en 2.1.
+- **Archives des jours passés** : `getDailyTarget(date)` est déterministe, rejouer le
+  personnage du 12 octobre ne coûte qu'un sélecteur de date (hors série et classement).
+- **Statistique du jour** : « 38 % des joueurs l'ont trouvé en 3 essais ou moins », agrégée
+  depuis `game_sessions` après la partie — donne envie de comparer et de partager.
+
+---
+
 # 🔍 Audit du 2026-09-13 — perf, dépôt, sécurité, docs, idées par mode
 
 > Demande de Hamza : « optimiser le site, rendre le repo plus propre, une template de PR,

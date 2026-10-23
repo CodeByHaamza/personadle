@@ -4,13 +4,18 @@
  * Couvre :
  *   - canRecover() : toutes les conditions de cooldown
  *   - checkStreakRecovery() : affichage conditionnel, flag shown écrit au bon moment
+ *   - recoveryCooldownDaysLeft() : délai affiché sous une série gelée
+ *   - série GELÉE récupérée avant de rejouer : la partie suivante ne la recasse pas
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
+import { updateProfileStats } from "../profile/profileStats.js";
+import { parisDateKey } from "../js/gameCore.js";
 import {
   canRecover,
   checkStreakRecovery,
   performRecovery,
+  recoveryCooldownDaysLeft,
   showStreakRecoveryMenu,
   syncRecoveryCooldown,
 } from "../js/streak-recovery.js";
@@ -61,7 +66,10 @@ describe("canRecover", () => {
 
   it("returns false when lastUsed is exactly 59 days ago", () => {
     const almostReady = new Date(Date.now() - 59 * 24 * 60 * 60 * 1000).toISOString();
-    localStorage.setItem(RECOVERY_KEY, JSON.stringify({ previousStreak: 5, lastUsed: almostReady }));
+    localStorage.setItem(
+      RECOVERY_KEY,
+      JSON.stringify({ previousStreak: 5, lastUsed: almostReady })
+    );
     expect(canRecover()).toBe(false);
   });
 
@@ -298,6 +306,63 @@ describe("performRecovery", () => {
     const rec = JSON.parse(localStorage.getItem(RECOVERY_KEY));
     expect(rec.previousStreak).toBe(4);
     expect(rec.lastUsed).toBeUndefined();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// recoveryCooldownDaysLeft() — seul critère pour une série GELÉE (pas encore
+// rejoué, donc pas encore de trace previousStreak)
+// ─────────────────────────────────────────────────────────────
+
+describe("recoveryCooldownDaysLeft", () => {
+  const DAY = 24 * 60 * 60 * 1000;
+
+  it("returns 0 when Jack Frost was never used", () => {
+    expect(recoveryCooldownDaysLeft()).toBe(0);
+  });
+
+  it("does not need a previousStreak trace", () => {
+    localStorage.setItem(RECOVERY_KEY, JSON.stringify({ lastUsed: null }));
+    expect(recoveryCooldownDaysLeft()).toBe(0);
+  });
+
+  it("counts the remaining days, rounded up", () => {
+    const used = new Date(Date.now() - 10.5 * DAY).toISOString();
+    localStorage.setItem(RECOVERY_KEY, JSON.stringify({ lastUsed: used }));
+    expect(recoveryCooldownDaysLeft()).toBe(50);
+  });
+
+  it("returns 0 once the 60 days are over", () => {
+    const used = new Date(Date.now() - 61 * DAY).toISOString();
+    localStorage.setItem(RECOVERY_KEY, JSON.stringify({ lastUsed: used }));
+    expect(recoveryCooldownDaysLeft()).toBe(0);
+  });
+
+  it("does not block on an unreadable date", () => {
+    localStorage.setItem(RECOVERY_KEY, JSON.stringify({ lastUsed: "pas-une-date" }));
+    expect(recoveryCooldownDaysLeft()).toBe(0);
+  });
+});
+
+describe("frozen streak recovered before playing again", () => {
+  it("is not broken again by the next game of the day", async () => {
+    // 12 jours, dernière partie il y a 3 jours : série gelée, aucune trace.
+    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+    localStorage.setItem(
+      "personaUserProfile",
+      JSON.stringify({ stats: { streak: 12, streakRecord: 12, lastPlayed: threeDaysAgo } })
+    );
+
+    const res = await performRecovery(12);
+    expect(res.ok).toBe(true);
+
+    updateProfileStats({ result: "win", mode: "classic" });
+
+    const { stats } = JSON.parse(localStorage.getItem("personaUserProfile"));
+    expect(stats.streak).toBe(12);
+    expect(parisDateKey(new Date(stats.lastPlayed))).toBe(parisDateKey());
+    // Pas de nouvelle trace Jack Frost : rien n'a été cassé.
+    expect(JSON.parse(localStorage.getItem(RECOVERY_KEY)).previousStreak).toBe(0);
   });
 });
 
