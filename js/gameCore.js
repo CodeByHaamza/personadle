@@ -317,6 +317,10 @@ export function isGameLogged(scope) {
 export function markGameLogged(scope) {
   const id = currentGameId(scope);
   localStorage.setItem(_gameLoggedKey(scope), id);
+  // Trace « mode joué aujourd'hui », lue par js/daily_status.js (pastilles ✓ de
+  // l'accueil et de la feuille « Jouer »). Elle survit au Replay, contrairement
+  // à gameLogged_* que startGame() efface. Datée du jour de JEU de la partie.
+  localStorage.setItem(`dailyDone_${scope}`, currentGameDay(scope));
   return id;
 }
 

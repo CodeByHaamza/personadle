@@ -4926,3 +4926,87 @@ body.darkmode .velvet-theme .version-content ul li strong {
     display: none;
   }
 }
+
+/* =====================================================
+   ACCUEIL SUR TÉLÉPHONE (js/home_mobile.js) — 2026-10-20
+   Mesuré en 390×844 : 2 écrans de haut, 2,5 bannières au premier écran, la
+   3e masquée par News / Daily Reset flottants ET la barre du bas.
+   ===================================================== */
+
+/* Pastille « joué aujourd'hui » — toutes tailles. */
+.mode-status-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #2e9b57;
+  color: #fff;
+  border: 2px solid #fff;
+  font: 800 0.72rem/1.2 Arial, sans-serif;
+  letter-spacing: 0.03em;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+#gameModeSelector > button {
+  position: relative;
+}
+
+/* Au-delà de 480 px, la rangée n'existe pas pour la mise en page : News et
+   Daily gardent leurs positions fixes d'origine. */
+.home-quick-actions {
+  display: contents;
+}
+
+@media (max-width: 480px) {
+  /* Deux colonnes : les six modes tiennent dans le premier écran. */
+  #gameModeSelector {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 480px;
+    gap: 10px;
+    padding: 0 10px;
+  }
+
+  #gameModeSelector .gamemode-button,
+  #gameModeSelector > button {
+    max-width: 100%;
+    margin: 0;
+  }
+
+  .mode-status-badge {
+    top: 4px;
+    right: 4px;
+    padding: 2px 6px;
+  }
+
+  .mode-status-text {
+    display: none; /* le ✓ seul : la bannière fait 170 px de large */
+  }
+
+  .home-quick-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 0 auto 12px;
+  }
+
+  .home-quick-actions .news-btn,
+  .home-quick-actions .daily-btn {
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
+    margin: 0;
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  /* Plus de boutons flottants à loger au-dessus du pied de page. */
+  body {
+    padding-bottom: 78px;
+  }
+}

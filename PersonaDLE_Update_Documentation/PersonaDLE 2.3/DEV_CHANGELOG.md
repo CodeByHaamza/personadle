@@ -42,6 +42,91 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 16 | `fix/badge_modal_prod` | Le détail d'un badge reprend la modale de la production |
 | 17 | `feat/badge_cafe_leblanc` | Badge secret Ko-fi |
 | 18 | `perf/aoa_reencode_hd` | Les 33 animations AOA en 1080p au calibre des autres |
+| 20 | `feat/nav_mobile` | Navigation mobile : saisie visible, feuille « Jouer », accueil et profil compacts |
+
+---
+
+## 2026-10-20 — Navigation mobile : jouer sans défiler
+
+Demande de Hamza (« pas intuitive, trop de scroll »), déjà signalée le 2026-09-25 pour
+Classique et corrigée à moitié en 2.3.1. **Tout mesuré** (Chromium, 360×740 et 390×844) :
+
+| Page | Avant | Après |
+|---|---|---|
+| Champ de réponse, 6 modes | 781 → 1 221 px, **toujours sous la barre du bas** (782 px) | visible au premier écran partout |
+| Accueil, modes au premier écran | 2,5 sur 6 (le 3e masqué par News/Daily + la barre) | 6 sur 6 |
+| Profil | 3,3 écrans | 2,6 écrans |
+
+### Modes — `css/mobile_layout.css` (nouveau, ≤ 480 px)
+
+- **La ligne Rejouer | champ | Valider s'ancre au-dessus de la barre du bas**
+  (`position: sticky`) : visible quel que soit l'indice au-dessus (silhouette, animation
+  AOA, lecteur Musique), sans réordonner le DOM des 6 modes. Classique nomme cette ligne
+  `.input-row`, les 5 autres la posent en `<div>` stylé inline, premier enfant de
+  `.input-wrapper` — d'où un sélecteur `:is(.input-row, div:first-child)` et des
+  `!important` pour battre l'inline.
+- Le fond est posé sur la **ligne**, pas sur le wrapper, pour qu'une ligne masquée en fin
+  de partie ne laisse pas de bande vide ; `.hidden` reste prioritaire.
+- L'autocomplétion s'ouvre **vers le haut** (vers le bas, elle passait sous la barre).
+- En-tête compacté : logo à 56 vw, bascule Expert réduite, encart titre moitié moins
+  haut, Indice/Abandon à 56 px. Rejouer/Valider : image de 34 px mais cible tactile
+  ≥ 44 × 48 px (CLAUDE.md §7).
+- Chargée **en dernier** dans le `<head>`, juste avant `</head>` — et pas à côté des
+  autres `<link>`, dont les `?v=` bougent dans la PR des tampons d'assets : deux lignes
+  voisines modifiées par deux branches = conflit garanti.
+
+### Barre du bas — item « Jouer » (`js/bottomNav.js`, `js/daily_status.js`)
+
+- 5e item (entre Accueil et Classement) qui ouvre une **feuille des 6 modes** avec leur
+  état du jour (✓ Joué / À jouer) et le mode courant marqué, plus une pastille
+  « N à jouer » sur l'icône. Échap ferme, le focus revient au bouton.
+- **Libellés traduits** (`nav.*`, 6 langues) : ils étaient écrits en dur en anglais. Via
+  `data-i18n`, que `setLang()` réapplique à tout le DOM — l'événement
+  `personadle:i18n-ready` n'existe que sur le profil.
+- ≤ 480 px : items en `flex: 1` pour que 5 (6 pour un admin) tiennent en 320 px.
+
+**« Joué aujourd'hui » : la trace `dailyDone_<scope>`**, posée par `markGameLogged()`
+(gameCore.js), datée du jour de JEU (`currentGameDay`). Elle survit au Replay, ce que
+`gameLogged_*` ne fait pas (`startGame()` l'efface). Repli pour les parties d'avant la
+trace : partie armée aujourd'hui et déjà enregistrée. Seule la dimension normale compte.
+`MODE_STATS_SCOPE` recopie les portées réelles — **pas de règle commune** (« silhouette »
+en minuscules, « AllOut ») : `tests/daily_status.test.js` relit les 6 fichiers de mode.
+
+### Accueil — `js/home_mobile.js`
+
+- Pastille ✓ sur les bannières des modes joués aujourd'hui (toutes tailles).
+- ≤ 480 px : grille 2 colonnes, et News / Daily Reset rangés sous le titre
+  (`#homeQuickActions`) au lieu de flotter sur les bannières. Le nœud est déplacé (ses
+  écouteurs suivent) ; au-delà de 480 px la rangée est en `display: contents` et les deux
+  boutons gardent leur position fixe d'origine.
+
+### Profil — `profile/profile_mobile.js`
+
+- Stats en 2 colonnes (la série et les tuiles « full » gardent la largeur, libellés
+  autorisés à passer à la ligne).
+- Badges, Code événement, Partage, Wallpapers **repliables** d'un tap sur le titre
+  (clavier : Entrée/Espace, `aria-expanded`), choix retenu en localStorage. Repliés par
+  défaut : Code événement, Partage, Wallpapers. Les stats ne se replient jamais.
+
+### Tests
+
+- `tests/daily_status.test.js`, `tests/home_profile_mobile.test.js`, feuille « Jouer »
+  dans `tests/bottomNav.test.js`.
+- **E2E `tests-e2e/mobile_input_visible.spec.js`** : pour les 6 modes en 360×740 et
+  390×844, le champ est entre le haut de l'écran et la barre, sans défilement, sans
+  débordement, et rien ne le recouvre (`elementFromPoint`) ; la feuille « Jouer » mène au
+  mode choisi. Lancé en local contre un serveur statique avec
+  `classic_mobile_layout.spec.js` (23/23) ; la suite complète tourne en CI.
+
+### Angles morts connus
+
+- Mesures et E2E faits **sans backend** (serveur statique) : un joueur connecté voit en
+  plus les bandeaux de défi/notifications, à revérifier sur la préprod.
+- Clavier virtuel ouvert : la ligne ancrée suit le bas du *layout viewport* ; sur iOS,
+  le clavier peut la recouvrir partiellement pendant la frappe — à vérifier sur un vrai
+  iPhone.
+- La pastille ✓ ne s'allume qu'à partir de la première partie jouée avec cette version
+  (ou d'une partie déjà en cours aujourd'hui, via le repli).
 
 ---
 

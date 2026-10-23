@@ -146,3 +146,57 @@ describe("getProfileAvatar", () => {
     expect(getProfileAvatar("home")).toBe("/img/avatar1.png");
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Feuille « Jouer » (2026-10-20)
+// ─────────────────────────────────────────────────────────────────────────────
+
+import { buildPlaySheetHTML, updatePlayBadge } from "../js/bottomNav.js";
+
+describe("buildPlaySheetHTML", () => {
+  const progress = {
+    done: 1,
+    total: 6,
+    modes: [
+      { key: "classic", label: "Classic", done: true },
+      { key: "emoji", label: "Emoji", done: false },
+      { key: "silhouette", label: "Silhouette", done: false },
+      { key: "alloutattack", label: "AllOutAttack", done: false },
+      { key: "personae", label: "Personae", done: false },
+      { key: "music", label: "Music", done: false },
+    ],
+  };
+
+  it("lists the six modes with relative links from the current page", () => {
+    setPath("/profile/profile.html");
+    const html = buildPlaySheetHTML(progress, "/profile/profile.html");
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    const links = [...doc.querySelectorAll(".play-sheet-item")].map((a) => a.getAttribute("href"));
+    expect(links).toHaveLength(6);
+    expect(links[0]).toBe("../classiqueMode/classiqueMode.html");
+  });
+
+  it("marks played modes and the current page", () => {
+    setPath("/emojiMode/emojiMode.html");
+    const html = buildPlaySheetHTML(progress, "/emojiMode/emojiMode.html");
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    const items = doc.querySelectorAll(".play-sheet-item");
+    expect(items[0].classList.contains("is-done")).toBe(true);
+    expect(items[1].classList.contains("is-here")).toBe(true);
+    expect(items[1].getAttribute("aria-current")).toBe("page");
+    expect(doc.querySelector(".play-sheet-count").textContent).toBe("1 / 6");
+  });
+});
+
+describe("updatePlayBadge", () => {
+  it("shows how many modes are left, then a check once all are played", () => {
+    document.body.innerHTML = '<span id="navPlayBadge" class="nav-badge hidden"></span>';
+    updatePlayBadge({ done: 2, total: 6, modes: [] });
+    const badge = document.getElementById("navPlayBadge");
+    expect(badge.textContent).toBe("4");
+    expect(badge.classList.contains("hidden")).toBe(false);
+    updatePlayBadge({ done: 6, total: 6, modes: [] });
+    expect(badge.textContent).toBe("✓");
+    expect(badge.classList.contains("nav-badge--done")).toBe(true);
+  });
+});
