@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../api/lib/game_session.php';
 require_once __DIR__ . '/../../api/lib/streak_recovery.php';
 require_once __DIR__ . '/../../api/lib/social_link_interaction.php';
 require_once __DIR__ . '/../../api/lib/error_log.php';
+require_once __DIR__ . '/../../api/lib/client_errors.php';
 require_once __DIR__ . '/../../api/lib/admin_audit.php';
 require_once __DIR__ . '/../../api/lib/deletion_requests.php';
 require_once __DIR__ . '/../../api/lib/moderation.php';
@@ -1660,5 +1661,27 @@ final class DatabaseIntegrationTest extends TestCase
         $this->assertNotContains('Passée', $msgs);
         $this->assertSame('maintenance', $list[0]['level'], 'la maintenance passe devant');
         self::$pdo->exec("DELETE FROM announcements");
+    }
+
+    /**
+     * Erreurs JS des joueurs (api/client_errors.php) : une même empreinte n'est
+     * « nouvelle » qu'une fois par fenêtre — c'est ce qui borne les écritures en
+     * base et les alertes Discord quand 200 joueurs tombent sur le même bug.
+     */
+    public function testClientErrorFingerprintIsNewOncePerWindow(): void
+    {
+        $fp = 'test' . bin2hex(random_bytes(6));
+        self::$pdo->prepare('DELETE FROM rate_limits WHERE rl_key = ?')->execute(['client-error-fp:' . $fp]);
+
+        $this->assertTrue(personadle_client_error_is_new(self::$pdo, $fp, 3600));
+        $this->assertFalse(personadle_client_error_is_new(self::$pdo, $fp, 3600), 'second joueur, même bug : pas nouveau');
+        $this->assertFalse(personadle_client_error_is_new(self::$pdo, $fp, 3600));
+
+        // Fenêtre écoulée : on la recule d'une heure, l'erreur redevient signalable.
+        self::$pdo->prepare('UPDATE rate_limits SET window_start = window_start - 7200 WHERE rl_key = ?')
+            ->execute(['client-error-fp:' . $fp]);
+        $this->assertTrue(personadle_client_error_is_new(self::$pdo, $fp, 3600));
+
+        self::$pdo->prepare('DELETE FROM rate_limits WHERE rl_key = ?')->execute(['client-error-fp:' . $fp]);
     }
 }
