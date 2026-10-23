@@ -42,6 +42,52 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 16 | `fix/badge_modal_prod` | Le détail d'un badge reprend la modale de la production |
 | 17 | `feat/badge_cafe_leblanc` | Badge secret Ko-fi |
 | 18 | `perf/aoa_reencode_hd` | Les 33 animations AOA en 1080p au calibre des autres |
+| 22 | `feat/pwa_polices` | Application installable (PWA) + polices auto-hébergées |
+
+---
+
+## 2026-10-20 — Application installable et polices sans Google
+
+### PWA
+
+Le service worker existait déjà, mais **aucun manifeste** : impossible d'« ajouter à
+l'écran d'accueil » avec une vraie icône. Pour un jeu quotidien joué surtout sur téléphone,
+c'est le levier de retour le plus direct.
+
+- `manifest.webmanifest` (racine) : `standalone`, couleur `#e63946`, `start_url`
+  `./index.html?source=pwa` (repérable plus tard dans les statistiques), raccourcis vers
+  Classique, Émoji, Musique et le profil (appui long sur l'icône).
+- `img/app_icons/` : 192, 512, 512 *maskable* (logo dans la zone sûre de 80 %) et
+  `apple_touch_icon_180` pour iOS — générées depuis `New_Logo_PersonaDLE.png` sur fond noir
+  à bande rouge P5. **Provisoires** : à remplacer par une icône dessinée (mêmes noms).
+- `<link rel="manifest">`, `theme-color` et `apple-touch-icon` sur les 15 pages du jeu
+  (pas l'admin ni les pages Nouveautés). `pages/404.html` en chemins absolus, comme le
+  reste de cette page servie à n'importe quelle URL.
+- `.htaccess` : `AddType application/manifest+json .webmanifest`.
+
+### Polices auto-hébergées
+
+Huit familles Google (Cinzel, Oswald, Playfair Display, Abril Fatface, Special Elite,
+Inter, JetBrains Mono, Montserrat) venaient de `fonts.googleapis.com` : deux connexions
+tierces bloquantes et un changement de police visible au chargement.
+
+- `scripts/fetch_google_fonts.js` télécharge les woff2 (latin + latin-ext, fichiers
+  variables : 18 fichiers, 592 Ko) dans `font/google/` et génère `css/fonts.css`. Une seule
+  feuille pour toutes les pages : le navigateur ne télécharge que ce que la page utilise
+  (vérifié : 0 requête Google, polices `loaded` sur l'accueil, le profil, la FAQ).
+- Cache d'un an `immutable` déjà prévu par `.htaccess` pour `font/`.
+- CSP : `fonts.googleapis.com` et `fonts.gstatic.com` retirés de `style-src`/`font-src`.
+- Les pages Nouveautés 2.0 → 2.2 sont touchées **uniquement** sur leur lien de police :
+  avec la CSP resserrée, elles seraient sinon retombées sur une police de repli.
+- `tests/pwa_fonts.test.js` : aucun lien Google ne revient, chaque fichier de `fonts.css`
+  existe, la CSP n'autorise plus Google, le manifeste et ses icônes sont valides et liés.
+
+### Angles morts connus
+
+- Pas de bouton « Installer l'app » dans l'interface : on s'appuie sur l'invite du
+  navigateur (Chrome/Edge/Android) et sur « Partager → Sur l'écran d'accueil » (iOS).
+- `sw.js` garde sa branche « Google Fonts → stale-while-revalidate », désormais inutile
+  mais inoffensive : à retirer au prochain passage sur le service worker.
 
 ---
 
