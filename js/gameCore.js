@@ -614,6 +614,29 @@ function buildExpertTooltip(reason, progress) {
     count.textContent = `${current} / ${required}`;
 
     tip.append(bar, count);
+
+    // Série d'affilée : `current` est la série EN COURS (elle retombe à 0 sur une
+    // partie ratée), `best` le record, qui seul décide du déblocage. Afficher le
+    // record à la place de la série en cours figeait le compteur après chaque
+    // série cassée — « la quête n'avance plus » (signalement joueur 2026-11).
+    if (progress.condition_type === "mode_consecutive_perfects") {
+      const best = Math.max(0, Number(progress.best) || 0);
+      if (best > current) {
+        const bestLine = document.createElement("span");
+        bestLine.className = "expert-tooltip-best";
+        bestLine.textContent = _t("ui.expert_best_run", { best }, `Record: ${best}`);
+        tip.append(bestLine);
+      }
+
+      const hint = document.createElement("span");
+      hint.className = "expert-tooltip-hint";
+      hint.textContent = _t(
+        "ui.expert_cond_consecutive_hint",
+        undefined,
+        "Every game counts, Replay included: a win in 2 or more tries resets the streak."
+      );
+      tip.append(hint);
+    }
   }
 
   return tip;
