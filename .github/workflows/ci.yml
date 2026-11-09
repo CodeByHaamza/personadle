@@ -112,9 +112,14 @@ jobs:
           DB_TEST_PASS: rootpassword
         run: php phpunit.phar
 
+      # Versions ÉPINGLÉES (PHPStan ici, Psalm plus bas) : `releases/latest` a cassé
+      # la CI le 2026-11-09 sans qu'une ligne de PHP ait changé — Psalm 7 (sorti
+      # la semaine précédente) signalait du code inchangé depuis des mois, et même
+      # une PR Dependabot sans PHP passait au rouge. Monter de version = une PR
+      # dédiée, où le diff de résultats se lit tranquillement.
       - name: Static analysis (PHPStan)
         run: |
-          wget -q -O phpstan.phar https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar
+          wget -q -O phpstan.phar https://github.com/phpstan/phpstan/releases/download/2.2.2/phpstan.phar
           php phpstan.phar analyse --no-progress
 
       # Analyse de TAINT (injection SQL, XSS, traversée de chemin) sur api/.
@@ -128,7 +133,7 @@ jobs:
       # non déterministe, qui ne doit jamais bloquer une PR (TODO.md §5).
       - name: Security — taint analysis (Psalm)
         run: |
-          wget -q -O psalm.phar https://github.com/vimeo/psalm/releases/latest/download/psalm.phar
+          wget -q -O psalm.phar https://github.com/vimeo/psalm/releases/download/6.20.10/psalm.phar
           php psalm.phar --taint-analysis --no-cache --no-progress
 
   # ── Job 3 : E2E Playwright contre la stack Docker complète ──────────────────
