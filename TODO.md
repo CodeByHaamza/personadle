@@ -22,7 +22,7 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
 > [`DEPLOY.md`](DEPLOY.md) § « Release majeure ». Cette liste-ci ne suit que l'état
 > d'avancement.
 
-- [ ] **2.3.4 — Jouer `sql/migrations/056_remember_tokens.sql`** (table `remember_tokens`, un
+- [x] **2.3.4 — Jouer `sql/migrations/056_remember_tokens.sql`** — **jouée en prod le 2026-11-09 à 21:09** (dump 51 Mo avant, répétée sur la copie du serveur maison, 101 jetons repris, rejouée après le déploiement : +0) (table `remember_tokens`, un
       jeton « se souvenir de moi » par appareil, + reprise des jetons encore valides de
       `users` ; `CREATE TABLE IF NOT EXISTS` + `INSERT IGNORE`, rejouable). **À jouer AVANT le
       `git pull` Hostinger** : sans la table, la restauration de session échoue en silence

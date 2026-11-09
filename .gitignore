@@ -200,6 +200,10 @@ graphify-out/
 .claude/
 .superpowers/
 docs/superpowers/
+# Guide du mainteneur pour l'assistant : local, plus versionné depuis le 2026-11-09
+# (décision Hamza). Copie privée : personadle-discord/docs/CLAUDE.personadle.md.
+CLAUDE.md
+CLAUDE.local.md
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Données personnelles de test
