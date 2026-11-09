@@ -28,7 +28,7 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       `git pull` Hostinger** : sans la table, la restauration de session échoue en silence
       (`user: null`) et chaque joueur dont la session PHP a expiré est déconnecté. Puis
       `INSERT IGNORE INTO schema_migrations (version) VALUES ('056_remember_tokens')`.
-- [ ] **2.3.4 — Bumper `CACHE_VERSION` dans `sw.js`** (v106 → v107) : `js/gameCore.js`,
+- [x] **2.3.4 — Bumper `CACHE_VERSION` dans `sw.js`** (v106 → v107, fait le 2026-11-09) : `js/gameCore.js`,
       `css/global.css`, `lang/*.json` et `allOutAttackMode/modeAllOutAttack.js` changent.
 
 - [x] Jouer `sql/migrations/029_badge_gyotre.sql` et `030_titles_junes_investigation.sql`.
