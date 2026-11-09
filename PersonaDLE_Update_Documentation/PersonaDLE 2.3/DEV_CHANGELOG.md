@@ -45,6 +45,87 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-11-09 — 2.3.4 : la quête Expert « 15 d'affilée » avance de nouveau
+
+Signalement joueur (Zaiko2302) : en All-Out Attack et en Musique, la quête « Gagne 15
+parties d'affilée du premier coup » **n'avançait plus**. Ses pistes : un changement de
+filtre en Musique, et deux déconnexions automatiques.
+
+### Ce que disaient ses données (lecture seule en prod, 2026-11-09)
+
+| Mode | Série en cours | Record | Affiché |
+|---|---|---|---|
+| All-Out Attack | **11** | 12 | 12 / 15, figé depuis le 20/10 |
+| Musique | **3** | 5 | 5 / 15 |
+| Personae | 3 | 15 | débloqué |
+
+Il progressait, **l'affichage ne bougeait pas**.
+
+### Cause 1 — l'infobulle montrait le record, pas la série en cours
+
+Depuis le 2026-09-01, `personadle_count_consecutive_perfects()` renvoie le **maximum
+historique**, à juste titre : un déblocage doit être définitif (cf. CLAUDE.md §7,
+« Condition de déblocage non monotone »). Mais `personadle_expert_progress()` s'en
+servait aussi comme `current`, donc comme progression affichée. Après une série cassée,
+le compteur restait figé jusqu'à ce que la nouvelle série **dépasse** l'ancienne. Le test
+`testProgressNeverGoesBackwards` protégeait ce comportement comme une qualité.
+
+**Correctif** : `personadle_consecutive_perfect_runs()` rend `['current', 'best']` en un
+seul balayage. `personadle_expert_progress()` renvoie `current` (série en cours, peut
+retomber à 0) **et** `best` (record, seul juge du déblocage). Pour les deux autres types
+(cumul à vie, meilleure journée), `best = current`.
+
+Côté client (`buildExpertTooltip`, `js/gameCore.js`) : la barre et le compteur suivent
+`current` ; une ligne « Record : N d'affilée » s'ajoute quand `best > current` ; un rappel
+dit que **toutes les parties comptent, Rejouer compris** (décision Hamza du 2026-11-09 :
+la règle reste, on l'affiche). Un serveur sans `best` (front servi avant l'API) affiche la
+progression reçue, sans record. L'admin (onglet Expert) montre aussi le record.
+
+### Cause 2 — en All-Out Attack, la partie relancée par un filtre n'était jamais enregistrée
+
+Le rappel d'`initFilterMenu()` recopiait `resetGame()` à la main… sans `startGame()`.
+Après une partie terminée, la nouvelle partie gardait l'identifiant de la précédente :
+`isGameLogged()` restait vrai, et sa victoire ne partait **jamais** (ni session, ni
+stats, ni série, ni quête). Il appelle désormais `resetGame()` (cible du jour re-tirée
+dans le nouveau pool, comme avant), qui arme une nouvelle partie. Les cinq autres modes
+passaient déjà par leur reset.
+
+### Cause 3 — les déconnexions : lot à part
+
+Un seul jeton « se souvenir de moi » par compte, roté à chaque restauration : un
+deuxième appareil (ou deux onglets) déconnecte l'autre, et en invité la cible du jour
+change. Corrigé dans un lot dédié (migration).
+
+### Fichiers
+
+- `api/lib/condition_check.php` — `personadle_consecutive_perfect_runs()` ;
+  `personadle_count_consecutive_perfects()` en devient un raccourci (`best`), inchangé
+  pour les badges et titres.
+- `api/lib/expert_unlocks.php` — `current` / `best`, déblocage sur `best`.
+- `js/gameCore.js`, `css/global.css` — infobulle (`.expert-tooltip-best`, `.expert-tooltip-hint`).
+- `allOutAttackMode/modeAllOutAttack.js` — le filtre passe par `resetGame()`.
+- `lang/*.json` — `ui.expert_best_run`, `ui.expert_cond_consecutive_hint` (6 langues).
+- `admin/admin.js`, `js/api.js`, `api/user/expert_status.php` — `best` affiché et documenté.
+
+### Tests
+
+- `tests/expert_serie_en_cours.test.js` (6) — barre sur la série en cours, record seulement
+  s'il dépasse, rappel Rejouer, rien de tout ça sur une condition cumulative, compatibilité
+  sans `best`.
+- `tests/filter_change_rearms_game.test.js` (7) — dans les 6 modes, le filtre passe par le
+  reset du mode ; AOA ne re-tire plus la cible à la main.
+- `tests/php/ExpertUnlocksTest.php` — `testProgressNeverGoesBackwards` remplacé par
+  `testProgressShowsTheCurrentRunButNeverLosesTheRecord` ; séries en cours / record ;
+  `best = current` sur les conditions cumulatives.
+
+### Angle mort connu
+
+Changer de filtre **pendant** une partie l'abandonne sans l'enregistrer, dans les six
+modes : on peut esquiver une partie ratée et garder sa série. C'est l'« étape B
+anti-triche » (avertissement + partie comptée comme abandonnée), prévue en 2.4.
+
+---
+
 ## 2026-10-21 — Un écran large mais court ne défile plus pour jouer
 
 > ⚠️ **À déplacer dans `PersonaDLE 2.4/` à l'ouverture de cette version** (§9). Ce lot

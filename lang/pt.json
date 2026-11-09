@@ -43,6 +43,8 @@
     "expert_cond_wins_under_attempts": "Vence {{required}} partidas em 4 tentativas ou menos",
     "expert_cond_wins_single_day": "Vence {{required}} partidas num único dia",
     "expert_cond_consecutive_perfects": "Vence {{required}} partidas seguidas à primeira tentativa",
+    "expert_cond_consecutive_hint": "Todas as partidas contam, incluindo Jogar Novamente: uma vitória em 2 ou mais tentativas reinicia a sequência.",
+    "expert_best_run": "Recorde: {{best}} seguidas",
     "expert_cond_signin": "Inicia sessão para desbloquear o Modo Especialista — o teu progresso segue a tua conta.",
     "expert_cond_unknown": "Liga-te novamente para veres o teu progresso.",
     "expert_locked_title": "Modo Especialista bloqueado",
