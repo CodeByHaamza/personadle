@@ -454,11 +454,11 @@ Léo et Damien, `reset --hard` sur Hostinger, PR ouvertes à recréer**. À ne f
       automatisé. Blocage réel : les migrations utilisent `ADD COLUMN IF NOT EXISTS`, syntaxe
       MariaDB que MySQL 8.0 refuse — un job de replay demande de les réécrire en procédure
       stockée, ou de faire tourner la CI sur MariaDB.
-- [ ] **PHPStan installé en `releases/latest`** dans `.github/workflows/ci.yml` — le build
+- [x] **PHPStan installé en `releases/latest`** dans `.github/workflows/ci.yml` — le build
       n'est pas reproductible. C'est ce qui a fait rougir le job PHP sur trois commits sans
-      qu'une ligne change (2.2.2 → 2.2.8). Arbitrage à trancher : pinner (déterministe, on
-      rate les nouvelles détections) ou garder `latest` (c'est lui qui a attrapé la garde
-      morte `$expertModes`).
+      qu'une ligne change (2.2.2 → 2.2.8). **Tranché le 2026-11-09 : épinglé** (PHPStan 2.2.2,
+      Psalm 6.20.10). Psalm 7, sorti la semaine précédente, a mis au rouge TOUTES les PR —
+      Dependabot comprise — sur du code inchangé. Monter de version = une PR dédiée.
 - [ ] **Déploiement : étape de migration** dans le hook Hostinger, ou règle écrite « migration
       en prod avant merge vers main ». Aujourd'hui le code précède systématiquement le schéma.
 - [x] **Template de PR GitHub** reprenant la Definition of Done de CLAUDE.md §13, pour la
