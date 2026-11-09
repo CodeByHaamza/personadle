@@ -5,7 +5,14 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { getStreakTier, formatSongTime, bestModeOverall, needsAvatarOrigin, statsForUnlocks } from "../profile/profile-format.js";
+import {
+  getStreakTier,
+  formatSongTime,
+  bestModeOverall,
+  needsAvatarOrigin,
+  statsForUnlocks,
+  pairStatTiles,
+} from "../profile/profile-format.js";
 
 describe("getStreakTier", () => {
   it("returns tier 0 for no streak", () => {
@@ -115,5 +122,71 @@ describe("statsForUnlocks — normal + Expert pour les déblocages (décision du
     const s = { wins: 3, modeWins: { Music: 3 } };
     expect(statsForUnlocks(s)).toBe(s);
     expect(statsForUnlocks(undefined)).toEqual({});
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// pairStatTiles — aucune demi-ligne vide dans la grille des stats (capture joueur 2026-11)
+// ─────────────────────────────────────────────────────────────────────────────
+/** Lignes de la grille 2 colonnes : une tuile pleine largeur occupe une ligne seule. */
+function gridRows(tiles) {
+  const rows = [];
+  let row = [];
+  for (const t of tiles) {
+    if (t.full) {
+      if (row.length) rows.push(row);
+      rows.push([t]);
+      row = [];
+    } else {
+      row.push(t);
+      if (row.length === 2) {
+        rows.push(row);
+        row = [];
+      }
+    }
+  }
+  if (row.length) rows.push(row);
+  return rows;
+}
+const halfEmpty = (tiles) => gridRows(tiles).filter((r) => r.length === 1 && !r[0].full).length;
+
+describe("pairStatTiles — grille des stats sans trou", () => {
+  // L'ordre exact du profil : victoires, abandons, parties, meilleure série, temps,
+  // première partie (pleine largeur), mode favori, meilleur mode, série actuelle.
+  const PROFILE = ["wins", "giveups", "games", "best", "time", "first", "fav", "bestMode", "streak"].map((id) => ({
+    id,
+    full: id === "first",
+  }));
+
+  it("la capture du joueur avait deux demi-lignes vides", () => {
+    expect(halfEmpty(PROFILE)).toBe(2);
+  });
+
+  it("après rangement : aucune demi-ligne vide, et toutes les tuiles sont là", () => {
+    const out = pairStatTiles(PROFILE);
+    expect(halfEmpty(out)).toBe(0);
+    expect(out.map((t) => t.id).sort()).toEqual(PROFILE.map((t) => t.id).sort());
+  });
+
+  it("garde l'ordre autant que possible : la pleine largeur glisse d'une place", () => {
+    expect(pairStatTiles(PROFILE).map((t) => t.id)).toEqual([
+      "wins", "giveups", "games", "best", "time", "fav", "first", "bestMode", "streak",
+    ]);
+  });
+
+  it("un nombre impair de demi-tuiles : la dernière passe en pleine largeur", () => {
+    const out = pairStatTiles([{ id: "a" }, { id: "b" }, { id: "c" }]);
+    expect(out.map((t) => [t.id, !!t.full])).toEqual([["a", false], ["b", false], ["c", true]]);
+  });
+
+  it("série en pleine largeur (palier 5+) : toujours aucun trou", () => {
+    const tiles = PROFILE.map((t) => (t.id === "streak" ? { ...t, full: true } : t));
+    expect(halfEmpty(pairStatTiles(tiles))).toBe(0);
+  });
+
+  it("ne modifie pas le tableau reçu", () => {
+    const copy = JSON.parse(JSON.stringify(PROFILE));
+    pairStatTiles(PROFILE);
+    expect(PROFILE).toEqual(copy);
   });
 });

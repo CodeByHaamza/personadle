@@ -45,6 +45,26 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-11-09 — 2.3.4 : plus de demi-ligne vide dans la grille des stats du profil
+
+Capture d'un joueur (profil, thème Velvet Room, mode sombre) : « Temps joué » et « Série
+actuelle » occupaient chacune **une demi-ligne, l'autre moitié vide** (« la boîte se coupe
+en plein milieu »). La grille fait 2 colonnes ; la tuile pleine largeur « Première partie »
+tombait après un nombre impair de demi-tuiles, et la série, ajoutée en dernier, restait
+seule. Même défaut dans la vue du profil d'un autre joueur.
+
+`pairStatTiles()` (`profile/profile-format.js`, pure) : une tuile pleine largeur qui arrive
+pendant qu'une demi-tuile attend sa voisine glisse juste après celle-ci ; une demi-tuile
+restée seule à la fin passe en pleine largeur. Utilisée par `profile-page.js` et
+`profile-view.js` ; `buildStreakItem()` accepte la largeur décidée (`forceFull`), la règle
+du palier 5+ restant la valeur par défaut.
+
+Rendu mesuré en local (1280 px) : 4 rangées de deux tuiles et une pleine largeur, aucun
+trou ; mobile inchangé (une colonne). `tests/profileFormat.test.js` (+6) rejoue l'ordre
+exact de la capture.
+
+---
+
 ## 2026-11-09 — CI : PHPStan et Psalm épinglés
 
 Le job « PHP Lint & Tests » est passé au rouge sur **toutes** les PR du jour, y compris
