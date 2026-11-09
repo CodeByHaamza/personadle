@@ -19,7 +19,7 @@
  */
 
 import { execSync } from "node:child_process";
-import { readFileSync, writeFileSync, readdirSync, rmSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -211,6 +211,10 @@ let notFound = [];
 const dirtyFiles = new Set();
 
 for (const point of syncPoints) {
+  // CLAUDE.md n'est plus versionné (2026-11-09, décision Hamza : le guide du mainteneur
+  // reste local). Absent en CI ou dans un clone neuf : ses points de synchro sont
+  // sautés ; présent sur le poste du mainteneur : il est tenu à jour comme avant.
+  if (point.file === CLAUDE_MD && !existsSync(CLAUDE_MD)) continue;
   const content = getContent(point.file);
   // Flag "d" : expose la position exacte (début/fin) de chaque groupe capturé dans `content`.
   // Indispensable pour un remplacement positionnel plutôt que par sous-chaîne — sinon un nombre

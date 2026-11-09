@@ -45,6 +45,25 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-11-09 — CLAUDE.md et les specs d'outillage sortent du dépôt public
+
+Décision Hamza : le guide de l'assistant (`CLAUDE.md`) n'a pas à être public. Il contient
+des alias SSH, le nom de la base de prod, et des procédures d'exploitation. Il reste en
+**local**, ignoré par git, avec une copie privée dans
+`personadle-discord/docs/CLAUDE.personadle.md`. Les deux specs de `docs/superpowers/`
+(déjà dans `.gitignore`, mais suivies d'avant) sortent avec lui. La réécriture
+d'historique qui suit les retire aussi des commits passés.
+
+`scripts/check-doc-numbers.js` saute les points de synchro de `CLAUDE.md` quand le
+fichier est absent (CI, clone neuf), et continue de le tenir à jour sur le poste du
+mainteneur. Vérifié dans les deux cas avec `npm run docs:check`. Les références
+« cf. CLAUDE.md §… » dans la doc restent ; elles désignent le guide privé.
+
+Au passage : la migration 056 est cochée dans `TODO.md`, et `develop` rattrape le commit
+de merge de la release 2.3.4.
+
+---
+
 ## 2026-11-09 — Release 2.3.4
 
 Correctifs nés d'un signalement joueur (quête Expert figée, déconnexions) et de l'audit
