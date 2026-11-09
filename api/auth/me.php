@@ -12,6 +12,7 @@
  */
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../lib/remember_tokens.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     jsonError('Method Not Allowed', 405);
@@ -80,8 +81,8 @@ if (!empty($_SESSION['user_id'])) {
 // le GC de l'hébergeur) mais que le cookie remember_me est encore valide.
 // On recrée la session PHP pour les requêtes suivantes.
 //
-// Enveloppé dans un try/catch : si les colonnes remember_me_* sont absentes
-// (migration partielle), on retourne simplement user:null sans 500.
+// Enveloppé dans un try/catch : si la table remember_tokens est absente
+// (migration 056 pas encore jouée), on retourne simplement user:null sans 500.
 $rawToken = $_COOKIE['remember_me'] ?? '';
 
 if ($rawToken === '') {
@@ -89,18 +90,22 @@ if ($rawToken === '') {
 }
 
 try {
-    $hashedToken = hash('sha256', $rawToken);
-
-    $stmt = $pdo->prepare('
-        SELECT id, email, pseudo, lang, friend_code, created_at, last_login_at, is_admin, is_banned,
-               ban_reason, banned_until, reset_local_state_at FROM users
-        WHERE remember_me_hash = ?
-          AND remember_me_expires > NOW()
-          AND is_deleted = 0
-        LIMIT 1
-    ');
-    $stmt->execute([$hashedToken]);
-    $user = $stmt->fetch();
+    // Un jeton PAR APPAREIL (migration 056, api/lib/remember_tokens.php) : avant,
+    // un jeton unique par compte, écrasé par chaque connexion et roté par chaque
+    // restauration — un deuxième appareil ou deux onglets se déconnectaient
+    // mutuellement (signalement joueur 2026-11).
+    $token = personadle_remember_lookup($pdo, $rawToken);
+    $user  = false;
+    if ($token !== null) {
+        $stmt = $pdo->prepare('
+            SELECT id, email, pseudo, lang, friend_code, created_at, last_login_at, is_admin, is_banned,
+                   ban_reason, banned_until, reset_local_state_at FROM users
+            WHERE id = ? AND is_deleted = 0
+            LIMIT 1
+        ');
+        $stmt->execute([$token['user_id']]);
+        $user = $stmt->fetch();
+    }
 
     if (!$user) {
         // Token invalide ou expiré — supprimer le cookie fantôme
@@ -128,31 +133,32 @@ try {
         jsonSuccess(siteState($pdo) + ['user' => null, 'banned' => $ban]);
     }
 
-    // Token valide → recréer la session PHP + rotation du token (évite la réutilisation)
+    // Token valide → recréer la session PHP.
     // session_regenerate_id() évite qu'un ID de session pré-fixé par un attaquant
     // (avant même que le cookie remember_me soit relu) devienne authentifié.
     session_regenerate_id(true);
     $_SESSION['user_id'] = (int) $user['id'];
 
-    $newRawToken    = bin2hex(random_bytes(32));
-    $newHashedToken = hash('sha256', $newRawToken);
-    $newExpires     = date('Y-m-d H:i:s', time() + 30 * 24 * 3600);
+    $pdo->prepare('UPDATE users SET last_login_at = NOW() WHERE id = ?')->execute([$user['id']]);
 
-    $pdo->prepare('UPDATE users SET remember_me_hash = ?, remember_me_expires = ?, last_login_at = NOW() WHERE id = ?')
-        ->execute([$newHashedToken, $newExpires, $user['id']]);
-
-    setcookie('remember_me', $newRawToken, [
-        'expires'  => time() + 30 * 24 * 3600,
-        'path'     => '/',
-        'domain'   => PERSONADLE_COOKIE_DOMAIN,
-        'secure'   => APP_ENV === 'production',
-        'httponly' => true,
-        'samesite' => 'Lax',
-    ]);
+    // Rotation seulement si le jeton a plus de 24 h, et l'ancien reste valable
+    // 2 minutes : deux onglets qui restaurent en même temps ne se cassent plus.
+    // Jeton récent → cookie inchangé.
+    $newRawToken = personadle_remember_rotate_if_due($pdo, $token);
+    if ($newRawToken !== null) {
+        setcookie('remember_me', $newRawToken, [
+            'expires'  => time() + PERSONADLE_REMEMBER_TTL_DAYS * 24 * 3600,
+            'path'     => '/',
+            'domain'   => PERSONADLE_COOKIE_DOMAIN,
+            'secure'   => APP_ENV === 'production',
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+    }
 
     meResponse($pdo, $user);
 } catch (PDOException $e) {
-    // Colonnes remember_me manquantes — retour silencieux user:null
+    // Table remember_tokens absente (056 non jouée) — retour silencieux user:null
     error_log('[PersonaDLE me] remember_me unavailable: ' . $e->getMessage());
     jsonSuccess(siteState($pdo) + ['user' => null]);
 }
