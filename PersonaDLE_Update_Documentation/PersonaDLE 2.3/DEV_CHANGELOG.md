@@ -45,6 +45,22 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-11-09 — CI : PHPStan et Psalm épinglés
+
+Le job « PHP Lint & Tests » est passé au rouge sur **toutes** les PR du jour, y compris
+la PR Dependabot #242, qui ne touche aucun fichier PHP. `develop` était vert le 2026-10-21.
+La cause : `ci.yml` téléchargeait `releases/latest`. Psalm a sorti sa version majeure 7
+(7.0.4 le 2026-11-06, 7.2.0 le 2026-11-09), et son analyse de taint signale désormais du
+code inchangé (`TaintedHeader` sur `api/auth/request-reset.php`, et `UndefinedConstant` pour
+les constantes définies seulement dans `api/config.php`).
+
+Épinglés : PHPStan **2.2.2** (la version qui passe sur le code actuel) et Psalm **6.20.10**
+(dernière 6.x). L'arbitrage laissé ouvert dans `TODO.md` est tranché. Monter de version se
+fera dans une PR dédiée, où les nouvelles détections se lisent et se corrigent une par une
+plutôt que de bloquer une PR qui n'a rien à voir.
+
+---
+
 ## 2026-11-09 — 2.3.4 : notes internes plus servies, « Première partie », profil public traduit
 
 Trois petits correctifs trouvés pendant l'audit du 2026-11-09.
