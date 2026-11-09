@@ -45,6 +45,57 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-11-09 — 2.3.4 : notes internes plus servies, « Première partie », profil public traduit
+
+Trois petits correctifs trouvés pendant l'audit du 2026-11-09.
+
+### Le site servait les notes internes du dépôt
+
+Le webroot Hostinger est un clone git : tout le dépôt y arrive. Relevé sur la prod :
+`/CLAUDE.md`, `/TODO.md`, `/DEPLOY.md`, `/AMELIORATIONS.md`, `/ROADMAP.md`,
+`/expert_mode_content.md`, `/nom`, `/version-all.sh` → **200**. (`.git`, `api/config.php`,
+`sql/`, `scripts/` étaient déjà bloqués.) Rien de secret au sens strict — le dépôt est
+public — mais procédures d'exploitation, alias SSH et nom de la base n'ont rien à faire
+sur le site.
+
+`.htaccess` : `<FilesMatch "(?i)\.(md|sh)$|^nom$|^(?!robots\.txt$|license\.txt$).*\.txt$">`
+→ `Require all denied`. Le front ne charge aucun de ces fichiers (le changelog joueur est
+un `.html`). Vérifié sur l'Apache de la stack Docker : les notes passent en **403**,
+`robots.txt`, `LICENSE.txt`, `sitemap.xml`, les pages et le changelog joueur restent en 200.
+`tests/htaccess_fichiers_internes.test.js` applique les vraies règles `<FilesMatch>` du
+fichier à 19 noms (bloqués / servis).
+
+### « Première partie — » sur son propre profil
+
+Capture d'un joueur à 256 parties : « First played — ». La date n'était posée qu'à la
+**création d'un profil local vierge** (`profile-page.js`) ; la déconnexion vide ce profil,
+et un nouvel appareil n'en a pas. Le profil public, lui, lisait déjà
+`MIN(played_date)` côté serveur.
+
+`GET /api/user/:id` renvoie désormais `first_game_date` (même requête que
+`api/user/public.php`, fusionnée avec le `COUNT(DISTINCT played_date)` déjà présent) et
+`pullProfileFromCloud()` la pose dans `stats.firstPlayed`. Absente ou `null` (backend
+antérieur, aucune partie) : la valeur locale reste. Vérifié contre l'API locale (null sans
+partie, puis la bonne date avec deux parties insérées).
+
+### Profil d'un autre joueur : fonds d'écran en anglais
+
+En français : « 7 wallpapers unlocked » (anglais codé en dur) sous « Fonds d'écran à
+débloquer » — le titre de SON propre profil. Nouvelles clés `profile.wallpapers_view_title`,
+`profile.wallpapers_view_count` (`{{count}}`), `profile.view_nothing_yet`, 6 langues ; la
+vue remplace le titre de la carte. `tests/profile_view_i18n.test.js`.
+
+Non retenu : « ← Mon profil » affiché à un visiteur déconnecté. Un invité a bien sa
+propre page profil, le lien n'est pas faux.
+
+### Reste à reproduire
+
+Signalé par Hamza : sur le profil d'un ami « avec style et couleur », le fond ne se voit
+pas et la carte s'arrête à mi-page. Non reproduit en local (les thèmes ne changent que la
+couleur d'accent) : il faut le pseudo concerné ou une capture.
+
+---
+
 ## 2026-11-09 — 2.3.4 : « Se souvenir de moi » par appareil, fin des déconnexions silencieuses
 
 Même signalement que la quête Expert (ci-dessous) : « deux fois, j'ai été déconnecté

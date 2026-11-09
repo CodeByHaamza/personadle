@@ -500,14 +500,25 @@ if (viewParam || uidParam) {
       }
     }
 
-    // ── Wallpapers débloquables — état vide si le joueur n'en a pas ──
+    // ── Wallpapers débloqués — état vide si le joueur n'en a pas ──
+    // Titre et textes propres à la vue : « Fonds d'écran à débloquer » est le titre
+    // de SON profil, et le compteur était en anglais codé en dur (vu en prod,
+    // profil en français, 2026-11).
     const wpGrid = document.getElementById("unlockableWallpaperGrid");
     if (wpGrid) {
+      const wpTitle = document.querySelector('#unlockableWallpapersCard [data-i18n="profile.wallpapers_title"]');
+      if (wpTitle) {
+        wpTitle.setAttribute("data-i18n", "profile.wallpapers_view_title");
+        wpTitle.textContent = t("profile.wallpapers_view_title", "🖼️ Wallpapers");
+      }
       const unlockedWps = unlocked_wallpapers;
       if (unlockedWps.length === 0) {
-        wpGrid.innerHTML = `<p class="view-empty-state">🔒 Nothing to see here… yet.</p>`;
+        wpGrid.innerHTML = `<p class="view-empty-state">${escapeHtml(t("profile.view_nothing_yet", "🔒 Nothing to see here… yet."))}</p>`;
       } else {
-        wpGrid.innerHTML = `<p class="view-empty-state" style="opacity:.7;">🖼️ ${unlockedWps.length} wallpaper${unlockedWps.length > 1 ? "s" : ""} unlocked</p>`;
+        const r = window.i18n?.t?.("profile.wallpapers_view_count", { count: unlockedWps.length });
+        const label =
+          r != null && r !== "profile.wallpapers_view_count" ? r : `Wallpapers unlocked: ${unlockedWps.length}`;
+        wpGrid.innerHTML = `<p class="view-empty-state" style="opacity:.7;">🖼️ ${escapeHtml(label)}</p>`;
       }
     }
 
