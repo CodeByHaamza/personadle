@@ -13,6 +13,7 @@
  */
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../lib/remember_tokens.php';
 
 // ── Rate limiting ─────────────────────────────────────────────────────────────
 // 5 tentatives / 15 min en prod ; marge élargie hors prod, même raison que pour
@@ -84,19 +85,22 @@ $_SESSION['user_id'] = (int) $user['id'];
 // Enveloppé dans un try/catch pour qu'une colonne manquante en BDD (ex: migration
 // partielle) n'empêche pas la connexion — la session PHP reste active.
 try {
+    // Un jeton PAR APPAREIL (migration 056, api/lib/remember_tokens.php) : se
+    // connecter ici ne touche plus aux autres appareils du compte. Avant, le jeton
+    // unique de `users` était écrasé, et le téléphone déconnectait le PC.
+    $currentDeviceToken = $_COOKIE['remember_me'] ?? '';
+    if ($currentDeviceToken !== '') {
+        // Une reconnexion sur CET appareil remplace son ancien jeton.
+        personadle_remember_revoke($pdo, $currentDeviceToken);
+    }
+
     if ($rememberMe) {
-        $rawToken    = bin2hex(random_bytes(32));          // 64 chars hex
-        $hashedToken = hash('sha256', $rawToken);
-        $expires     = date('Y-m-d H:i:s', time() + 30 * 24 * 3600);
-
-        $pdo->prepare('UPDATE users SET remember_me_hash = ?, remember_me_expires = ? WHERE id = ?')
-            ->execute([$hashedToken, $expires, $user['id']]);
-
+        $rawToken = personadle_remember_issue($pdo, (int) $user['id']);
         setcookie(
             'remember_me',
             $rawToken,
             [
-                'expires'  => time() + 30 * 24 * 3600,
+                'expires'  => time() + PERSONADLE_REMEMBER_TTL_DAYS * 24 * 3600,
                 'path'     => '/',
                 'domain'   => PERSONADLE_COOKIE_DOMAIN,
                 'secure'   => APP_ENV === 'production',
@@ -105,15 +109,12 @@ try {
             ]
         );
     } else {
-        // Décoché : révoque tout token remember-me laissé par une connexion
-        // précédente sur cette machine — sinon la case décochée ne servirait à
-        // rien si l'appareil avait déjà été "mémorisé" avant.
-        $pdo->prepare('UPDATE users SET remember_me_hash = NULL, remember_me_expires = NULL WHERE id = ?')
-            ->execute([$user['id']]);
+        // Décoché : rien n'est mémorisé sur CET appareil. Les autres appareils du
+        // compte gardent le leur — décocher ici ne doit pas déconnecter le téléphone.
         setcookie('remember_me', '', ['expires' => time() - 3600, 'path' => '/', 'domain' => PERSONADLE_COOKIE_DOMAIN]);
     }
 } catch (PDOException $e) {
-    // Remember-me non disponible (colonne manquante en BDD) — la session PHP
+    // Remember-me non disponible (table remember_tokens absente) — la session PHP
     // reste valide, seule la reconnexion auto entre sessions est désactivée.
     error_log('[PersonaDLE login] remember_me unavailable: ' . $e->getMessage());
 }

@@ -8,7 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 1561 tests Vitest (88 suites), 410 méthodes PHPUnit, 329 tests E2E,
+> Vérifié le 2026-08-26 : 1561 tests Vitest (88 suites), 421 méthodes PHPUnit, 329 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
@@ -21,6 +21,15 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
 > 📖 Procédure complète (ordre, sauvegarde, vérification, **retour arrière**) :
 > [`DEPLOY.md`](DEPLOY.md) § « Release majeure ». Cette liste-ci ne suit que l'état
 > d'avancement.
+
+- [ ] **2.3.4 — Jouer `sql/migrations/056_remember_tokens.sql`** (table `remember_tokens`, un
+      jeton « se souvenir de moi » par appareil, + reprise des jetons encore valides de
+      `users` ; `CREATE TABLE IF NOT EXISTS` + `INSERT IGNORE`, rejouable). **À jouer AVANT le
+      `git pull` Hostinger** : sans la table, la restauration de session échoue en silence
+      (`user: null`) et chaque joueur dont la session PHP a expiré est déconnecté. Puis
+      `INSERT IGNORE INTO schema_migrations (version) VALUES ('056_remember_tokens')`.
+- [ ] **2.3.4 — Bumper `CACHE_VERSION` dans `sw.js`** (v106 → v107) : `js/gameCore.js`,
+      `css/global.css`, `lang/*.json` et `allOutAttackMode/modeAllOutAttack.js` changent.
 
 - [x] Jouer `sql/migrations/029_badge_gyotre.sql` et `030_titles_junes_investigation.sql`.
       **Oubliées de cette liste jusqu'au 2026-09-01** : elles datent du lot de contenu 2.1

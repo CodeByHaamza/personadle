@@ -9,6 +9,7 @@
  */
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../lib/remember_tokens.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonError('Method Not Allowed', 405);
@@ -16,9 +17,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Invalider le token remember_me en BDD avant de détruire la session,
 // pour que le cookie fantôme ne permette pas de se reconnecter.
-if (!empty($_SESSION['user_id'])) {
-    pdo()->prepare('UPDATE users SET remember_me_hash = NULL, remember_me_expires = NULL WHERE id = ?')
-         ->execute([(int) $_SESSION['user_id']]);
+// Se déconnecter révoque le jeton « se souvenir de moi » de CET appareil
+// seulement (migration 056) : les autres appareils du compte restent connectés.
+$rawToken = $_COOKIE['remember_me'] ?? '';
+if ($rawToken !== '') {
+    try {
+        personadle_remember_revoke(pdo(), $rawToken);
+    } catch (PDOException $e) {
+        error_log('[PersonaDLE logout] remember_me unavailable: ' . $e->getMessage());
+    }
 }
 
 // Vider les données de session
