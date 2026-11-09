@@ -45,6 +45,24 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-11-09 — Release 2.3.4
+
+Correctifs nés d'un signalement joueur (quête Expert figée, déconnexions) et de l'audit
+du même jour : #243 (série en cours dans l'infobulle Expert, filtre AOA), #244 (« se
+souvenir de moi » par appareil, **migration 056**), #245 (notes internes plus servies,
+« Première partie », profil public traduit), #247 (grille des stats sans demi-ligne vide).
+#246 épingle PHPStan et Psalm, dont la version « latest » mettait toute la CI au rouge.
+
+- `CACHE_VERSION` v106 → v107 : `js/gameCore.js`, `css/global.css`, `lang/*.json`, les
+  pages de profil et `allOutAttackMode/modeAllOutAttack.js` changent.
+- Ligne 2.3.4 dans le README ; les quatre correctifs visibles ajoutés au changelog joueur,
+  en FR et en EN.
+- **Migration 056 à jouer avant le `git pull` Hostinger**, puis à rejouer juste après (elle
+  est rejouable) pour reprendre les jetons émis entre-temps par l'ancien code.
+- `schema:check-prod` passé le 2026-11-09 avant la release : aucune dérive.
+
+---
+
 ## 2026-11-09 — 2.3.4 : plus de demi-ligne vide dans la grille des stats du profil
 
 Capture d'un joueur (profil, thème Velvet Room, mode sombre) : « Temps joué » et « Série
