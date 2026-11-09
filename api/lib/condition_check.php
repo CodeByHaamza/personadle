@@ -42,8 +42,9 @@
  *                          (porte du Mode Expert Classique/Silhouette)
  *   mode_wins_single_day → condition_value victoires dans condition_mode sur UNE journée — la
  *                          meilleure journée du joueur, pas la journée en cours (porte Expert Émoji)
- *   mode_consecutive_perfects → série EN COURS de condition_value victoires parfaites (1 essai)
- *                          dans condition_mode, comptée en parties et non en jours
+ *   mode_consecutive_perfects → MEILLEURE série de condition_value victoires parfaites (1 essai)
+ *                          dans condition_mode, comptée en parties et non en jours — un
+ *                          déblocage reste acquis ; la série en cours ne sert qu'à l'affichage
  *                          (porte Expert AOA/Personae/Music)
  *   expert_wins_total    → condition_value victoires EN EXPERT, tous modes confondus
  *                          (titre `shadows_converge`). À ne pas confondre avec
@@ -558,6 +559,22 @@ function personadle_count_best_single_day_wins(PDO $pdo, int $userId, string $mo
  */
 function personadle_count_consecutive_perfects(PDO $pdo, int $userId, string $mode): int
 {
+    return personadle_consecutive_perfect_runs($pdo, $userId, $mode)['best'];
+}
+
+/**
+ * Série parfaite EN COURS et MEILLEURE série, en un seul balayage.
+ *
+ * Les deux servent à des choses différentes, et les confondre a déjà coûté un
+ * signalement joueur (2026-11) : `best` décide du déblocage (définitif, cf.
+ * ci-dessus) ; `current` est ce que le joueur doit voir avancer. L'infobulle
+ * affichait `best` comme progression : après une série cassée, le compteur restait
+ * figé jusqu'à ce que la nouvelle série dépasse l'ancienne.
+ *
+ * @return array{current: int, best: int}
+ */
+function personadle_consecutive_perfect_runs(PDO $pdo, int $userId, string $mode): array
+{
     $s = $pdo->prepare(
         'SELECT attempts, result FROM game_sessions
          WHERE user_id = ? AND mode = ? AND is_expert = 0
@@ -577,7 +594,7 @@ function personadle_count_consecutive_perfects(PDO $pdo, int $userId, string $mo
             $run = 0; // série interrompue — mais le maximum déjà atteint reste acquis
         }
     }
-    return $best;
+    return ['current' => $run, 'best' => $best];
 }
 
 /**
