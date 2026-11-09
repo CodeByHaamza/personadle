@@ -297,19 +297,61 @@ final class ExpertUnlocksTest extends TestCase
         );
     }
 
-    public function testProgressNeverGoesBackwards(): void
+    public function testConsecutivePerfectRunsGivesTheCurrentRunAndTheBest(): void
     {
-        // Corollaire visible par le joueur : l'infobulle « 9 / 15 » ne doit pas
-        // redescendre après une partie ratée, sinon la progression paraît aléatoire.
+        // Signalement joueur 2026-11 : 11 parfaites d'affilée en AOA, mais l'infobulle
+        // affichait 12 / 15 — son record — et « n'avançait plus ». Les deux nombres
+        // existent et doivent être lus séparément.
+        $uid = $this->makeUser();
+        $this->session($uid, 'alloutattack', 1, 'win', 6);
+        $this->session($uid, 'alloutattack', 1, 'win', 5);
+        $this->session($uid, 'alloutattack', 1, 'win', 4); // record : 3
+        $this->session($uid, 'alloutattack', 2, 'win', 3); // casse
+        $this->session($uid, 'alloutattack', 1, 'win', 2);
+        $this->session($uid, 'alloutattack', 1, 'win', 1); // série en cours : 2
+
+        $this->assertSame(
+            ['current' => 2, 'best' => 3],
+            personadle_consecutive_perfect_runs(self::$pdo, $uid, 'alloutattack')
+        );
+    }
+
+    public function testConsecutivePerfectRunsIsZeroAfterAMiss(): void
+    {
+        $uid = $this->makeUser();
+        $this->session($uid, 'music', 1, 'win', 2);
+        $this->session($uid, 'music', 1, 'giveup', 1);
+        $this->assertSame(
+            ['current' => 0, 'best' => 1],
+            personadle_consecutive_perfect_runs(self::$pdo, $uid, 'music')
+        );
+    }
+
+    public function testProgressShowsTheCurrentRunButNeverLosesTheRecord(): void
+    {
+        // Remplace l'ancien testProgressNeverGoesBackwards : la série affichée ne
+        // reculait jamais parce qu'on affichait le RECORD — c'est précisément ce qui
+        // figeait le compteur. Désormais la série en cours peut retomber à 0 ; le
+        // record (`best`), lui, ne recule jamais, et lui seul décide du déblocage.
         $uid = $this->makeUser();
         $this->session($uid, 'personae', 1, 'win', 3);
         $this->session($uid, 'personae', 1, 'win', 2);
-        $before = personadle_expert_progress(self::$pdo, $uid, 'personae')['current'];
-
         $this->session($uid, 'personae', 3, 'giveup', 1);
-        $after = personadle_expert_progress(self::$pdo, $uid, 'personae')['current'];
 
-        $this->assertSame($before, $after, 'la progression affichée ne doit jamais reculer');
+        $p = personadle_expert_progress(self::$pdo, $uid, 'personae');
+        $this->assertSame(0, $p['current'], 'la série en cours est cassée');
+        $this->assertSame(2, $p['best'], 'le record ne recule jamais');
+        $this->assertFalse($p['unlocked']);
+    }
+
+    public function testCumulativeConditionsReportBestEqualToCurrent(): void
+    {
+        // Les deux autres types ne reculent jamais : `best` = `current`, pour que le
+        // front puisse lire `best` sans se demander de quel type il s'agit.
+        $uid = $this->makeUser();
+        $this->session($uid, 'classic', 3, 'win', 1);
+        $p = personadle_expert_progress(self::$pdo, $uid, 'classic');
+        $this->assertSame($p['current'], $p['best']);
     }
 
     // ── personadle_expert_conditions / progress / is_unlocked ─────────────────────
@@ -391,7 +433,7 @@ final class ExpertUnlocksTest extends TestCase
         $uid = $this->makeUser();
         $p = personadle_expert_progress(self::$pdo, $uid, 'music');
         $this->assertSame(
-            ['unlocked', 'condition_type', 'required', 'current', 'granted'],
+            ['unlocked', 'condition_type', 'required', 'current', 'best', 'granted'],
             array_keys($p)
         );
         $this->assertIsBool($p['unlocked']);
