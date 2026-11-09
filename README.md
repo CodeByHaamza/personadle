@@ -122,6 +122,7 @@ the Persona's real myth with its name masked. Expert keeps its own targets, stat
 - 2.3.1: badge and title unlocks are decided by the server, an Expert friend challenge no longer wins itself, Kotone's animated pictures stay animated, and the Classic page starts as high as the other modes on mobile.
 - 2.3.2: on phones, Hint and Give Up sit side by side again in Classic — the answer field moved 170 px up — the duplicate "Delete my account" button left the profile page, and the empty notification dot left the Friends icon. On Discord, the daily is announced by 39 voices instead of 8 and the Sunday recap shows the podium's portraits.
 - 2.3.3: the Replay button is back at the end of a Classic round — it had vanished in 2.3.2, in both normal and Expert, leaving no way to start over without reloading the page.
+- 2.3.4: the Expert quest tooltip shows your current streak and your record (it looked stuck), a game restarted by a filter change in All-Out Attack is recorded again, each device keeps its own login instead of logging the others out, and the profile shows "First played" again with a statistics grid free of half-empty slots.
 
 <details>
 <summary>2.2 — Profile showcase &amp; Compendium</summary>
