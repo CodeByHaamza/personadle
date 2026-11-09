@@ -91,6 +91,246 @@ pas. Ni la cible ni les noms proposés ne sont stockés dans `lastGameResult`.
 
 ---
 
+## 2026-10-21 — Un écran large mais court ne défile plus pour jouer
+
+> ⚠️ **À déplacer dans `PersonaDLE 2.4/` à l'ouverture de cette version** (§9). Ce lot
+> n'est pas un correctif de la 2.3 livrée : il est écrit ici parce que la 2.4 n'est pas
+> encore ouverte, décision de Hamza du 2026-10-21.
+
+Signalé par Hamza : un correctif d'affichage « pas besoin de défiler pour voir les
+résultats de Classique » marchait **chez lui et pas chez les joueurs**, sur un vrai PC.
+
+### La cause : tout le responsive ignorait la hauteur
+
+Vérifié fichier par fichier : il n'existait **aucune** media query sur la hauteur dans
+l'ensemble du CSS du projet. Tous les points de rupture portent sur la largeur — 480 /
+768 / 1024 px, exactement ce que liste le §6 du CLAUDE.md.
+
+Conséquence mesurée : **la barre de réponse se place à la même ordonnée quelle que soit
+la hauteur de la fenêtre**, dans les six modes. `#imgHomePage` est le cas d'école :
+`width: min(460px, 80vw)` + `height: auto`, donc sa hauteur suit la largeur disponible et
+jamais la place verticale restante.
+
+Relevé à **1536×864** — la résolution de bureau la plus répandue, et un écran que tous les
+points de rupture en largeur considèrent comme large, donc confortable :
+
+| Mode | Saisie à y= | Défilement pour l'atteindre |
+|---|---|---|
+| Silhouette | 1475 | **611 px** |
+| Personae | 1309 | 445 px |
+| All-Out Attack | 1285 | 421 px |
+| Musique | 963 | 99 px |
+| Émoji | 842 | tient, à 22 px près |
+| Classique | 766 | tient, mais les résultats démarrent à 830 |
+
+Sur un écran de 1080 px de haut la page tient **pile** ; sur tout écran plus court elle
+défile. D'où « ça marche chez moi ». Et le correctif « Indice et Abandon côte à côte » de
+la 2.3.2 traitait bien le même symptôme — mais sous `max-width: 900px`, donc jamais sur un
+PC.
+
+### Le correctif
+
+Un bloc de compression du bandeau partagé, scopé **`min-width: 901px` ET
+`max-height: 900px`** : large mais court.
+
+- La borne 901 s'aligne sur le `max-width: 900px` de `classique.css`, donc les deux blocs
+  ne se chevauchent **jamais** : le calibrage mobile, ajusté au pixel en 2.3.2, n'est pas
+  touché.
+- Là où la page tenait déjà (≥ 901 px de large et > 900 px de haut), **rien ne change**.
+- Les valeurs sont en `clamp()` avec du `vh` plutôt qu'un nouveau palier en px dur, pour
+  que la compression soit continue jusqu'aux petits portables (§6).
+
+Postes comprimés — `css/global.css` §20 (nouvelle section) :
+
+- **`#imgHomePage`** — 175 px de haut dès 1536 px de large. Borné par sa **hauteur**
+  (`width: auto` conserve le ratio) au lieu de sa largeur, puisque c'est la hauteur qui
+  manque. Effet de bord favorable : la hauteur de l'en-tête devient connue avant le
+  chargement de l'image, donc plus de reflow vertical au moment où elle arrive.
+- **`.emoji-hint-zone`** — bandeau de consigne des cinq autres modes : 30 px de padding
+  **et** 30 px de marge, en haut comme en bas, soit 120 px qui ne portent aucune
+  information.
+- **`.expert-toggle-zone`** — ses seules marges verticales valaient 36 px.
+- **`.hint-giveup-row`** — 166 px de haut, dont 24 px de padding vertical imposé à tout
+  `.link-wrapper` par le §18 (cible tactile). On rogne le padding et on borne l'image par
+  sa hauteur : même technique que le correctif mobile de la 2.3.2, en production depuis,
+  donc les formes SVG décoratives suivent (elles sont en absolu dans `.link-wrapper`, qui
+  reste en `fit-content`). La cible tactile reste au-dessus des 48 px du §7.
+
+Et `classiqueMode/classique.css` pour **`.personadle-box`** (172 px : 60 px de padding
+vertical, un `h1` de 62 px et sa marge), qui remplace `.emoji-hint-zone` dans ce mode et
+échappait donc à la compression des cinq autres.
+
+Le commentaire de la 2.3.2 jugeait que toucher à cette boîte et au logo serait « une
+refonte, pas un correctif ». C'était exact **dans son contexte** : il s'agissait d'y
+toucher pour tout le monde. Sous condition de hauteur, le compromis change — on ne dégrade
+rien là où ça fonctionnait.
+
+### Gain mesuré (1536×864)
+
+| Mode | Avant | Après | Gain |
+|---|---|---|---|
+| **Classique** | saisie@766, 74 px de défilement | **saisie@617, 0 défilement** | −149 px |
+| **Émoji** | saisie@842, 120 px | **saisie@717, 0 défilement** | −125 px |
+| Musique | saisie@963, 241 px | saisie@837, 115 px | −126 px |
+| Personae | saisie@1309, 589 px | saisie@1173, 453 px | −136 px |
+| All-Out Attack | saisie@1285, 563 px | saisie@1159, 437 px | −126 px |
+| Silhouette | saisie@1475, 755 px | saisie@1337, 617 px | −138 px |
+
+**Classique et Émoji ne défilent plus du tout** à cette résolution, et Classique dispose de
+247 px sous la barre de saisie — de quoi afficher deux lignes de résultat (100 px l'unité),
+ce qui était la demande d'origine.
+
+### Vérification
+
+- Mesures prises au navigateur réel (Playwright) sur les **six** modes et trois
+  résolutions, avant et après, pas une lecture du CSS.
+- Vitest : **1548 passés** (86 suites).
+- Accolades équilibrées sur les deux fichiers ; diff en **insertions pures** (133 lignes,
+  0 suppression).
+- `prettier --write` passé sur le bloc ajouté **avant** de l'insérer, pour ne pas embarquer
+  le reformatage des parties préexistantes de `global.css` — le fichier était déjà non
+  conforme sur `develop`, et la vérification prettier de la CI est explicitement non
+  bloquante (`AMELIORATIONS.md §8`). Ce reformatage reste un chantier à part.
+
+### Angles morts connus
+
+- **Silhouette, All-Out Attack et Personae débordent encore** (617, 437 et 453 px à
+  1536×864). Le reste vient de leur grande image, pas du bandeau partagé. Les dimensionner
+  en `vh` touche la lisibilité du jeu lui-même — une silhouette plus petite change la
+  difficulté — donc c'est une décision de conception, pas un sous-produit de ce lot.
+- **Les captures de référence visuelles** (`E2E_VISUAL=1`, opt-in) sont à régénérer : les
+  six modes changent d'apparence sous 900 px de haut. Elles ne tournent pas en CI, donc
+  rien n'est cassé aujourd'hui.
+- **Le groupe E2E du profil est instable**, indépendamment de ce lot. Quatre runs complets
+  sur base vierge : **1, 2, 3 puis 5 échecs**, les deux runs à 1 et 5 étant tous deux
+  *sans* la modification. Les échecs se concentrent sur `profile_atelier.spec.js` (186,
+  242, 282, 459) et `profile_no_overwrite.spec.js` (42), et chacun **passe lancé seul** —
+  écriture presse-papiers qui réclame le focus, clics sur une page encore en cours de
+  rendu. Le job E2E est bloquant en CI depuis le 24 juillet 2026 : cette variance mérite
+  son propre lot, sinon elle finira par bloquer une release sans raison.
+- La suite E2E **n'est pas idempotente** entre deux exécutions sans `docker compose down -v`,
+  et l'enchaîner trop vite déclenche le rate-limit du `globalSetup` (429, table
+  `rate_limits`).
+---
+
+## 2026-10-21 — Hotfix sécurité : PHP2Shell mitigé, et une fuite d'identifiants fermée
+
+Deux failles critiques du **moteur** PHP sont publiées ce jour (PHP2Shell, CVE-2026-109618 et
+CVE-2026-109619) : deux *use-after-free* exploitables en **exécution de code à distance non
+authentifiée**. Elles sont atteintes pendant que PHP parse la requête, donc **avant** qu'une
+seule ligne de `api/` ne s'exécute — notre code n'y change rien. Cloudflare a observé des
+tentatives dès 07:43 UTC, soit avant même la publication du correctif à 14:00 UTC.
+
+En auditant la prod pour mesurer l'exposition, on a trouvé **une seconde fuite, sans rapport
+et plus grave** : les identifiants de la base de production étaient servis en clair.
+
+### Pourquoi une règle `.htaccess` et pas une mise à jour de PHP
+
+Les correctifs sont dans PHP 8.2.35 / 8.3.36 / 8.4.27 / 8.5.12. Relevé sur le serveur le jour
+même : **aucune version proposée par Hostinger n'est à jour** — 8.2.34, 8.3.35, 8.4.26 et
+8.5.11, toutes buildées le 30/09. Changer de version dans hPanel ne corrige donc rien, et
+monter en 8.3 rouvrirait au passage le bug de collation de la 2.2.6 (§7 du CLAUDE.md).
+
+Un `.user.ini` ne servirait à rien non plus : l'hébergeur a vidé `user_ini.filename`, les
+fichiers ne sont **jamais lus**. Vérifié avant d'en écrire un.
+
+`session.upload_progress.enabled` est déjà à `Off` en prod, ce qui atténue une partie de la
+109618 — mais Sansec est explicite : ce réglage seul ne suffit pas, la fuite mémoire fonctionne
+même sans `session_start()`.
+
+Reste donc un seul levier : **tous les exploits connus passent par une requête
+`multipart/form-data`**. Audit du dépôt : **zéro** `$_FILES`, **zéro** `FormData`, **zéro**
+`enctype` sur 2157 fichiers suivis — tout passe en JSON via `js/api.js`. Refuser le multipart
+ne coûte aucune fonctionnalité.
+
+### Le piège qui a failli rendre la mitigation inutile
+
+La première version de la règle était un `RewriteRule ... [F]` dans le `.htaccess` de la
+racine. Mesure avant correction :
+
+| Requête | Attendu | Obtenu |
+|---|---|---|
+| `POST` multipart sur `/` | 403 | 403 ✅ |
+| `POST` multipart sur `/api/auth/login` | 403 | **400** ❌ |
+
+Un 400 signifie que **PHP a parsé le corps de la requête** : la mitigation était contournée
+exactement là où elle compte. Cause : les règles `mod_rewrite` d'un `.htaccess` de sous-dossier
+**écrasent** celles du parent, elles ne s'héritent pas. `api/` a le sien — comme 13 de ses
+sous-dossiers. La règle de la racine ne couvrait donc que la racine, c'est-à-dire le seul
+endroit où aucun PHP ne tourne.
+
+Corrigé par un filtre `SetEnvIfNoCase` + `Require not env`, qui relève de l'autorisation et
+**s'hérite**, lui, dans tous les sous-dossiers. La règle `rewrite` est conservée en second
+rideau, et doublée dans `api/.htaccess` au cas où LiteSpeed traiterait l'héritage autrement.
+Dupliquer la règle dans les 14 `.htaccess` a été écarté : le quinzième dossier l'oublierait en
+silence, exactement le piège déjà documenté au §7.
+
+### La fuite d'identifiants (trouvée en auditant, sans rapport avec la CVE)
+
+`git status` du webroot de prod — le webroot est un clone git, donc tout fichier étranger s'y
+voit — a sorti un seul fichier hors git : `api/config.php.bak-20260909`.
+
+`GET https://personadle.net/api/config.php.bak-20260909` renvoyait **HTTP 200** et le source
+PHP en clair : `DB_NAME`, `DB_USER` et le mot de passe de la base de **production**. Aucun
+exploit nécessaire, juste l'URL.
+
+Cause : `api/.htaccess` ne refuse que les noms **exacts** `^(config|bootstrap)\.php$`. Une
+copie ne matche pas, et un `.php` que PHP n'exécute pas est du code source en texte brut.
+
+- **Fuite fermée immédiatement** : fichier déplacé hors du webroot vers
+  `~/backups_hors_web/` (déplacé et non supprimé — la fuite s'arrête, le backup est conservé).
+  L'URL renvoie 404, le site répond normalement.
+- **Correction de fond** : une règle de la racine refuse désormais le **motif** et non un nom
+  précis — tout nom contenant `.php.` ou terminé par un suffixe de sauvegarde
+  (`.bak`, `.old`, `.orig`, `.save`, `.swp`, `~`…, avec une queue numérique optionnelle).
+  Vérifié : sur 2157 fichiers suivis, **0** matche cette règle, donc aucun asset servi ne peut
+  être refusé par erreur.
+
+### Vérification
+
+Matrice de requêtes réelles contre la stack Docker (Apache), pas une lecture du fichier :
+
+| Requête | Attendu | Obtenu |
+|---|---|---|
+| `GET /` | 200 | 200 |
+| `GET /css/global.css` · `/js/api.js` | 200 | 200 |
+| `POST` JSON `/api/auth/login` | 401 | 401 |
+| `GET /api/titles/` | 401 | 401 |
+| `POST` multipart `/` | 403 | 403 |
+| `POST` multipart `/api/auth/login` | 403 | 403 |
+| `POST` multipart `/api/user/stats` | 403 | 403 |
+| `POST` multipart `/api/friends/` | 403 | 403 |
+| `GET` leurres `config.php.bak-20260909`, `config.php.old`, `api.js.bak`, `gameCore.js~` | 403 | 403 |
+
+Le log Apache confirme le point essentiel : `authz_core ... client denied by server
+configuration`, donc le refus tombe **avant** l'invocation de PHP, pas dedans.
+
+E2E : **316 passés, 1 échec**, sur base vierge. L'échec (`profile_atelier.spec.js:459`, copie
+presse-papiers) est **pré-existant** — la même suite sans la modification, sur base vierge
+également, échoue sur exactement le même test. Il passe isolé : c'est l'écriture presse-papiers
+qui réclame le focus du document, perdu sous charge parallèle.
+
+### Angles morts connus
+
+- **La mitigation n'est pas un correctif.** Tant qu'Hostinger n'aura pas déployé 8.2.35, le
+  moteur reste vulnérable ; on ne ferme que le chemin d'exploitation connu. À surveiller avec
+  `ssh hostinger-personadle php -v`, et **retirer les deux règles multipart** une fois la
+  version patchée servie — sinon elles produiront un 403 incompréhensible le jour où on
+  ajoutera un vrai upload.
+- **Le mot de passe de la base a été exposé** pendant une durée inconnue (fichier daté du
+  2026-09-09). Aucune trace d'intrusion : `git status` du webroot est propre, aucun `.php`
+  modifié depuis 10 jours, aucun fichier déposé. `DB_HOST` vaut `localhost`, donc la base n'est
+  pas joignable de l'extérieur sans un autre point d'appui. **La rotation du mot de passe reste
+  à faire** (hPanel + `api/config.php`) : décision de Hamza, hors périmètre de ce hotfix.
+- **Les logs d'accès ne sont pas lisibles en SSH** sur le mutualisé (§10) : impossible de
+  confirmer ou d'exclure des tentatives par les logs. L'intégrité a donc été établie autrement,
+  par l'état git du webroot.
+- La suite E2E **n'est pas idempotente** entre deux exécutions sans `docker compose down -v` :
+  les tests écrivent en base et un second run voit des badges déjà accordés. Et l'enchaîner
+  trop souvent déclenche le rate-limit du `globalSetup` (429, table `rate_limits`). Constaté en
+  établissant la baseline, à traiter dans son propre lot.
+---
+
 ## 2026-09-30 — Hotfix 2.3.3 : le bouton Rejouer avait disparu de Classique
 
 Signalé par Hamza : en Classique, gagné ou perdu, normal ou Expert, plus aucun moyen de

@@ -1,5 +1,52 @@
 ErrorDocument 404 /pages/404.html
 
+# PHP2Shell (CVE-2026-109618 / CVE-2026-109619) — mitigation posée le 2026-10-21.
+#
+# Deux use-after-free dans le MOTEUR PHP lui-même, exploitables en exécution de
+# code à distance NON AUTHENTIFIÉE. Notre code n'y change rien : la faille est
+# atteinte pendant que PHP parse la requête, avant qu'une seule ligne de api/ ne
+# s'exécute. Corrigées dans PHP 8.2.35, publié le 2026-10-21 à 14:00 UTC.
+#
+# POURQUOI UNE RÈGLE ICI PLUTÔT QU'UNE MISE À JOUR : Hostinger sert encore
+# 8.2.34 (buildé le 30/09), et AUCUNE des versions proposées dans hPanel n'est à
+# jour — 8.3.35, 8.4.26 et 8.5.11 sont toutes en retard d'un patch. Changer de
+# version PHP ne corrige donc rien aujourd'hui. Un `.user.ini` ne servirait à
+# rien non plus : l'hébergeur a vidé `user_ini.filename`, les fichiers ne sont
+# jamais lus (vérifié le 2026-10-21). Cette règle est notre seul levier.
+#
+# POURQUOI LE MULTIPART : tous les exploits connus passent par une requête
+# `multipart/form-data` — c'est le chemin qui amène PHP à manipuler la mémoire
+# libérée. Le site n'en émet aucune : zéro `$_FILES` dans api/, zéro `FormData`
+# en JS, zéro `enctype` dans les HTML, tout passe en JSON via js/api.js. Refuser
+# le multipart ne coûte donc aucune fonctionnalité, et Apache rejette la requête
+# avant que PHP n'en parse le corps.
+#
+# ⚠️ À RETIRER dès qu'Hostinger sert >= 8.2.35 (`ssh hostinger-personadle php -v`).
+#    Un durcissement laissé en place indéfiniment, c'est un 403 incompréhensible
+#
+# DEUX MÉCANISMES, ET C'EST VOULU : les règles mod_rewrite d'un .htaccess de
+# sous-dossier ÉCRASENT celles du parent, elles ne s'héritent pas. api/ a le sien,
+# donc la règle rewrite de la racine ne couvrait QUE la racine : le seul endroit où
+# aucun PHP ne tourne. Mesure du 2026-10-21 avant correction : un multipart sur
+# /api/auth/login renvoyait 400 et non 403, preuve que PHP avait parsé le corps.
+# Le filtre SetEnvIf + Require ci-dessous, lui, est hérité par tous les
+# sous-dossiers ; la règle rewrite est en plus doublée dans api/.htaccess.
+<IfModule mod_setenvif.c>
+    SetEnvIfNoCase Content-Type ^multipart/ personadle_deny_multipart=1
+</IfModule>
+<IfModule mod_authz_core.c>
+    <RequireAll>
+        Require all granted
+        Require not env personadle_deny_multipart
+    </RequireAll>
+</IfModule>
+#    le jour où on ajoutera un vrai upload — et plus personne pour s'en souvenir.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTP:Content-Type} ^multipart/ [NC]
+    RewriteRule ^ - [F,L]
+</IfModule>
+
 # Forcer HTTPS en production
 <IfModule mod_rewrite.c>
     RewriteEngine On
@@ -97,6 +144,25 @@ ErrorDocument 404 /pages/404.html
 # manque, le bloc est simplement ignoré plutôt que de renvoyer une 500.
 <IfModule mod_authz_core.c>
     <FilesMatch "(?i)^(package(-lock)?\.json|composer\.(json|lock)|vitest\.config\.js|playwright\.config\.js|eslint\.config\.js|phpunit\.xml|phpstan\.neon|docker-compose\.yml|Makefile|setup\.sh|\.env.*|\.hostinger)$|\.phar$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+
+# Copies et sauvegardes de fichiers source — jamais servies.
+#
+# Vécu le 2026-10-21, trouvé en auditant la prod : un `api/config.php.bak-20260909`
+# laissé dans le webroot était servi EN CLAIR par Apache. Un simple GET renvoyait
+# les identifiants de la base de PRODUCTION. Le fichier étant hors git, il
+# n'apparaissait nulle part dans le dépôt — seul un `git status` du webroot le
+# montrait (d'où l'intérêt de garder ce réflexe avant chaque release).
+#
+# Pourquoi c'est le pire cas : un `.php` que PHP n'exécute PAS est du code source
+# en texte brut. Le <FilesMatch> ci-dessus ne protège que des noms EXACTS
+# (`config.php`), donc jamais leurs copies. Cette règle vise le MOTIF — tout nom
+# qui contient `.php.` ou se termine par un suffixe de sauvegarde — pour couvrir
+# aussi la prochaine copie, quel que soit le nom qu'on lui donnera.
+<IfModule mod_authz_core.c>
+    <FilesMatch "(?i)\.(bak|old|orig|save|sav|swp|swo|rej|tmp|copy|dist|sample|log)(-?[0-9]*)$|\.php\.|~$">
         Require all denied
     </FilesMatch>
 </IfModule>
