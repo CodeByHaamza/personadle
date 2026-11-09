@@ -44,6 +44,7 @@ import {
   normalizeAvatarPath,
   bestModeOverall,
   needsAvatarOrigin,
+  pairStatTiles,
 } from "./profile-format.js";
 import { THEME_COLORS, hexToRgb, adjustHex, resolveTheme, applyThemeVars } from "./theme.js";
 import { initAtelier, openAtelier, initSaveStatus, scheduleAutosave } from "./atelier.js";
@@ -622,7 +623,7 @@ function _applyCloudToUI() {
  * @param {string} label  - Label traduit
  * @param {string} delay  - Valeur de animation-delay (ex: "0.22s")
  */
-function buildStreakItem(streak, label, delay) {
+function buildStreakItem(streak, label, delay, forceFull) {
   const tier = getStreakTier(streak);
 
   // Décorateurs selon le tier
@@ -637,7 +638,8 @@ function buildStreakItem(streak, label, delay) {
   let rightDeco = "";
   let icon = "🔥";
   let iconSize = "1.3em";
-  let fullWidth = tier >= 5;
+  // forceFull : décidé par pairStatTiles() quand la série reste seule sur sa ligne.
+  let fullWidth = forceFull ?? tier >= 5;
 
   if (tier === 0) {
     leftDeco = snowL(1);
@@ -739,14 +741,19 @@ function renderStats() {
     { icon: "🏅", value: modeBest, label: tf("profile.stat_best_mode_label", "Best Mode Overall") },
   ];
 
-  const streakHTML = buildStreakItem(
-    s.streak || 0,
-    tf("profile.stat_current_streak_label", "Current Streak"),
-    "0.22s"
-  );
-  const regularHTML = stats
-    .map(
-      (st, idx) => `
+  // Rangées sans trou : cf. pairStatTiles() (capture joueur 2026-11, « Temps joué »
+  // et « Série actuelle » seuls sur leur ligne, l'autre moitié vide).
+  const tiles = pairStatTiles([...stats, { streak: true, full: getStreakTier(s.streak || 0) >= 5 }]);
+  statsContainer.innerHTML = tiles
+    .map((st, idx) =>
+      st.streak
+        ? buildStreakItem(
+            s.streak || 0,
+            tf("profile.stat_current_streak_label", "Current Streak"),
+            `${0.1 + idx * 0.06}s`,
+            st.full
+          )
+        : `
     <div class="stat-item${st.full ? " stat-item--full" : ""}"
          style="animation-delay:${0.1 + idx * 0.06}s">
       <span class="stat-icon">${st.icon}</span>
@@ -757,8 +764,6 @@ function renderStats() {
     </div>`
     )
     .join("");
-
-  statsContainer.innerHTML = regularHTML + streakHTML;
 
   // Bouton de récupération visible sous les stats quand streak = 0 et cooldown OK
   const recoveryPrompt = document.getElementById("streakRecoveryPrompt");

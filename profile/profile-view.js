@@ -4,7 +4,7 @@ import {
   getSocialLinkData,
   applyRank10Effect,
 } from "../js/social-link.js";
-import { getStreakTier, formatSongTime, bestModeOverall } from "./profile-format.js";
+import { getStreakTier, formatSongTime, bestModeOverall, pairStatTiles } from "./profile-format.js";
 import { formatPlayTime } from "./formatPlayTime.js";
 import { resolveTheme, applyThemeVars } from "./theme.js";
 import { profileAutoplayAllowed } from "../js/settings-modal.js";
@@ -81,7 +81,7 @@ if (viewParam || uidParam) {
     return r != null && r !== key ? r : (fallback ?? key);
   }
 
-  function buildStreakItem(streak, label, delay) {
+  function buildStreakItem(streak, label, delay, forceFull) {
     const tier = getStreakTier(streak);
     const flameL = (n) => `<span class="streak-side-flame" aria-hidden="true">🔥</span>`.repeat(n);
     const flameR = (n) =>
@@ -90,7 +90,8 @@ if (viewParam || uidParam) {
     let leftDeco = "";
     let rightDeco = "";
     let iconSize = "1.3em";
-    const fullWidth = tier >= 5;
+    // forceFull : décidé par pairStatTiles() quand la série reste seule sur sa ligne.
+    const fullWidth = forceFull ?? tier >= 5;
 
     if (tier === 3) {
       leftDeco = flameL(1);
@@ -579,9 +580,22 @@ if (viewParam || uidParam) {
         },
       ];
 
-      const regularHTML = items
-        .map(
-          (st, idx) => `
+      // Rangées sans trou : cf. pairStatTiles() (capture joueur 2026-11, « Temps joué »
+      // et « Série actuelle » seuls sur leur ligne, l'autre moitié vide).
+      const tiles = pairStatTiles([
+        ...items,
+        { streak: true, full: getStreakTier(currentStreak) >= 5 },
+      ]);
+      statsContainer.innerHTML = tiles
+        .map((st, idx) =>
+          st.streak
+            ? buildStreakItem(
+                currentStreak,
+                t("profile.stat_current_streak_label", "Current Streak"),
+                `${0.1 + idx * 0.06}s`,
+                st.full
+              )
+            : `
       <div class="stat-item${st.full ? " stat-item--full" : ""}"
            style="animation-delay:${0.1 + idx * 0.06}s">
         <span class="stat-icon">${st.icon}</span>
@@ -592,13 +606,6 @@ if (viewParam || uidParam) {
       </div>`
         )
         .join("");
-
-      const streakHTML = buildStreakItem(
-        currentStreak,
-        t("profile.stat_current_streak_label", "Current Streak"),
-        "0.5s"
-      );
-      statsContainer.innerHTML = regularHTML + streakHTML;
     }
 
     // ── Mode Breakdown — structure IDENTIQUE à renderModeStats() dans profile-page.js ──

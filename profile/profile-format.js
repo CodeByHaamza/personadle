@@ -131,3 +131,49 @@ export function bestModeOverall(entries, minGames = 3) {
   }
   return best;
 }
+
+/**
+ * Range les tuiles de la grille des stats (2 colonnes) pour qu'aucune ligne ne reste
+ * à moitié vide.
+ *
+ * Capture d'un joueur, 2026-11 : « Temps joué » et « Série actuelle » occupaient
+ * chacune une demi-ligne, l'autre moitié vide. La tuile pleine largeur « Première
+ * partie » tombait juste après un nombre impair de demi-tuiles et cassait
+ * l'alternance ; la série, ajoutée en dernier, restait orpheline.
+ *
+ * Règle : une tuile pleine largeur qui arrive pendant qu'une demi-tuile attend sa
+ * voisine glisse juste après cette voisine. S'il reste à la fin une demi-tuile seule,
+ * elle passe en pleine largeur. L'ordre est conservé autant que possible, et le
+ * tableau reçu n'est pas modifié.
+ *
+ * @template {{ full?: boolean }} T
+ * @param {T[]} tiles
+ * @returns {T[]}
+ */
+export function pairStatTiles(tiles) {
+  const out = [];
+  let deferred = [];
+  let open = false; // une demi-tuile attend sa voisine
+  for (const tile of tiles) {
+    if (tile.full) {
+      if (open) deferred.push(tile);
+      else out.push(tile);
+      continue;
+    }
+    out.push(tile);
+    open = !open;
+    if (!open && deferred.length) {
+      out.push(...deferred);
+      deferred = [];
+    }
+  }
+  if (open) {
+    for (let i = out.length - 1; i >= 0; i--) {
+      if (!out[i].full) {
+        out[i] = { ...out[i], full: true };
+        break;
+      }
+    }
+  }
+  return [...out, ...deferred];
+}
