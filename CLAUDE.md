@@ -43,7 +43,7 @@ personadle/
 ├── profile/             ← profile-page.js, badges/, friends/, leaderboard/
 ├── api/                 ← PHP REST (auth/, user/, messages/, social-links/, leaderboard/…)
 ├── tests/               ← 88 suites Vitest (1561 tests) + tests/php/ (PHPUnit)
-└── sql/                 ← bdd_mysql.sql (30 tables)
+└── sql/                 ← bdd_mysql.sql (31 tables)
 ```
 
 **Fichiers clés :**
