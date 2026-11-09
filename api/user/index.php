@@ -115,9 +115,13 @@ if ($method === 'GET') {
     $unlockedTitles = $stmt->fetchAll();
 
     // Journées distinctes jouées, comptées par le SERVEUR (game_sessions) — cf. 'unique_days' plus bas.
-    $stmt = $pdo->prepare('SELECT COUNT(DISTINCT played_date) FROM game_sessions WHERE user_id = ?');
+    // Et la première d'entre elles, pour « Première partie » (même requête que le profil
+    // public, api/user/public.php) — cf. 'first_game_date' plus bas.
+    $stmt = $pdo->prepare('SELECT COUNT(DISTINCT played_date) AS days, MIN(played_date) AS first_day FROM game_sessions WHERE user_id = ?');
     $stmt->execute([$userId]);
-    $uniqueDays = (int) $stmt->fetchColumn();
+    $daysRow = $stmt->fetch();
+    $uniqueDays = (int) ($daysRow['days'] ?? 0);
+    $firstGameDate = $daysRow['first_day'] ?? null;
 
     // Résoudre le slug du titre équipé (évite un aller-retour supplémentaire côté JS)
     $equippedTitleSlug = null;
@@ -150,6 +154,9 @@ if ($method === 'GET') {
         // par le serveur à chaque synchro et à chaque épinglage. Le pull remplace
         // désormais le compteur local par cette valeur.
         'unique_days' => $uniqueDays,
+        // Journée de la toute première partie ("Y-m-d"), ou null. Le profil local ne
+        // la gardait qu'à sa création : vidé à la déconnexion, il affichait « — ».
+        'first_game_date' => $firstGameDate,
         'global_streak'        => (int) ($user['global_streak'] ?? 0),
         'global_streak_record' => (int) ($user['global_streak_record'] ?? 0),
         // Dernière JOURNÉE (Paris, "Y-m-d") comptée dans la streak globale, ou null.
