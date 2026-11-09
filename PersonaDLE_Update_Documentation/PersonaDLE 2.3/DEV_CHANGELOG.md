@@ -45,6 +45,69 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 
 ---
 
+## 2026-11-09 — 2.3.4 : « Se souvenir de moi » par appareil, fin des déconnexions silencieuses
+
+Même signalement que la quête Expert (ci-dessous) : « deux fois, j'ai été déconnecté
+automatiquement ; les modes s'étaient remis à zéro, je les ai rejoués sans m'en rendre
+compte, puis je me suis reconnecté ».
+
+### La cause
+
+Un **seul** jeton « se souvenir de moi » par compte (`users.remember_me_hash`) :
+
+- chaque connexion l'**écrasait** → se connecter sur le téléphone invalidait le PC ;
+- chaque restauration de session le **faisait tourner** → deux onglets qui restauraient en
+  même temps (les 6 modes ouverts d'un coup, par exemple) : le premier rotait, le second
+  présentait l'ancien jeton, ne trouvait rien et **effaçait le cookie**.
+
+Sur Hostinger, la session PHP expire vite (fichiers de session nettoyés par l'hébergeur) :
+c'est donc le jeton qui maintient la connexion, et le perdre déconnecte. En invité, la
+graine du tirage passe de l'id du compte à un id anonyme (`getPlayerSeedId()`) : **autres
+cibles du jour**, d'où les modes « remis à zéro ». Ces parties d'invité sont ensuite
+versées dans le compte à la reconnexion (file `pendingSessions`), avec une cible que
+l'anti-triche ne reconnaît pas.
+
+### Le correctif
+
+Table `remember_tokens` (migration **056**), une ligne par appareil, logique dans
+`api/lib/remember_tokens.php` :
+
+| Règle | Pourquoi |
+|---|---|
+| Un jeton par connexion « se souvenir de moi », 30 jours | un appareil ne touche plus aux autres |
+| Rotation seulement au-delà de **24 h**, l'ancien reste valable **2 min** | deux onglets simultanés ne se déconnectent plus |
+| « Se déconnecter » ne révoque que **cet** appareil | le téléphone reste connecté quand on quitte le PC |
+| Changer de mot de passe révoque **tous** les appareils | geste de sécurité |
+| Au plus **10** appareils par compte, les plus anciens sautent | pas de table qui gonfle |
+| Dates calculées par la base (`NOW() + INTERVAL ?`) | fuseau PHP et fuseau MariaDB n'ont plus à coïncider |
+
+La migration **recopie les jetons encore valides** de `users` : les joueurs connectés au
+déploiement ne sont pas déconnectés. Les colonnes `users.remember_me_*` restent (plus
+lues, vidées au changement de mot de passe), à retirer dans une version ultérieure.
+Décocher « se souvenir de moi » ne mémorise rien sur cet appareil, mais ne révoque plus
+ceux des autres.
+
+### Vérifié
+
+- `tests/php/RememberTokensTest.php` (10) : deux appareils coexistent, pas de rotation
+  d'un jeton récent, rotation + fenêtre de grâce, révocation d'un seul appareil / de tous,
+  jeton expiré, compte supprimé, jeton malformé, plafond de 10, **reprise des anciens
+  jetons par la migration** (le test applique la 056 sur la base, rejouable).
+- `PasswordResetTest` : le changement de mot de passe révoque tous les appareils.
+- Parcours HTTP réel sur la stack Docker (deux contextes de navigateur, session PHP
+  supprimée pour simuler l'hébergeur) : PC encore connecté après la connexion du
+  téléphone ; deux onglets simultanés connectés ; déconnexion du PC sans effet sur le
+  téléphone.
+- PHPUnit complet (418) · PHPStan niveau 5 sans erreur.
+
+### Release
+
+**Jouer la 056 AVANT le `git pull` Hostinger** (checklist « Bloquant release » de
+`TODO.md`) : sans la table, la restauration échoue en silence (`user: null`) et tout
+joueur dont la session PHP a expiré est déconnecté.
+
+---
+
 ## 2026-11-09 — 2.3.4 : la quête Expert « 15 d'affilée » avance de nouveau
 
 Signalement joueur (Zaiko2302) : en All-Out Attack et en Musique, la quête « Gagne 15
@@ -94,7 +157,7 @@ passaient déjà par leur reset.
 
 Un seul jeton « se souvenir de moi » par compte, roté à chaque restauration : un
 deuxième appareil (ou deux onglets) déconnecte l'autre, et en invité la cible du jour
-change. Corrigé dans un lot dédié (migration).
+change. Corrigé dans l'entrée ci-dessus (migration 056).
 
 ### Fichiers
 
