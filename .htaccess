@@ -166,3 +166,17 @@ ErrorDocument 404 /pages/404.html
         Require all denied
     </FilesMatch>
 </IfModule>
+
+# Notes internes du dépôt — jamais servies.
+#
+# Vu le 2026-11-09 sur la prod : /CLAUDE.md, /TODO.md, /DEPLOY.md,
+# /expert_mode_content.md, /nom, /version-all.sh répondaient 200. Le webroot est
+# un clone git : tout Markdown, script shell ou note texte du dépôt y arrive. Le
+# front n'en charge aucun (le changelog joueur est un .html). Exceptions :
+# robots.txt (lu par les moteurs) et LICENSE.txt (public par nature).
+# Test : tests/htaccess_fichiers_internes.test.js.
+<IfModule mod_authz_core.c>
+    <FilesMatch "(?i)\.(md|sh)$|^nom$|^(?!robots\.txt$|license\.txt$).*\.txt$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
