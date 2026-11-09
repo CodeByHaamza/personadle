@@ -43,6 +43,8 @@
     "expert_cond_wins_under_attempts": "Vinci {{required}} partite in 4 tentativi o meno",
     "expert_cond_wins_single_day": "Vinci {{required}} partite in un solo giorno",
     "expert_cond_consecutive_perfects": "Vinci {{required}} partite di fila al primo tentativo",
+    "expert_cond_consecutive_hint": "Ogni partita conta, Ricomincia compreso: una vittoria in 2 o più tentativi azzera la serie.",
+    "expert_best_run": "Record: {{best}} di fila",
     "expert_cond_signin": "Accedi per sbloccare la Modalità Esperto: i tuoi progressi seguono il tuo account.",
     "expert_cond_unknown": "Riconnettiti per vedere i tuoi progressi.",
     "expert_locked_title": "Modalità Esperto bloccata",
