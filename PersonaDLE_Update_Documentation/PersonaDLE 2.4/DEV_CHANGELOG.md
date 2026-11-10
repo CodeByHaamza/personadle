@@ -54,6 +54,21 @@ site, préprod accessible par Tailscale, page de statut publique.
 
 ---
 
+## 2026-11-11 — Les hooks git ne plantent plus quand VS Code ouvre le dossier en « c:\ »
+
+Après le reclonage du 2026-11-10, le pre-push a bloqué un push sain : 87 fichiers de tests
+sur 90 en échec, tous avec « Cannot read properties of undefined (reading 'config') » au
+premier `describe`. Cause : VS Code avait ouvert le dossier en `c:\…` (lettre de lecteur en
+minuscule) tandis que git le voit en `C:/…`. Vitest charge alors deux exemplaires de
+lui-même. Le même test passait depuis un PowerShell en `C:\`.
+
+`.githooks/pre-commit` et `.githooks/pre-push` font désormais
+`cd "$(git rev-parse --show-toplevel)"` juste après `set -e` : les tests tournent toujours
+depuis la racine telle que git la donne. Vérifié depuis un terminal en `c:\` : le test
+qui échouait passe.
+
+---
+
 ## 2026-10-21 — Un écran large mais court ne défile plus pour jouer
 
 
