@@ -173,7 +173,7 @@ export const api = {
 
     /**
      * État de déblocage des 6 Modes Expert pour l'utilisateur connecté.
-     * @returns {Promise<{expert_status: Record<string, {unlocked: boolean, condition_type: string, required: number, current: number}>}>}
+     * @returns {Promise<{expert_status: Record<string, {unlocked: boolean, condition_type: string, required: number, current: number, best: number}>}>}
      */
     expertStatus: () => get("/user/expert-status"),
 

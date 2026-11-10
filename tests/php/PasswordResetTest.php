@@ -186,4 +186,19 @@ final class PasswordResetTest extends TestCase
         // (protège contre un lien de reset réutilisé/partagé par erreur).
         $this->assertNull(personadle_find_user_by_reset_token(self::$pdo, $token));
     }
+
+    public function testApplyNewPasswordRevokesTheRememberMeOfEveryDevice(): void
+    {
+        // Depuis la migration 056, « se souvenir de moi » vit dans remember_tokens,
+        // un jeton par appareil. Changer de mot de passe doit tous les révoquer :
+        // c'est le geste qu'on fait quand on craint qu'un appareil soit compromis.
+        $uid = $this->makeUser();
+        $pc    = personadle_remember_issue(self::$pdo, $uid);
+        $phone = personadle_remember_issue(self::$pdo, $uid);
+
+        personadle_apply_new_password(self::$pdo, $uid, password_hash('An0ther-Passw0rd!', PASSWORD_BCRYPT));
+
+        $this->assertNull(personadle_remember_lookup(self::$pdo, $pc));
+        $this->assertNull(personadle_remember_lookup(self::$pdo, $phone));
+    }
 }
