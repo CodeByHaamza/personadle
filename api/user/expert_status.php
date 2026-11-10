@@ -5,7 +5,10 @@
  * État de déblocage des 6 Modes Expert pour l'utilisateur connecté.
  *
  * Accès : connecté
- * Succès : 200 { expert_status: { <mode>: { unlocked, condition_type, required, current } } }
+ * Succès : 200 { expert_status: { <mode>: { unlocked, condition_type, required, current, best, granted } } }
+ *
+ * `current` = progression affichée (série EN COURS pour les séries d'affilée),
+ * `best` = record, seul juge du déblocage (cf. personadle_expert_progress()).
  *
  * Le serveur ne renvoie AUCUN libellé : seulement `condition_type` et les deux
  * nombres. Le texte de l'infobulle (« 7 / 10 victoires en 4 essais ou moins »)
