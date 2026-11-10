@@ -15,6 +15,16 @@
 | Fichier             | Rôle                                                            |
 | ------------------- | --------------------------------------------------------------- |
 | `Persona5Font.ttf`  | Police display inspirée de l'UI de Persona 5 (titres, accents)  |
+| `google/*.woff2`    | Cinzel, Oswald, Playfair Display, Abril Fatface, Special Elite, Inter, JetBrains Mono, Montserrat — **générés**, ne pas éditer |
+
+### Polices Google auto-hébergées (depuis le 2026-10-20)
+
+Plus aucune page ne charge `fonts.googleapis.com` : les fichiers vivent dans `google/`, déclarés
+par `css/fonts.css`. Les deux sont **générés** par `node scripts/fetch_google_fonts.js` — pour
+ajouter une famille ou une graisse, modifier `FAMILIES` dans ce script et le relancer, puis
+lier `css/fonts.css` dans la page (une seule feuille pour toutes les familles : le navigateur
+ne télécharge que les polices réellement utilisées). `tests/pwa_fonts.test.js` refuse le
+retour d'un lien Google, et la CSP du `.htaccess` ne l'autorise plus.
 
 ## Utilisation
 
