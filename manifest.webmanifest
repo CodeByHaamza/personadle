@@ -1,0 +1,54 @@
+{
+  "name": "PersonaDLE",
+  "short_name": "PersonaDLE",
+  "description": "A daily guessing game set in the Persona universe — six modes, a new puzzle every day.",
+  "id": "./",
+  "start_url": "./index.html?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0c0c0c",
+  "theme_color": "#e63946",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    {
+      "src": "img/app_icons/icon_192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "img/app_icons/icon_512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "img/app_icons/icon_maskable_512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Classic",
+      "url": "./classiqueMode/classiqueMode.html",
+      "icons": [{ "src": "img/app_icons/icon_192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Emoji",
+      "url": "./emojiMode/emojiMode.html",
+      "icons": [{ "src": "img/app_icons/icon_192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Music",
+      "url": "./musicsMode/musics.html",
+      "icons": [{ "src": "img/app_icons/icon_192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Profile",
+      "url": "./profile/profile.html",
+      "icons": [{ "src": "img/app_icons/icon_192.png", "sizes": "192x192" }]
+    }
+  ]
+}
