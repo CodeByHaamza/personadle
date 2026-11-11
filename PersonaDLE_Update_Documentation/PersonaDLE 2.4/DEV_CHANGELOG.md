@@ -29,7 +29,7 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 5 | `feat/remontee_erreurs_js` (#234) | Les erreurs JS des joueurs remontent dans l'admin et sur Discord |
 | 6 | Dependabot (#240, #242) | Dépendances de dev (jsdom 31) |
 | 7 | `fix/profil_debordement_mobile` | Le profil déborde de 12–14 px à 390/480 px (alerte `prod_smoke` chaque nuit depuis le 2026-10-12) |
-| 8 | `feat/discord_fin_de_partie` | Discord au bon moment : fin de partie, journée 6/6, profil, menu Jouer ; membres en ligne ; modale recentrée |
+| 8 | `feat/discord_fin_de_partie` | Discord au bon moment : fin de partie, journée 6/6, profil, menu Jouer ; membres en ligne ; modale recentrée — **fait** |
 | 9 | `feat/codes_evenement_discord` | Codes événement exclusifs au Discord (badge ou titre) |
 | 10 | `feat/partage_journee` | Partage « journée complète » des six modes |
 | 11 | `feat/prochains_deblocages` | Profil : quêtes Expert et badges les plus proches |
@@ -41,6 +41,11 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 17 | `docs/readme_anime` | README façon thème GRUB : bannière et citation animées, démo des six modes |
 | 18 | `chore/menage_depot` | Fichiers inutiles retirés, trois documents de planification fusionnés, identifiant Hostinger retiré des fichiers suivis |
 
+Depuis le lot 8, les lots sont des **commits successifs d'une seule branche,
+`feat/v2_4_suite`** (partie du lot 7), avec une seule PR vers `develop` : Hamza teste
+l'ensemble en local puis en préprod avant toute fusion (décision du 2026-11-11). Les noms
+de branche du tableau restent ceux des commits.
+
 Hors dépôt du jeu (`personadle-discord`) : Aigis (livré le 2026-11-09), sauvegardes hors
 site, préprod accessible par Tailscale, page de statut publique.
 
@@ -51,6 +56,92 @@ site, préprod accessible par Tailscale, page de statut publique.
 - **« Puzzle commun du jour »** (une cible identique pour tous) : idée validée sur le
   principe, à cadrer avant d'en faire un lot — reportée à la 2.5 avec la salle à part
   (Archives de Velvet, Cognition) et l'OAuth Discord.
+
+---
+
+## 2026-11-11 — Lot 8 : le Discord, au moment où on a envie d'en parler
+
+Mesure du 2026-11-09 : 68 membres, **2 arrivées en 30 jours**. Le seul chemin vers le
+serveur était l'icône Discord en bas de l'accueil, qui ouvrait une modale où le serveur
+partenaire passait en premier. Or le moment où un joueur a envie d'en parler, c'est juste
+après une victoire, et plus encore après une journée 6/6.
+
+### Ce qui change pour le joueur
+
+- **Après une victoire**, sous la navigation de fin de partie : une carte « Bien joué !
+  Poste ta grille sur Discord ». Son bouton copie le résultat (le même texte que
+  « Partager mon résultat ») et ouvre le serveur. L'argument est vrai et rassurant :
+  chaque joueur a sa propre cible, la grille ne divulgue rien.
+- **Après la 6e victoire du jour** : la même carte, en version « 🏆 6/6 aujourd'hui ».
+- **Compteur** : « 69 membres · 8 en ligne », sous des seuils (50 membres, 5 en ligne) au-dessous
+  desquels il ne s'affiche pas. « 2 en ligne » ferait fuir.
+- **Feuille « Jouer »** (barre du bas, téléphone) : à 6/6, un lien vers le serveur sous la
+  liste des modes.
+- **Profil** : la fenêtre de partage avait « Copier pour Discord » sans dire où coller ;
+  un lien vers le serveur sous les quatre boutons.
+- **Modale Discord de l'accueil** : PersonaDLE en premier (liseré, « ⭐ Officiel ·
+  🌍 International »), le Grimoire du Cœur ensuite. Le texte « toujours actif » est
+  retiré : la mesure dit le contraire (seul `#general` vit).
+- Au passage : la pastille « N à jouer » de la barre du bas restait au chiffre du
+  chargement (6 juste après une victoire). Elle se met à jour en fin de partie.
+
+### Retenue (pour ne pas devenir une pub)
+
+Une seule carte par jour, plus une pour le 6/6. Elle revient seulement quand c'est la
+**même** partie qui se réaffiche (rechargement). Jamais après un abandon, jamais pendant un
+défi : on repart de `readCurrentResult()`, qui exclut déjà ces cas. Le ✕ (« Masquer — je
+suis déjà sur le serveur ») la fait taire pour de bon sur l'appareil.
+
+### Détails techniques
+
+- `api/discord_counts.php` + `api/lib/discord_counts.php` : proxy de l'endpoint **public**
+  d'invitation de Discord (`/api/v10/invites/<code>?with_counts=true`), qui donne membres et
+  présents **sans jeton et sans widget** (le widget du serveur est désactivé : 403). On passe
+  par un proxy plutôt que par le navigateur pour trois raisons : l'IP des joueurs ne part
+  pas chez Discord avant leur clic, la CSP (`connect-src`) reste fermée, et Discord n'est
+  appelé que toutes les 10 min (cache). En cas de panne, le dernier chiffre sert encore
+  un jour, avec 60 s entre deux essais. `fetched_at` (date des chiffres) et `checked_at`
+  (dernier essai) sont séparés : sinon un chiffre périmé, réécrit à chaque échec,
+  survivrait indéfiniment. Le cache vit dans `sys_get_temp_dir()` et non dans le webroot,
+  dont le `git status` doit rester propre pour le déploiement auto.
+  Les valeurs relues sont bornées, `/tmp` n'étant pas de confiance.
+- `js/discord_nudge.js` : `pickNudgeVariant()` (pure), `countsLine()`,
+  `fetchDiscordCounts()` (cache 5 min en `sessionStorage`) et `mountDiscordNudge()`, appelé
+  par `revealNextLink()` comme le bouton Partager. La carte est posée **après**
+  `#modeNavigationContainer`, pas dedans : la nav est une rangée flex
+  prev/partage/défi/suivant qu'une carte casserait. Un `MutationObserver` sur le `style`
+  de la nav la cache quand une nouvelle partie démarre (Replay, filtre, minuit).
+- Le bouton est un `<a target="_blank">` et non `window.open()`, donc jamais bloqué comme
+  popup. La copie démarre dans le clic, tant que la page a le focus.
+- `currentShareText()` et `toast()` sortis de `js/share_result.js`, partagés par les deux
+  boutons. `DISCORD_INVITE_URL` dans `gameCore.js`, partagé par la carte et la feuille
+  « Jouer ».
+- Logo blanc sur pastille Discord : le SVG des liens sociaux est noir (pas de `fill`) et
+  disparaissait en mode nuit. Le filtre est sur l'`<img>` seule : posé sur la pastille, il
+  inverserait aussi son fond.
+- i18n : section `discord` (8 clés), `nav.play_discord`, `profile.share_open_server`, et
+  `index.discord_personadle_tag/desc` réécrits, dans les 6 langues.
+- Tests : `tests/discord_nudge.test.js` (14), `tests/php/DiscordCountsTest.php` (5),
+  un cas de plus dans `tests/bottomNav.test.js`.
+
+### Vérifié à l'écran (pile Docker)
+
+Victoire réelle en Classique (390 px mobile et 1280 px, clair et nuit) :
+- la carte est sous la navigation, avec le compteur réel (69 · 8) ;
+- elle revient au rechargement ;
+- elle reste atteignable au-dessus de la barre du bas ;
+- aucun débordement à 390 px.
+
+Modale et feuille « Jouer » à 6/6 contrôlées aussi.
+
+### Angles morts
+
+- À 1280 px, la page Classique fait 1 309 px de large **avant même ce lot** : une
+  infobulle `.tooltip-text` déborde à droite. Noté pour le lot 13.
+- Le lien d'invitation arrive sur `📜┃rules` (réglage de l'invitation côté Discord).
+  Pour que « colle-le sur le serveur » soit évident, un fil « scores du jour » sous le
+  quotidien serait le bon point de chute : à faire côté bot (`personadle-discord`).
+- Compteur « approximatif » côté Discord : il peut retarder de quelques minutes.
 
 ---
 

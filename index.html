@@ -667,7 +667,8 @@
     <!-- =====================================================
      💬 Modale Discord — collab PersonaDLE × Le Grimoire du Cœur
      Ouverte par le bouton Discord des liens sociaux (#discordBtn).
-     Deux serveurs côte à côte : Grimoire (FR, +actif) / PersonaDLE (international).
+     Deux serveurs côte à côte : PersonaDLE (officiel, international) en premier depuis la
+     2.4, puis le Grimoire (partenaire FR, le plus actif).
      Icônes servies en statique depuis assets/discord/ (CSP img-src 'self').
      ===================================================== -->
     <div
@@ -698,6 +699,34 @@
         </div>
 
         <div class="discord-servers">
+          <!-- PersonaDLE — serveur officiel, en tête depuis la 2.4 (lot 8) : c'est lui qu'on
+               veut faire grandir ; le Grimoire reste la porte d'entrée francophone. -->
+          <a
+            class="discord-server-card discord-server-card--official"
+            href="https://discord.gg/wpMdGGDp3y"
+            target="_blank"
+            rel="noopener"
+          >
+            <img
+              class="discord-server-icon"
+              src="./assets/discord/personadle_server.png"
+              alt="PersonaDLE"
+              width="76"
+              height="76"
+              loading="lazy"
+            />
+            <span
+              class="discord-server-tag discord-tag-intl"
+              data-i18n="index.discord_personadle_tag"
+              >⭐ Official · 🌍 International</span
+            >
+            <span class="discord-server-name">PersonaDLE</span>
+            <span class="discord-server-desc" data-i18n="index.discord_personadle_desc">
+              The official PersonaDLE server: post your grids, report bugs, share feedback — and
+              we're recruiting!
+            </span>
+            <span class="discord-join-btn" data-i18n="index.discord_join">Join</span>
+          </a>
           <!-- Le Grimoire du Cœur — serveur FR partenaire, le plus actif -->
           <a
             class="discord-server-card"
@@ -724,33 +753,6 @@
             <span class="discord-join-btn" data-i18n="index.discord_join">Join</span>
           </a>
 
-          <!-- PersonaDLE — serveur officiel, international -->
-          <a
-            class="discord-server-card"
-            href="https://discord.gg/wpMdGGDp3y"
-            target="_blank"
-            rel="noopener"
-          >
-            <img
-              class="discord-server-icon"
-              src="./assets/discord/personadle_server.png"
-              alt="PersonaDLE"
-              width="76"
-              height="76"
-              loading="lazy"
-            />
-            <span
-              class="discord-server-tag discord-tag-intl"
-              data-i18n="index.discord_personadle_tag"
-              >🌍 International</span
-            >
-            <span class="discord-server-name">PersonaDLE</span>
-            <span class="discord-server-desc" data-i18n="index.discord_personadle_desc">
-              The official PersonaDLE server — always active, English-friendly. Bug reports,
-              feedback, and we're recruiting!
-            </span>
-            <span class="discord-join-btn" data-i18n="index.discord_join">Join</span>
-          </a>
         </div>
       </div>
     </div>

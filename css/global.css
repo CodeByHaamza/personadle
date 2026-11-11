@@ -3776,6 +3776,11 @@ body.darkmode #rulesModal em {
   border-color: #5865f2;
   box-shadow: 0 8px 26px rgba(88, 101, 242, 0.35);
 }
+/* Le serveur officiel en tête (2.4, lot 8) : liseré et halo, sans éteindre le partenaire. */
+.discord-server-card--official {
+  border: 2px solid #5865f2;
+  box-shadow: 0 0 0 4px rgba(88, 101, 242, 0.14);
+}
 
 .discord-server-icon {
   width: 76px;
@@ -4240,6 +4245,173 @@ body.darkmode .btn-share-result {
   font-weight: 700;
   font-size: 0.85rem;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+/* =============================================================================
+   CARTE DISCORD DE FIN DE PARTIE (js/discord_nudge.js) — lot 8 de la 2.4
+   Posée juste APRÈS #modeNavigationContainer (pas dedans : la nav est une
+   rangée flex prev/partage/défi/suivant qu'une carte casserait). Le JS la cache
+   quand la nav se recache ; `[hidden]` doit donc battre le `display: grid`.
+   ============================================================================= */
+.discord-nudge {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px 14px;
+  position: relative;
+  width: min(560px, 100%);
+  box-sizing: border-box;
+  margin: -24px auto 40px;
+  padding: 14px 44px 14px 16px;
+  background: #fff;
+  color: #1a1a1a;
+  border: 2px solid #1a1a1a;
+  border-radius: 14px;
+  box-shadow: 4px 4px 0 #5865f2;
+  font-family: inherit;
+  text-align: left;
+  animation: discordNudgeIn 0.35s ease both;
+}
+.discord-nudge[hidden] {
+  display: none;
+}
+.discord-nudge--perfect_day {
+  box-shadow: 4px 4px 0 #f4b400;
+  border-color: #b8860b;
+}
+/* Logo blanc sur pastille Discord : le SVG des liens sociaux est noir (pas de
+   fill) et disparaissait sur le fond du mode nuit. Le filtre est sur l'<img>
+   seule — posé sur la pastille, il inverserait aussi son fond. */
+.discord-nudge__logo {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #5865f2;
+}
+.discord-nudge__logo img {
+  width: 26px;
+  height: 26px;
+  filter: brightness(0) invert(1);
+}
+.discord-nudge__body {
+  min-width: 0;
+}
+.discord-nudge__title {
+  margin: 0 0 2px;
+  font-size: 0.98rem;
+  font-weight: 800;
+}
+.discord-nudge__text,
+.discord-nudge__count {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: #4a4a4a;
+}
+.discord-nudge__count {
+  margin-top: 4px;
+  font-weight: 700;
+  color: #4752c4;
+}
+.discord-nudge__count::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #23a55a;
+  vertical-align: 1px;
+}
+/* Un <a> : pas concerné par le min-height des <button> (§18 de global.css). */
+.discord-nudge__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 8px 18px;
+  border-radius: 100px;
+  background: #5865f2;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.discord-nudge__cta:hover,
+.discord-nudge__cta:focus-visible {
+  background: #4752c4;
+}
+.discord-nudge__close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 32px;
+  height: 32px;
+  min-height: 0; /* §18 : sinon 32×48 */
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #777;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.discord-nudge__close:hover,
+.discord-nudge__close:focus-visible {
+  background: rgba(0, 0, 0, 0.07);
+  color: #1a1a1a;
+}
+
+body.darkmode .discord-nudge {
+  background: #141414;
+  color: #fff;
+  border-color: #fff;
+}
+body.darkmode .discord-nudge--perfect_day {
+  border-color: #f4b400;
+}
+body.darkmode .discord-nudge__text {
+  color: #bbb;
+}
+body.darkmode .discord-nudge__count {
+  color: #9aa3ff;
+}
+body.darkmode .discord-nudge__close {
+  color: #aaa;
+}
+body.darkmode .discord-nudge__close:hover,
+body.darkmode .discord-nudge__close:focus-visible {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+@keyframes discordNudgeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (max-width: 480px) {
+  .discord-nudge {
+    grid-template-columns: auto minmax(0, 1fr);
+    margin-top: -16px;
+  }
+  .discord-nudge__cta {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .discord-nudge {
+    animation: none;
+  }
 }
 
 /* =====================================================================

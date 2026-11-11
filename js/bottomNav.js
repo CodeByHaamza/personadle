@@ -46,7 +46,7 @@ function _normalizeAvatar(avatar) {
  * Identifie la page courante d'après l'URL.
  * @returns {'home' | 'profile' | 'other'}
  */
-import { siteRootPrefix } from "./gameCore.js";
+import { DISCORD_INVITE_URL, siteRootPrefix } from "./gameCore.js";
 import { dailyProgress, MODE_ICON, modeHref } from "./daily_status.js";
 
 /** Traduction avec repli (CLAUDE.md §5 : t(key) rend la clé si elle manque). */
@@ -306,6 +306,14 @@ export function buildPlaySheetHTML(progress, currentPath = window.location.pathn
         <span class="play-sheet-count">${progress.done} / ${progress.total}</span>
       </h2>
       <div class="play-sheet-list">${items}</div>
+      ${
+        progress.total > 0 && progress.done >= progress.total
+          ? `<a class="play-sheet-discord" href="${DISCORD_INVITE_URL}" target="_blank" rel="noopener">
+               <span aria-hidden="true">💬</span>
+               <span>${_t("nav.play_discord", "All done for today — come chat on Discord")}</span>
+             </a>`
+          : ""
+      }
     </div>`;
 }
 

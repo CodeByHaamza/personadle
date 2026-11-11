@@ -2369,6 +2369,28 @@ body.darkmode .share-color-picker {
   opacity: 0.88;
 }
 
+/* Lien vers le serveur, sous les quatre boutons (2.4, lot 8). Un <a> : pas de
+   min-height de <button> (§18 de global.css). */
+.share-server-link {
+  grid-column: 1 / -1;
+  justify-self: center;
+  padding: 6px 4px;
+  color: #4752c4;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.share-server-link:hover,
+.share-server-link:focus-visible {
+  color: #5865f2;
+}
+
+body.darkmode .share-server-link {
+  color: #9aa3ff;
+}
+
 /* Email — outline rouge */
 .share-btn--email {
   background: transparent;

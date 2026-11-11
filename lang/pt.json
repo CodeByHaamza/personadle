@@ -376,6 +376,7 @@
     "share_download": "Transferir PNG",
     "share_on_x": "Partilhar no X",
     "share_discord": "Copiar para o Discord",
+    "share_open_server": "Abrir o servidor Discord do PersonaDLE →",
     "share_email": "E-mail",
     "theme_custom": "Cor personalizada",
     "friend_code_copy_hint": "Clica para copiar o teu código de amigo",
@@ -1072,8 +1073,8 @@
     "discord_modal_sub": "Dois servidores, uma só família Persona.",
     "discord_grimoire_tag": "🇫🇷 Servidor francês",
     "discord_grimoire_desc": "A nossa comunidade parceira francófona — a mais ativa. Eventos, discussões e toda a cena Persona FR.",
-    "discord_personadle_tag": "🌍 Internacional",
-    "discord_personadle_desc": "O servidor oficial do PersonaDLE — sempre ativo, em inglês. Reportes de bugs, feedback, e estamos a recrutar!",
+    "discord_personadle_tag": "⭐ Oficial · 🌍 Internacional",
+    "discord_personadle_desc": "O servidor oficial do PersonaDLE: publica as tuas grelhas, reporta bugs, dá a tua opinião — e estamos a recrutar!",
     "discord_join": "Juntar",
     "daily_btn": "🕛 Reset Diário",
     "daily_title": "🕛 Reset Diário",
@@ -1577,6 +1578,17 @@
     "play_todo": "Por jogar",
     "play_left": "Faltam {{count}} hoje",
     "play_all_done": "Todos os modos jogados hoje",
-    "home_status_done": "Jogado hoje"
+    "home_status_done": "Jogado hoje",
+    "play_discord": "Tudo jogado por hoje — vem conversar no Discord"
+  },
+  "discord": {
+    "nudge_win_title": "Boa! Publica a tua grelha no Discord",
+    "nudge_perfect_title": "🏆 6/6 hoje! Vem mostrá-lo no Discord",
+    "nudge_text": "Cada um tem o seu próprio alvo: a tua grelha não revela nada.",
+    "nudge_cta": "Copiar e abrir o Discord",
+    "nudge_copied": "Resultado copiado — cola-o no servidor!",
+    "nudge_hide": "Esconder — já estou no servidor",
+    "members": "{{members}} membros",
+    "online": "{{online}} online agora"
   }
 }

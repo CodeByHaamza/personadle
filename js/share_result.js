@@ -117,7 +117,7 @@ export function buildShareText({ mode, result, attempts, isExpert = false, day, 
   return lines.join("\n");
 }
 
-function _toast(msg) {
+export function toast(msg) {
   if (typeof window.showToast === "function") {
     window.showToast(msg); // bottomNav.js
     return;
@@ -151,6 +151,18 @@ export async function shareText(text, nav = navigator) {
   }
 }
 
+/**
+ * Texte à partager pour la partie affichée (grille de couleurs en Classique
+ * normal, ligne d'essais ailleurs). Sert aussi à la carte Discord
+ * (js/discord_nudge.js), qui copie le résultat avant d'ouvrir le serveur.
+ * @returns {string|null}
+ */
+export function currentShareText(doc = document, result = readCurrentResult()) {
+  if (!result) return null;
+  const isClassic = normalizeModeKey(result.mode) === "classic" && !result.isExpert;
+  return buildShareText({ ...result, grid: isClassic ? readClassicGrid(doc) : [] });
+}
+
 /** Monte le bouton dans la navigation de fin de partie (#modeNavigationContainer). */
 export function mountShareButton(doc = document) {
   const nav = doc.getElementById("modeNavigationContainer");
@@ -164,12 +176,10 @@ export function mountShareButton(doc = document) {
   btn.className = "btn-share-result";
   btn.innerHTML = `<span aria-hidden="true">📋</span><span>${_t("share.button", "Share my result")}</span>`;
   btn.addEventListener("click", async () => {
-    const current = readCurrentResult() ?? result;
-    const isClassic = normalizeModeKey(current.mode) === "classic" && !current.isExpert;
-    const text = buildShareText({ ...current, grid: isClassic ? readClassicGrid(doc) : [] });
+    const text = currentShareText(doc, readCurrentResult() ?? result);
     const outcome = await shareText(text);
-    if (outcome === "copied") _toast(_t("share.copied", "Result copied — paste it anywhere!"));
-    else if (outcome === "failed") _toast(_t("share.failed", "Couldn't copy the result."));
+    if (outcome === "copied") toast(_t("share.copied", "Result copied — paste it anywhere!"));
+    else if (outcome === "failed") toast(_t("share.failed", "Couldn't copy the result."));
   });
   nav.prepend(btn);
   return btn;

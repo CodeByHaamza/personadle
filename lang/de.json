@@ -376,6 +376,7 @@
     "share_download": "PNG herunterladen",
     "share_on_x": "Auf X teilen",
     "share_discord": "Für Discord kopieren",
+    "share_open_server": "PersonaDLE-Discord-Server öffnen →",
     "share_email": "E-Mail",
     "theme_custom": "Benutzerdefinierte Farbe",
     "friend_code_copy_hint": "Klicken, um deinen Freundescode zu kopieren",
@@ -1220,8 +1221,8 @@
     "discord_modal_sub": "Zwei Server, eine Persona-Familie.",
     "discord_grimoire_tag": "🇫🇷 Französischer Server",
     "discord_grimoire_desc": "Unsere französischsprachige Partner-Community — die aktivste. Events, Diskussionen und die ganze Persona-FR-Szene.",
-    "discord_personadle_tag": "🌍 International",
-    "discord_personadle_desc": "Der offizielle PersonaDLE-Server — immer aktiv, englischsprachig. Bug-Reports, Feedback, und wir rekrutieren!",
+    "discord_personadle_tag": "⭐ Offiziell · 🌍 International",
+    "discord_personadle_desc": "Der offizielle PersonaDLE-Server: Teile deine Raster, melde Bugs, gib Feedback — und wir rekrutieren!",
     "discord_join": "Beitreten",
     "daily_btn": "🕛 Tages-Reset",
     "daily_title": "🕛 Tages-Reset",
@@ -1577,6 +1578,17 @@
     "play_todo": "Offen",
     "play_left": "Heute noch {{count}}",
     "play_all_done": "Heute alle Modi gespielt",
-    "home_status_done": "Heute gespielt"
+    "home_status_done": "Heute gespielt",
+    "play_discord": "Für heute alles gespielt — komm zum Plaudern auf Discord"
+  },
+  "discord": {
+    "nudge_win_title": "Gut gemacht! Teile dein Raster auf Discord",
+    "nudge_perfect_title": "🏆 6/6 heute! Zeig es auf Discord",
+    "nudge_text": "Jeder hat sein eigenes Ziel: Dein Raster verrät nichts.",
+    "nudge_cta": "Kopieren & Discord öffnen",
+    "nudge_copied": "Ergebnis kopiert — füge es auf dem Server ein!",
+    "nudge_hide": "Ausblenden — ich bin schon auf dem Server",
+    "members": "{{members}} Mitglieder",
+    "online": "{{online}} gerade online"
   }
 }

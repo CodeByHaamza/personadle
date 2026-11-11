@@ -795,6 +795,13 @@ function foldText(s) {
   return Array.from(s, foldChar).join("");
 }
 
+/**
+ * Invitation du serveur Discord officiel PersonaDLE (n'expire jamais). Une seule
+ * source pour la carte de fin de partie (discord_nudge.js) et la feuille « Jouer »
+ * (bottomNav.js) ; le footer et la modale de l'accueil l'ont en dur dans le HTML.
+ */
+export const DISCORD_INVITE_URL = "https://discord.gg/wpMdGGDp3y";
+
 // ─────────────────────────────────────────────────────────────────────────────
 // MODES — source unique de vérité pour le vocabulaire des modes de jeu
 // ─────────────────────────────────────────────────────────────────────────────
@@ -960,6 +967,12 @@ export function revealNextLink({ nextHref = "", prevHref = null } = {}) {
     // Bouton « Partager mon résultat » : la fin de partie des six modes passe ici,
     // rechargement compris. Import dynamique (cycle évité, voir buildGameSession).
     import("./share_result.js").then((m) => m.mountShareButton()).catch(() => {});
+    // Carte « Poste ta grille sur Discord » après une victoire (lot 8 de la 2.4).
+    import("./discord_nudge.js").then((m) => m.mountDiscordNudge()).catch(() => {});
+    // La pastille « N à jouer » de la barre du bas était calculée au chargement :
+    // elle affichait encore 6 juste après la partie. Sans effet si la barre est
+    // absente (updatePlayBadge ne trouve pas #navPlayBadge).
+    import("./bottomNav.js").then((m) => m.updatePlayBadge()).catch(() => {});
     // Delay the scroll so the layout has time to update
     setTimeout(() => {
       nav.scrollIntoView({ behavior: "smooth", block: "center" });

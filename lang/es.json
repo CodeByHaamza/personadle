@@ -376,6 +376,7 @@
     "share_download": "Descargar PNG",
     "share_on_x": "Compartir en X",
     "share_discord": "Copiar para Discord",
+    "share_open_server": "Abrir el servidor de Discord de PersonaDLE →",
     "share_email": "Correo",
     "theme_custom": "Color personalizado",
     "friend_code_copy_hint": "Haz clic para copiar tu código de amigo",
@@ -1220,8 +1221,8 @@
     "discord_modal_sub": "Dos servidores, una sola familia Persona.",
     "discord_grimoire_tag": "🇫🇷 Servidor francés",
     "discord_grimoire_desc": "Nuestra comunidad asociada francófona — la más activa. Eventos, debates y toda la escena Persona FR.",
-    "discord_personadle_tag": "🌍 Internacional",
-    "discord_personadle_desc": "El servidor oficial de PersonaDLE — siempre activo, en inglés. Reportes de bugs, sugerencias, ¡y estamos reclutando!",
+    "discord_personadle_tag": "⭐ Oficial · 🌍 Internacional",
+    "discord_personadle_desc": "El servidor oficial de PersonaDLE: publica tus cuadrículas, reporta bugs, da tu opinión — ¡y estamos reclutando!",
     "discord_join": "Unirse",
     "daily_btn": "🕛 Reset Diario",
     "daily_title": "🕛 Reset Diario",
@@ -1577,6 +1578,17 @@
     "play_todo": "Por jugar",
     "play_left": "Quedan {{count}} hoy",
     "play_all_done": "Todos los modos jugados hoy",
-    "home_status_done": "Jugado hoy"
+    "home_status_done": "Jugado hoy",
+    "play_discord": "Todo jugado por hoy — ven a charlar en Discord"
+  },
+  "discord": {
+    "nudge_win_title": "¡Bien hecho! Publica tu cuadrícula en Discord",
+    "nudge_perfect_title": "🏆 ¡6/6 hoy! Preséntalo en Discord",
+    "nudge_text": "Cada uno tiene su propio objetivo: tu cuadrícula no revela nada.",
+    "nudge_cta": "Copiar y abrir Discord",
+    "nudge_copied": "Resultado copiado — ¡pégalo en el servidor!",
+    "nudge_hide": "Ocultar — ya estoy en el servidor",
+    "members": "{{members}} miembros",
+    "online": "{{online}} en línea"
   }
 }

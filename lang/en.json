@@ -376,6 +376,7 @@
     "share_download": "Download PNG",
     "share_on_x": "Share on X",
     "share_discord": "Copy for Discord",
+    "share_open_server": "Open the PersonaDLE Discord server →",
     "share_email": "Email",
     "theme_custom": "Custom color",
     "friend_code_copy_hint": "Click to copy your friend code",
@@ -1072,8 +1073,8 @@
     "discord_modal_sub": "Two servers, one Persona family.",
     "discord_grimoire_tag": "🇫🇷 French server",
     "discord_grimoire_desc": "Our French-speaking partner community — the most active. Events, discussions and the whole Persona FR scene.",
-    "discord_personadle_tag": "🌍 International",
-    "discord_personadle_desc": "The official PersonaDLE server — always active, English-friendly. Bug reports, feedback, and we're recruiting!",
+    "discord_personadle_tag": "⭐ Official · 🌍 International",
+    "discord_personadle_desc": "The official PersonaDLE server: post your grids, report bugs, share feedback — and we're recruiting!",
     "discord_join": "Join",
     "daily_btn": "🕛 Daily Reset",
     "daily_title": "🕛 Daily Reset",
@@ -1577,6 +1578,17 @@
     "play_todo": "To play",
     "play_left": "{{count}} left today",
     "play_all_done": "All modes played today",
-    "home_status_done": "Played today"
+    "home_status_done": "Played today",
+    "play_discord": "All done for today — come chat on Discord"
+  },
+  "discord": {
+    "nudge_win_title": "Nice one! Post your grid on Discord",
+    "nudge_perfect_title": "🏆 6/6 today! Show it off on Discord",
+    "nudge_text": "Everyone gets their own target: your grid spoils nothing.",
+    "nudge_cta": "Copy & open Discord",
+    "nudge_copied": "Result copied — paste it on the server!",
+    "nudge_hide": "Hide — I'm already on the server",
+    "members": "{{members}} members",
+    "online": "{{online}} online now"
   }
 }

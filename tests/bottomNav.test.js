@@ -186,6 +186,24 @@ describe("buildPlaySheetHTML", () => {
     expect(items[1].getAttribute("aria-current")).toBe("page");
     expect(doc.querySelector(".play-sheet-count").textContent).toBe("1 / 6");
   });
+
+  it("offers the Discord server only once all six modes are played", () => {
+    setPath("/index.html");
+    const partial = new DOMParser().parseFromString(
+      buildPlaySheetHTML(progress, "/index.html"),
+      "text/html"
+    );
+    expect(partial.querySelector(".play-sheet-discord")).toBeNull();
+
+    const all = { ...progress, done: 6, modes: progress.modes.map((m) => ({ ...m, done: true })) };
+    const done = new DOMParser().parseFromString(
+      buildPlaySheetHTML(all, "/index.html"),
+      "text/html"
+    );
+    const link = done.querySelector(".play-sheet-discord");
+    expect(link.getAttribute("href")).toMatch(/^https:\/\/discord\.gg\//);
+    expect(link.getAttribute("rel")).toBe("noopener");
+  });
 });
 
 describe("updatePlayBadge", () => {
