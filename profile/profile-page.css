@@ -853,6 +853,35 @@ body.darkmode .stat-streak-t0 {
   transform: translateY(-1px);
 }
 
+/* Jack Frost au repos (cooldown 60 j) : un texte, pas un bouton grisé — il n'y
+   a rien à cliquer, et un bouton désactivé passerait pour un bug. */
+.srp-cooldown {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px dashed rgba(100, 180, 220, 0.5);
+  color: #2b6f86;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+body.darkmode .srp-cooldown {
+  color: #8fd3ea;
+  border-color: rgba(100, 200, 240, 0.35);
+}
+
+/* Série gelée : le chiffre reste lisible (c'est lui que Jack Frost rend), mais
+   comme pris dans la glace. Pas d'animation sur `opacity`/`transform` : la
+   tuile hérite déjà de streakIceGlow + fadeSlideUp (palier 0). */
+.stat-streak--frozen .stat-value {
+  color: #4a9bb8;
+  text-shadow: 0 0 6px rgba(140, 210, 240, 0.7);
+}
+
+body.darkmode .stat-streak--frozen .stat-value {
+  color: #9edcf2;
+}
+
 /* =====================================================
    6c. MODE BREAKDOWN STATS
    ===================================================== */

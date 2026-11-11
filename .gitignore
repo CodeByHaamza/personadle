@@ -178,6 +178,16 @@ PersonaDLE_Update_Documentation/PersonaDLE 2.3/*
 !PersonaDLE_Update_Documentation/PersonaDLE 2.3/*.jpeg
 !PersonaDLE_Update_Documentation/PersonaDLE 2.3/*.gif
 !PersonaDLE_Update_Documentation/PersonaDLE 2.3/*.webp
+!PersonaDLE_Update_Documentation/PersonaDLE 2.4
+PersonaDLE_Update_Documentation/PersonaDLE 2.4/*
+!PersonaDLE_Update_Documentation/PersonaDLE 2.4/PersonaDLE_Update.html
+!PersonaDLE_Update_Documentation/PersonaDLE 2.4/DEV_CHANGELOG.md
+!PersonaDLE_Update_Documentation/PersonaDLE 2.4/TEST_PLAN.md
+!PersonaDLE_Update_Documentation/PersonaDLE 2.4/*.png
+!PersonaDLE_Update_Documentation/PersonaDLE 2.4/*.jpg
+!PersonaDLE_Update_Documentation/PersonaDLE 2.4/*.jpeg
+!PersonaDLE_Update_Documentation/PersonaDLE 2.4/*.gif
+!PersonaDLE_Update_Documentation/PersonaDLE 2.4/*.webp
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Dossier de staging local pour les assets en attente d'ingestion (voir
@@ -195,11 +205,16 @@ graphify-out/
 .graphifyignore
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Outils de développement personnel (Claude Code, Superpowers)
+# Outillage de développement local : jamais versionné (décision du 2026-11-10,
+# avec la sortie du guide du mainteneur — aucune exception, agents compris).
 # ─────────────────────────────────────────────────────────────────────────────
 .claude/
 .superpowers/
 docs/superpowers/
+# Guide du mainteneur pour l'assistant : local, plus versionné depuis le 2026-11-09
+# (décision Hamza). Copie privée : personadle-discord/docs/CLAUDE.personadle.md.
+CLAUDE.md
+CLAUDE.local.md
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Données personnelles de test

@@ -14,9 +14,7 @@
             }
         })();
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/fonts.css" />
     <style>
         /* ── Theme variables ── */
         :root {
@@ -1279,7 +1277,6 @@
             .kotone-ribbon { animation: none; }
         }
 
-
         /* ═══════════════════════════════════════════════════════════════════
            GRILLE DES NOUVEAUX PORTRAITS
 
@@ -1802,42 +1799,6 @@
                 <em>Thanatos</em> — the persona she wields in <em>Persona 4 Arena
                 Ultimax</em>. Personae mode already knew; the Classic grid said otherwise.
                 Theodore still wields no persona.</li>
-        </ul>
-    </div>
-
-    <!-- ═══════════════════════════════════
-         NAVIGATION MOBILE
-    ═══════════════════════════════════ -->
-
-    <div data-i18n-block="fr"><h1>📱 Jouer sur téléphone sans défiler</h1></div>
-    <div data-i18n-block="en"><h1>📱 Play on your phone without scrolling</h1></div>
-
-    <div data-i18n-block="fr">
-        <ul>
-            <li>Dans les six modes, la <strong>zone de réponse reste collée en bas</strong> de
-                l'écran, juste au-dessus de la barre de navigation : plus besoin de défiler à
-                chaque essai, même avec une grande silhouette ou une animation au-dessus.</li>
-            <li>Nouveau bouton <strong>▶ Jouer</strong> dans la barre du bas : il affiche les six
-                modes, ceux déjà joués aujourd'hui, et vous y emmène d'un tap.</li>
-            <li>Sur l'accueil, les six modes tiennent sur un seul écran, et un ✓ marque ceux que
-                vous avez déjà faits aujourd'hui.</li>
-            <li>Sur le profil, les statistiques passent sur deux colonnes et les sections
-                secondaires se replient d'un tap.</li>
-            <li>La barre de navigation est enfin traduite dans votre langue.</li>
-        </ul>
-    </div>
-    <div data-i18n-block="en">
-        <ul>
-            <li>In all six modes, the <strong>answer field now sticks to the bottom</strong> of
-                the screen, right above the navigation bar: no more scrolling for every guess,
-                even with a big silhouette or animation above it.</li>
-            <li>New <strong>▶ Play</strong> button in the bottom bar: it shows the six modes,
-                which ones you already played today, and takes you there in one tap.</li>
-            <li>On the home page, all six modes fit on one screen, and a ✓ marks the ones you
-                already did today.</li>
-            <li>On your profile, stats now use two columns and secondary sections fold away
-                with a tap.</li>
-            <li>The navigation bar is finally translated into your language.</li>
         </ul>
     </div>
 
@@ -2523,6 +2484,24 @@
                 à la fin d'une partie, en normal comme en Expert : il n'y avait plus aucun moyen
                 d'en relancer une sans recharger la page. Il est de retour. Nos excuses — c'est
                 une correction de la mise à jour précédente qui l'avait emporté avec elle.</li>
+
+            <li><strong>Quêtes du Mode Expert</strong> — en All-Out Attack, Personae et Musique,
+                la quête « 15 parties d'affilée du premier coup » semblait bloquée : l'infobulle
+                affichait votre <em>record</em>, pas votre série en cours. Elle montre maintenant les
+                deux, et rappelle que chaque partie compte, <em>Rejouer</em> compris.</li>
+
+            <li><strong>All-Out Attack</strong> — une partie relancée en changeant de filtre, après
+                une partie terminée, n'était jamais enregistrée : ni stats, ni série, ni quête.
+                C'est réparé.</li>
+
+            <li><strong>Connexion</strong> — se connecter sur un deuxième appareil, ou ouvrir
+                plusieurs onglets, pouvait vous déconnecter sans prévenir : vous rejouiez alors en
+                invité, avec d'autres personnages du jour. Chaque appareil garde maintenant sa propre
+                connexion.</li>
+
+            <li><strong>Profil</strong> — « Première partie » s'affiche de nouveau, la grille des
+                statistiques n'a plus de case à moitié vide, et le profil d'un autre joueur n'affiche
+                plus de texte en anglais dans la page française.</li>
         </ul>
     </div>
     <div data-i18n-block="en">
@@ -2562,6 +2541,22 @@
                 the end of a round, in both normal and Expert: there was no way to start another
                 one without reloading the page. It's back. Our apologies — a fix in the previous
                 update had taken it along with it.</li>
+
+            <li><strong>Expert Mode quests</strong> — in All-Out Attack, Personae and Music, the
+                "15 games in a row on the first try" quest looked stuck: the tooltip showed your
+                <em>record</em>, not your current streak. It now shows both, and reminds you that
+                every game counts, <em>Replay</em> included.</li>
+
+            <li><strong>All-Out Attack</strong> — a game started by changing filters after a
+                finished one was never recorded: no stats, no streak, no quest progress. Fixed.</li>
+
+            <li><strong>Login</strong> — signing in on a second device, or opening several tabs,
+                could log you out silently, and you would then play as a guest with different daily
+                characters. Each device now keeps its own login.</li>
+
+            <li><strong>Profile</strong> — "First played" shows up again, the statistics grid no
+                longer leaves half-empty slots, and another player's profile no longer shows English
+                text on the French page.</li>
         </ul>
     </div>
 

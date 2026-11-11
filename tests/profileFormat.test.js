@@ -5,7 +5,15 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { getStreakTier, formatSongTime, bestModeOverall, needsAvatarOrigin, statsForUnlocks } from "../profile/profile-format.js";
+import {
+  getStreakTier,
+  getRecoverableStreak,
+  formatSongTime,
+  bestModeOverall,
+  needsAvatarOrigin,
+  statsForUnlocks,
+  pairStatTiles,
+} from "../profile/profile-format.js";
 
 describe("getStreakTier", () => {
   it("returns tier 0 for no streak", () => {
@@ -23,6 +31,64 @@ describe("getStreakTier", () => {
     expect(getStreakTier(29)).toBe(4);
     expect(getStreakTier(30)).toBe(5);
     expect(getStreakTier(365)).toBe(5);
+  });
+});
+
+describe("getRecoverableStreak", () => {
+  const todayKey = "2026-10-20";
+
+  it("freezes a streak whose last game is older than yesterday", () => {
+    expect(getRecoverableStreak({ streak: 15, lastPlayedKey: "2026-10-18", todayKey })).toEqual({
+      state: "frozen",
+      value: 15,
+    });
+  });
+
+  it("keeps a streak alive when the last game was yesterday or today", () => {
+    expect(
+      getRecoverableStreak({ streak: 15, lastPlayedKey: "2026-10-19", todayKey }).state
+    ).toBeNull();
+    expect(
+      getRecoverableStreak({ streak: 15, lastPlayedKey: todayKey, todayKey }).state
+    ).toBeNull();
+  });
+
+  it("uses Paris calendar days across a month boundary", () => {
+    expect(
+      getRecoverableStreak({ streak: 4, lastPlayedKey: "2026-09-30", todayKey: "2026-10-01" }).state
+    ).toBeNull();
+    expect(
+      getRecoverableStreak({ streak: 4, lastPlayedKey: "2026-09-29", todayKey: "2026-10-01" }).state
+    ).toBe("frozen");
+  });
+
+  it("never freezes a 1-day streak (nothing for Jack Frost to give back)", () => {
+    expect(
+      getRecoverableStreak({ streak: 1, lastPlayedKey: "2026-10-01", todayKey }).state
+    ).toBeNull();
+  });
+
+  it("does not freeze without a known last game", () => {
+    expect(getRecoverableStreak({ streak: 15, lastPlayedKey: null, todayKey }).state).toBeNull();
+  });
+
+  it("offers the broken streak once the player has played again (streak back to 1)", () => {
+    expect(
+      getRecoverableStreak({ streak: 1, lastPlayedKey: todayKey, todayKey, previousStreak: 9 })
+    ).toEqual({ state: "broken", value: 9 });
+  });
+
+  it("drops the trace once the new streak caught up with the old one", () => {
+    expect(
+      getRecoverableStreak({ streak: 9, lastPlayedKey: todayKey, todayKey, previousStreak: 9 })
+        .state
+    ).toBeNull();
+  });
+
+  it("prefers the current frozen streak over an older trace", () => {
+    expect(
+      getRecoverableStreak({ streak: 6, lastPlayedKey: "2026-10-10", todayKey, previousStreak: 20 })
+    ).toEqual({ state: "frozen", value: 6 });
   });
 });
 
@@ -95,9 +161,23 @@ describe("needsAvatarOrigin — portrait recadré sans origine connue (052)", ()
 describe("statsForUnlocks — normal + Expert pour les déblocages (décision du 2026-09-19)", () => {
   it("additionne compteurs et modeWins, prend le max des records, et retire la clé expert", () => {
     const s = {
-      wins: 30, giveups: 5, games: 35, perfectWins: 20, streakRecord: 4,
-      modeWins: { AllOutAttack: 30 }, modeCount: { AllOutAttack: 35 }, streak: 2,
-      expert: { wins: 10, giveups: 2, games: 12, perfectWins: 5, streakRecord: 9, modeWins: { AllOutAttack: 10, Music: 1 }, modeCount: { AllOutAttack: 12, Music: 1 } },
+      wins: 30,
+      giveups: 5,
+      games: 35,
+      perfectWins: 20,
+      streakRecord: 4,
+      modeWins: { AllOutAttack: 30 },
+      modeCount: { AllOutAttack: 35 },
+      streak: 2,
+      expert: {
+        wins: 10,
+        giveups: 2,
+        games: 12,
+        perfectWins: 5,
+        streakRecord: 9,
+        modeWins: { AllOutAttack: 10, Music: 1 },
+        modeCount: { AllOutAttack: 12, Music: 1 },
+      },
     };
     const v = statsForUnlocks(s);
     expect(v.wins).toBe(40);
@@ -115,5 +195,71 @@ describe("statsForUnlocks — normal + Expert pour les déblocages (décision du
     const s = { wins: 3, modeWins: { Music: 3 } };
     expect(statsForUnlocks(s)).toBe(s);
     expect(statsForUnlocks(undefined)).toEqual({});
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// pairStatTiles — aucune demi-ligne vide dans la grille des stats (capture joueur 2026-11)
+// ─────────────────────────────────────────────────────────────────────────────
+/** Lignes de la grille 2 colonnes : une tuile pleine largeur occupe une ligne seule. */
+function gridRows(tiles) {
+  const rows = [];
+  let row = [];
+  for (const t of tiles) {
+    if (t.full) {
+      if (row.length) rows.push(row);
+      rows.push([t]);
+      row = [];
+    } else {
+      row.push(t);
+      if (row.length === 2) {
+        rows.push(row);
+        row = [];
+      }
+    }
+  }
+  if (row.length) rows.push(row);
+  return rows;
+}
+const halfEmpty = (tiles) => gridRows(tiles).filter((r) => r.length === 1 && !r[0].full).length;
+
+describe("pairStatTiles — grille des stats sans trou", () => {
+  // L'ordre exact du profil : victoires, abandons, parties, meilleure série, temps,
+  // première partie (pleine largeur), mode favori, meilleur mode, série actuelle.
+  const PROFILE = ["wins", "giveups", "games", "best", "time", "first", "fav", "bestMode", "streak"].map((id) => ({
+    id,
+    full: id === "first",
+  }));
+
+  it("la capture du joueur avait deux demi-lignes vides", () => {
+    expect(halfEmpty(PROFILE)).toBe(2);
+  });
+
+  it("après rangement : aucune demi-ligne vide, et toutes les tuiles sont là", () => {
+    const out = pairStatTiles(PROFILE);
+    expect(halfEmpty(out)).toBe(0);
+    expect(out.map((t) => t.id).sort()).toEqual(PROFILE.map((t) => t.id).sort());
+  });
+
+  it("garde l'ordre autant que possible : la pleine largeur glisse d'une place", () => {
+    expect(pairStatTiles(PROFILE).map((t) => t.id)).toEqual([
+      "wins", "giveups", "games", "best", "time", "fav", "first", "bestMode", "streak",
+    ]);
+  });
+
+  it("un nombre impair de demi-tuiles : la dernière passe en pleine largeur", () => {
+    const out = pairStatTiles([{ id: "a" }, { id: "b" }, { id: "c" }]);
+    expect(out.map((t) => [t.id, !!t.full])).toEqual([["a", false], ["b", false], ["c", true]]);
+  });
+
+  it("série en pleine largeur (palier 5+) : toujours aucun trou", () => {
+    const tiles = PROFILE.map((t) => (t.id === "streak" ? { ...t, full: true } : t));
+    expect(halfEmpty(pairStatTiles(tiles))).toBe(0);
+  });
+
+  it("ne modifie pas le tableau reçu", () => {
+    const copy = JSON.parse(JSON.stringify(PROFILE));
+    pairStatTiles(PROFILE);
+    expect(PROFILE).toEqual(copy);
   });
 });

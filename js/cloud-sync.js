@@ -183,6 +183,16 @@ export async function pullProfileFromCloud() {
       delete p.stats.favoriteMode;
     }
 
+    // Date de la première partie, lue en base (MIN(played_date)). Elle n'était posée
+    // qu'à la création d'un profil local vierge : après une déconnexion ou sur un
+    // nouvel appareil, le profil affichait « First played — » (capture joueur
+    // 2026-11) alors que le profil public, lui, avait la vraie date. Absente ou null
+    // (backend antérieur, aucune partie) → la valeur locale reste.
+    if (typeof d.first_game_date === "string" && d.first_game_date) {
+      if (!p.stats) p.stats = {};
+      p.stats.firstPlayed = d.first_game_date.slice(0, 10);
+    }
+
     // ── Stats Expert (user_stats_expert, 051) ──────────────────────────────
     // Tenues à part de p.stats.* (le profil les affiche dans son propre bloc), mais
     // additionnées aux normales pour les déblocages — statsForUnlocks()
