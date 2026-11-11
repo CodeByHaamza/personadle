@@ -43,6 +43,8 @@
     "expert_cond_wins_under_attempts": "Gagne {{required}} parties en 4 essais ou moins",
     "expert_cond_wins_single_day": "Gagne {{required}} parties dans la même journée",
     "expert_cond_consecutive_perfects": "Gagne {{required}} parties d'affilée du premier coup",
+    "expert_cond_consecutive_hint": "Toutes les parties comptent, Rejouer compris : une victoire en 2 essais ou plus remet la série à zéro.",
+    "expert_best_run": "Record : {{best}} d'affilée",
     "expert_cond_signin": "Connecte-toi pour débloquer le Mode Expert — ta progression suit ton compte.",
     "expert_cond_unknown": "Reconnecte-toi pour voir ta progression.",
     "expert_locked_title": "Mode Expert verrouillé",
@@ -364,6 +366,9 @@
     "all_saved": "Tout est enregistré",
     "customize_btn": "Personnaliser",
     "wallpapers_title": "🖼️ Fonds d'écran à débloquer",
+    "wallpapers_view_title": "🖼️ Fonds d'écran",
+    "wallpapers_view_count": "Fonds d'écran débloqués : {{count}}",
+    "view_nothing_yet": "🔒 Rien à voir ici… pour l'instant.",
     "wp_owned": "Débloqué",
     "share_title": "Partage",
     "share_desc": "Transforme ton profil en carte à poster où tu veux — ou copie son lien pour qu'un ami vienne y faire un tour.",
@@ -403,6 +408,7 @@
     "fav_mode_pick_label": "Mode favori",
     "fav_mode_none": "Aucun",
     "stat_current_streak_label": "Série actuelle",
+    "stat_frozen_streak_label": "Série gelée",
     "mode_col_mode": "Mode",
     "mode_col_games": "Parties / Win %",
     "song_title": "Chanson de profil",
@@ -1516,7 +1522,8 @@
     "description": "Jack Frost peut la restaurer — une fois tous les 2 mois.",
     "restore_button": "🔥 Restaurer ma série !",
     "cancel_button": "Plus tard",
-    "profile_btn": "❄️ Rallumer — 0 → {{count}} jours",
+    "profile_btn": "❄️ Appeler Jack Frost — retour à {{count}} jours",
+    "profile_cooldown": "🧊 Jack Frost se repose — de retour dans {{count}} jours",
     "error_cooldown": "Récupération en cooldown — réessaie plus tard.",
     "error_offline": "Tu sembles hors ligne. Réessaie.",
     "error_generic": "Récupération indisponible pour le moment. Réessaie."
@@ -1558,5 +1565,18 @@
   "notice": {
     "from_team": "Message de l'équipe",
     "ack": "Compris"
+  },
+  "nav": {
+    "home": "Accueil",
+    "play": "Jouer",
+    "ranking": "Classement",
+    "friends": "Amis",
+    "profile": "Profil",
+    "play_title": "Les modes du jour",
+    "play_done": "Joué",
+    "play_todo": "À jouer",
+    "play_left": "Encore {{count}} aujourd'hui",
+    "play_all_done": "Tous les modes joués aujourd'hui",
+    "home_status_done": "Joué aujourd'hui"
   }
 }

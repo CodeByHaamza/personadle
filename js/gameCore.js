@@ -317,6 +317,10 @@ export function isGameLogged(scope) {
 export function markGameLogged(scope) {
   const id = currentGameId(scope);
   localStorage.setItem(_gameLoggedKey(scope), id);
+  // Trace « mode joué aujourd'hui », lue par js/daily_status.js (pastilles ✓ de
+  // l'accueil et de la feuille « Jouer »). Elle survit au Replay, contrairement
+  // à gameLogged_* que startGame() efface. Datée du jour de JEU de la partie.
+  localStorage.setItem(`dailyDone_${scope}`, currentGameDay(scope));
   return id;
 }
 
@@ -614,6 +618,29 @@ function buildExpertTooltip(reason, progress) {
     count.textContent = `${current} / ${required}`;
 
     tip.append(bar, count);
+
+    // Série d'affilée : `current` est la série EN COURS (elle retombe à 0 sur une
+    // partie ratée), `best` le record, qui seul décide du déblocage. Afficher le
+    // record à la place de la série en cours figeait le compteur après chaque
+    // série cassée — « la quête n'avance plus » (signalement joueur 2026-11).
+    if (progress.condition_type === "mode_consecutive_perfects") {
+      const best = Math.max(0, Number(progress.best) || 0);
+      if (best > current) {
+        const bestLine = document.createElement("span");
+        bestLine.className = "expert-tooltip-best";
+        bestLine.textContent = _t("ui.expert_best_run", { best }, `Record: ${best}`);
+        tip.append(bestLine);
+      }
+
+      const hint = document.createElement("span");
+      hint.className = "expert-tooltip-hint";
+      hint.textContent = _t(
+        "ui.expert_cond_consecutive_hint",
+        undefined,
+        "Every game counts, Replay included: a win in 2 or more tries resets the streak."
+      );
+      tip.append(hint);
+    }
   }
 
   return tip;

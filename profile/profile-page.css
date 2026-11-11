@@ -853,6 +853,35 @@ body.darkmode .stat-streak-t0 {
   transform: translateY(-1px);
 }
 
+/* Jack Frost au repos (cooldown 60 j) : un texte, pas un bouton grisé — il n'y
+   a rien à cliquer, et un bouton désactivé passerait pour un bug. */
+.srp-cooldown {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px dashed rgba(100, 180, 220, 0.5);
+  color: #2b6f86;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+body.darkmode .srp-cooldown {
+  color: #8fd3ea;
+  border-color: rgba(100, 200, 240, 0.35);
+}
+
+/* Série gelée : le chiffre reste lisible (c'est lui que Jack Frost rend), mais
+   comme pris dans la glace. Pas d'animation sur `opacity`/`transform` : la
+   tuile hérite déjà de streakIceGlow + fadeSlideUp (palier 0). */
+.stat-streak--frozen .stat-value {
+  color: #4a9bb8;
+  text-shadow: 0 0 6px rgba(140, 210, 240, 0.7);
+}
+
+body.darkmode .stat-streak--frozen .stat-value {
+  color: #9edcf2;
+}
+
 /* =====================================================
    6c. MODE BREAKDOWN STATS
    ===================================================== */
@@ -5475,4 +5504,65 @@ body.darkmode .share-modal-title {
 }
 body.darkmode .danger-consequences {
   color: #bbb;
+}
+
+/* =====================================================
+   PROFIL SUR TÉLÉPHONE — 2026-10-20 (profile/profile_mobile.js)
+   Mesuré en 390×844 : 3,3 écrans, dont 10 tuiles de stats en une colonne.
+   ===================================================== */
+@media (max-width: 480px) {
+  /* Deux colonnes : la moitié de la hauteur. Les tuiles « full » (première
+     partie, série à 30+ jours) gardent toute la largeur. */
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px;
+  }
+
+  .stats-grid .stat-item {
+    padding: 8px 10px;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  /* La série (avec ses flocons/flammes de part et d'autre) garde toute la
+     largeur : en demi-colonne, son libellé était tronqué. */
+  .stats-grid .stat-item--full,
+  .stats-grid .stat-streak {
+    grid-column: 1 / -1;
+  }
+
+  .stats-grid .stat-label {
+    font-size: 0.62rem;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.2;
+  }
+
+  /* Sections repliables : un tap sur le titre. */
+  .profile-card.is-collapsible > .card-title {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+  }
+
+  .profile-card.is-collapsible > .card-title::after {
+    content: "▾";
+    margin-left: auto;
+    font-size: 1.1em;
+    transition: transform 0.2s ease;
+  }
+
+  .profile-card.is-collapsed > .card-title::after {
+    transform: rotate(-90deg);
+  }
+
+  .profile-card.is-collapsed > :not(.card-title) {
+    display: none !important;
+  }
+
+  .profile-card.is-collapsed > .card-title {
+    margin-bottom: 0;
+  }
 }

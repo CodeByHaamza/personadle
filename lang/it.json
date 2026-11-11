@@ -43,6 +43,8 @@
     "expert_cond_wins_under_attempts": "Vinci {{required}} partite in 4 tentativi o meno",
     "expert_cond_wins_single_day": "Vinci {{required}} partite in un solo giorno",
     "expert_cond_consecutive_perfects": "Vinci {{required}} partite di fila al primo tentativo",
+    "expert_cond_consecutive_hint": "Ogni partita conta, Ricomincia compreso: una vittoria in 2 o più tentativi azzera la serie.",
+    "expert_best_run": "Record: {{best}} di fila",
     "expert_cond_signin": "Accedi per sbloccare la Modalità Esperto: i tuoi progressi seguono il tuo account.",
     "expert_cond_unknown": "Riconnettiti per vedere i tuoi progressi.",
     "expert_locked_title": "Modalità Esperto bloccata",
@@ -364,6 +366,9 @@
     "all_saved": "Tutto è salvato",
     "customize_btn": "Personalizza",
     "wallpapers_title": "🖼️ Sfondi da sbloccare",
+    "wallpapers_view_title": "🖼️ Sfondi",
+    "wallpapers_view_count": "Sfondi sbloccati: {{count}}",
+    "view_nothing_yet": "🔒 Niente da vedere qui… per ora.",
     "wp_owned": "Sbloccato",
     "share_title": "Condivisione",
     "share_desc": "Trasforma il tuo profilo in una carta da postare ovunque — o copia il link perché un amico venga a dare un'occhiata.",
@@ -403,6 +408,7 @@
     "fav_mode_pick_label": "Modalità preferita",
     "fav_mode_none": "Nessuna",
     "stat_current_streak_label": "Serie attuale",
+    "stat_frozen_streak_label": "Serie congelata",
     "mode_col_mode": "Modalità",
     "mode_col_games": "Partite / Win %",
     "song_title": "Canzone del profilo",
@@ -1516,7 +1522,8 @@
     "description": "Jack Frost può ripristinarla — una volta ogni 2 mesi.",
     "restore_button": "🔥 Ripristina la mia serie!",
     "cancel_button": "Non ora",
-    "profile_btn": "❄️ Riaccendi — 0 → {{count}} giorni",
+    "profile_btn": "❄️ Chiama Jack Frost — torna a {{count}} giorni",
+    "profile_cooldown": "🧊 Jack Frost riposa — di ritorno tra {{count}} giorni",
     "error_cooldown": "Ripristino in cooldown — riprova più tardi.",
     "error_offline": "Sembri offline. Riprova.",
     "error_generic": "Ripristino non disponibile al momento. Riprova."
@@ -1558,5 +1565,18 @@
   "notice": {
     "from_team": "Messaggio del team",
     "ack": "Capito"
+  },
+  "nav": {
+    "home": "Home",
+    "play": "Gioca",
+    "ranking": "Classifica",
+    "friends": "Amici",
+    "profile": "Profilo",
+    "play_title": "Modalità di oggi",
+    "play_done": "Giocato",
+    "play_todo": "Da giocare",
+    "play_left": "Ancora {{count}} oggi",
+    "play_all_done": "Tutte le modalità giocate oggi",
+    "home_status_done": "Giocato oggi"
   }
 }

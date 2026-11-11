@@ -43,6 +43,8 @@
     "expert_cond_wins_under_attempts": "Gana {{required}} partidas en 4 intentos o menos",
     "expert_cond_wins_single_day": "Gana {{required}} partidas en un solo día",
     "expert_cond_consecutive_perfects": "Gana {{required}} partidas seguidas al primer intento",
+    "expert_cond_consecutive_hint": "Todas las partidas cuentan, Reiniciar incluido: una victoria en 2 intentos o más reinicia la racha.",
+    "expert_best_run": "Récord: {{best}} seguidas",
     "expert_cond_signin": "Inicia sesión para desbloquear el Modo Experto: tu progreso sigue a tu cuenta.",
     "expert_cond_unknown": "Vuelve a conectarte para ver tu progreso.",
     "expert_locked_title": "Modo Experto bloqueado",
@@ -364,6 +366,9 @@
     "all_saved": "Todo está guardado",
     "customize_btn": "Personalizar",
     "wallpapers_title": "🖼️ Fondos de pantalla por desbloquear",
+    "wallpapers_view_title": "🖼️ Fondos de pantalla",
+    "wallpapers_view_count": "Fondos de pantalla desbloqueados: {{count}}",
+    "view_nothing_yet": "🔒 Nada que ver aquí… por ahora.",
     "wp_owned": "Desbloqueado",
     "share_title": "Compartir",
     "share_desc": "Convierte tu perfil en una tarjeta para publicar donde quieras — o copia su enlace para que un amigo venga a verlo.",
@@ -403,6 +408,7 @@
     "fav_mode_pick_label": "Modo favorito",
     "fav_mode_none": "Ninguno",
     "stat_current_streak_label": "Racha actual",
+    "stat_frozen_streak_label": "Racha congelada",
     "mode_col_mode": "Modo",
     "mode_col_games": "Partidas / Win %",
     "song_title": "Canción de perfil",
@@ -1516,7 +1522,8 @@
     "description": "Jack Frost puede restaurarla — una vez cada 2 meses.",
     "restore_button": "🔥 ¡Restaurar mi racha!",
     "cancel_button": "Ahora no",
-    "profile_btn": "❄️ Reavivar — 0 → {{count}} días",
+    "profile_btn": "❄️ Llamar a Jack Frost — volver a {{count}} días",
+    "profile_cooldown": "🧊 Jack Frost descansa — vuelve en {{count}} días",
     "error_cooldown": "Recuperación en espera — inténtalo más tarde.",
     "error_offline": "Parece que estás sin conexión. Inténtalo de nuevo.",
     "error_generic": "Recuperación no disponible ahora mismo. Inténtalo de nuevo."
@@ -1558,5 +1565,18 @@
   "notice": {
     "from_team": "Mensaje del equipo",
     "ack": "Entendido"
+  },
+  "nav": {
+    "home": "Inicio",
+    "play": "Jugar",
+    "ranking": "Ranking",
+    "friends": "Amigos",
+    "profile": "Perfil",
+    "play_title": "Modos de hoy",
+    "play_done": "Jugado",
+    "play_todo": "Por jugar",
+    "play_left": "Quedan {{count}} hoy",
+    "play_all_done": "Todos los modos jugados hoy",
+    "home_status_done": "Jugado hoy"
   }
 }

@@ -8,7 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 1563 tests Vitest (87 suites), 407 méthodes PHPUnit, 329 tests E2E,
+> Vérifié le 2026-08-26 : 1678 tests Vitest (96 suites), 429 méthodes PHPUnit, 342 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
@@ -21,6 +21,20 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
 > 📖 Procédure complète (ordre, sauvegarde, vérification, **retour arrière**) :
 > [`DEPLOY.md`](DEPLOY.md) § « Release majeure ». Cette liste-ci ne suit que l'état
 > d'avancement.
+
+- [x] **2.3.4 — Jouer `sql/migrations/056_remember_tokens.sql`** — **jouée en prod le 2026-11-09 à 21:09** (dump 51 Mo avant, répétée sur la copie du serveur maison, 101 jetons repris, rejouée après le déploiement : +0) (table `remember_tokens`, un
+      jeton « se souvenir de moi » par appareil, + reprise des jetons encore valides de
+      `users` ; `CREATE TABLE IF NOT EXISTS` + `INSERT IGNORE`, rejouable). **À jouer AVANT le
+      `git pull` Hostinger** : sans la table, la restauration de session échoue en silence
+      (`user: null`) et chaque joueur dont la session PHP a expiré est déconnecté. Puis
+      `INSERT IGNORE INTO schema_migrations (version) VALUES ('056_remember_tokens')`.
+- [x] **2.3.4 — Bumper `CACHE_VERSION` dans `sw.js`** (v106 → v107, fait le 2026-11-09) : `js/gameCore.js`,
+      `css/global.css`, `lang/*.json` et `allOutAttackMode/modeAllOutAttack.js` changent.
+- [ ] *(optionnel, 2.4)* **Erreurs JS des joueurs** : créer un salon Discord **privé** (staff),
+      un webhook dedans, et ajouter `define('DISCORD_ERRORS_WEBHOOK', '…');` au `config.php` de
+      prod (cf. `api/config.example.php`). Sans lui, `api/client_errors.php` range quand même
+      les erreurs dans `error_log` (admin) — seule l'alerte Discord manque. Aucune migration :
+      la déduplication passe par `rate_limits`, qui existe déjà.
 
 - [x] Jouer `sql/migrations/029_badge_gyotre.sql` et `030_titles_junes_investigation.sql`.
       **Oubliées de cette liste jusqu'au 2026-09-01** : elles datent du lot de contenu 2.1
@@ -445,11 +459,11 @@ Léo et Damien, `reset --hard` sur Hostinger, PR ouvertes à recréer**. À ne f
       automatisé. Blocage réel : les migrations utilisent `ADD COLUMN IF NOT EXISTS`, syntaxe
       MariaDB que MySQL 8.0 refuse — un job de replay demande de les réécrire en procédure
       stockée, ou de faire tourner la CI sur MariaDB.
-- [ ] **PHPStan installé en `releases/latest`** dans `.github/workflows/ci.yml` — le build
+- [x] **PHPStan installé en `releases/latest`** dans `.github/workflows/ci.yml` — le build
       n'est pas reproductible. C'est ce qui a fait rougir le job PHP sur trois commits sans
-      qu'une ligne change (2.2.2 → 2.2.8). Arbitrage à trancher : pinner (déterministe, on
-      rate les nouvelles détections) ou garder `latest` (c'est lui qui a attrapé la garde
-      morte `$expertModes`).
+      qu'une ligne change (2.2.2 → 2.2.8). **Tranché le 2026-11-09 : épinglé** (PHPStan 2.2.2,
+      Psalm 6.20.10). Psalm 7, sorti la semaine précédente, a mis au rouge TOUTES les PR —
+      Dependabot comprise — sur du code inchangé. Monter de version = une PR dédiée.
 - [ ] **Déploiement : étape de migration** dans le hook Hostinger, ou règle écrite « migration
       en prod avant merge vers main ». Aujourd'hui le code précède systématiquement le schéma.
 - [x] **Template de PR GitHub** reprenant la Definition of Done de CLAUDE.md §13, pour la

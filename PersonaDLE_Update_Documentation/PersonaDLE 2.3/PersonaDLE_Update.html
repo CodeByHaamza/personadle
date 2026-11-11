@@ -14,9 +14,7 @@
             }
         })();
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/fonts.css" />
     <style>
         /* ── Theme variables ── */
         :root {
@@ -1279,7 +1277,6 @@
             .kotone-ribbon { animation: none; }
         }
 
-
         /* ═══════════════════════════════════════════════════════════════════
            GRILLE DES NOUVEAUX PORTRAITS
 
@@ -1802,28 +1799,6 @@
                 <em>Thanatos</em> — the persona she wields in <em>Persona 4 Arena
                 Ultimax</em>. Personae mode already knew; the Classic grid said otherwise.
                 Theodore still wields no persona.</li>
-        </ul>
-    </div>
-
-    <!-- ═══════════════════════════════════
-         PARTAGER MON RÉSULTAT
-    ═══════════════════════════════════ -->
-
-    <div data-i18n-block="fr"><h1>📋 Partagez votre grille</h1></div>
-    <div data-i18n-block="en"><h1>📋 Share your grid</h1></div>
-
-    <div data-i18n-block="fr">
-        <ul>
-            <li>En fin de partie, un bouton <strong>Partager mon résultat</strong> copie votre
-                parcours en emojis — 🟩🟨🟥 en Classique, ❌❌✅ dans les autres modes — sans jamais
-                dévoiler le personnage. Collez-le sur Discord, X ou dans vos messages.</li>
-        </ul>
-    </div>
-    <div data-i18n-block="en">
-        <ul>
-            <li>At the end of a game, a <strong>Share my result</strong> button copies your run as
-                emojis — 🟩🟨🟥 in Classic, ❌❌✅ in the other modes — without ever revealing the
-                character. Paste it on Discord, X or in your chats.</li>
         </ul>
     </div>
 
@@ -2509,6 +2484,24 @@
                 à la fin d'une partie, en normal comme en Expert : il n'y avait plus aucun moyen
                 d'en relancer une sans recharger la page. Il est de retour. Nos excuses — c'est
                 une correction de la mise à jour précédente qui l'avait emporté avec elle.</li>
+
+            <li><strong>Quêtes du Mode Expert</strong> — en All-Out Attack, Personae et Musique,
+                la quête « 15 parties d'affilée du premier coup » semblait bloquée : l'infobulle
+                affichait votre <em>record</em>, pas votre série en cours. Elle montre maintenant les
+                deux, et rappelle que chaque partie compte, <em>Rejouer</em> compris.</li>
+
+            <li><strong>All-Out Attack</strong> — une partie relancée en changeant de filtre, après
+                une partie terminée, n'était jamais enregistrée : ni stats, ni série, ni quête.
+                C'est réparé.</li>
+
+            <li><strong>Connexion</strong> — se connecter sur un deuxième appareil, ou ouvrir
+                plusieurs onglets, pouvait vous déconnecter sans prévenir : vous rejouiez alors en
+                invité, avec d'autres personnages du jour. Chaque appareil garde maintenant sa propre
+                connexion.</li>
+
+            <li><strong>Profil</strong> — « Première partie » s'affiche de nouveau, la grille des
+                statistiques n'a plus de case à moitié vide, et le profil d'un autre joueur n'affiche
+                plus de texte en anglais dans la page française.</li>
         </ul>
     </div>
     <div data-i18n-block="en">
@@ -2548,6 +2541,22 @@
                 the end of a round, in both normal and Expert: there was no way to start another
                 one without reloading the page. It's back. Our apologies — a fix in the previous
                 update had taken it along with it.</li>
+
+            <li><strong>Expert Mode quests</strong> — in All-Out Attack, Personae and Music, the
+                "15 games in a row on the first try" quest looked stuck: the tooltip showed your
+                <em>record</em>, not your current streak. It now shows both, and reminds you that
+                every game counts, <em>Replay</em> included.</li>
+
+            <li><strong>All-Out Attack</strong> — a game started by changing filters after a
+                finished one was never recorded: no stats, no streak, no quest progress. Fixed.</li>
+
+            <li><strong>Login</strong> — signing in on a second device, or opening several tabs,
+                could log you out silently, and you would then play as a guest with different daily
+                characters. Each device now keeps its own login.</li>
+
+            <li><strong>Profile</strong> — "First played" shows up again, the statistics grid no
+                longer leaves half-empty slots, and another player's profile no longer shows English
+                text on the French page.</li>
         </ul>
     </div>
 

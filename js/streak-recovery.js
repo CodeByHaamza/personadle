@@ -84,10 +84,23 @@ export function syncRecoveryCooldown(serverDate) {
 export function canRecover() {
   const r = _getRecovery();
   if (!r.previousStreak || r.previousStreak <= 1) return false;
-  if (!r.lastUsed) return true;
-  const used = new Date(r.lastUsed).getTime();
-  if (Number.isNaN(used)) return true; // date illisible : ne pas bloquer sur une donnée corrompue
-  return Date.now() - used >= TWO_MONTHS_MS;
+  return recoveryCooldownDaysLeft() === 0;
+}
+
+/**
+ * Jours avant que Jack Frost soit de nouveau disponible (0 = disponible).
+ *
+ * Séparé de canRecover() : la série GELÉE du profil (pas encore rejoué, donc
+ * pas encore de trace `previousStreak`) n'a besoin que du cooldown. Mêmes
+ * replis que canRecover() — aucune date ou date illisible → disponible.
+ */
+export function recoveryCooldownDaysLeft() {
+  const { lastUsed } = _getRecovery();
+  if (!lastUsed) return 0;
+  const used = new Date(lastUsed).getTime();
+  if (Number.isNaN(used)) return 0; // date illisible : ne pas bloquer sur une donnée corrompue
+  const left = TWO_MONTHS_MS - (Date.now() - used);
+  return left > 0 ? Math.ceil(left / 86_400_000) : 0;
 }
 
 /**
@@ -202,6 +215,11 @@ function _applyRecoveryLocally(previousStreak) {
     if (profile.stats) {
       profile.stats.streak = previousStreak;
       profile.stats.streakRecord = Math.max(profile.stats.streakRecord || 0, previousStreak);
+      // Le serveur date la série restaurée d'aujourd'hui (global_streak_date).
+      // Sans le même jour ici, une série récupérée encore GELÉE (avant toute
+      // partie du jour) restait datée d'avant-hier : la partie suivante la voyait
+      // cassée, la remettait à 1 et reposait une trace Jack Frost.
+      profile.stats.lastPlayed = new Date().toISOString();
     }
     profile.streakRestorationUsed = true;
     localStorage.setItem("personaUserProfile", JSON.stringify(profile));

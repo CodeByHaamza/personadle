@@ -4028,6 +4028,21 @@ body.darkmode #rulesModal em {
   color: #9a9a9a;
 }
 
+/* Série d'affilée : le record (quand il dépasse la série en cours) et le rappel
+   que Rejouer compte aussi — en retrait, sous la barre. */
+.expert-tooltip-best {
+  font-family: "Courier New", monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: #e8b44a;
+}
+
+.expert-tooltip-hint {
+  font-size: 0.68rem;
+  line-height: 1.35;
+  color: #bdbdbd;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .expert-tooltip {
     transition: opacity 0.16s ease, visibility 0.16s;

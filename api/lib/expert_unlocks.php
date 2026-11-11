@@ -67,7 +67,7 @@ function personadle_expert_is_granted(PDO $pdo, int $userId, string $mode): bool
  * `granted` distingue les deux chemins : le front peut ainsi ne pas afficher de
  * barre de progression pour un accès offert, où elle n'aurait aucun sens.
  *
- * @return array{unlocked: bool, condition_type: string, required: int, current: int, granted: bool}
+ * @return array{unlocked: bool, condition_type: string, required: int, current: int, best: int, granted: bool}
  */
 function personadle_expert_progress(PDO $pdo, int $userId, string $mode): array
 {
@@ -80,6 +80,7 @@ function personadle_expert_progress(PDO $pdo, int $userId, string $mode): array
             'condition_type' => 'none',
             'required'       => 0,
             'current'        => 0,
+            'best'           => 0,
             'granted'        => false,
         ];
     }
@@ -87,14 +88,25 @@ function personadle_expert_progress(PDO $pdo, int $userId, string $mode): array
     $cond     = $conditions[$mode];
     $required = $cond['value'];
 
-    $current = match ($cond['type']) {
-        'mode_wins_under_attempts'  => personadle_count_wins_under_attempts($pdo, $userId, $mode),
-        'mode_wins_single_day'      => personadle_count_best_single_day_wins($pdo, $userId, $mode),
-        'mode_consecutive_perfects' => personadle_count_consecutive_perfects($pdo, $userId, $mode),
-        default                     => 0,
-    };
+    // `current` = ce que le joueur voit avancer ; `best` = ce qui débloque. Ils ne
+    // diffèrent que pour la série d'affilée : `current` y est la série EN COURS
+    // (elle retombe à 0 sur une partie ratée), `best` le record, qui ne recule
+    // jamais — un déblocage reste définitif. Les deux autres types sont des
+    // maximums ou des cumuls à vie : best = current.
+    if ($cond['type'] === 'mode_consecutive_perfects') {
+        $runs    = personadle_consecutive_perfect_runs($pdo, $userId, $mode);
+        $current = $runs['current'];
+        $best    = $runs['best'];
+    } else {
+        $current = match ($cond['type']) {
+            'mode_wins_under_attempts' => personadle_count_wins_under_attempts($pdo, $userId, $mode),
+            'mode_wins_single_day'     => personadle_count_best_single_day_wins($pdo, $userId, $mode),
+            default                    => 0,
+        };
+        $best = $current;
+    }
 
-    $earned  = $current >= $required;
+    $earned  = $best >= $required;
     // Court-circuit : on n'interroge la table de dons que si la condition n'est
     // pas déjà remplie — inutile de payer une requête pour un joueur qui a gagné
     // son accès, c'est-à-dire le cas courant.
@@ -105,6 +117,7 @@ function personadle_expert_progress(PDO $pdo, int $userId, string $mode): array
         'condition_type' => $cond['type'],
         'required'       => $required,
         'current'        => $current,
+        'best'           => $best,
         'granted'        => $granted,
     ];
 }

@@ -17,11 +17,12 @@
  * ────────────────────────────────────────────────────────────────
  */
 
-// ⚠️ À BUMPER À CHAQUE DÉPLOIEMENT (checklist « Bloquant release » de TODO.md).
-// Sans bump, `activate` ne purge rien et les assets servis en cache-first
-// (images, sons) restent ceux de la version précédente — invisible en test,
-// puisque c'est justement le cache des joueurs DÉJÀ venus qui est concerné.
-const CACHE_VERSION = "personadle-v106";
+// ⚠️ NE PAS ÉDITER À LA MAIN : `npm run assets:stamp` (à la release) y pose
+// l'empreinte des fichiers servis en cache-first (scripts/stamp_assets.js).
+// Sans changement de valeur, `activate` ne purge rien et les assets servis en
+// cache-first (images, sons) restent ceux de la version précédente — invisible
+// en test, puisque c'est justement le cache des joueurs DÉJÀ venus qui est concerné.
+const CACHE_VERSION = "personadle-7c89c1ad8d";
 
 // Préfixe du sous-dossier : '/personadle' en dev local, '' en production (racine).
 // Calculé depuis l'URL du SW lui-même (ex: /personadle/sw.js → /personadle).
@@ -282,7 +283,12 @@ async function networkFirstWithFallback(request) {
     }
     return response;
   } catch {
-    const cached = await caches.match(request);
+    // ignoreSearch : les pages demandent `global.css?v=<empreinte>`, le précache
+    // a stocké `global.css` (et une version précédente, l'ancien ?v=). Hors ligne,
+    // n'importe quelle version vaut mieux que rien. Réservé à ce repli : le
+    // cache-first, lui, doit continuer de distinguer les query strings.
+    const cached =
+      (await caches.match(request)) || (await caches.match(request, { ignoreSearch: true }));
     if (cached) return cached;
     /* Fallback ultime : page d'accueil ou 404 */
     return caches.match("/index.html") || new Response("Offline", { status: 503 });

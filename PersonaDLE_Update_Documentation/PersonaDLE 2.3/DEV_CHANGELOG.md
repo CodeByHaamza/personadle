@@ -42,175 +42,275 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 16 | `fix/badge_modal_prod` | Le détail d'un badge reprend la modale de la production |
 | 17 | `feat/badge_cafe_leblanc` | Badge secret Ko-fi |
 | 18 | `perf/aoa_reencode_hd` | Les 33 animations AOA en 1080p au calibre des autres |
-| 21 | `feat/partage_resultat` | « Partager mon résultat » façon Wordle dans les 6 modes |
 
 ---
 
-## 2026-10-20 — « Partager mon résultat », façon Wordle
+## 2026-11-09 — CLAUDE.md et les specs d'outillage sortent du dépôt public
 
-Le premier canal d'acquisition d'un jeu « -dle » est la grille d'emojis collée dans un
-groupe ; aucun des six modes n'en avait. Le texte ne révèle jamais la cible :
+Décision Hamza : le guide de l'assistant (`CLAUDE.md`) n'a pas à être public. Il contient
+des alias SSH, le nom de la base de prod, et des procédures d'exploitation. Il reste en
+**local**, ignoré par git, avec une copie privée dans
+`personadle-discord/docs/CLAUDE.personadle.md`. Les deux specs de `docs/superpowers/`
+(déjà dans `.gitignore`, mais suivies d'avant) sortent avec lui. La réécriture
+d'historique qui suit les retire aussi des commits passés.
 
-```
-PersonaDLE 🔤 Classic — 20/10
-🟥🟨🟥🟩🟥🟥🟨
-🟩🟩🟩🟩🟩🟩🟩
-✅ 2 essais
-https://personadle.net
-```
+`scripts/check-doc-numbers.js` saute les points de synchro de `CLAUDE.md` quand le
+fichier est absent (CI, clone neuf), et continue de le tenir à jour sur le poste du
+mainteneur. Vérifié dans les deux cas avec `npm run docs:check`. Les références
+« cf. CLAUDE.md §… » dans la doc restent ; elles désignent le guide privé.
 
-Classique partage sa vraie grille (lue dans `#output`, remise dans l'ordre de jeu — les
-lignes y sont insérées de la plus récente à la plus ancienne). Les cinq autres modes,
-sans grille d'attributs, partagent la suite ❌❌✅ ou 🏳️. Expert est signalé (⚡).
-Téléphone : feuille de partage native (`navigator.share`) ; ailleurs : presse-papiers.
-
-### Câblage — zéro appel ajouté dans les modes
-
-Les six modes affichent leur fin de partie chacun à sa façon ; ils ont en commun deux
-fonctions de `gameCore.js` :
-
-- `buildGameSession()` écrit `lastGameResult` (portée, identifiant de partie, résultat,
-  essais, Expert) — **en synchrone**, pour être là avant le montage du bouton ;
-- `revealNextLink()`, appelé en fin de partie **et au rechargement** d'une partie finie,
-  monte le bouton par `import("./share_result.js")` — dynamique, car `share_result.js`
-  importe `gameCore.js` (un import statique ferait un cycle).
-
-Le bouton n'apparaît que si le résultat retenu porte l'identifiant de la partie affichée
-(`gameId_<scope>`) : une partie de défi (non enregistrée) ou un résultat d'hier n'en a
-pas. Ni la cible ni les noms proposés ne sont stockés dans `lastGameResult`.
-
-### Angles morts connus
-
-- Une partie terminée **avant** cette version n'a pas de `lastGameResult` : pas de bouton
-  jusqu'à la partie suivante.
-- La grille de Classique est lue dans le DOM : si la présentation de `#output` change
-  (classes `guess-row` / `guess-cell` / `correct|misplaced|wrong`), le test
-  `readClassicGrid` le signalera.
-- `MODE_ICON` existe aussi dans `js/daily_status.js` (PR navigation mobile) : à fusionner
-  une fois les deux PR mergées.
+Au passage : la migration 056 est cochée dans `TODO.md`, et `develop` rattrape le commit
+de merge de la release 2.3.4.
 
 ---
 
-## 2026-10-21 — Un écran large mais court ne défile plus pour jouer
+## 2026-11-09 — Release 2.3.4
 
-> ⚠️ **À déplacer dans `PersonaDLE 2.4/` à l'ouverture de cette version** (§9). Ce lot
-> n'est pas un correctif de la 2.3 livrée : il est écrit ici parce que la 2.4 n'est pas
-> encore ouverte, décision de Hamza du 2026-10-21.
+Correctifs nés d'un signalement joueur (quête Expert figée, déconnexions) et de l'audit
+du même jour : #243 (série en cours dans l'infobulle Expert, filtre AOA), #244 (« se
+souvenir de moi » par appareil, **migration 056**), #245 (notes internes plus servies,
+« Première partie », profil public traduit), #247 (grille des stats sans demi-ligne vide).
+#246 épingle PHPStan et Psalm, dont la version « latest » mettait toute la CI au rouge.
 
-Signalé par Hamza : un correctif d'affichage « pas besoin de défiler pour voir les
-résultats de Classique » marchait **chez lui et pas chez les joueurs**, sur un vrai PC.
+- `CACHE_VERSION` v106 → v107 : `js/gameCore.js`, `css/global.css`, `lang/*.json`, les
+  pages de profil et `allOutAttackMode/modeAllOutAttack.js` changent.
+- Ligne 2.3.4 dans le README ; les quatre correctifs visibles ajoutés au changelog joueur,
+  en FR et en EN.
+- **Migration 056 à jouer avant le `git pull` Hostinger**, puis à rejouer juste après (elle
+  est rejouable) pour reprendre les jetons émis entre-temps par l'ancien code.
+- `schema:check-prod` passé le 2026-11-09 avant la release : aucune dérive.
 
-### La cause : tout le responsive ignorait la hauteur
+---
 
-Vérifié fichier par fichier : il n'existait **aucune** media query sur la hauteur dans
-l'ensemble du CSS du projet. Tous les points de rupture portent sur la largeur — 480 /
-768 / 1024 px, exactement ce que liste le §6 du CLAUDE.md.
+## 2026-11-09 — 2.3.4 : plus de demi-ligne vide dans la grille des stats du profil
 
-Conséquence mesurée : **la barre de réponse se place à la même ordonnée quelle que soit
-la hauteur de la fenêtre**, dans les six modes. `#imgHomePage` est le cas d'école :
-`width: min(460px, 80vw)` + `height: auto`, donc sa hauteur suit la largeur disponible et
-jamais la place verticale restante.
+Capture d'un joueur (profil, thème Velvet Room, mode sombre) : « Temps joué » et « Série
+actuelle » occupaient chacune **une demi-ligne, l'autre moitié vide** (« la boîte se coupe
+en plein milieu »). La grille fait 2 colonnes ; la tuile pleine largeur « Première partie »
+tombait après un nombre impair de demi-tuiles, et la série, ajoutée en dernier, restait
+seule. Même défaut dans la vue du profil d'un autre joueur.
 
-Relevé à **1536×864** — la résolution de bureau la plus répandue, et un écran que tous les
-points de rupture en largeur considèrent comme large, donc confortable :
+`pairStatTiles()` (`profile/profile-format.js`, pure) : une tuile pleine largeur qui arrive
+pendant qu'une demi-tuile attend sa voisine glisse juste après celle-ci ; une demi-tuile
+restée seule à la fin passe en pleine largeur. Utilisée par `profile-page.js` et
+`profile-view.js` ; `buildStreakItem()` accepte la largeur décidée (`forceFull`), la règle
+du palier 5+ restant la valeur par défaut.
 
-| Mode | Saisie à y= | Défilement pour l'atteindre |
-|---|---|---|
-| Silhouette | 1475 | **611 px** |
-| Personae | 1309 | 445 px |
-| All-Out Attack | 1285 | 421 px |
-| Musique | 963 | 99 px |
-| Émoji | 842 | tient, à 22 px près |
-| Classique | 766 | tient, mais les résultats démarrent à 830 |
+Rendu mesuré en local (1280 px) : 4 rangées de deux tuiles et une pleine largeur, aucun
+trou ; mobile inchangé (une colonne). `tests/profileFormat.test.js` (+6) rejoue l'ordre
+exact de la capture.
 
-Sur un écran de 1080 px de haut la page tient **pile** ; sur tout écran plus court elle
-défile. D'où « ça marche chez moi ». Et le correctif « Indice et Abandon côte à côte » de
-la 2.3.2 traitait bien le même symptôme — mais sous `max-width: 900px`, donc jamais sur un
-PC.
+---
+
+## 2026-11-09 — CI : PHPStan et Psalm épinglés
+
+Le job « PHP Lint & Tests » est passé au rouge sur **toutes** les PR du jour, y compris
+la PR Dependabot #242, qui ne touche aucun fichier PHP. `develop` était vert le 2026-10-21.
+La cause : `ci.yml` téléchargeait `releases/latest`. Psalm a sorti sa version majeure 7
+(7.0.4 le 2026-11-06, 7.2.0 le 2026-11-09), et son analyse de taint signale désormais du
+code inchangé (`TaintedHeader` sur `api/auth/request-reset.php`, et `UndefinedConstant` pour
+les constantes définies seulement dans `api/config.php`).
+
+Épinglés : PHPStan **2.2.2** (la version qui passe sur le code actuel) et Psalm **6.20.10**
+(dernière 6.x). L'arbitrage laissé ouvert dans `TODO.md` est tranché. Monter de version se
+fera dans une PR dédiée, où les nouvelles détections se lisent et se corrigent une par une
+plutôt que de bloquer une PR qui n'a rien à voir.
+
+---
+
+## 2026-11-09 — 2.3.4 : notes internes plus servies, « Première partie », profil public traduit
+
+Trois petits correctifs trouvés pendant l'audit du 2026-11-09.
+
+### Le site servait les notes internes du dépôt
+
+Le webroot Hostinger est un clone git : tout le dépôt y arrive. Relevé sur la prod :
+`/CLAUDE.md`, `/TODO.md`, `/DEPLOY.md`, `/AMELIORATIONS.md`, `/ROADMAP.md`,
+`/expert_mode_content.md`, `/nom`, `/version-all.sh` → **200**. (`.git`, `api/config.php`,
+`sql/`, `scripts/` étaient déjà bloqués.) Rien de secret au sens strict — le dépôt est
+public — mais procédures d'exploitation, alias SSH et nom de la base n'ont rien à faire
+sur le site.
+
+`.htaccess` : `<FilesMatch "(?i)\.(md|sh)$|^nom$|^(?!robots\.txt$|license\.txt$).*\.txt$">`
+→ `Require all denied`. Le front ne charge aucun de ces fichiers (le changelog joueur est
+un `.html`). Vérifié sur l'Apache de la stack Docker : les notes passent en **403**,
+`robots.txt`, `LICENSE.txt`, `sitemap.xml`, les pages et le changelog joueur restent en 200.
+`tests/htaccess_fichiers_internes.test.js` applique les vraies règles `<FilesMatch>` du
+fichier à 19 noms (bloqués / servis).
+
+### « Première partie — » sur son propre profil
+
+Capture d'un joueur à 256 parties : « First played — ». La date n'était posée qu'à la
+**création d'un profil local vierge** (`profile-page.js`) ; la déconnexion vide ce profil,
+et un nouvel appareil n'en a pas. Le profil public, lui, lisait déjà
+`MIN(played_date)` côté serveur.
+
+`GET /api/user/:id` renvoie désormais `first_game_date` (même requête que
+`api/user/public.php`, fusionnée avec le `COUNT(DISTINCT played_date)` déjà présent) et
+`pullProfileFromCloud()` la pose dans `stats.firstPlayed`. Absente ou `null` (backend
+antérieur, aucune partie) : la valeur locale reste. Vérifié contre l'API locale (null sans
+partie, puis la bonne date avec deux parties insérées).
+
+### Profil d'un autre joueur : fonds d'écran en anglais
+
+En français : « 7 wallpapers unlocked » (anglais codé en dur) sous « Fonds d'écran à
+débloquer » — le titre de SON propre profil. Nouvelles clés `profile.wallpapers_view_title`,
+`profile.wallpapers_view_count` (`{{count}}`), `profile.view_nothing_yet`, 6 langues ; la
+vue remplace le titre de la carte. `tests/profile_view_i18n.test.js`.
+
+Non retenu : « ← Mon profil » affiché à un visiteur déconnecté. Un invité a bien sa
+propre page profil, le lien n'est pas faux.
+
+### Reste à reproduire
+
+Signalé par Hamza : sur le profil d'un ami « avec style et couleur », le fond ne se voit
+pas et la carte s'arrête à mi-page. Non reproduit en local (les thèmes ne changent que la
+couleur d'accent) : il faut le pseudo concerné ou une capture.
+
+---
+
+## 2026-11-09 — 2.3.4 : « Se souvenir de moi » par appareil, fin des déconnexions silencieuses
+
+Même signalement que la quête Expert (ci-dessous) : « deux fois, j'ai été déconnecté
+automatiquement ; les modes s'étaient remis à zéro, je les ai rejoués sans m'en rendre
+compte, puis je me suis reconnecté ».
+
+### La cause
+
+Un **seul** jeton « se souvenir de moi » par compte (`users.remember_me_hash`) :
+
+- chaque connexion l'**écrasait** → se connecter sur le téléphone invalidait le PC ;
+- chaque restauration de session le **faisait tourner** → deux onglets qui restauraient en
+  même temps (les 6 modes ouverts d'un coup, par exemple) : le premier rotait, le second
+  présentait l'ancien jeton, ne trouvait rien et **effaçait le cookie**.
+
+Sur Hostinger, la session PHP expire vite (fichiers de session nettoyés par l'hébergeur) :
+c'est donc le jeton qui maintient la connexion, et le perdre déconnecte. En invité, la
+graine du tirage passe de l'id du compte à un id anonyme (`getPlayerSeedId()`) : **autres
+cibles du jour**, d'où les modes « remis à zéro ». Ces parties d'invité sont ensuite
+versées dans le compte à la reconnexion (file `pendingSessions`), avec une cible que
+l'anti-triche ne reconnaît pas.
 
 ### Le correctif
 
-Un bloc de compression du bandeau partagé, scopé **`min-width: 901px` ET
-`max-height: 900px`** : large mais court.
+Table `remember_tokens` (migration **056**), une ligne par appareil, logique dans
+`api/lib/remember_tokens.php` :
 
-- La borne 901 s'aligne sur le `max-width: 900px` de `classique.css`, donc les deux blocs
-  ne se chevauchent **jamais** : le calibrage mobile, ajusté au pixel en 2.3.2, n'est pas
-  touché.
-- Là où la page tenait déjà (≥ 901 px de large et > 900 px de haut), **rien ne change**.
-- Les valeurs sont en `clamp()` avec du `vh` plutôt qu'un nouveau palier en px dur, pour
-  que la compression soit continue jusqu'aux petits portables (§6).
+| Règle | Pourquoi |
+|---|---|
+| Un jeton par connexion « se souvenir de moi », 30 jours | un appareil ne touche plus aux autres |
+| Rotation seulement au-delà de **24 h**, l'ancien reste valable **2 min** | deux onglets simultanés ne se déconnectent plus |
+| « Se déconnecter » ne révoque que **cet** appareil | le téléphone reste connecté quand on quitte le PC |
+| Changer de mot de passe révoque **tous** les appareils | geste de sécurité |
+| Au plus **10** appareils par compte, les plus anciens sautent | pas de table qui gonfle |
+| Dates calculées par la base (`NOW() + INTERVAL ?`) | fuseau PHP et fuseau MariaDB n'ont plus à coïncider |
 
-Postes comprimés — `css/global.css` §20 (nouvelle section) :
+La migration **recopie les jetons encore valides** de `users` : les joueurs connectés au
+déploiement ne sont pas déconnectés. Les colonnes `users.remember_me_*` restent (plus
+lues, vidées au changement de mot de passe), à retirer dans une version ultérieure.
+Décocher « se souvenir de moi » ne mémorise rien sur cet appareil, mais ne révoque plus
+ceux des autres.
 
-- **`#imgHomePage`** — 175 px de haut dès 1536 px de large. Borné par sa **hauteur**
-  (`width: auto` conserve le ratio) au lieu de sa largeur, puisque c'est la hauteur qui
-  manque. Effet de bord favorable : la hauteur de l'en-tête devient connue avant le
-  chargement de l'image, donc plus de reflow vertical au moment où elle arrive.
-- **`.emoji-hint-zone`** — bandeau de consigne des cinq autres modes : 30 px de padding
-  **et** 30 px de marge, en haut comme en bas, soit 120 px qui ne portent aucune
-  information.
-- **`.expert-toggle-zone`** — ses seules marges verticales valaient 36 px.
-- **`.hint-giveup-row`** — 166 px de haut, dont 24 px de padding vertical imposé à tout
-  `.link-wrapper` par le §18 (cible tactile). On rogne le padding et on borne l'image par
-  sa hauteur : même technique que le correctif mobile de la 2.3.2, en production depuis,
-  donc les formes SVG décoratives suivent (elles sont en absolu dans `.link-wrapper`, qui
-  reste en `fit-content`). La cible tactile reste au-dessus des 48 px du §7.
+### Vérifié
 
-Et `classiqueMode/classique.css` pour **`.personadle-box`** (172 px : 60 px de padding
-vertical, un `h1` de 62 px et sa marge), qui remplace `.emoji-hint-zone` dans ce mode et
-échappait donc à la compression des cinq autres.
+- `tests/php/RememberTokensTest.php` (10) : deux appareils coexistent, pas de rotation
+  d'un jeton récent, rotation + fenêtre de grâce, révocation d'un seul appareil / de tous,
+  jeton expiré, compte supprimé, jeton malformé, plafond de 10, **reprise des anciens
+  jetons par la migration** (le test applique la 056 sur la base, rejouable).
+- `PasswordResetTest` : le changement de mot de passe révoque tous les appareils.
+- Parcours HTTP réel sur la stack Docker (deux contextes de navigateur, session PHP
+  supprimée pour simuler l'hébergeur) : PC encore connecté après la connexion du
+  téléphone ; deux onglets simultanés connectés ; déconnexion du PC sans effet sur le
+  téléphone.
+- PHPUnit complet (418) · PHPStan niveau 5 sans erreur.
 
-Le commentaire de la 2.3.2 jugeait que toucher à cette boîte et au logo serait « une
-refonte, pas un correctif ». C'était exact **dans son contexte** : il s'agissait d'y
-toucher pour tout le monde. Sous condition de hauteur, le compromis change — on ne dégrade
-rien là où ça fonctionnait.
+### Release
 
-### Gain mesuré (1536×864)
+**Jouer la 056 AVANT le `git pull` Hostinger** (checklist « Bloquant release » de
+`TODO.md`) : sans la table, la restauration échoue en silence (`user: null`) et tout
+joueur dont la session PHP a expiré est déconnecté.
 
-| Mode | Avant | Après | Gain |
+---
+
+## 2026-11-09 — 2.3.4 : la quête Expert « 15 d'affilée » avance de nouveau
+
+Signalement joueur (Zaiko2302) : en All-Out Attack et en Musique, la quête « Gagne 15
+parties d'affilée du premier coup » **n'avançait plus**. Ses pistes : un changement de
+filtre en Musique, et deux déconnexions automatiques.
+
+### Ce que disaient ses données (lecture seule en prod, 2026-11-09)
+
+| Mode | Série en cours | Record | Affiché |
 |---|---|---|---|
-| **Classique** | saisie@766, 74 px de défilement | **saisie@617, 0 défilement** | −149 px |
-| **Émoji** | saisie@842, 120 px | **saisie@717, 0 défilement** | −125 px |
-| Musique | saisie@963, 241 px | saisie@837, 115 px | −126 px |
-| Personae | saisie@1309, 589 px | saisie@1173, 453 px | −136 px |
-| All-Out Attack | saisie@1285, 563 px | saisie@1159, 437 px | −126 px |
-| Silhouette | saisie@1475, 755 px | saisie@1337, 617 px | −138 px |
+| All-Out Attack | **11** | 12 | 12 / 15, figé depuis le 20/10 |
+| Musique | **3** | 5 | 5 / 15 |
+| Personae | 3 | 15 | débloqué |
 
-**Classique et Émoji ne défilent plus du tout** à cette résolution, et Classique dispose de
-247 px sous la barre de saisie — de quoi afficher deux lignes de résultat (100 px l'unité),
-ce qui était la demande d'origine.
+Il progressait, **l'affichage ne bougeait pas**.
 
-### Vérification
+### Cause 1 — l'infobulle montrait le record, pas la série en cours
 
-- Mesures prises au navigateur réel (Playwright) sur les **six** modes et trois
-  résolutions, avant et après, pas une lecture du CSS.
-- Vitest : **1548 passés** (86 suites).
-- Accolades équilibrées sur les deux fichiers ; diff en **insertions pures** (133 lignes,
-  0 suppression).
-- `prettier --write` passé sur le bloc ajouté **avant** de l'insérer, pour ne pas embarquer
-  le reformatage des parties préexistantes de `global.css` — le fichier était déjà non
-  conforme sur `develop`, et la vérification prettier de la CI est explicitement non
-  bloquante (`AMELIORATIONS.md §8`). Ce reformatage reste un chantier à part.
+Depuis le 2026-09-01, `personadle_count_consecutive_perfects()` renvoie le **maximum
+historique**, à juste titre : un déblocage doit être définitif (cf. CLAUDE.md §7,
+« Condition de déblocage non monotone »). Mais `personadle_expert_progress()` s'en
+servait aussi comme `current`, donc comme progression affichée. Après une série cassée,
+le compteur restait figé jusqu'à ce que la nouvelle série **dépasse** l'ancienne. Le test
+`testProgressNeverGoesBackwards` protégeait ce comportement comme une qualité.
 
-### Angles morts connus
+**Correctif** : `personadle_consecutive_perfect_runs()` rend `['current', 'best']` en un
+seul balayage. `personadle_expert_progress()` renvoie `current` (série en cours, peut
+retomber à 0) **et** `best` (record, seul juge du déblocage). Pour les deux autres types
+(cumul à vie, meilleure journée), `best = current`.
 
-- **Silhouette, All-Out Attack et Personae débordent encore** (617, 437 et 453 px à
-  1536×864). Le reste vient de leur grande image, pas du bandeau partagé. Les dimensionner
-  en `vh` touche la lisibilité du jeu lui-même — une silhouette plus petite change la
-  difficulté — donc c'est une décision de conception, pas un sous-produit de ce lot.
-- **Les captures de référence visuelles** (`E2E_VISUAL=1`, opt-in) sont à régénérer : les
-  six modes changent d'apparence sous 900 px de haut. Elles ne tournent pas en CI, donc
-  rien n'est cassé aujourd'hui.
-- **Le groupe E2E du profil est instable**, indépendamment de ce lot. Quatre runs complets
-  sur base vierge : **1, 2, 3 puis 5 échecs**, les deux runs à 1 et 5 étant tous deux
-  *sans* la modification. Les échecs se concentrent sur `profile_atelier.spec.js` (186,
-  242, 282, 459) et `profile_no_overwrite.spec.js` (42), et chacun **passe lancé seul** —
-  écriture presse-papiers qui réclame le focus, clics sur une page encore en cours de
-  rendu. Le job E2E est bloquant en CI depuis le 24 juillet 2026 : cette variance mérite
-  son propre lot, sinon elle finira par bloquer une release sans raison.
-- La suite E2E **n'est pas idempotente** entre deux exécutions sans `docker compose down -v`,
-  et l'enchaîner trop vite déclenche le rate-limit du `globalSetup` (429, table
-  `rate_limits`).
+Côté client (`buildExpertTooltip`, `js/gameCore.js`) : la barre et le compteur suivent
+`current` ; une ligne « Record : N d'affilée » s'ajoute quand `best > current` ; un rappel
+dit que **toutes les parties comptent, Rejouer compris** (décision Hamza du 2026-11-09 :
+la règle reste, on l'affiche). Un serveur sans `best` (front servi avant l'API) affiche la
+progression reçue, sans record. L'admin (onglet Expert) montre aussi le record.
+
+### Cause 2 — en All-Out Attack, la partie relancée par un filtre n'était jamais enregistrée
+
+Le rappel d'`initFilterMenu()` recopiait `resetGame()` à la main… sans `startGame()`.
+Après une partie terminée, la nouvelle partie gardait l'identifiant de la précédente :
+`isGameLogged()` restait vrai, et sa victoire ne partait **jamais** (ni session, ni
+stats, ni série, ni quête). Il appelle désormais `resetGame()` (cible du jour re-tirée
+dans le nouveau pool, comme avant), qui arme une nouvelle partie. Les cinq autres modes
+passaient déjà par leur reset.
+
+### Cause 3 — les déconnexions : lot à part
+
+Un seul jeton « se souvenir de moi » par compte, roté à chaque restauration : un
+deuxième appareil (ou deux onglets) déconnecte l'autre, et en invité la cible du jour
+change. Corrigé dans l'entrée ci-dessus (migration 056).
+
+### Fichiers
+
+- `api/lib/condition_check.php` — `personadle_consecutive_perfect_runs()` ;
+  `personadle_count_consecutive_perfects()` en devient un raccourci (`best`), inchangé
+  pour les badges et titres.
+- `api/lib/expert_unlocks.php` — `current` / `best`, déblocage sur `best`.
+- `js/gameCore.js`, `css/global.css` — infobulle (`.expert-tooltip-best`, `.expert-tooltip-hint`).
+- `allOutAttackMode/modeAllOutAttack.js` — le filtre passe par `resetGame()`.
+- `lang/*.json` — `ui.expert_best_run`, `ui.expert_cond_consecutive_hint` (6 langues).
+- `admin/admin.js`, `js/api.js`, `api/user/expert_status.php` — `best` affiché et documenté.
+
+### Tests
+
+- `tests/expert_serie_en_cours.test.js` (6) — barre sur la série en cours, record seulement
+  s'il dépasse, rappel Rejouer, rien de tout ça sur une condition cumulative, compatibilité
+  sans `best`.
+- `tests/filter_change_rearms_game.test.js` (7) — dans les 6 modes, le filtre passe par le
+  reset du mode ; AOA ne re-tire plus la cible à la main.
+- `tests/php/ExpertUnlocksTest.php` — `testProgressNeverGoesBackwards` remplacé par
+  `testProgressShowsTheCurrentRunButNeverLosesTheRecord` ; séries en cours / record ;
+  `best = current` sur les conditions cumulatives.
+
+### Angle mort connu
+
+Changer de filtre **pendant** une partie l'abandonne sans l'enregistrer, dans les six
+modes : on peut esquiver une partie ratée et garder sa série. C'est l'« étape B
+anti-triche » (avertissement + partie comptée comme abandonnée), prévue en 2.4.
+
 ---
 
 ## 2026-10-21 — Hotfix sécurité : PHP2Shell mitigé, et une fuite d'identifiants fermée
