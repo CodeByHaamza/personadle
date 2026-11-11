@@ -38,7 +38,7 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 14 | `feat/nav_ordinateur` | Ordinateur : navigation en haut, pastilles qui ne masquent plus les bannières, un seul ⚙ par mode — **fait** |
 | 15 | `feat/podium_classement` | Podium animé, évolution ▲▼, « ta place » toujours visible — **fait** |
 | 16 | `feat/classement_quotidien` | Classement principal sur les parties du jour ; comptes hors norme repérés dans l'admin — **fait**, migration 058 |
-| 17 | `docs/readme_anime` | README façon thème GRUB : bannière et citation animées, démo des six modes |
+| 17 | `docs/readme_anime` | README à la manière de Persona GRUB Themes : bannière et citations animées, bandeaux de section — **fait** |
 | 18 | `chore/menage_depot` | Fichiers inutiles retirés, trois documents de planification fusionnés, identifiant Hostinger retiré des fichiers suivis |
 
 Depuis le lot 8, les lots sont des **commits successifs d'une seule branche,
@@ -56,6 +56,52 @@ site, préprod accessible par Tailscale, page de statut publique.
 - **« Puzzle commun du jour »** (une cible identique pour tous) : idée validée sur le
   principe, à cadrer avant d'en faire un lot — reportée à la 2.5 avec la salle à part
   (Archives de Velvet, Cognition) et l'OAuth Discord.
+
+---
+
+## 2026-11-11 — Lot 17 : un README dans le style Persona
+
+Le README de PersonaDLE était une page de projet ordinaire, alors que celui de Persona GRUB
+Themes, le projet frère de Hamza, a sa propre identité visuelle. La demande de Hamza : « le
+style joli README Persona, comme mon projet de thème GRUB ». Une première version imitait
+un menu de démarrage GRUB, ce qui était un contresens ; elle a été retirée avant commit.
+
+### Ce qui change
+
+- **En-tête** :
+  - bannière animée « PERSONADLE » en lettres découpées, avec « THE DAILY GUESSING GAME »
+    dans son cadre et la ligne « Persona 1 to 5X · six modes · six languages · a new
+    target every day » ;
+  - citations qui s'écrivent (« I am thou, thou art I… », « Who is it going to be
+    today? »…) ;
+  - badges sombres (`labelColor=0D0D0D`, rouge `E60012`), une phrase d'accroche, la
+    capture de l'accueil, puis la navigation en gras.
+- **Séparateurs animés** rouge et noir à la place des `---`.
+- **Bandeaux de section** sous « Six modes » (« Normal + Expert »), « Features » (« 6
+  languages ») et « Community » (« Discord »).
+- Une ligne précise que le classement principal compte la partie du jour de chaque mode
+  (lot 16).
+
+### Comment c'est fait
+
+`scripts/readme_assets.py` reprend la méthode de `tools/readme_assets.py` du dépôt GRUB :
+- le texte est converti en **tracés** (fontTools), donc rendu identique sans aucune
+  police chez le lecteur ;
+- animations CSS / SMIL sans script. GitHub sert ces SVG comme des images, où les
+  animations tournent et les scripts non ;
+- `prefers-reduced-motion` coupe toutes les animations.
+
+Les polices viennent **du site lui-même** (`font/google/*.woff2`, OFL : Inter, Cinzel,
+Montserrat, Oswald, Abril Fatface, Playfair Display), instanciées à la bonne graisse.
+Rien à installer d'autre que les dépendances de dev, fontTools et brotli. Le script
+d'origine visait des polices Linux absentes ici.
+
+Poids : bannière 110 Ko, citations 175 Ko, bandeaux 31 à 39 Ko, séparateur 1 Ko.
+Special Elite (machine à écrire) a été écartée pour les citations : ses contours
+« usés » donnaient un SVG de près de 1 Mo. Aucun GIF : l'historique en a été purgé en
+2026-11.
+
+Pour regénérer : `python scripts/readme_assets.py` (sortie dans `img/readme/`).
 
 ---
 
