@@ -100,14 +100,14 @@ export function renderSongCard(profile, saveProfile, saveProfileToCloud, markDir
   card.classList.remove("hidden");
 
   card.innerHTML = `
-    <h3 class="card-title"><span class="card-accent">◆</span> Profile Song</h3>
+    <h3 class="card-title"><span class="card-accent">◆</span> ${songT("profile.song_title", "Profile Song")}</h3>
 
     ${
       hasSong
         ? `
     <!-- Mini-lecteur actif — sélecteur masqué, image grande + infos dessous -->
     <div id="songPlayerUI" class="song-player">
-      <img id="songArtwork" class="song-artwork" src="" alt="Song artwork" crossorigin="anonymous">
+      <img id="songArtwork" class="song-artwork" src="" alt="${songT("profile.song_artwork_alt", "Song artwork")}" crossorigin="anonymous">
       <div class="song-info">
         <div id="songTitleEl" class="song-title"></div>
         <div id="songOpusEl"  class="song-opus-badge"></div>
@@ -124,7 +124,7 @@ export function renderSongCard(profile, saveProfile, saveProfileToCloud, markDir
           </div>
         </div>
         <div class="song-action-row">
-          <button id="songRemoveBtn" class="btn-danger song-btn-sm">✕ Remove</button>
+          <button id="songRemoveBtn" class="btn-danger song-btn-sm">✕ ${songT("profile.song_remove", "Remove")}</button>
         </div>
       </div>
     </div>

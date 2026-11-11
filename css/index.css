@@ -4938,7 +4938,9 @@ body.darkmode .velvet-theme .version-content ul li strong {
   position: absolute;
   top: 8px;
   right: 8px;
-  z-index: 5;
+  /* Au-dessus de toutes les couches animées des bannières (jusqu'à 15 pour
+     All-Out Attack, 10 pour les images d'Émoji, Shadows, Personae, Musique). */
+  z-index: 21;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -4955,6 +4957,28 @@ body.darkmode .velvet-theme .version-content ul li strong {
 
 #gameModeSelector > button {
   position: relative;
+}
+
+/* Une ligne sous chaque mode (2.4, lot 13) : rien ne disait à qui découvre le site
+   ce qu'on fait dans chaque mode — les bannières sont des images. Bandeau posé en
+   bas de la bannière, sans toucher à la grille, au-dessus des couches animées
+   (jusqu'à z-index 15) et sous la pastille ✓. Sur téléphone, la bannière fait
+   170 px de large : le bandeau en cacherait la moitié, il passe dans la feuille
+   « Jouer » de la barre du bas (js/bottomNav.js). */
+.mode-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  padding: 18px 12px 8px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0));
+  color: #fff;
+  font: 700 0.86rem/1.25 Arial, sans-serif;
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+  border-radius: 0 0 inherit inherit;
 }
 
 /* Au-delà de 480 px, la rangée n'existe pas pour la mise en page : News et
@@ -4986,6 +5010,10 @@ body.darkmode .velvet-theme .version-content ul li strong {
 
   .mode-status-text {
     display: none; /* le ✓ seul : la bannière fait 170 px de large */
+  }
+
+  .mode-caption {
+    display: none;
   }
 
   .home-quick-actions {

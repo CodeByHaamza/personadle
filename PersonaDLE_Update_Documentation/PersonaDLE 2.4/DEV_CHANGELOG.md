@@ -34,7 +34,7 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 10 | `feat/partage_journee` | Partage « journée complète » des six modes — **fait** |
 | 11 | `feat/prochains_deblocages` | Profil : quêtes Expert et badges les plus proches — **fait** |
 | 12 | `feat/filtre_en_cours_de_partie` | Étape B anti-triche : changer de filtre en cours de partie = abandon, avec avertissement — **fait** |
-| 13 | `feat/accueil_explications` | Une ligne sous chaque mode, slogan à jour, profil invité qui explique le compte, textes anglais restants |
+| 13 | `feat/accueil_explications` | Une ligne sous chaque mode, slogan à jour, profil invité qui explique le compte, textes anglais restants — **fait** |
 | 14 | `feat/nav_ordinateur` | Ordinateur : navigation en haut, pastilles qui ne masquent plus les bannières, un seul ⚙ par mode |
 | 15 | `feat/podium_classement` | Podium animé, évolution ▲▼, « ta place » toujours visible |
 | 16 | `feat/classement_quotidien` | Classement principal sur les parties du jour ; comptes hors norme repérés dans l'admin |
@@ -56,6 +56,65 @@ site, préprod accessible par Tailscale, page de statut publique.
 - **« Puzzle commun du jour »** (une cible identique pour tous) : idée validée sur le
   principe, à cadrer avant d'en faire un lot — reportée à la 2.5 avec la salle à part
   (Archives de Velvet, Cognition) et l'OAuth Discord.
+
+---
+
+## 2026-11-11 — Lot 13 : l'accueil dit ce qu'on fait, l'invité sait ce qu'un compte apporte
+
+Pour qui découvre le site, rien n'expliquait les six modes : les bannières de l'accueil
+sont des images. Le slogan disait encore « Persona 1 à Persona 5 ». Et un invité qui
+ouvrait son profil voyait deux boutons « Connexion / Créer un compte », sans un mot
+sur ce que le compte change.
+
+### Ce qui change pour le joueur
+
+- **Une ligne sur chaque bannière** (« Devine le personnage d'après sa silhouette »,
+  « Trouve à qui appartient cette Persona »…), en bandeau en bas de l'image, en
+  tablette et sur ordinateur. Sur téléphone, la bannière fait 170 px de large : le
+  bandeau en cacherait la moitié. La même ligne passe donc sous le nom de chaque mode
+  dans la **feuille « Jouer »**.
+- **Slogan** : « Devinez le personnage Persona du jour, de Persona 1 à Persona 5X », dans
+  les 6 langues.
+- **Profil invité** : « Gratuit. Ta série, tes stats et tes badges te suivent sur tous tes
+  appareils, et tu peux ajouter des amis, les défier et entrer au classement. », au-dessus
+  des boutons de compte.
+- **Textes anglais restants**, sur une page française :
+  - « Guest » devient « Invité ».
+  - « Enter username… » devient « Ton pseudo… » : la clé `profile.pseudo_placeholder`
+    était référencée par le HTML mais n'existait dans aucune langue.
+  - « Profile Song » et « ✕ Remove » sont traduits.
+  - Les notifications « Title Unlocked! » et « Wallpaper Unlocked! » aussi (« Badge
+    Unlocked! » l'était déjà).
+- **« Première partie » d'un profil vierge** : la tuile affichait la date du jour pour qui
+  n'avait jamais joué (`firstPlayed` est posé à la création du profil). Elle affiche
+  « — » tant qu'aucune partie n'est jouée.
+
+### Deux bugs trouvés en route
+
+- **La pastille « ✓ Joué aujourd'hui » était cachée** sur cinq bannières sur six. Elle
+  avait `z-index: 5` alors que les images d'Émoji, Shadows, Personae et Musique sont à
+  10 et les couches d'All-Out Attack montent à 15. Elle ne se voyait que sur
+  Classique. Elle passe à 21 et la légende à 20.
+- **« Aucun » / « None » au hasard** dans le choix du mode favori, et « Guest » au lieu
+  d'« Invité ». Ces deux éléments étaient rendus avant le chargement des traductions
+  et jamais repris : selon l'ordre de chargement, le texte sortait en anglais.
+  `_rerenderTranslated()` les ajoute à ce qu'on redessine sur `personadle:i18n-ready`.
+  Vérifié sur 5 chargements : « Invité », « Aucun » à chaque fois.
+
+### Débordement de la page Classique sur ordinateur (noté au lot 8)
+
+À 1280 px, la page faisait 1 309 px de large : la bulle d'aide de la dernière colonne
+(« Jeu »), centrée sur son en-tête, dépassait du bord droit. Même cachée
+(`visibility: hidden`), elle comptait dans la largeur de la page. Ancrée à droite pour la
+dernière colonne : 1280 et 1440 px n'ont plus de débordement, et à 1024 la rangée est
+rognée par son conteneur sans faire défiler la page.
+
+### Tests
+
+`tests/home_captions.test.js` (3) vérifie trois choses :
+- les six légendes sont dans leur bannière ;
+- leurs clés existent dans les 6 langues ;
+- la feuille « Jouer » les reprend.
 
 ---
 

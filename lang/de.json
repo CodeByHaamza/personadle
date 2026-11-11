@@ -448,7 +448,14 @@
     "next_unlocks_expert": "Expertenmodus — {{mode}}",
     "next_unlocks_kind_badge": "Abzeichen",
     "next_unlocks_kind_title": "Titel",
-    "next_unlocks_kind_expert": "Experte"
+    "next_unlocks_kind_expert": "Experte",
+    "title_unlocked_notif": "🏅 Titel freigeschaltet!",
+    "wallpaper_unlocked_notif": "🖼️ Hintergrund freigeschaltet!",
+    "guest_name": "Gast",
+    "guest_account_pitch": "Kostenlos. Deine Serie, Statistiken und Abzeichen folgen dir auf jedes Gerät, und du kannst Freunde hinzufügen, sie herausfordern und in die Rangliste kommen.",
+    "pseudo_placeholder": "Dein Benutzername…",
+    "song_artwork_alt": "Cover des Songs",
+    "song_remove": "Entfernen"
   },
   "badges": {
     "notification_title": "🎖️ Abzeichen freigeschaltet!",
@@ -1219,7 +1226,7 @@
     "danger_intro": "Diese beiden Aktionen sind unwiderruflich. Im Zweifel vorher das Profil exportieren."
   },
   "index": {
-    "main_title": "Versuche, den Persona-Charakter zu erraten (Persona 1 bis Persona 5)",
+    "main_title": "Errate den Persona-Charakter des Tages, von Persona 1 bis Persona 5X",
     "update_history": "Update-Verlauf",
     "changelog_button": "Vollständiges Changelog anzeigen",
     "copyright": "personadle.net — 2026",
@@ -1253,7 +1260,13 @@
       "b3_text": "Tauche mit den neuen saisonalen Animationen in die Sommeratmosphäre ein!",
       "b4_label": "In der Sonne:",
       "b4_text": "Spiele den All-Out Attack-Modus und genieße das neue P5X-Sommerpaket!"
-    }
+    },
+    "mode_caption_classic": "Errate den Charakter anhand seiner Merkmale",
+    "mode_caption_emoji": "Errate den Charakter anhand von Emojis",
+    "mode_caption_alloutattack": "Erkenne, wer beim All-Out Attack zuschlägt",
+    "mode_caption_silhouette": "Errate den Charakter anhand seiner Silhouette",
+    "mode_caption_personae": "Finde heraus, wem diese Persona gehört",
+    "mode_caption_music": "Erkenne den Song in wenigen Sekunden"
   },
   "data": {
     "genre": {

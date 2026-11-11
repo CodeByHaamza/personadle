@@ -455,6 +455,12 @@ function _titleImgSrc(title) {
   return `${base}/${p}`;
 }
 
+/** Traduction avec repli (CLAUDE.md §5 : t() renvoie la clé si elle manque). */
+function _notifT(key, fallback) {
+  const r = window.i18n?.t?.(key);
+  return r != null && r !== key ? r : fallback;
+}
+
 function _showTitleNotification(title) {
   const imgSrc = _titleImgSrc(title);
   const cond = titleConditionText(title);
@@ -462,7 +468,7 @@ function _showTitleNotification(title) {
   const notif = document.createElement("div");
   notif.className = "title-notification";
   notif.innerHTML = `
-    <div class="title-notif-header">🏅 Title Unlocked!</div>
+    <div class="title-notif-header">${_notifT("profile.title_unlocked_notif", "🏅 Title Unlocked!")}</div>
     <img class="title-notif-img" src="${imgSrc}" alt="${title.name}">
     <div class="title-notif-footer">
       <strong>${title.name}</strong>

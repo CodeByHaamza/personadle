@@ -173,6 +173,12 @@ export async function checkAndUnlockWallpapers(p, stats, friendCount, saveProfil
   }
 }
 
+/** Traduction avec repli (CLAUDE.md §5 : t() renvoie la clé si elle manque). */
+function _notifT(key, fallback) {
+  const r = window.i18n?.t?.(key);
+  return r != null && r !== key ? r : fallback;
+}
+
 /** Affiche une notification toast de déblocage de wallpaper. */
 export function showWallpaperNotification(wp) {
   const notif = document.createElement("div");
@@ -180,7 +186,7 @@ export function showWallpaperNotification(wp) {
   notif.innerHTML = `
     <img class="wallpaper-notif-thumb" src="${wp.src}" alt="${wp.name}">
     <div class="wallpaper-notif-text">
-      <div class="wallpaper-notif-title">🖼️ Wallpaper Unlocked!</div>
+      <div class="wallpaper-notif-title">${_notifT("profile.wallpaper_unlocked_notif", "🖼️ Wallpaper Unlocked!")}</div>
       <div class="wallpaper-notif-name">${wp.name}</div>
     </div>
   `;

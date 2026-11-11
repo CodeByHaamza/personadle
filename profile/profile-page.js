@@ -338,7 +338,7 @@ function initProfile() {
   pageAvatar.style.borderColor = profile.avatarBorderColor || "#000000";
 
   // ── Pseudo ──
-  pageUsername.textContent = profile.pseudo || "Guest";
+  pageUsername.textContent = profile.pseudo || tf("profile.guest_name", "Guest");
   pseudoInput.value = profile.pseudo || "";
 
   // ── Couleur de bordure ──
@@ -550,7 +550,8 @@ function _applyCloudToUI() {
   }
 
   // ── Identité ──────────────────────────────────────────────
-  if (pageUsername) pageUsername.textContent = profile.pseudo || profile.username || "Guest";
+  if (pageUsername)
+    pageUsername.textContent = profile.pseudo || profile.username || tf("profile.guest_name", "Guest");
   if (pseudoInput) pseudoInput.value = profile.pseudo || profile.username || "";
 
   // ── Avatar ────────────────────────────────────────────────
@@ -744,7 +745,9 @@ function renderStats() {
     },
     {
       icon: "📅",
-      value: s.firstPlayed?.split("T")[0] || "—",
+      // Un profil neuf pose firstPlayed à sa création : sans partie jouée, la tuile
+      // annonçait une « première partie » qui n'a jamais eu lieu (2.4, lot 13).
+      value: (s.games || 0) > 0 ? s.firstPlayed?.split("T")[0] || "—" : "—",
       label: tf("profile.stat_first_played_label", "First Played"),
       full: true,
     },
@@ -1178,7 +1181,7 @@ if (deleteAccountBtn && deleteAccountModal) {
 let _pseudoSyncTimer = null;
 pseudoInput.oninput = (e) => {
   profile.pseudo = e.target.value;
-  pageUsername.textContent = profile.pseudo || "Guest";
+  pageUsername.textContent = profile.pseudo || tf("profile.guest_name", "Guest");
   saveProfile();
   markDirty();
   clearTimeout(_pseudoSyncTimer);
@@ -1686,20 +1689,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 4. Re-render stats + badges à chaque changement de langue (et au chargement initial)
   //    Listener permanent : capte init + chaque setLang() depuis le sélecteur
-  window.addEventListener("personadle:i18n-ready", () => {
+  // Le sélecteur de mode favori (« Aucun ») et le nom d'invité étaient rendus avant
+  // le chargement des traductions et jamais repris : « None » / « Guest » en
+  // français, une fois sur deux selon l'ordre de chargement (2.4, lot 13).
+  const _rerenderTranslated = () => {
     renderStats();
     renderModeStats();
     renderExpertStats();
     renderBadgesModal(profile, saveProfileAndSyncBadges);
-  });
+    renderFavoriteModePicker();
+    if (!profile.pseudo) pageUsername.textContent = tf("profile.guest_name", "Guest");
+  };
+  window.addEventListener("personadle:i18n-ready", _rerenderTranslated);
 
   // Race-condition : si initLang() s'est terminé avant ce listener, l'event est déjà parti
-  if (window.i18nIsReady) {
-    renderStats();
-    renderModeStats();
-    renderExpertStats();
-    renderBadgesModal(profile, saveProfileAndSyncBadges);
-  }
+  if (window.i18nIsReady) _rerenderTranslated();
 });
 
 // Attacher les handlers de zoom badges après leur rendu

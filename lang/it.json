@@ -448,7 +448,14 @@
     "next_unlocks_expert": "Modalità Esperto — {{mode}}",
     "next_unlocks_kind_badge": "Badge",
     "next_unlocks_kind_title": "Titolo",
-    "next_unlocks_kind_expert": "Esperto"
+    "next_unlocks_kind_expert": "Esperto",
+    "title_unlocked_notif": "🏅 Titolo sbloccato!",
+    "wallpaper_unlocked_notif": "🖼️ Sfondo sbloccato!",
+    "guest_name": "Ospite",
+    "guest_account_pitch": "Gratis. La tua serie, le statistiche e i badge ti seguono su ogni dispositivo, e puoi aggiungere amici, sfidarli ed entrare in classifica.",
+    "pseudo_placeholder": "Il tuo nome utente…",
+    "song_artwork_alt": "Copertina del brano",
+    "song_remove": "Rimuovi"
   },
   "badges": {
     "notification_title": "🎖️ Badge sbloccato!",
@@ -1219,7 +1226,7 @@
     "danger_intro": "Queste due azioni sono irreversibili. Nel dubbio, esporta prima il profilo."
   },
   "index": {
-    "main_title": "Prova a indovinare il personaggio di Persona (da Persona 1 a Persona 5)",
+    "main_title": "Indovina il personaggio di Persona del giorno, da Persona 1 a Persona 5X",
     "update_history": "Cronologia aggiornamenti",
     "changelog_button": "Vedi il Changelog completo",
     "copyright": "personadle.net — 2026",
@@ -1253,7 +1260,13 @@
       "b3_text": "Immergiti nell'atmosfera estiva con le nuove animazioni stagionali!",
       "b4_label": "Sotto il sole:",
       "b4_text": "Gioca nella modalità All-Out Attack e goditi il nuovo lotto P5X estivo!"
-    }
+    },
+    "mode_caption_classic": "Indovina il personaggio dai suoi tratti",
+    "mode_caption_emoji": "Indovina il personaggio dalle emoji",
+    "mode_caption_alloutattack": "Riconosci chi colpisce nell'All-Out Attack",
+    "mode_caption_silhouette": "Indovina il personaggio dalla sua silhouette",
+    "mode_caption_personae": "Scopri di chi è questa Persona",
+    "mode_caption_music": "Riconosci il brano in pochi secondi"
   },
   "data": {
     "genre": {

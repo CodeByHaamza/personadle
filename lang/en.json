@@ -448,7 +448,14 @@
     "next_unlocks_expert": "Expert mode — {{mode}}",
     "next_unlocks_kind_badge": "Badge",
     "next_unlocks_kind_title": "Title",
-    "next_unlocks_kind_expert": "Expert"
+    "next_unlocks_kind_expert": "Expert",
+    "title_unlocked_notif": "🏅 Title Unlocked!",
+    "wallpaper_unlocked_notif": "🖼️ Wallpaper Unlocked!",
+    "guest_name": "Guest",
+    "guest_account_pitch": "Free. Your streak, stats and badges follow you on every device, and you can add friends, send them challenges and enter the leaderboard.",
+    "pseudo_placeholder": "Enter username…",
+    "song_artwork_alt": "Song artwork",
+    "song_remove": "Remove"
   },
   "badges": {
     "notification_title": "🎖️ Badge Unlocked!",
@@ -1071,7 +1078,7 @@
     "danger_intro": "These two are irreversible. Export your profile first if you are unsure."
   },
   "index": {
-    "main_title": "Try to guess the Persona character (Persona 1 to Persona 5)",
+    "main_title": "Guess the Persona character of the day, from Persona 1 to Persona 5X",
     "update_history": "Update History",
     "changelog_button": "See full Changelog",
     "copyright": "personadle.net — 2026",
@@ -1105,7 +1112,13 @@
       "b3_text": "Dive into summer fun with the brand-new seasonal animations!",
       "b4_label": "Playing in the Sun:",
       "b4_text": "Jump into All-Out Attack mode and enjoy the new P5X summer batch!"
-    }
+    },
+    "mode_caption_classic": "Guess the character from their traits",
+    "mode_caption_emoji": "Guess the character from emojis",
+    "mode_caption_alloutattack": "Name who's striking in the All-Out Attack",
+    "mode_caption_silhouette": "Guess the character from their silhouette",
+    "mode_caption_personae": "Find whose Persona this is",
+    "mode_caption_music": "Name the song from a short clip"
   },
   "data": {
     "genre": {

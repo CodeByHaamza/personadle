@@ -3101,6 +3101,18 @@ body.darkmode .crop-zoom-label {
   gap: 8px;
 }
 
+/* Ce que le compte change, pour un invité (2.4, lot 13). */
+.auth-guest-pitch {
+  margin: 0 0 4px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: #666;
+}
+
+body.darkmode .auth-guest-pitch {
+  color: #aaa;
+}
+
 .btn-auth {
   width: 100%;
   padding: 9px 14px;

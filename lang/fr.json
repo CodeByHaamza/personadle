@@ -448,7 +448,14 @@
     "next_unlocks_expert": "Mode Expert — {{mode}}",
     "next_unlocks_kind_badge": "Badge",
     "next_unlocks_kind_title": "Titre",
-    "next_unlocks_kind_expert": "Expert"
+    "next_unlocks_kind_expert": "Expert",
+    "title_unlocked_notif": "🏅 Titre débloqué !",
+    "wallpaper_unlocked_notif": "🖼️ Fond d'écran débloqué !",
+    "guest_name": "Invité",
+    "guest_account_pitch": "Gratuit. Ta série, tes stats et tes badges te suivent sur tous tes appareils, et tu peux ajouter des amis, les défier et entrer au classement.",
+    "pseudo_placeholder": "Ton pseudo…",
+    "song_artwork_alt": "Pochette de la musique",
+    "song_remove": "Retirer"
   },
   "badges": {
     "notification_title": "🎖️ Badge débloqué !",
@@ -1219,7 +1226,7 @@
     "danger_intro": "Ces deux actions sont irréversibles. Dans le doute, exporte ton profil avant."
   },
   "index": {
-    "main_title": "Devinez le personnage Persona (Persona 1 à Persona 5)",
+    "main_title": "Devinez le personnage Persona du jour, de Persona 1 à Persona 5X",
     "update_history": "Historique des mises à jour",
     "changelog_button": "Voir le Changelog complet",
     "copyright": "personadle.net — 2026",
@@ -1253,7 +1260,13 @@
       "b3_text": "Plongez dans l'ambiance estivale avec les nouvelles animations saisonnières !",
       "b4_label": "En plein soleil :",
       "b4_text": "Lancez le mode All-Out Attack et profitez du nouveau lot P5X d'été !"
-    }
+    },
+    "mode_caption_classic": "Devine le personnage d'après ses traits",
+    "mode_caption_emoji": "Devine le personnage avec des emojis",
+    "mode_caption_alloutattack": "Reconnais qui frappe dans l'All-Out Attack",
+    "mode_caption_silhouette": "Devine le personnage d'après sa silhouette",
+    "mode_caption_personae": "Trouve à qui appartient cette Persona",
+    "mode_caption_music": "Reconnais la musique en quelques secondes"
   },
   "data": {
     "genre": {

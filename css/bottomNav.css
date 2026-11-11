@@ -464,6 +464,24 @@ body.darkmode .nav-toast {
   color: #2e9b57;
 }
 
+/* Ce qu'on fait dans le mode (2.4, lot 13) : sur téléphone, la bannière de
+   l'accueil est trop petite pour l'écrire dessus. */
+.play-sheet-caption {
+  grid-column: 1 / -1;
+  margin-top: 2px;
+  font-size: 0.7rem;
+  line-height: 1.25;
+  color: #777;
+}
+
+.play-sheet-caption:empty {
+  display: none;
+}
+
+body.darkmode .play-sheet-caption {
+  color: #aaa;
+}
+
 body.darkmode .play-sheet-panel {
   background: #141414;
 }
