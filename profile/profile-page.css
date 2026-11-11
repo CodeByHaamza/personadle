@@ -1102,23 +1102,30 @@ body.darkmode .mode-stat-rate {
   gap: 10px;
 }
 
+/* Pastille, pas image : badges et bannières pèsent plusieurs Mo pièce. */
 .next-unlock__img {
+  display: grid;
+  place-items: center;
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  object-fit: contain;
-  background: #f4f4f4;
+  font-size: 1.3rem;
+  background: #f1f1f1;
 }
 
-/* Les titres sont des bannières 16:4 : on en montre le centre. */
-.next-unlock__img--title {
-  object-fit: cover;
+.next-unlock__img--rare {
+  background: linear-gradient(135deg, #dbe8ff, #b9cff7);
+}
+
+.next-unlock__img--epic {
+  background: linear-gradient(135deg, #eadcff, #cdb3f5);
+}
+
+.next-unlock__img--legendary {
+  background: linear-gradient(135deg, #fff1c7, #f4d27a);
 }
 
 .next-unlock__img--expert {
-  display: grid;
-  place-items: center;
-  font-size: 1.3rem;
   background: linear-gradient(135deg, #2b2b2b, #111);
   color: #ffd54a;
 }

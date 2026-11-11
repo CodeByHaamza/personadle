@@ -160,7 +160,7 @@ Service worker              Cron: leaderboard cache, Discord daily & weekly post
 | **Front end** | HTML5 · CSS3 (one file per component, dark mode) · Vanilla JavaScript ES6+                        |
 | **Back end**  | PHP 8.2 REST API — `GET/POST/PATCH/DELETE /api/{resource}`, JSON, proper status codes             |
 | **Database**  | MariaDB 10.6+ / MySQL 8.0 — 31-table relational schema, 1734+ unit tests keep the contract honest |
-| **i18n**      | EN · FR · ES · DE · IT · PT (1376 keys each), `en.json` is the source of truth                    |
+| **i18n**      | EN · FR · ES · DE · IT · PT (1381 keys each), `en.json` is the source of truth                    |
 | **Hosting**   | Hostinger, auto-deploy on push to `main`; SQL migrations applied by hand _before_ the merge       |
 
 ### Quality gates

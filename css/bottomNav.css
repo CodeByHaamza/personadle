@@ -591,6 +591,13 @@ body.darkmode .play-sheet-share {
     padding-top: 64px;
   }
 
+  /* Tout défilement VERS un élément (ancre, focus clavier, scrollIntoView —
+     « ma place » du classement, lot 15) doit s'arrêter sous la barre, pas
+     dessous : sinon l'élément visé y est caché et ses clics sont interceptés. */
+  html {
+    scroll-padding-top: 72px;
+  }
+
   .play-sheet-panel {
     top: 66px;
     bottom: auto;

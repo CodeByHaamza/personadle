@@ -15,7 +15,7 @@
  * Invité ou API muette : la carte reste cachée.
  */
 
-import { expertConditionLabel, modeLabel, siteRootPrefix } from "../js/gameCore.js";
+import { expertConditionLabel, modeLabel } from "../js/gameCore.js";
 
 function _t(key, fallback, vars) {
   const r = window.i18n?.t?.(key, vars);
@@ -29,16 +29,13 @@ function _esc(s) {
   );
 }
 
-/** Icône de l'entrée, depuis la racine du site (la page profil est dans /profile/). */
-function _imageSrc(item, root) {
-  if (item.kind === "expert") return null;
-  let p = String(item.image || "");
-  if (!p) return null;
-  if (p.startsWith("/") || /^https?:/.test(p)) return p;
-  // Titres : « titles/x.webp » (relatif à profile/) ou « profile/titles/x.webp ».
-  if (item.kind === "title" && !p.startsWith("profile/")) p = `profile/${p}`;
-  return `${root}${p}`;
-}
+/**
+ * Pastille de l'entrée. JAMAIS l'image du badge ou la bannière du titre : elles
+ * pèsent jusqu'à 7,7 Mo et 4,4 Mo pièce (111 Mo de badges au total), et le profil
+ * ne charge aucune image de badge tant que la collection est fermée
+ * (tests-e2e/profile_payload.spec.js). Six entrées auraient coûté ~7 Mo.
+ */
+const KIND_ICON = { badge: "🏅", title: "🎖️", expert: "⚡" };
 
 /**
  * Nom et condition affichés pour une entrée. Pure : testée dans
@@ -63,15 +60,15 @@ export function nextUnlockLabel(item) {
 }
 
 /** HTML de la liste. Pure (échappée) : testée dans tests/next_unlocks_ui.test.js. */
-export function buildNextUnlocksHTML(items, root = siteRootPrefix()) {
+export function buildNextUnlocksHTML(items) {
   return items
     .map((item) => {
       const { name, condition } = nextUnlockLabel(item);
       const pct = Math.max(0, Math.min(100, Math.round((item.current / item.required) * 100)));
-      const src = _imageSrc(item, root);
-      const icon = src
-        ? `<img class="next-unlock__img next-unlock__img--${_esc(item.kind)}" src="${_esc(src)}" alt="" loading="lazy" />`
-        : `<span class="next-unlock__img next-unlock__img--expert" aria-hidden="true">⚡</span>`;
+      const rarity = item.rarity ? ` next-unlock__img--${_esc(item.rarity)}` : "";
+      const icon = `<span class="next-unlock__img next-unlock__img--${_esc(item.kind)}${rarity}" aria-hidden="true">${
+        KIND_ICON[item.kind] ?? "◆"
+      }</span>`;
       const kindLabel = _t(`profile.next_unlocks_kind_${item.kind}`, item.kind);
       return `
         <li class="next-unlock next-unlock--${_esc(item.kind)}">

@@ -60,26 +60,26 @@ describe("nextUnlockLabel", () => {
 });
 
 describe("buildNextUnlocksHTML", () => {
-  it("renders a progress bar per item, escaped, with root-relative images", () => {
+  it("renders a progress bar per item, escaped, and never loads an image", () => {
     const doc = new DOMParser().parseFromString(
-      `<ul>${buildNextUnlocksHTML([badge, title, expert], "../")}</ul>`,
+      `<ul>${buildNextUnlocksHTML([{ ...badge, rarity: "rare" }, title, expert])}</ul>`,
       "text/html"
     );
     const rows = doc.querySelectorAll(".next-unlock");
     expect(rows).toHaveLength(3);
     expect(rows[0].querySelector(".next-unlock__bar > span").style.width).toBe("80%");
     expect(rows[0].querySelector(".next-unlock__count").textContent).toBe("4 / 5");
-    expect(rows[0].querySelector("img").getAttribute("src")).toBe("../profile/badges/images/x.png");
-    // Titre : chemin relatif à profile/ ramené à la racine.
-    expect(rows[1].querySelector("img").getAttribute("src")).toBe(
-      "../profile/titles/yosuke_ride_the_wind.webp"
-    );
+    // Badges et bannières pèsent plusieurs Mo : une pastille, jamais l'image
+    // (tests-e2e/profile_payload.spec.js).
+    expect(doc.querySelectorAll("img")).toHaveLength(0);
+    expect(
+      rows[0].querySelector(".next-unlock__img--badge.next-unlock__img--rare").textContent
+    ).toBe("🏅");
+    expect(rows[1].querySelector(".next-unlock__img--title").textContent).toBe("🎖️");
+    expect(rows[2].querySelector(".next-unlock__img--expert").textContent).toBe("⚡");
     // Échappé : le nom ne devient jamais du HTML.
     expect(rows[1].querySelector(".next-unlock__name").textContent).toBe("Ride the <Wind>");
     expect(rows[1].querySelector("wind")).toBeNull();
-    // Quête Expert : pas d'image, une icône.
-    expect(rows[2].querySelector("img")).toBeNull();
-    expect(rows[2].querySelector(".next-unlock__img--expert")).not.toBeNull();
   });
 });
 

@@ -420,22 +420,6 @@
             <div id="expertStatsContainer" class="mode-stats expert-stats"></div>
           </div>
 
-          <!-- Card : Prochains déblocages (2.4, lot 11) — ce qui est presque là :
-               badges, titres et Modes Expert les plus avancés. Joueur connecté
-               seulement ; rempli par next_unlocks_ui.js, caché tant qu'il est vide. -->
-          <div
-            id="nextUnlocksCard"
-            class="profile-card animate-right"
-            style="animation-delay: 0.12s"
-            hidden
-          >
-            <h3 class="card-title">
-              <span class="card-accent">◆</span>
-              <span data-i18n="profile.next_unlocks_title">Almost there</span>
-            </h3>
-            <ul id="nextUnlocksList" class="next-unlocks"></ul>
-          </div>
-
           <!-- Card : Badges — vitrine des badges DÉBLOQUÉS (retour Hamza : on les
                voyait mal). Les verrouillés et leurs conditions restent dans la
                collection complète (#badgesModal). -->
@@ -452,6 +436,25 @@
             <button id="openBadgesModal" class="btn-secondary" data-i18n="profile.see_all_badges">
               See All Badges
             </button>
+          </div>
+
+          <!-- Card : Prochains déblocages (2.4, lot 11) — ce qui est presque là :
+               badges, titres et Modes Expert les plus avancés. Joueur connecté
+               seulement ; rempli par next_unlocks_ui.js, caché tant qu'il est vide.
+               SOUS les badges et non au-dessus : elle arrive après la synchro, et
+               posée plus haut elle faisait sauter la rangée des badges épinglés
+               pendant qu'on la visait. -->
+          <div
+            id="nextUnlocksCard"
+            class="profile-card animate-right"
+            style="animation-delay: 0.12s"
+            hidden
+          >
+            <h3 class="card-title">
+              <span class="card-accent">◆</span>
+              <span data-i18n="profile.next_unlocks_title">Almost there</span>
+            </h3>
+            <ul id="nextUnlocksList" class="next-unlocks"></ul>
           </div>
 
           <!-- Card : Code événement -->
