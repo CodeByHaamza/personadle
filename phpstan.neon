@@ -20,6 +20,8 @@ parameters:
         # Même chose pour le top 3 hebdo (api/cron/discord_weekly.php).
         - DISCORD_WEEKLY_WEBHOOK
         - DISCORD_WEEKLY_MENTION_ROLE
+        # Et pour l'alerte des erreurs JS des joueurs (api/client_errors.php).
+        - DISCORD_ERRORS_WEBHOOK
         # Identifiants Pusher Channels (notifications temps réel) : vides dans
         # config.example.php, renseignés seulement en prod. Même piège que
         # DISCORD_DAILY_WEBHOOK — sans ces lignes PHPStan déclare la garde
