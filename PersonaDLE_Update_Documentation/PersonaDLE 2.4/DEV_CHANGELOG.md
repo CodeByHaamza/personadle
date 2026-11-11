@@ -36,7 +36,7 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 12 | `feat/filtre_en_cours_de_partie` | Étape B anti-triche : changer de filtre en cours de partie = abandon, avec avertissement — **fait** |
 | 13 | `feat/accueil_explications` | Une ligne sous chaque mode, slogan à jour, profil invité qui explique le compte, textes anglais restants — **fait** |
 | 14 | `feat/nav_ordinateur` | Ordinateur : navigation en haut, pastilles qui ne masquent plus les bannières, un seul ⚙ par mode — **fait** |
-| 15 | `feat/podium_classement` | Podium animé, évolution ▲▼, « ta place » toujours visible |
+| 15 | `feat/podium_classement` | Podium animé, évolution ▲▼, « ta place » toujours visible — **fait** |
 | 16 | `feat/classement_quotidien` | Classement principal sur les parties du jour ; comptes hors norme repérés dans l'admin |
 | 17 | `docs/readme_anime` | README façon thème GRUB : bannière et citation animées, démo des six modes |
 | 18 | `chore/menage_depot` | Fichiers inutiles retirés, trois documents de planification fusionnés, identifiant Hostinger retiré des fichiers suivis |
@@ -56,6 +56,74 @@ site, préprod accessible par Tailscale, page de statut publique.
 - **« Puzzle commun du jour »** (une cible identique pour tous) : idée validée sur le
   principe, à cadrer avant d'en faire un lot — reportée à la 2.5 avec la salle à part
   (Archives de Velvet, Cognition) et l'OAuth Discord.
+
+---
+
+## 2026-11-11 — Lot 15 : le classement bouge, et ta place ne se perd plus
+
+### Ce qui change pour le joueur
+
+- **Podium animé** : les trois marches montent l'une après l'autre (3ᵉ, 2ᵉ, puis le 1ᵉʳ,
+  dont la médaille finit par un petit rebond). Désactivé si le système demande moins
+  d'animations.
+- **▲▼ depuis ta dernière visite**, à côté de chaque pseudo et dans « ta place ».
+- **« Ta place » toujours visible** :
+  - le bandeau reste épinglé en haut de la liste pendant qu'on fait défiler, sous la
+    barre de navigation sur ordinateur ;
+  - il s'affiche **même quand tu n'es pas dans la page affichée**. Avant, il
+    n'apparaissait que pour le top 50, c'est-à-dire pour ceux qui n'en avaient pas
+    besoin ;
+  - si ta ligne est sur la page, toucher le bandeau t'y ramène et la fait briller.
+
+### Ce qui ne marchait pas
+
+- **Le bandeau ne collait jamais.** Il était déjà en `position: sticky`, mais dans une
+  carte en `overflow: hidden` : la carte devenait un conteneur de défilement immobile
+  et le bandeau défilait avec la page. `overflow: clip` rogne toujours les coins, sans
+  ce conteneur (même famille de piège qu'au lot 7). Sa teinte est désormais posée sur
+  le fond de la carte : une teinte seule laissait voir les lignes passer dessous.
+- **`my_rank` n'existait que sur la page renvoyée.** `formatAndSend()` reçoit une
+  fonction « trouve-moi ». Elle rejoue la même requête **sans `LIMIT`** et s'arrête dès
+  qu'elle trouve le joueur, et elle ne tourne que pour un joueur connecté absent de la
+  page. Chacun des quatre chemins SQL (depuis toujours normal et Expert, période en
+  direct, série en direct) garde sa requête sans `LIMIT` dans `$sql`, la page
+  l'ajoutant au moment de l'exécution.
+- **Pagination des classements jour / semaine / mois cassée (cache).** Le SQL appliquait
+  déjà `LIMIT/OFFSET`, puis le PHP refaisait `array_slice($offset, $limit)` :
+  - la **page 2 revenait toujours vide** ;
+  - le total valait la taille de la page ;
+  - le filtre amis ne voyait que le top 50.
+
+  Le chemin du cache lit maintenant toute la vue (une ligne par joueur classé), puis
+  filtre, compte, cherche « ta place » et pagine. Vérifié après avoir rempli le cache
+  local avec le cron : page 2 = rangs 6 à 10, total 40, « ta place » au 40ᵉ.
+
+### ▲▼ sans historique serveur
+
+`leaderboard_cache` est recalculé chaque heure sans garder de passé, donc pas de migration
+pour une première version. L'évolution se mesure dans le navigateur
+(`profile/leaderboard/rank_delta.js`), contre les rangs que **ce** joueur a vus à sa
+dernière visite :
+- une référence par vue : dimension, mode, période, métrique et filtre amis ;
+- pour les périodes bornées, une par jour, semaine ou mois, sinon le classement du jour
+  se comparerait à celui de la veille ;
+- la référence est gardée **12 h**, pour qu'un simple rechargement n'efface pas les
+  flèches qu'on vient de voir ;
+- elle n'est jamais remplacée depuis une page 2+, qui n'est qu'une vue partielle.
+
+### Tests
+
+- `tests/rank_delta.test.js` (7) : périodes, clés de vue, durée de vie, page partielle,
+  pastilles.
+- `tests-e2e/leaderboard_my_rank.spec.js` : avec une page d'une ligne, le second joueur
+  reçoit quand même son rang, et ce rang est bien le sien.
+- E2E classement / stats / API (28) et PHPUnit complet (445) verts.
+
+### Angle mort
+
+Les flèches dépendent du navigateur : un autre appareil ou un stockage vidé, et il n'y en a
+plus jusqu'à la visite suivante. Une table d'historique côté serveur (un instantané par
+jour) donnerait une évolution vraie pour tous ; à décider si la fonction plaît.
 
 ---
 

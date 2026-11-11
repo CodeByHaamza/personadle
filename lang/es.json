@@ -981,7 +981,9 @@
     "scope_friends": "Amigos",
     "login_for_friends": "Inicia sesión para ver el ranking de tus amigos.",
     "no_friends": "Ninguno de tus amigos aparece aún en este ranking.",
-    "expert_no_streak": "La mejor racha no tiene clasificación Experto: una racha cuenta días consecutivos, y el Experto no es una cita diaria."
+    "expert_no_streak": "La mejor racha no tiene clasificación Experto: una racha cuenta días consecutivos, y el Experto no es una cita diaria.",
+    "rank_up": "Sube {{n}} desde tu última visita",
+    "rank_down": "Baja {{n}} desde tu última visita"
   },
   "friends": {
     "title": "Amigos",

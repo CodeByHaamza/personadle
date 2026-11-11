@@ -981,7 +981,9 @@
     "scope_friends": "Friends",
     "login_for_friends": "Log in to see your friends leaderboard.",
     "no_friends": "None of your friends appear in this ranking yet.",
-    "expert_no_streak": "Best streak has no Expert ranking: a streak counts consecutive days, and Expert is not a daily run."
+    "expert_no_streak": "Best streak has no Expert ranking: a streak counts consecutive days, and Expert is not a daily run.",
+    "rank_up": "Up {{n}} since your last visit",
+    "rank_down": "Down {{n}} since your last visit"
   },
   "friends": {
     "title": "Friends",

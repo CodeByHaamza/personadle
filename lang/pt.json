@@ -981,7 +981,9 @@
     "scope_friends": "Amigos",
     "login_for_friends": "Inicia sessão para veres a classificação dos teus amigos.",
     "no_friends": "Nenhum dos teus amigos aparece ainda nesta classificação.",
-    "expert_no_streak": "A melhor sequência não tem classificação Especialista: uma sequência conta dias consecutivos, e o Especialista não é um compromisso diário."
+    "expert_no_streak": "A melhor sequência não tem classificação Especialista: uma sequência conta dias consecutivos, e o Especialista não é um compromisso diário.",
+    "rank_up": "Subiu {{n}} desde a tua última visita",
+    "rank_down": "Desceu {{n}} desde a tua última visita"
   },
   "friends": {
     "title": "Amigos",

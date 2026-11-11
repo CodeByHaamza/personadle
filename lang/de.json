@@ -981,7 +981,9 @@
     "scope_friends": "Freunde",
     "login_for_friends": "Melde dich an, um das Freundes-Ranking zu sehen.",
     "no_friends": "Noch keiner deiner Freunde erscheint in diesem Ranking.",
-    "expert_no_streak": "Für die beste Serie gibt es keine Experten-Rangliste: eine Serie zählt aufeinanderfolgende Tage, und der Experten-Modus ist kein tägliches Ritual."
+    "expert_no_streak": "Für die beste Serie gibt es keine Experten-Rangliste: eine Serie zählt aufeinanderfolgende Tage, und der Experten-Modus ist kein tägliches Ritual.",
+    "rank_up": "{{n}} Plätze hoch seit deinem letzten Besuch",
+    "rank_down": "{{n}} Plätze runter seit deinem letzten Besuch"
   },
   "friends": {
     "title": "Freunde",

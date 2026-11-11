@@ -283,10 +283,9 @@ function buildEverLeaderboard(PDO $pdo, string $mode, string $metric, int $limit
         GROUP BY u.id, u.pseudo, u.friend_code, p.avatar_data, p.avatar_border_color, p.selected_badges
         HAVING score IS NOT NULL AND score > 0 {$participation}
         ORDER BY score {$orderDir}, u.pseudo ASC
-        LIMIT {$limit} OFFSET {$offset}
     ";
 
-    $stmt = $pdo->query($sql);
+    $stmt = $pdo->query($sql . " LIMIT {$limit} OFFSET {$offset}");
     $rows = $stmt->fetchAll();
 
     // Count total matching rows (without LIMIT) for correct pagination
@@ -304,7 +303,8 @@ function buildEverLeaderboard(PDO $pdo, string $mode, string $metric, int $limit
     ";
     $total = (int) $pdo->query($countSql)->fetchColumn();
 
-    formatAndSend($pdo, $rows, $metric, $myId, $mode, 'ever', $limit, $offset, $total);
+    formatAndSend($pdo, $rows, $metric, $myId, $mode, 'ever', $limit, $offset, $total, false,
+        fn () => personadle_leaderboard_find_mine($pdo, $sql, [], $myId));
 }
 
 
@@ -363,9 +363,8 @@ function buildEverExpertLeaderboard(PDO $pdo, string $mode, string $metric, int 
         GROUP BY u.id, u.pseudo, u.friend_code, p.avatar_data, p.avatar_border_color, p.selected_badges
         HAVING score IS NOT NULL AND score > 0 {$participation}
         ORDER BY score DESC, u.pseudo ASC
-        LIMIT {$limit} OFFSET {$offset}
     ";
-    $rows = $pdo->query($sql)->fetchAll();
+    $rows = $pdo->query($sql . " LIMIT {$limit} OFFSET {$offset}")->fetchAll();
 
     $countSql = "
         SELECT COUNT(*) FROM (
@@ -382,7 +381,8 @@ function buildEverExpertLeaderboard(PDO $pdo, string $mode, string $metric, int 
     ";
     $total = (int) $pdo->query($countSql)->fetchColumn();
 
-    formatAndSend($pdo, $rows, $metric, $myId, $mode, 'ever', $limit, $offset, $total, true);
+    formatAndSend($pdo, $rows, $metric, $myId, $mode, 'ever', $limit, $offset, $total, true,
+        fn () => personadle_leaderboard_find_mine($pdo, $sql, [], $myId));
 }
 
 
@@ -419,14 +419,11 @@ function buildPeriodLeaderboard(PDO $pdo, string $mode, string $period, string $
           AND lc.metric    = :metric
           AND lc.is_expert = :expert
         ORDER BY lc.rank_position ASC
-        LIMIT :lim OFFSET :off
     ");
     $cacheStmt->bindValue(':mode',   $mode,   PDO::PARAM_STR);
     $cacheStmt->bindValue(':period', $period, PDO::PARAM_STR);
     $cacheStmt->bindValue(':metric', $metric, PDO::PARAM_STR);
     $cacheStmt->bindValue(':expert', $expertOnly ? 1 : 0, PDO::PARAM_INT);
-    $cacheStmt->bindValue(':lim',    $limit,  PDO::PARAM_INT);
-    $cacheStmt->bindValue(':off',    $offset, PDO::PARAM_INT);
     $cacheStmt->execute();
     $cacheRows = $cacheStmt->fetchAll();
 
@@ -436,7 +433,20 @@ function buildPeriodLeaderboard(PDO $pdo, string $mode, string $period, string $
             $friendIds = getFriendIds($pdo, $myId);
             $cacheRows = array_values(array_filter($cacheRows, fn($r) => in_array((int)$r['user_id'], $friendIds, true)));
         }
+        // Toute la vue est lue (une ligne par joueur classé), puis paginée ICI —
+        // 2.4, lot 15. Avant, le SQL appliquait déjà LIMIT/OFFSET et cette ligne
+        // décalait une SECONDE fois : la page 2 revenait toujours vide, le total
+        // valait la taille de la page, et le filtre amis ne voyait que le top 50.
         $total = count($cacheRows);
+        $mine  = null;
+        if ($myId) {
+            foreach ($cacheRows as $i => $r) {
+                if ((int) $r['user_id'] === $myId) {
+                    $mine = ['rank' => $i + 1, 'score' => $r['score'] !== null ? (float) $r['score'] : null];
+                    break;
+                }
+            }
+        }
         $cacheRows = array_slice($cacheRows, $offset, $limit);
 
         // Reformater pour correspondre à la structure attendue par formatAndSend
@@ -453,7 +463,8 @@ function buildPeriodLeaderboard(PDO $pdo, string $mode, string $period, string $
             ];
         }, $cacheRows);
 
-        formatAndSend($pdo, $rows, $metric, $myId, $mode, $period, $limit, $offset, $total, $expertOnly);
+        formatAndSend($pdo, $rows, $metric, $myId, $mode, $period, $limit, $offset, $total, $expertOnly,
+            fn () => $mine);
     }
 
     // ── Fallback : calcul live depuis game_sessions ───────────────────────────
@@ -511,7 +522,8 @@ function buildPeriodLeaderboardLive(PDO $pdo, string $mode, string $period, stri
         $countStmt->execute([$startDate]);
         $total = (int) $countStmt->fetchColumn();
 
-        formatAndSend($pdo, $rows, $metric, $myId, $mode, $period, $limit, $offset, $total, $expertOnly);
+        formatAndSend($pdo, $rows, $metric, $myId, $mode, $period, $limit, $offset, $total, $expertOnly,
+            fn () => personadle_leaderboard_find_mine($pdo, $sql, [$startDate], $myId));
     }
 
     // Compte des PARTIES, pas des jours — décision produit écrite dans
@@ -546,10 +558,9 @@ function buildPeriodLeaderboardLive(PDO $pdo, string $mode, string $period, stri
         GROUP BY u.id, u.pseudo, u.friend_code, p.avatar_data, p.avatar_border_color, p.selected_badges
         HAVING score IS NOT NULL AND score > 0 {$participation}
         ORDER BY score DESC, u.pseudo ASC
-        LIMIT {$limit} OFFSET {$offset}
     ";
 
-    $stmt = $pdo->prepare($sql);
+    $stmt = $pdo->prepare($sql . " LIMIT {$limit} OFFSET {$offset}");
     $stmt->execute([$startDate]);
     $rows = $stmt->fetchAll();
 
@@ -572,7 +583,8 @@ function buildPeriodLeaderboardLive(PDO $pdo, string $mode, string $period, stri
     $countStmt->execute([$startDate]);
     $total = (int) $countStmt->fetchColumn();
 
-    formatAndSend($pdo, $rows, $metric, $myId, $mode, $period, $limit, $offset, $total, $expertOnly);
+    formatAndSend($pdo, $rows, $metric, $myId, $mode, $period, $limit, $offset, $total, $expertOnly,
+        fn () => personadle_leaderboard_find_mine($pdo, $sql, [$startDate], $myId));
 }
 
 
@@ -580,7 +592,7 @@ function buildPeriodLeaderboardLive(PDO $pdo, string $mode, string $period, stri
  * Formate les résultats bruts, ajoute le rang, cherche la position perso.
  * $total = nombre total de lignes sans LIMIT (pour la pagination).
  */
-function formatAndSend(PDO $pdo, array $rows, string $metric, int $myId, string $mode, string $period, int $limit, int $offset, int $total, bool $expertOnly = false): never
+function formatAndSend(PDO $pdo, array $rows, string $metric, int $myId, string $mode, string $period, int $limit, int $offset, int $total, bool $expertOnly = false, ?Closure $findMine = null): never
 {
     $entries = [];
     $myRank  = null;
@@ -611,6 +623,17 @@ function formatAndSend(PDO $pdo, array $rows, string $metric, int $myId, string 
         $entries[] = $entry;
     }
 
+    // « Ta place » même quand tu n'es pas sur la page affichée (2.4, lot 15) :
+    // avant, my_rank n'existait que pour le top 50 — exactement ceux qui n'en
+    // avaient pas besoin. La recherche n'est faite qu'à cette condition.
+    if ($myId && $myRank === null && $findMine !== null) {
+        try {
+            $myRank = $findMine();
+        } catch (Throwable $e) {
+            error_log('[PersonaDLE leaderboard my_rank] ' . $e->getMessage());
+        }
+    }
+
     jsonSuccess([
         'mode'    => $mode,
         'period'  => $period,
@@ -625,4 +648,28 @@ function formatAndSend(PDO $pdo, array $rows, string $metric, int $myId, string 
         'offset'  => $offset,
         'limit'   => $limit,
     ]);
+}
+
+
+/**
+ * Rang du joueur connecté dans un classement complet (même requête que la page,
+ * sans LIMIT) — pour « ta place » quand il n'est pas sur la page affichée.
+ * Ne lit que l'ordre : on s'arrête dès qu'on l'a trouvé.
+ *
+ * @param list<mixed> $params
+ * @return array{rank:int, score:?float}|null
+ */
+function personadle_leaderboard_find_mine(PDO $pdo, string $orderedSql, array $params, int $myId): ?array
+{
+    $stmt = $pdo->prepare($orderedSql);
+    $stmt->execute($params);
+    $pos = 0;
+    while ($r = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $pos++;
+        if ((int) $r['id'] === $myId) {
+            $stmt->closeCursor();
+            return ['rank' => $pos, 'score' => $r['score'] !== null ? (float) $r['score'] : null];
+        }
+    }
+    return null;
 }

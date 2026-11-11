@@ -230,10 +230,13 @@
   border: 1.5px solid var(--lb-border);
   border-radius: var(--lb-radius);
   box-shadow: var(--lb-shadow);
-  overflow: hidden;
+  /* `clip` et non `hidden` (2.4, lot 15) : `hidden` faisait de la carte un
+     conteneur de défilement immobile, et « ma place » (sticky) ne collait donc
+     JAMAIS quand la page défilait. `clip` rogne les coins sans créer ce conteneur. */
+  overflow: clip;
 }
 
-/* Sa propre position, épinglée en haut de la carte */
+/* Sa propre position, épinglée en haut de l'écran pendant qu'on fait défiler */
 .lb-my-rank {
   position: sticky;
   top: 0;
@@ -242,7 +245,12 @@
   align-items: center;
   gap: 10px;
   padding: 12px 18px;
-  background: rgba(var(--lb-accent-rgb), 0.08);
+  /* Teinte posée SUR le fond de la carte : maintenant qu'elle colle vraiment
+     pendant le défilement (lot 15), une teinte seule laissait voir les lignes
+     passer dessous. */
+  background:
+    linear-gradient(rgba(var(--lb-accent-rgb), 0.08), rgba(var(--lb-accent-rgb), 0.08)),
+    var(--lb-surface);
   border-bottom: 1.5px solid rgba(var(--lb-accent-rgb), 0.2);
   font-size: 0.82rem;
   color: var(--lb-text);
@@ -986,4 +994,108 @@ body.darkmode .lb-bond-xp {
 }
 .darkmode .lb-filters-card--expert {
   border-color: rgba(178, 106, 255, 0.45);
+}
+
+/* ──────────────────────────────────────────────────────────
+   2.4, LOT 15 — podium animé, ▲▼ depuis la dernière visite, « ma place »
+   ────────────────────────────────────────────────────────── */
+
+/* Les marches montent l'une après l'autre : 3ᵉ, 2ᵉ, puis le 1ᵉʳ, qui finit
+   par un petit rebond. `backwards` et non `both` : une fois l'animation finie,
+   le style normal reprend la main — sinon le `transform` figé écraserait le
+   soulèvement au survol (piège §7 : une animation bat les déclarations). */
+.lb-podium-card {
+  animation: lbPodiumRise 0.55s cubic-bezier(0.2, 0.9, 0.25, 1.15) backwards;
+}
+.lb-podium-card--3 {
+  animation-delay: 0.05s;
+}
+.lb-podium-card--2 {
+  animation-delay: 0.2s;
+}
+.lb-podium-card--1 {
+  animation-delay: 0.38s;
+}
+.lb-podium-card--1 .lb-podium-medal {
+  animation: lbCrownPop 0.5s ease-out 0.85s backwards;
+}
+
+@keyframes lbPodiumRise {
+  from {
+    opacity: 0;
+    transform: translateY(36px);
+  }
+}
+
+@keyframes lbCrownPop {
+  0% {
+    transform: scale(0.2) rotate(-25deg);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.25) rotate(8deg);
+    opacity: 1;
+  }
+}
+
+/* ▲▼ */
+.lb-delta {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 5px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 1.5;
+  vertical-align: 1px;
+  font-variant-numeric: tabular-nums;
+}
+.lb-delta--up {
+  color: #1b7a43;
+  background: rgba(46, 155, 87, 0.14);
+}
+.lb-delta--down {
+  color: #b3261e;
+  background: rgba(230, 57, 70, 0.12);
+}
+body.darkmode .lb-delta--up {
+  color: #7fe0a6;
+}
+body.darkmode .lb-delta--down {
+  color: #ff9a9a;
+}
+
+/* « Ma place » : sous la barre de navigation du haut sur ordinateur (lot 14). */
+@media (min-width: 1025px) {
+  .lb-my-rank {
+    top: 64px;
+  }
+}
+.lb-my-rank--jump {
+  cursor: pointer;
+}
+.lb-my-rank--jump::after {
+  content: "↓";
+  margin-left: auto;
+  font-weight: 800;
+  color: var(--lb-accent);
+}
+
+/* Ta ligne, retrouvée depuis « ma place » */
+.lb-flash {
+  animation: lbRowFlash 1.4s ease-out;
+}
+@keyframes lbRowFlash {
+  0%,
+  35% {
+    box-shadow: 0 0 0 3px rgba(var(--lb-accent-rgb), 0.55);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lb-podium-card,
+  .lb-podium-card--1 .lb-podium-medal,
+  .lb-flash {
+    animation: none;
+  }
 }
