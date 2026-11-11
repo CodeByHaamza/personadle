@@ -8,7 +8,10 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { readdirSync, existsSync } from "node:fs";
+import { join } from "node:path";
 import {
+  badgeThumbPath,
   buildNextUnlocksHTML,
   nextUnlockLabel,
   renderNextUnlocks,
@@ -60,26 +63,43 @@ describe("nextUnlockLabel", () => {
 });
 
 describe("buildNextUnlocksHTML", () => {
-  it("renders a progress bar per item, escaped, and never loads an image", () => {
+  it("shows the real badge (as a light thumbnail), icons for titles and Expert, escaped", () => {
     const doc = new DOMParser().parseFromString(
-      `<ul>${buildNextUnlocksHTML([{ ...badge, rarity: "rare" }, title, expert])}</ul>`,
+      `<ul>${buildNextUnlocksHTML([{ ...badge, rarity: "rare" }, title, expert], "../")}</ul>`,
       "text/html"
     );
     const rows = doc.querySelectorAll(".next-unlock");
     expect(rows).toHaveLength(3);
     expect(rows[0].querySelector(".next-unlock__bar > span").style.width).toBe("80%");
     expect(rows[0].querySelector(".next-unlock__count").textContent).toBe("4 / 5");
-    // Badges et bannières pèsent plusieurs Mo : une pastille, jamais l'image
-    // (tests-e2e/profile_payload.spec.js).
-    expect(doc.querySelectorAll("img")).toHaveLength(0);
-    expect(
-      rows[0].querySelector(".next-unlock__img--badge.next-unlock__img--rare").textContent
-    ).toBe("🏅");
+    // Badge : sa miniature (jamais l'original de plusieurs Mo), pastille de secours.
+    const img = rows[0].querySelector("img");
+    expect(img.getAttribute("src")).toBe("../profile/badges/thumbs/x.webp");
+    expect(img.dataset.fallback).toBe("🏅");
+    expect(doc.querySelectorAll("img")).toHaveLength(1);
     expect(rows[1].querySelector(".next-unlock__img--title").textContent).toBe("🎖️");
     expect(rows[2].querySelector(".next-unlock__img--expert").textContent).toBe("⚡");
     // Échappé : le nom ne devient jamais du HTML.
     expect(rows[1].querySelector(".next-unlock__name").textContent).toBe("Ride the <Wind>");
     expect(rows[1].querySelector("wind")).toBeNull();
+  });
+});
+
+describe("badgeThumbPath", () => {
+  it("maps an original to its snake_case webp thumbnail", () => {
+    expect(badgeThumbPath("profile/badges/images/Badges_Burn_My_Dread_Silver.png")).toBe(
+      "profile/badges/thumbs/badges_burn_my_dread_silver.webp"
+    );
+    expect(badgeThumbPath("")).toBeNull();
+  });
+
+  it("every badge image has its thumbnail (scripts/badge_thumbs.py was run)", () => {
+    const root = join(__dirname, "..");
+    const missing = readdirSync(join(root, "profile/badges/images"))
+      .filter((f) => /\.(png|webp|jpe?g|gif)$/i.test(f))
+      .map((f) => badgeThumbPath(`profile/badges/images/${f}`))
+      .filter((thumb) => !existsSync(join(root, thumb)));
+    expect(missing, "relance python scripts/badge_thumbs.py").toEqual([]);
   });
 });
 

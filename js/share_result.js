@@ -11,6 +11,9 @@
  *   ✅ 2 essais
  *   https://personadle.net
  *
+ * Le bouton vit SOUS la barre de fin de partie (endgameSlot()), pas dedans : y
+ * glisser un bouton déplaçait « mode précédent / suivant ».
+ *
  * Câblage, sans toucher aux six modes un par un :
  *  - buildGameSession() (gameCore.js) retient le résultat de la partie en cours
  *    dans `lastGameResult` (LAST_RESULT_KEY : résultat, essais, identifiant) ;
@@ -164,7 +167,34 @@ export function currentShareText(doc = document, result = readCurrentResult()) {
   return buildShareText({ ...result, grid: isClassic ? readClassicGrid(doc) : [] });
 }
 
-/** Monte le bouton dans la navigation de fin de partie (#modeNavigationContainer). */
+/**
+ * Bloc posé SOUS la barre de fin de partie (#modeNavigationContainer), qui reçoit
+ * le bouton « Partager » et la carte Discord (js/discord_nudge.js).
+ *
+ * Hors de la barre, volontairement : elle est une rangée flex « précédent / défi /
+ * suivant » en `space-between`, et y glisser le bouton Partager DÉPLAÇAIT les
+ * boutons de mode (retour de Hamza sur la 2.4). Le bloc suit l'état de la barre :
+ * caché quand elle se recache (Replay, filtre, minuit).
+ */
+export function endgameSlot(doc = document) {
+  const nav = doc.getElementById("modeNavigationContainer");
+  if (!nav) return null;
+  let slot = doc.getElementById("endgameExtras");
+  if (!slot) {
+    slot = doc.createElement("div");
+    slot.id = "endgameExtras";
+    slot.className = "endgame-extras";
+    nav.insertAdjacentElement("afterend", slot);
+    const sync = () => {
+      slot.hidden = nav.style.display === "none";
+    };
+    new MutationObserver(sync).observe(nav, { attributes: true, attributeFilter: ["style"] });
+    sync();
+  }
+  return slot;
+}
+
+/** Monte le bouton sous la navigation de fin de partie (bloc endgameSlot()). */
 export function mountShareButton(doc = document) {
   const nav = doc.getElementById("modeNavigationContainer");
   const result = readCurrentResult();
@@ -194,6 +224,6 @@ export function mountShareButton(doc = document) {
       );
     } else if (outcome === "failed") toast(_t("share.failed", "Couldn't copy the result."));
   });
-  nav.prepend(btn);
+  endgameSlot(doc).prepend(btn);
   return btn;
 }

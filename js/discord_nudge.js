@@ -6,7 +6,8 @@
  * en bas de l'accueil. Le moment où un joueur a envie d'en parler, c'est juste
  * après une victoire — et plus encore après une journée 6/6.
  *
- * Ce qu'on affiche, sous la navigation de fin de partie :
+ * Ce qu'on affiche, dans le bloc posé sous la navigation de fin de partie
+ * (endgameSlot(), js/share_result.js) :
  *  - après une victoire : une carte qui copie le résultat (le même texte que
  *    « Partager mon résultat ») et ouvre le serveur ;
  *  - après la 6e victoire du jour : la même, en version « 6/6 ».
@@ -26,7 +27,7 @@
 
 import { DISCORD_INVITE_URL, isExpertPage, parisDateKey, siteRootPrefix } from "./gameCore.js";
 import { dailyProgress } from "./daily_status.js";
-import { currentShareText, readCurrentResult, toast } from "./share_result.js";
+import { currentShareText, endgameSlot, readCurrentResult, toast } from "./share_result.js";
 import { currentDayShareText } from "./share_day.js";
 
 export const NUDGE_HIDDEN_KEY = "discordNudgeHidden";
@@ -136,9 +137,7 @@ export function mountDiscordNudge(
   { storage = localStorage, today = parisDateKey() } = {}
 ) {
   const nav = doc.getElementById("modeNavigationContainer");
-  const previous = doc.getElementById("discordNudge");
-  previous?._observer?.disconnect();
-  previous?.remove();
+  doc.getElementById("discordNudge")?.remove();
   if (!nav) return null;
 
   const result = readCurrentResult(storage);
@@ -191,7 +190,8 @@ export function mountDiscordNudge(
   // refuse sinon) ; l'onglet Discord s'ouvre juste après.
   cta.addEventListener("click", () => {
     // 6/6 : la journée entière (js/share_day.js), sinon la partie qui vient de finir.
-    const text = variant === "perfect_day" ? currentDayShareText({ storage }) : currentShareText(doc);
+    const text =
+      variant === "perfect_day" ? currentDayShareText({ storage }) : currentShareText(doc);
     if (!text || typeof navigator.clipboard?.writeText !== "function") return;
     navigator.clipboard
       .writeText(text)
@@ -200,20 +200,12 @@ export function mountDiscordNudge(
   });
   close.addEventListener("click", () => {
     _write(storage, NUDGE_HIDDEN_KEY, "1");
-    card._observer?.disconnect();
     card.remove();
   });
 
-  // La navigation se recache quand une nouvelle partie démarre (Replay, filtre,
-  // minuit) : la carte, posée à côté et non dedans, suit son état.
-  const sync = () => {
-    card.hidden = nav.style.display === "none";
-  };
-  card._observer = new MutationObserver(sync);
-  card._observer.observe(nav, { attributes: true, attributeFilter: ["style"] });
-  sync();
-
-  nav.insertAdjacentElement("afterend", card);
+  // Sous la barre de fin de partie, dans le même bloc que « Partager » : le bloc
+  // se cache avec la barre quand une nouvelle partie démarre (endgameSlot()).
+  endgameSlot(doc).appendChild(card);
   _write(storage, NUDGE_SHOWN_KEY, JSON.stringify({ day: today, id: result.id, variant }));
 
   fetchDiscordCounts().then((counts) => {

@@ -173,12 +173,15 @@ describe("fetchDiscordCounts", () => {
 });
 
 describe("mountDiscordNudge", () => {
-  it("puts the card right after the end-of-game navigation, linking to the server", () => {
+  it("puts the card under the end-of-game navigation, linking to the server", () => {
     const nav = setNav();
     setResult();
     const card = mountDiscordNudge(document, { today: TODAY });
     expect(card).not.toBeNull();
-    expect(nav.nextElementSibling).toBe(card);
+    // Dans le bloc posé sous la barre (endgameSlot), jamais dans la barre.
+    expect(nav.nextElementSibling.id).toBe("endgameExtras");
+    expect(card.parentElement).toBe(nav.nextElementSibling);
+    expect(nav.contains(card)).toBe(false);
     expect(card.classList.contains("discord-nudge--win")).toBe(true);
     const cta = card.querySelector(".discord-nudge__cta");
     expect(cta.getAttribute("href")).toBe(DISCORD_INVITE_URL);
@@ -233,9 +236,10 @@ describe("mountDiscordNudge", () => {
     const nav = setNav();
     setResult();
     const card = mountDiscordNudge(document, { today: TODAY });
-    expect(card.hidden).toBe(false);
+    const slot = card.parentElement;
+    expect(slot.hidden).toBe(false);
     nav.style.display = "none";
     await new Promise((r) => setTimeout(r, 0)); // MutationObserver : microtâche
-    expect(card.hidden).toBe(true);
+    expect(slot.hidden).toBe(true);
   });
 });

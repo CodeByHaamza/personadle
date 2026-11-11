@@ -1102,7 +1102,7 @@ body.darkmode .mode-stat-rate {
   gap: 10px;
 }
 
-/* Pastille, pas image : badges et bannières pèsent plusieurs Mo pièce. */
+/* Pastille (titre, Expert) ou miniature du badge (profile/badges/thumbs/). */
 .next-unlock__img {
   display: grid;
   place-items: center;
@@ -1128,6 +1128,12 @@ body.darkmode .mode-stat-rate {
 .next-unlock__img--expert {
   background: linear-gradient(135deg, #2b2b2b, #111);
   color: #ffd54a;
+}
+
+/* La vraie image du badge (miniature) : pas de fond teinté derrière. */
+.next-unlock__img--pic {
+  object-fit: contain;
+  background: none;
 }
 
 .next-unlock__body {

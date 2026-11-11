@@ -1065,12 +1065,6 @@ body.darkmode .lb-delta--down {
   color: #ff9a9a;
 }
 
-/* « Ma place » : sous la barre de navigation du haut sur ordinateur (lot 14). */
-@media (min-width: 1025px) {
-  .lb-my-rank {
-    top: 64px;
-  }
-}
 .lb-my-rank--jump {
   cursor: pointer;
 }

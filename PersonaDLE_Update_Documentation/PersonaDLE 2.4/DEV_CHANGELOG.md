@@ -35,7 +35,7 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 11 | `feat/prochains_deblocages` | Profil : quêtes Expert et badges les plus proches — **fait** |
 | 12 | `feat/filtre_en_cours_de_partie` | Étape B anti-triche : changer de filtre en cours de partie = abandon, avec avertissement — **fait** |
 | 13 | `feat/accueil_explications` | Une ligne sous chaque mode, slogan à jour, profil invité qui explique le compte, textes anglais restants — **fait** |
-| 14 | `feat/nav_ordinateur` | Ordinateur : navigation en haut, pastilles qui ne masquent plus les bannières, un seul ⚙ par mode — **fait** |
+| 14 | `feat/nav_ordinateur` | Ordinateur : un seul ⚙ par mode — **fait** ; la navigation en haut et les boutons rangés sous le titre ont été **retirés** à la demande de Hamza (voir « Retours de Hamza ») |
 | 15 | `feat/podium_classement` | Podium animé, évolution ▲▼, « ta place » toujours visible — **fait** |
 | 16 | `feat/classement_quotidien` | Classement principal sur les parties du jour ; comptes hors norme repérés dans l'admin — **fait**, migration 058 |
 | 17 | `docs/readme_anime` | README à la manière de Persona GRUB Themes : bannière et citations animées, bandeaux de section — **fait** |
@@ -56,6 +56,63 @@ site, préprod accessible par Tailscale, page de statut publique.
 - **« Puzzle commun du jour »** (une cible identique pour tous) : idée validée sur le
   principe, à cadrer avant d'en faire un lot — reportée à la 2.5 avec la salle à part
   (Archives de Velvet, Cognition) et l'OAuth Discord.
+
+---
+
+## 2026-11-11 — Retours de Hamza sur les lots 8, 11 et 14
+
+Trois demandes, après un premier coup d'œil à la série :
+
+> « le truc nouveauté et reset remets-les dans leur ancien emplacement (en desktop au
+> moins), comme la nav barre à remettre en bas ; le truc partagez résultat et grille
+> Discord rendent mal car il déplace les boutons menant au mode suivant ; pour les trucs
+> presque là, mets la vraie image du badge »
+
+### 1. Ordinateur : navigation en bas, « Nouveautés » et « Reset » flottants (retour sur le lot 14)
+
+- La barre de navigation reste **en bas** à toutes les tailles. Le bloc `≥ 1 025 px` de
+  `css/bottomNav.css` est retiré, et avec lui ce qui n'existait que pour la barre du
+  haut : `scroll-padding-top`, la feuille « Jouer » qui descendait, et le décalage de
+  « ma place » dans le classement.
+- « Nouveautés » et « Reset » retrouvent leurs positions fixes d'origine au-dessus de
+  480 px (`.home-quick-actions { display: contents }`). Sur téléphone, ils restent
+  rangés sous le titre, comme depuis le lot 3.
+- **Gardé** du lot 14 :
+  - l'entonnoir du bouton FILTRES (un seul ⚙ par page) ;
+  - le `z-index: auto` des deux boutons dans la rangée téléphone. Sans lui, ils passent
+    au-dessus de la feuille « Jouer », défaut qui existait depuis le lot 3.
+
+### 2. « Partager » et la carte Discord sous la barre de fin de partie (lots 4, 8, 10)
+
+La barre de fin de partie est une rangée flex « précédent / défi / suivant » en
+`space-between`. Le bouton « Partager mon résultat » (lot 4) y était **inséré en tête** :
+il décalait « mode précédent » vers le milieu et la rangée changeait d'allure selon le
+mode. La carte Discord (lot 8) avait de son côté une marge négative pour s'en
+rapprocher.
+
+Désormais, un bloc `#endgameExtras` est posé **sous** la barre et reçoit le bouton
+Partager (ou « Partager ma journée » à 6/6) puis la carte Discord. Il est créé par
+`endgameSlot()` (`js/share_result.js`), partagé par les deux modules, et se cache avec la
+barre quand une nouvelle partie démarre (un seul `MutationObserver`, au lieu de celui que
+portait la carte). La barre ne contient plus que ses propres boutons.
+`tests/share_result.test.js` vérifie que rien d'autre n'y entre.
+
+### 3. « Presque là » : la vraie image du badge (retour sur le lot 11)
+
+Les originaux pèsent jusqu'à 7,7 Mo pièce (115 Mo pour 74 badges), pour un affichage en
+44 px. Les montrer tels quels coûtait ~7 Mo à chaque visite du profil, et faisait échouer
+`profile_payload.spec.js`. La carte montre donc **la même image, réduite** :
+- `scripts/badge_thumbs.py` génère `profile/badges/thumbs/<nom_en_snake_case>.webp`
+  (128 px, webp q82) : **115 Mo → 616 Ko**, ~8 Ko par badge ;
+- `badgeThumbPath()` (`profile/next_unlocks_ui.js`) applique la même règle de nom. Un
+  test vérifie que chaque image de `profile/badges/images/` a sa miniature. Il faut
+  relancer le script après l'ajout d'un badge, et le test le rappelle ;
+- si une miniature manque, la pastille 🏅 la remplace plutôt qu'une image cassée ;
+- titres et quêtes Expert gardent leur pastille (🎖️, ⚡).
+
+Ces miniatures pourront servir ailleurs : la collection des badges charge toujours les
+originaux, alors que leur poids est le premier coût mobile du site (ROADMAP, « Repris
+des audits »).
 
 ---
 

@@ -7,7 +7,7 @@
 [![Play](https://img.shields.io/badge/▶%20play-personadle.net-E60012?style=for-the-badge&labelColor=0D0D0D)](https://personadle.net)
 [![Release](https://img.shields.io/github/v/release/CodeByHaamza/personadle?style=for-the-badge&label=release&color=E60012&labelColor=0D0D0D)](https://github.com/CodeByHaamza/personadle/releases)
 [![CI](https://img.shields.io/github/actions/workflow/status/CodeByHaamza/personadle/ci.yml?branch=develop&style=for-the-badge&label=CI&labelColor=0D0D0D)](https://github.com/CodeByHaamza/personadle/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/Tests-1734%20passing-FFFFFF?style=for-the-badge&logo=vitest&logoColor=white&labelColor=0D0D0D)](tests/README.md)
+[![Tests](https://img.shields.io/badge/Tests-1736%20passing-FFFFFF?style=for-the-badge&logo=vitest&logoColor=white&labelColor=0D0D0D)](tests/README.md)
 [![Discord](https://img.shields.io/badge/Discord-the%20Velvet%20Room-5865F2?style=for-the-badge&logo=discord&logoColor=white&labelColor=0D0D0D)](https://discord.gg/wpMdGGDp3y)
 [![License](https://img.shields.io/badge/code-MIT-FFFFFF?style=for-the-badge&labelColor=0D0D0D)](LICENSE.txt)
 
@@ -165,7 +165,7 @@ Service worker              Cron: leaderboard cache, Discord daily & weekly post
 | ------------- | ------------------------------------------------------------------------------------------------- |
 | **Front end** | HTML5 · CSS3 (one file per component, dark mode) · Vanilla JavaScript ES6+                        |
 | **Back end**  | PHP 8.2 REST API — `GET/POST/PATCH/DELETE /api/{resource}`, JSON, proper status codes             |
-| **Database**  | MariaDB 10.6+ / MySQL 8.0 — 31-table relational schema, 1734+ unit tests keep the contract honest |
+| **Database**  | MariaDB 10.6+ / MySQL 8.0 — 31-table relational schema, 1736+ unit tests keep the contract honest |
 | **i18n**      | EN · FR · ES · DE · IT · PT (1381 keys each), `en.json` is the source of truth                    |
 | **Hosting**   | Hostinger, auto-deploy on push to `main`; SQL migrations applied by hand _before_ the merge       |
 
@@ -174,7 +174,7 @@ Service worker              Cron: leaderboard cache, Discord daily & weekly post
 Every pull request runs the whole thing; `main` only receives releases from `develop`.
 
 ```
-Vitest + jsdom → 1734 tests unitaires (logique de jeu, backend, streak, i18n, validation données)
+Vitest + jsdom → 1736 tests unitaires (logique de jeu, backend, streak, i18n, validation données)
 PHPUnit        → tests de logique pure + intégration DB (contrat de schéma)
 Playwright     → 346 E2E sur la stack Docker complète (smoke, API, Social Link)
 PHPStan        → analyse statique PHP niveau 5 · Psalm → taint analysis
@@ -192,7 +192,7 @@ git clone https://github.com/CodeByHaamza/personadle.git && cd personadle
 npm install
 
 make up          # MariaDB + PHP + phpMyAdmin in Docker, schema and seed loaded → http://localhost:8080
-npm test         # 1734 unit tests
+npm test         # 1736 unit tests
 make test-php    # PHPUnit, inside the container
 npm run test:e2e # Playwright against the Docker stack
 make check       # lint + data + i18n + doc numbers + daily pools
