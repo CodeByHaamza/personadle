@@ -17,7 +17,7 @@
 
 ```
                  ╱╲
-                ╱  ╲      Playwright E2E — 342 tests (stack Docker réelle)
+                ╱  ╲      Playwright E2E — 344 tests (stack Docker réelle)
                ╱────╲     smoke (5) + API badges/streak (2) + Social Link ami→XP→rang (6)
               ╱      ╲
              ╱────────╲   PHPUnit — 429 méthodes (26 fichiers, dont intégration vraie MariaDB)

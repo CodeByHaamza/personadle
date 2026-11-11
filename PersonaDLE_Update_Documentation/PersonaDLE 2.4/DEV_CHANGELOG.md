@@ -54,6 +54,40 @@ site, préprod accessible par Tailscale, page de statut publique.
 
 ---
 
+## 2026-11-11 — Lot 7 : le profil ne déborde plus sur téléphone
+
+Le test de fumée de la prod (serveur maison) signalait **chaque nuit depuis au moins le
+2026-10-12** : « profil @390px — débordement horizontal +14px », « @480px +12px ». C'était
+l'alerte récurrente du salon 🤖┃bot.
+
+### La cause
+
+Les cartes du profil entrent en glissant depuis la droite (`.animate-right`,
+`translateX(28px)` → 0). À la première image, elles finissent à 403 px sur un écran de 390.
+Sur mobile, le navigateur élargit alors la **zone de mise en page** (404 px) et la **garde**
+après la fin de l'animation. La barre du bas, fixée de bord à bord (`left: 0; right: 0`),
+suit cette largeur et la page défile de côté. Le moindre recalcul de mise en page fait
+revenir la largeur à 390, d'où un bug difficile à voir à la main.
+
+### Pourquoi les tests ne le voyaient pas
+
+`tests-e2e/mobile_streak_usecases.spec.js` comparait `scrollWidth` à `window.innerWidth`.
+Or avec ce bug, `innerWidth` gonfle lui aussi (404) : le test passait. Seul le test de fumée
+du serveur maison, qui compare à la largeur fixe de l'écran, levait l'alerte.
+
+### Le correctif
+
+`.profile-container { overflow-x: clip; }` (`profile/profile-page.css`). `clip` et non
+`hidden` : pas de conteneur de défilement, les éléments `sticky` continuent de fonctionner.
+Volontairement local : un `overflow-x` sur `html` masquerait aussi les vrais débordements
+que le test de fumée doit attraper. Les cartes ont une ombre très légère (opacité 0,05,
+flou 12 px) : la coupe sur les bords du conteneur ne se voit pas.
+
+`tests-e2e/profil_debordement_mobile.spec.js` : profil à 390 et 480 px en mode mobile,
+comparé à la largeur **demandée**. Rouge avant le correctif (404 et 493 px), vert après.
+
+---
+
 ## 2026-11-11 — Les hooks git ne plantent plus quand VS Code ouvre le dossier en « c:\ »
 
 Après le reclonage du 2026-11-10, le pre-push a bloqué un push sain : 87 fichiers de tests

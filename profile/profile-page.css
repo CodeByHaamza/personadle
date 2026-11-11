@@ -119,6 +119,14 @@
   grid-template-columns: 300px minmax(0, 1fr);
   gap: 24px;
   align-items: start;
+  /* Les cartes entrent en glissant depuis la droite (.animate-right, translateX(28px)) :
+     à la première image elles dépassent de l'écran, et sur mobile le navigateur élargit
+     alors la zone de mise en page — 404 px pour 390 — et la GARDE après l'animation
+     (alerte prod_smoke chaque nuit depuis le 2026-10-12, +14 px). `clip` et non
+     `hidden` : pas de conteneur de défilement créé, les éléments sticky continuent de
+     marcher. Volontairement local : un `overflow-x` sur html masquerait aussi les
+     vrais débordements, que ce test de fumée doit justement attraper. */
+  overflow-x: clip;
 }
 
 .profile-right {

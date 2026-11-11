@@ -170,7 +170,7 @@ Every pull request runs the whole thing; `main` only receives releases from `dev
 ```
 Vitest + jsdom → 1678 tests unitaires (logique de jeu, backend, streak, i18n, validation données)
 PHPUnit        → tests de logique pure + intégration DB (contrat de schéma)
-Playwright     → 342 E2E sur la stack Docker complète (smoke, API, Social Link)
+Playwright     → 344 E2E sur la stack Docker complète (smoke, API, Social Link)
 PHPStan        → analyse statique PHP niveau 5 · Psalm → taint analysis
 ESLint+Prettier→ lint + format · i18n / data / daily-pool consistency checks
 ```
