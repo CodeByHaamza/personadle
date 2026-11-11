@@ -183,6 +183,33 @@ describe("pullProfileFromCloud — succès", () => {
     expect(JSON.parse(localStorage.getItem("personaUserProfile")).uniqueDaysPlayed).toBe(45);
   });
 
+  it("la date de première partie vient du serveur (first_game_date)", async () => {
+    // Capture du profil d'un joueur, 2026-11 : « First played — » avec 256 parties.
+    // La date n'était posée qu'à la création d'un profil local vierge ; après une
+    // déconnexion (profil local vidé) ou sur un nouvel appareil, elle disparaissait.
+    // Le profil public, lui, lisait déjà la vraie date côté serveur.
+    localStorage.setItem("personaUserProfile", JSON.stringify({ stats: {} }));
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () =>
+        baseUserPayload({ first_game_date: "2026-09-12", stats: [{ mode: "classic", games: 3, wins: 3 }] }),
+    });
+    await pullProfileFromCloud();
+    expect(JSON.parse(localStorage.getItem("personaUserProfile")).stats.firstPlayed).toBe("2026-09-12");
+  });
+
+  it("sans first_game_date (backend antérieur, ou aucune partie), la date locale reste", async () => {
+    localStorage.setItem("personaUserProfile", JSON.stringify({ stats: { firstPlayed: "2026-05-01T10:00:00.000Z" } }));
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => baseUserPayload({ first_game_date: null }),
+    });
+    await pullProfileFromCloud();
+    expect(JSON.parse(localStorage.getItem("personaUserProfile")).stats.firstPlayed).toBe("2026-05-01T10:00:00.000Z");
+  });
+
   it("un payload sans unique_days (backend antérieur) laisse le compte local intact", async () => {
     localStorage.setItem("personaUserProfile", JSON.stringify({ uniqueDaysPlayed: 12 }));
     vi.spyOn(globalThis, "fetch").mockResolvedValue({

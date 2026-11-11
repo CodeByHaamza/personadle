@@ -831,32 +831,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   gifElement?.addEventListener("dragstart", (e) => e.preventDefault());
 
   // ── Filtre opus — panneau déroulant ──
+  // Le changement de filtre passe par resetGame(), comme dans les cinq autres
+  // modes. Ce rappel recopiait le reset à la main en oubliant startGame() : après
+  // une partie terminée, la partie relancée gardait l'identifiant de la
+  // précédente, isGameLogged() restait vrai, et sa victoire n'était jamais
+  // enregistrée (stats, série, quête Expert — signalement joueur 2026-11).
+  // resetGame() sans `random` : la cible du jour, re-tirée dans le nouveau pool.
   const _filterApi = initFilterMenu("filters_AllOutAttack", ALL_OPUS, (newActive) => {
     activeOpusFilters = newActive;
     if (newActive.length === 0) return;
-    personas = getFilteredPersonas();
-
-    if (!personas.length) return;
-
-    target = getBetterRandomCharacter();
-    const imageName = portraitsMap[target] || target.split(" ")[0];
-    gifElement.style.filter = "none";
-    loadImageSafely(gifElement, cdn("allOutAttack", imageName), () => {
-      gifElement.style.filter = gifFilter();
-    });
-
-    attempts = 0;
-    document.getElementById("wrongGuessList").innerHTML = "";
-    document.getElementById("victoryBox").style.display = "none";
-    localStorage.setItem(EXPERT.key("aoaTarget"), target);
-    localStorage.setItem(EXPERT.key("aoaAttempts"), 0);
-    localStorage.removeItem(EXPERT.key("aoaGameOver"));
-    updateGiveUpCounter();
-
-    textbar.value = "";
-    textbar.disabled = false;
-    setGiveUpEnabled(false);
-    initializeAutocomplete(textbar, personas);
+    if (!getFilteredPersonas().length) return;
+    resetGame();
   });
   activeOpusFilters = _filterApi.getActive();
 

@@ -12,7 +12,7 @@
     "i18n:check-untranslated": "node scripts/check-i18n-untranslated.js",
     "data:check": "node scripts/validate_characters.js",
     "ingest:check": "node scripts/validate_incoming.js incoming",
-    "changelog:resolve": "python scripts/resolve_changelog_conflict.py \"PersonaDLE_Update_Documentation/PersonaDLE 2.3/DEV_CHANGELOG.md\"",
+    "changelog:resolve": "python scripts/resolve_changelog_conflict.py \"PersonaDLE_Update_Documentation/PersonaDLE 2.4/DEV_CHANGELOG.md\"",
     "docs:check": "node scripts/check-doc-numbers.js",
     "docs:fix": "node scripts/check-doc-numbers.js --fix",
     "pools:check": "node scripts/export-daily-pools.js --check",
@@ -33,12 +33,12 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
-    "@playwright/test": "^1.63.0",
-    "@vitest/coverage-v8": "^5.0.1",
-    "eslint": "^10.10.0",
-    "globals": "^17.12.0",
+    "@playwright/test": "^1.64.0",
+    "@vitest/coverage-v8": "^5.0.3",
+    "eslint": "^10.12.0",
+    "globals": "^17.13.0",
     "jsdom": "^29.1.1",
-    "prettier": "^3.9.6",
+    "prettier": "^3.9.10",
     "vitest": "^5.0.1"
   }
 }

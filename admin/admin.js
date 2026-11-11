@@ -918,7 +918,7 @@ async function renderTabExpert(d) {
         <tr>
           <td><strong>${escHtml(label)}</strong></td>
           <td>${badge}</td>
-          <td>${s.current} / ${s.required} <span class="tab-note" style="margin:0">${escHtml(cond)}</span></td>
+          <td>${s.current} / ${s.required}${s.best > s.current ? ` <span class="tab-note" style="margin:0">(record ${s.best})</span>` : ""} <span class="tab-note" style="margin:0">${escHtml(cond)}</span></td>
           <td style="text-align:right">${action}</td>
         </tr>`;
     })

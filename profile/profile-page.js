@@ -49,6 +49,7 @@ import {
   normalizeAvatarPath,
   bestModeOverall,
   needsAvatarOrigin,
+  pairStatTiles,
 } from "./profile-format.js";
 import { THEME_COLORS, hexToRgb, adjustHex, resolveTheme, applyThemeVars } from "./theme.js";
 import { initAtelier, openAtelier, initSaveStatus, scheduleAutosave } from "./atelier.js";
@@ -628,9 +629,10 @@ function _applyCloudToUI() {
  * @param {string} label  - Label traduit
  * @param {string} delay  - Valeur de animation-delay (ex: "0.22s")
  */
-function buildStreakItem(streak, label, delay, frozen = false) {
+function buildStreakItem(streak, label, delay, forceFull, frozen = false) {
   // Gelée : la valeur reste affichée (c'est ce que Jack Frost rend), mais avec
   // l'habillage glace du palier 0 au lieu des flammes de son palier.
+  // forceFull : la largeur décidée par pairStatTiles() (grille sans trou).
   const tier = frozen ? 0 : getStreakTier(streak);
 
   // Décorateurs selon le tier
@@ -645,7 +647,8 @@ function buildStreakItem(streak, label, delay, frozen = false) {
   let rightDeco = "";
   let icon = "🔥";
   let iconSize = "1.3em";
-  let fullWidth = tier >= 5;
+  // forceFull : décidé par pairStatTiles() quand la série reste seule sur sa ligne.
+  let fullWidth = forceFull ?? tier >= 5;
 
   if (tier === 0) {
     leftDeco = snowL(1);
@@ -750,17 +753,26 @@ function renderStats() {
 
   const recoverable = _recoverableStreak(s);
   const frozen = recoverable.state === "frozen";
-  const streakHTML = buildStreakItem(
-    s.streak || 0,
-    frozen
-      ? tf("profile.stat_frozen_streak_label", "Frozen Streak")
-      : tf("profile.stat_current_streak_label", "Current Streak"),
-    "0.22s",
-    frozen
-  );
-  const regularHTML = stats
-    .map(
-      (st, idx) => `
+  // Rangées sans trou : cf. pairStatTiles() (capture joueur 2026-11, « Temps joué »
+  // et « Série actuelle » seuls sur leur ligne, l'autre moitié vide). Une série
+  // gelée prend l'habillage du palier 0 : jamais pleine largeur d'office.
+  const tiles = pairStatTiles([
+    ...stats,
+    { streak: true, full: !frozen && getStreakTier(s.streak || 0) >= 5 },
+  ]);
+  statsContainer.innerHTML = tiles
+    .map((st, idx) =>
+      st.streak
+        ? buildStreakItem(
+            s.streak || 0,
+            frozen
+              ? tf("profile.stat_frozen_streak_label", "Frozen Streak")
+              : tf("profile.stat_current_streak_label", "Current Streak"),
+            `${0.1 + idx * 0.06}s`,
+            st.full,
+            frozen
+          )
+        : `
     <div class="stat-item${st.full ? " stat-item--full" : ""}"
          style="animation-delay:${0.1 + idx * 0.06}s">
       <span class="stat-icon">${st.icon}</span>
@@ -771,8 +783,6 @@ function renderStats() {
     </div>`
     )
     .join("");
-
-  statsContainer.innerHTML = regularHTML + streakHTML;
 
   _renderRecoveryPrompt(recoverable);
 }

@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { dirname, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   stampHtml,
@@ -18,8 +18,8 @@ import {
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const abs = (p) => join(ROOT, p);
-const hashOf = (p) =>
-  p.endsWith("missing.css") ? null : `h_${p.split("/").pop().replace(/\W/g, "")}`;
+// basename() et non split("/") : sous Windows, les chemins absolus sont en « \ ».
+const hashOf = (p) => (p.endsWith("missing.css") ? null : `h_${basename(p).replace(/\W/g, "")}`);
 
 describe("stampHtml", () => {
   const none = new Set();

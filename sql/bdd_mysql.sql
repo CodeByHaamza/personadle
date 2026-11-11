@@ -55,9 +55,9 @@ CREATE TABLE users (
     last_login_at        TIMESTAMP        NULL,
     is_deleted           TINYINT(1)       NOT NULL DEFAULT 0,
     deleted_at           TIMESTAMP        NULL,
-    -- Remember-me token (SHA-256 hash of the raw token stored in the browser cookie).
-    -- Allows automatic re-login across browser restarts without relying solely on
-    -- PHP session files, which shared hosts may garbage-collect aggressively.
+    -- ⚠️ PLUS LUES depuis la migration 056 : « se souvenir de moi » vit dans
+    -- remember_tokens, un jeton par appareil (cf. plus bas). Gardées le temps
+    -- d'une version, à retirer dans une migration ultérieure.
     remember_me_hash     VARCHAR(64)      NULL,
     remember_me_expires  DATETIME         NULL,
     -- Réinitialisation de mot de passe : hash sha256 du token envoyé par email + expiration
@@ -92,6 +92,24 @@ CREATE TABLE users (
     INDEX      idx_remember_me    (remember_me_hash)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 -- Pas d'index séparé sur pseudo : uq_pseudo ci-dessus l'indexe déjà (UNIQUE KEY).
+
+-- « Se souvenir de moi » — un jeton PAR APPAREIL (migration 056). Le cookie
+-- httpOnly garde le jeton brut, la base son hash SHA-256. Remplace l'ancien jeton
+-- unique de `users`, qui déconnectait un appareil à chaque connexion d'un autre.
+-- Logique : api/lib/remember_tokens.php.
+CREATE TABLE remember_tokens (
+    id           BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    user_id      BIGINT UNSIGNED  NOT NULL,
+    token_hash   VARCHAR(64)      NOT NULL,
+    created_at   DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_used_at DATETIME         NULL,
+    expires_at   DATETIME         NOT NULL,
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_remember_token_hash (token_hash),
+    KEY idx_remember_tokens_user (user_id),
+    CONSTRAINT fk_remember_tokens_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 -- =============================================================================

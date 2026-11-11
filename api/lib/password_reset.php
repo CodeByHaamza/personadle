@@ -10,6 +10,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/remember_tokens.php';
+
 /**
  * Génère un token de reset (32 octets aléatoires), stocke son HASH (sha256,
  * jamais le token en clair) avec une expiration d'1h pour l'utilisateur donné.
@@ -62,4 +64,9 @@ function personadle_apply_new_password(PDO $pdo, int $userId, string $newPasswor
              remember_me_hash = NULL, remember_me_expires = NULL
          WHERE id = ?'
     )->execute([$newPasswordHash, $userId]);
+
+    // Depuis la migration 056, « se souvenir de moi » vit dans remember_tokens,
+    // un jeton par appareil : on les révoque tous (les colonnes ci-dessus ne sont
+    // plus lues, on les vide quand même).
+    personadle_remember_revoke_all($pdo, $userId);
 }
