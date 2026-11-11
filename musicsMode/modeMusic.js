@@ -41,6 +41,7 @@ import {
 
 // Collapsible opus filter panel (shared across all modes)
 import { initFilterMenu } from "../js/filterMenu.js";
+import { createMidGameFilterGuard } from "../js/filter_guard.js";
 import { checkChallengeCompletion } from "../js/challenge-result.js";
 import { trackUniqueDay } from "../profile/badges/badgesManager.js";
 import { checkUnlocksAfterGame } from "../js/unlock-notify.js";
@@ -306,6 +307,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     resetGame(true);
   });
   activeFilters = _filterApi.getActive();
+  // Changer de filtre en cours de partie = abandon, après avertissement (2.4,
+  // lot 12, js/filter_guard.js) : sinon on esquivait une cible ratée sans que
+  // l'abandon compte.
+  _filterApi.setBeforeChange(
+    createMidGameFilterGuard({
+      scope: STATS_SCOPE,
+      modeKey: "music",
+      sessionMode: "Music",
+      isExpert: IS_EXPERT,
+      getState: () => ({
+        attempts,
+        gameOver,
+        targetName: target?.titre ?? null,
+        filters: activeFilters,
+        startedAt: sessionStartTime,
+      }),
+    })
+  );
 
   // ── UI wiring ──────────────────────────────────────────────────────────────
   // « Défier un ami » dès l'arrivée (retour joueur 2.2), score « par » tant que

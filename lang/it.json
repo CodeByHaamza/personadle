@@ -49,7 +49,9 @@
     "expert_cond_unknown": "Riconnettiti per vedere i tuoi progressi.",
     "expert_locked_title": "Modalità Esperto bloccata",
     "expert_unlocked_title": "Modalità Esperto sbloccata!",
-    "expert_unlocked_hint": "Il pulsante ⚡ ora è tuo."
+    "expert_unlocked_hint": "Il pulsante ⚡ ora è tuo.",
+    "filter_midgame_confirm": "Cambiare i filtri ora termina questa partita: conterà come un abbandono nelle tue statistiche. Cambiare comunque?",
+    "filter_midgame_done": "Partita contata come abbandono — era {{target}}."
   },
   "modes": {
     "classic": {

@@ -33,7 +33,7 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 9 | `feat/codes_evenement_discord` | Codes événement exclusifs au Discord (badge ou titre) — **fait**, migration 057 |
 | 10 | `feat/partage_journee` | Partage « journée complète » des six modes — **fait** |
 | 11 | `feat/prochains_deblocages` | Profil : quêtes Expert et badges les plus proches — **fait** |
-| 12 | `feat/filtre_en_cours_de_partie` | Étape B anti-triche : changer de filtre en cours de partie = abandon, avec avertissement |
+| 12 | `feat/filtre_en_cours_de_partie` | Étape B anti-triche : changer de filtre en cours de partie = abandon, avec avertissement — **fait** |
 | 13 | `feat/accueil_explications` | Une ligne sous chaque mode, slogan à jour, profil invité qui explique le compte, textes anglais restants |
 | 14 | `feat/nav_ordinateur` | Ordinateur : navigation en haut, pastilles qui ne masquent plus les bannières, un seul ⚙ par mode |
 | 15 | `feat/podium_classement` | Podium animé, évolution ▲▼, « ta place » toujours visible |
@@ -56,6 +56,64 @@ site, préprod accessible par Tailscale, page de statut publique.
 - **« Puzzle commun du jour »** (une cible identique pour tous) : idée validée sur le
   principe, à cadrer avant d'en faire un lot — reportée à la 2.5 avec la salle à part
   (Archives de Velvet, Cognition) et l'OAuth Discord.
+
+---
+
+## 2026-11-11 — Lot 12 : changer de filtre en cours de partie compte comme un abandon
+
+L'angle mort laissé par la 2.3 (« étape B anti-triche ») : changer de filtre relance la
+partie avec une nouvelle cible, et **la partie en cours disparaissait sans être
+enregistrée**, dans les six modes. On pouvait esquiver une cible ratée (trois essais, un
+filtre décoché, nouvelle cible) sans que l'abandon compte, ni dans les stats ni dans les
+quêtes Expert « d'affilée ».
+
+### Ce qui change pour le joueur
+
+Au **premier** changement de filtre d'une partie entamée, un avertissement : « Changer de
+filtre maintenant met fin à cette partie : elle comptera comme un abandon dans tes stats.
+Changer quand même ? »
+- **Annuler** : filtres et partie intacts.
+- **Confirmer** : la partie est enregistrée en abandon et le toast dit quelle était la
+  cible. Le changement s'applique ensuite et une nouvelle partie démarre, comme avant.
+
+Rien ne change pour une partie pas commencée (0 essai), déjà finie ou déjà enregistrée,
+ni pour une partie de défi : celle-ci n'est jamais enregistrée en quotidien, et ses
+filtres sont posés par le défi.
+
+### Détails techniques
+
+- `js/filter_guard.js` : `createMidGameFilterGuard()` enregistre **la même session que
+  le bouton Abandonner** (`buildGameSession` + `savePendingSession`, stats locales,
+  `checkUnlocksAfterGame`). Le seuil d'essais du bouton n'est pas exigé, et la cible
+  n'est pas révélée à l'écran, puisque la nouvelle partie démarre aussitôt.
+- `js/filterMenu.js` : `setBeforeChange(fn)` sur l'objet renvoyé par `initFilterMenu()`.
+  Le garde est consulté avant les trois chemins de changement (code seul, groupe, tout
+  cocher), et `false` annule le clic. Il est passé après coup plutôt qu'en argument
+  pour deux raisons :
+  - il lit l'état du mode (essais, cible), qui n'existe pas encore quand le menu se
+    construit ;
+  - `filter_change_rearms_game.test.js` découpe le rappel de `initFilterMenu()` jusqu'à
+    son `});`, et un 4e argument l'aurait affaibli sans bruit.
+- Les six modes branchent le garde avec leurs propres noms (`target.nom`, `target.titre`,
+  `target.user[0]`, AOA en chaîne ; `activeOpus`/`activeFilters`/`activeOpusFilters`).
+- `confirm()` natif : synchrone, donc le clic peut être annulé avant d'être appliqué. Une
+  modale maison demanderait de rendre le menu asynchrone.
+- Tests : `tests/filter_guard.test.js` (10). Ils couvrent les cas « rien à faire »,
+  Annuler, Confirmer, l'absence de second enregistrement, `setBeforeChange` dans le menu
+  et le branchement dans les six modes.
+
+### Vérifié (pile Docker)
+
+- Classique, deux essais puis un clic sur un filtre :
+  - Annuler : même cible, 0 session ;
+  - Confirmer : 1 session `giveup`, 2 essais, la bonne cible, puis nouvelle partie ;
+  - un second changement sur la partie neuve ne redemande rien.
+- Les six modes, en normal et en Expert : un clic de filtre s'applique sans erreur de
+  page. Le garde lit l'état du mode à chaque clic : un nom de variable faux y aurait
+  bloqué les filtres.
+- E2E existants (filtres, parties, Expert AOA/Musique/Personae, Rejouer, défis) :
+  58/58. Playwright refuse les dialogues par défaut, donc un test qui changeait un filtre
+  en pleine partie aurait cassé.
 
 ---
 

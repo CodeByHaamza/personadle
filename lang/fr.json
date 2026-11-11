@@ -49,7 +49,9 @@
     "expert_cond_unknown": "Reconnecte-toi pour voir ta progression.",
     "expert_locked_title": "Mode Expert verrouillé",
     "expert_unlocked_title": "Mode Expert débloqué !",
-    "expert_unlocked_hint": "Le bouton ⚡ est à toi."
+    "expert_unlocked_hint": "Le bouton ⚡ est à toi.",
+    "filter_midgame_confirm": "Changer de filtre maintenant met fin à cette partie : elle comptera comme un abandon dans tes stats. Changer quand même ?",
+    "filter_midgame_done": "Partie comptée comme un abandon — c'était {{target}}."
   },
   "modes": {
     "classic": {

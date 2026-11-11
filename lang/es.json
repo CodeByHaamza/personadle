@@ -49,7 +49,9 @@
     "expert_cond_unknown": "Vuelve a conectarte para ver tu progreso.",
     "expert_locked_title": "Modo Experto bloqueado",
     "expert_unlocked_title": "¡Modo Experto desbloqueado!",
-    "expert_unlocked_hint": "El botón ⚡ ya es tuyo."
+    "expert_unlocked_hint": "El botón ⚡ ya es tuyo.",
+    "filter_midgame_confirm": "Cambiar los filtros ahora termina esta partida: contará como abandono en tus estadísticas. ¿Cambiar de todos modos?",
+    "filter_midgame_done": "Partida contada como abandono — era {{target}}."
   },
   "modes": {
     "classic": {

@@ -51,6 +51,7 @@ import {
 
 // Collapsible opus filter panel (shared across all modes)
 import { initFilterMenu } from "../js/filterMenu.js";
+import { createMidGameFilterGuard } from "../js/filter_guard.js";
 import { checkChallengeCompletion } from "../js/challenge-result.js";
 import { checkUnlocksAfterGame } from "../js/unlock-notify.js";
 import { trackUniqueDay } from "../profile/badges/badgesManager.js";
@@ -882,6 +883,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     resetGame();
   });
   activeFilters = _filterApi.getActive();
+  // Changer de filtre en cours de partie = abandon, après avertissement (2.4,
+  // lot 12, js/filter_guard.js) : sinon on esquivait une cible ratée sans que
+  // l'abandon compte.
+  _filterApi.setBeforeChange(
+    createMidGameFilterGuard({
+      scope: STATS_SCOPE,
+      modeKey: "personae",
+      sessionMode: "Personae",
+      isExpert: EXPERT.isExpert,
+      getState: () => ({
+        attempts,
+        gameOver,
+        targetName: Array.isArray(target?.user) ? target.user[0] : target?.user ?? null,
+        filters: activeFilters,
+        startedAt: sessionStartTime,
+      }),
+    })
+  );
 
   guessBtn.addEventListener("click", handleGuess);
   resetBtn.addEventListener("click", () => resetGame(true));

@@ -49,7 +49,9 @@
     "expert_cond_unknown": "Reconnect to check your progress.",
     "expert_locked_title": "Expert mode locked",
     "expert_unlocked_title": "Expert mode unlocked!",
-    "expert_unlocked_hint": "The ⚡ button is yours now."
+    "expert_unlocked_hint": "The ⚡ button is yours now.",
+    "filter_midgame_confirm": "Changing filters now ends this game: it will count as a give-up in your stats. Change anyway?",
+    "filter_midgame_done": "Game counted as a give-up — it was {{target}}."
   },
   "modes": {
     "classic": {

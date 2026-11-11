@@ -49,7 +49,9 @@
     "expert_cond_unknown": "Liga-te novamente para veres o teu progresso.",
     "expert_locked_title": "Modo Especialista bloqueado",
     "expert_unlocked_title": "Modo Especialista desbloqueado!",
-    "expert_unlocked_hint": "O botão ⚡ agora é teu."
+    "expert_unlocked_hint": "O botão ⚡ agora é teu.",
+    "filter_midgame_confirm": "Mudar os filtros agora termina esta partida: vai contar como desistência nas tuas estatísticas. Mudar mesmo assim?",
+    "filter_midgame_done": "Partida contada como desistência — era {{target}}."
   },
   "modes": {
     "classic": {

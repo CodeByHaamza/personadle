@@ -209,9 +209,18 @@ export { _migrate as migrateLegacyOpusFilters };
  *                                    Seuls ces codes seront retournés au callback.
  * @param {Function} onFilterChange - Appelé avec (string[]) à chaque changement.
  *                                    Reçoit une copie des codes actifs.
- * @returns {{ getActive: () => string[] }}
+ * @returns {{ getActive: () => string[], setBeforeChange: (fn: () => boolean) => void }}
+ *   setBeforeChange — garde consulté AVANT d'appliquer un clic du joueur ; `false`
+ *   annule le changement (filtres et partie intacts). Sert au garde « filtre en
+ *   cours de partie = abandon » (js/filter_guard.js, 2.4 lot 12). Passé après coup
+ *   plutôt qu'en argument : le garde lit l'état du mode, qui n'existe pas encore
+ *   quand le menu se construit.
  */
 export function initFilterMenu(storageKey, allOpus, onFilterChange) {
+  let beforeChange = null;
+  /** Le joueur peut-il changer les filtres maintenant ? (garde de partie en cours) */
+  const _allowChange = () => (typeof beforeChange === "function" ? beforeChange() !== false : true);
+
   /* ── 1. Chargement + migration depuis localStorage ─────────── */
   let stored = null;
   try {
@@ -359,6 +368,7 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
 
     selectAllBtn.addEventListener("click", (e) => {
       e.stopPropagation();
+      if (!_allowChange()) return;
       const allActive = allOpus.every((o) => activeOpus.includes(o));
       activeOpus = allActive ? [] : [...allOpus];
       _syncUI();
@@ -399,6 +409,7 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
 
     groupBtn.addEventListener("click", (e) => {
       e.stopPropagation();
+      if (!_allowChange()) return;
       const allGroupActive = codes.every((c) => activeOpus.includes(c));
       if (allGroupActive) {
         activeOpus = activeOpus.filter((c) => !codes.includes(c));
@@ -499,6 +510,7 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
 
   /** Active ou désactive un code opus et notifie le mode. */
   function _toggleCode(opus) {
+    if (!_allowChange()) return;
     if (activeOpus.includes(opus)) {
       activeOpus = activeOpus.filter((o) => o !== opus);
     } else {
@@ -605,5 +617,9 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
   return {
     /** Retourne une copie des opus actifs. */
     getActive: () => [...activeOpus],
+    /** Pose le garde consulté avant chaque changement du joueur (lot 12). */
+    setBeforeChange: (fn) => {
+      beforeChange = fn;
+    },
   };
 }
