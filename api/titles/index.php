@@ -6,6 +6,7 @@
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../lib/condition_check.php';
 require_once __DIR__ . '/../lib/unlock_reconcile.php';
+require_once __DIR__ . '/../lib/event_codes.php';
 
 $authId = requireAuth();
 $pdo    = pdo();
@@ -53,11 +54,18 @@ if ($method === 'POST' && $action === 'unlock') {
 
     // Récupère le titre ET ses colonnes de condition en une seule requête
     $check = $pdo->prepare(
-        'SELECT id, condition_type, condition_mode, condition_value FROM titles WHERE id = ? LIMIT 1'
+        'SELECT id, slug, condition_type, condition_mode, condition_value FROM titles WHERE id = ? LIMIT 1'
     );
     $check->execute([$titleId]);
     $title = $check->fetch();
     if (!$title) jsonError('Title not found', 404);
+
+    // Un titre adossé à un code événement (migration 057) ne s'obtient QUE par
+    // POST /api/badges/redeem — même garde de route que les badges de code
+    // (cf. api/badges/index.php) : sa condition est `manual`, qui passe toujours.
+    if (personadle_title_is_code_gated($pdo, (string) $title['slug'])) {
+        jsonError('This title can only be unlocked with its event code', 403);
+    }
 
     // Vérifie que la condition est remplie côté serveur.
     //

@@ -386,7 +386,8 @@
     "about_badges_title": "Sobre os Nossos Emblemas",
     "about_badges_text": "Olá! Só queríamos ser transparentes – estes emblemas foram feitos com ajuda de IA. Somos apenas estudantes a trabalhar neste projeto de paixão de graça no nosso tempo livre e, honestamente, não tínhamos orçamento nem tempo para contratar um artista. Respeitamos totalmente os artistas humanos e adoraríamos trabalhar com um algum dia, se tivermos a oportunidade! Isto foi puramente por necessidade, não por preferência. Obrigado pela compreensão e por jogares! ❤️",
     "event_code_title": "Código de Evento",
-    "event_code_desc": "Introduz um código válido para desbloquear um emblema exclusivo!",
+    "event_code_desc": "Os códigos de evento desbloqueiam crachás e títulos exclusivos. São publicados no nosso Discord.",
+    "event_code_discord": "Encontra os códigos no Discord →",
     "share_btn": "Partilhar o Meu Perfil",
     "copy_link": "Copiar ligação",
     "link_copied": "Ligação copiada!",
@@ -453,6 +454,8 @@
     "event_code_placeholder": "Introduz o código de evento...",
     "event_code_submit": "Resgatar",
     "event_code_success": "Código resgatado! Emblema desbloqueado.",
+    "event_code_title_success": "🎉 Código resgatado! Um novo título espera-te nos teus títulos.",
+    "event_code_both_success": "🎉 Código resgatado! Crachá e título desbloqueados.",
     "event_code_error": "Código inválido ou já utilizado.",
     "ace_detective": {
       "name": "Detetive Ás",

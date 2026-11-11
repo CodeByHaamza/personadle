@@ -30,7 +30,7 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 6 | Dependabot (#240, #242) | Dépendances de dev (jsdom 31) |
 | 7 | `fix/profil_debordement_mobile` | Le profil déborde de 12–14 px à 390/480 px (alerte `prod_smoke` chaque nuit depuis le 2026-10-12) |
 | 8 | `feat/discord_fin_de_partie` | Discord au bon moment : fin de partie, journée 6/6, profil, menu Jouer ; membres en ligne ; modale recentrée — **fait** |
-| 9 | `feat/codes_evenement_discord` | Codes événement exclusifs au Discord (badge ou titre) |
+| 9 | `feat/codes_evenement_discord` | Codes événement exclusifs au Discord (badge ou titre) — **fait**, migration 057 |
 | 10 | `feat/partage_journee` | Partage « journée complète » des six modes |
 | 11 | `feat/prochains_deblocages` | Profil : quêtes Expert et badges les plus proches |
 | 12 | `feat/filtre_en_cours_de_partie` | Étape B anti-triche : changer de filtre en cours de partie = abandon, avec avertissement |
@@ -56,6 +56,68 @@ site, préprod accessible par Tailscale, page de statut publique.
 - **« Puzzle commun du jour »** (une cible identique pour tous) : idée validée sur le
   principe, à cadrer avant d'en faire un lot — reportée à la 2.5 avec la salle à part
   (Archives de Velvet, Cognition) et l'OAuth Discord.
+
+---
+
+## 2026-11-11 — Lot 9 : des codes vraiment exclusifs au Discord, et qui peuvent donner un titre
+
+Un code événement donnait un badge, et seulement un badge. Pour animer le Discord avec
+des codes à lui, le badge coûte cher : il faut une illustration. Un **titre** coûte un nom
+et une bannière. Et surtout, un code « exclusif » n'en était pas un : celui de la 2.3,
+« dévoilé dans l'annonce Discord », est écrit en clair dans la migration 054, sur un
+dépôt public.
+
+### Ce qui change
+
+- **Un code accorde un badge, un titre, ou les deux** (migration 057 :
+  `event_codes.badge_id` devient NULL-able, `event_codes.title_slug` ajoutée).
+- **Admin** : champ « Titre » (liste du catalogue) à côté du badge, colonne
+  « Récompense ». Au moins l'un des deux est exigé, et chacun est vérifié contre son
+  catalogue.
+- **Profil** : la carte « Code événement » dit que les codes sont publiés sur le Discord,
+  avec le lien. Un code « titre » affiche son propre message, et la liste des titres se
+  recharge sans recharger la page (`personadle:titles-changed`).
+- **Garde de route sur les titres** : un titre de code porte `condition_type = 'manual'`,
+  que la vérification de condition laisse toujours passer. Sans garde,
+  `POST /api/titles/unlock` avec le slug (public) l'aurait accordé sans code : c'est le
+  trou déjà fermé pour les badges dans la 2.2. Le garde vaut **même si le code est
+  désactivé**, pour que désactiver un code n'ouvre jamais son titre.
+- **Plus jamais de code dans le dépôt** : `tests/event_codes_not_in_repo.test.js` refuse
+  toute insertion dans `event_codes` dans une migration à partir de la 057. Les codes se
+  créent dans l'admin, donc dans la base de prod seulement.
+
+### Détails techniques
+
+- `api/lib/event_codes.php` : l'échange sort de `api/badges/index.php` pour devenir
+  testable : `personadle_redeem_event_code()` (statut HTTP + récompenses, ne lève rien),
+  `personadle_badge_is_code_gated()`, `personadle_title_is_code_gated()`. La redemption
+  n'est jamais consommée si la récompense est introuvable (titre ou badge mal saisi) :
+  le joueur garde sa chance une fois le catalogue corrigé. La transaction n'est ouverte
+  que si l'appelant n'en a pas déjà une : les tests tournent dans une transaction annulée.
+- Le chemin reste `POST /api/badges/redeem`, que le client et les annonces connaissent
+  déjà. La réponse gagne `title_slug`, et `badge_id` peut être `null`.
+- `title_slug` et non `title_id` : même choix que `badge_id`, lisible dans l'admin et
+  stable d'une base à l'autre (les id de `titles` diffèrent entre prod et Docker).
+- Tests :
+  - `tests/php/EventCodeRedeemTest.php`, 7 cas sur une vraie base : badge, titre, les
+    deux, 409, 404/400/410 dont le dernier jour inclus, code mal configuré sans
+    consommation, gardes ;
+  - `EventCodeBadgeGateTest.php` suit l'extraction ;
+  - E2E `admin-extended.spec.js` : l'admin crée un code « titre », `/titles/unlock` le
+    refuse (403), l'échange l'accorde ;
+  - `badgesManager.test.js` : un code « titre seul ».
+
+### À jouer en prod (release)
+
+`057_event_code_titles.sql` **avant** le `git pull`. Sans la colonne, l'échange et l'admin
+des codes tombent en 500. Rejouée deux fois sur la base Docker : idempotente.
+
+### Angle mort (décision Hamza)
+
+Les codes encore actifs déjà écrits dans le dépôt (`bdd_mysql.sql`, migration 054) restent
+lisibles sur GitHub, historique compris. Les retirer des fichiers n'y changerait rien. La
+seule parade est de les désactiver dans l'admin et d'en créer de nouveaux là-bas. Noté
+dans `TODO.md` § Bloquant release.
 
 ---
 

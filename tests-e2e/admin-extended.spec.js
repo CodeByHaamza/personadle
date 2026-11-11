@@ -116,6 +116,49 @@ test.describe.serial("API — endpoints admin étendus (event codes, logs, RGPD,
       const body = await listRes.json();
       expect(body.some((c) => c.code === code)).toBe(false);
     });
+
+    // 2.4, lot 9 (migration 057) : un code peut accorder un TITRE, et ce titre ne
+    // s'obtient alors plus que par le code — même garde de route que les badges.
+    test("un code « titre » accorde le titre, et /titles/unlock le refuse sans code", async () => {
+      const titleCode = "E2E_TITLE_" + Date.now().toString(36).toUpperCase();
+      const slug = "aigis_metis_same_soul"; // condition social link 10 : inatteignable ici
+
+      const refused = await adminCtx.post("/api/admin/event_codes", {
+        data: { code: titleCode, is_permanent: true },
+        headers: await csrfHeader(adminCtx),
+      });
+      expect(refused.status(), "ni badge ni titre : refusé").toBe(400);
+
+      const created = await adminCtx.post("/api/admin/event_codes", {
+        data: { code: titleCode, title_slug: slug, is_permanent: true, is_active: true },
+        headers: await csrfHeader(adminCtx),
+      });
+      expect(created.ok(), await created.text()).toBeTruthy();
+
+      try {
+        const sneaky = await userCtx.post("/api/titles/unlock", {
+          data: { title_slug: slug },
+          headers: await csrfHeader(userCtx),
+        });
+        expect(sneaky.status(), "un titre de code ne s'obtient pas par /unlock").toBe(403);
+
+        const redeem = await targetCtx.post("/api/badges/redeem", {
+          data: { code: titleCode.toLowerCase() },
+          headers: await csrfHeader(targetCtx),
+        });
+        expect(redeem.ok(), await redeem.text()).toBeTruthy();
+        const body = await redeem.json();
+        expect(body.title_slug).toBe(slug);
+        expect(body.badge_id).toBeNull();
+
+        const titles = await (await targetCtx.get("/api/titles?lang=en")).json();
+        expect(titles.find((t) => t.slug === slug)?.is_unlocked).toBeTruthy();
+      } finally {
+        await adminCtx.delete(`/api/admin/event_codes/${titleCode}`, {
+          headers: await csrfHeader(adminCtx),
+        });
+      }
+    });
   });
 
   // ── Error Logs ───────────────────────────────────────────────────────────

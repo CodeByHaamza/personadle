@@ -386,7 +386,8 @@
     "about_badges_title": "Sui nostri badge",
     "about_badges_text": "Ciao! Volevo solo essere trasparente – questi badge sono stati creati con l'aiuto dell'IA. Siamo solo studenti che lavorano su questo progetto passionale gratuitamente nel nostro tempo libero, e onestamente non avevamo il budget né il tempo per ingaggiare un artista. Rispettiamo assolutamente gli artisti umani e adoreremo lavorare con uno un giorno se ne avremo l'opportunità! Questo era puramente per necessità, non per preferenza. Grazie per la comprensione e per giocare! ❤️",
     "event_code_title": "Codice evento",
-    "event_code_desc": "Inserisci un codice valido per sbloccare un badge esclusivo!",
+    "event_code_desc": "I codici evento sbloccano badge e titoli esclusivi. Vengono pubblicati sul nostro Discord.",
+    "event_code_discord": "Trova i codici su Discord →",
     "share_btn": "Condividi il mio profilo",
     "copy_link": "Copia link",
     "link_copied": "Link copiato!",
@@ -453,6 +454,8 @@
     "event_code_placeholder": "Inserisci il codice evento...",
     "event_code_submit": "Riscatta",
     "event_code_success": "Codice riscattato! Badge sbloccato.",
+    "event_code_title_success": "🎉 Codice riscattato! Un nuovo titolo ti aspetta tra i tuoi titoli.",
+    "event_code_both_success": "🎉 Codice riscattato! Badge e titolo sbloccati.",
     "event_code_error": "Codice non valido o già utilizzato.",
     "ace_detective": {
       "name": "Asso Detective",

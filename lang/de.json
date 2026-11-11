@@ -386,7 +386,8 @@
     "about_badges_title": "Über unsere Abzeichen",
     "about_badges_text": "Hallo! Ich wollte nur transparent sein – diese Abzeichen wurden mit KI-Hilfe erstellt. Wir sind nur Studenten, die an diesem Leidenschaftsprojekt kostenlos in unserer Freizeit arbeiten, und ehrlich gesagt hatten wir weder das Budget noch die Zeit, einen Künstler zu beauftragen. Wir respektieren menschliche Künstler absolut und würden gerne mit einem zusammenarbeiten, wenn sich die Gelegenheit ergibt! Das war rein aus der Not heraus, nicht aus Vorliebe. Danke fürs Verständnis und fürs Spielen! ❤️",
     "event_code_title": "Event-Code",
-    "event_code_desc": "Gib einen gültigen Code ein, um ein exklusives Abzeichen freizuschalten!",
+    "event_code_desc": "Event-Codes schalten exklusive Abzeichen und Titel frei. Sie werden auf unserem Discord veröffentlicht.",
+    "event_code_discord": "Codes auf Discord holen →",
     "share_btn": "Mein Profil teilen",
     "copy_link": "Link kopieren",
     "link_copied": "Link kopiert!",
@@ -453,6 +454,8 @@
     "event_code_placeholder": "Event-Code eingeben...",
     "event_code_submit": "Einlösen",
     "event_code_success": "Code eingelöst! Abzeichen freigeschaltet.",
+    "event_code_title_success": "🎉 Code eingelöst! Ein neuer Titel wartet in deinen Titeln.",
+    "event_code_both_success": "🎉 Code eingelöst! Abzeichen und Titel freigeschaltet.",
     "event_code_error": "Ungültiger oder bereits verwendeter Code.",
     "ace_detective": {
       "name": "Ass-Detektiv",

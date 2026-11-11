@@ -386,7 +386,8 @@
     "about_badges_title": "À propos des badges",
     "about_badges_text": "Hey ! Juste pour être transparent – ces badges ont été créés avec de l'aide IA. Nous sommes de simples étudiants qui travaillons sur ce projet passion gratuitement sur notre temps libre, et nous n'avions pas le budget pour faire appel à un artiste. Nous respectons absolument les artistes humains et aimerions collaborer avec l'un d'eux si l'occasion se présente ! C'était purement par nécessité. Merci pour votre compréhension et pour jouer ! ❤️",
     "event_code_title": "Code Événement",
-    "event_code_desc": "Entrez un code valide pour débloquer un badge exclusif !",
+    "event_code_desc": "Les codes événement débloquent des badges et des titres exclusifs. Ils sont publiés sur notre Discord.",
+    "event_code_discord": "Trouver les codes sur Discord →",
     "share_btn": "Partager mon profil",
     "copy_link": "Copier le lien",
     "link_copied": "Lien copié !",
@@ -453,6 +454,8 @@
     "event_code_placeholder": "Entrez un code événement...",
     "event_code_submit": "Utiliser",
     "event_code_success": "Code utilisé ! Badge débloqué.",
+    "event_code_title_success": "🎉 Code validé ! Un nouveau titre t'attend dans tes titres.",
+    "event_code_both_success": "🎉 Code validé ! Badge et titre débloqués.",
     "event_code_error": "Code invalide ou déjà utilisé.",
     "ace_detective": {
       "name": "As Détective",

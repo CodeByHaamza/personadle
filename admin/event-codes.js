@@ -1,10 +1,13 @@
 /**
  * admin/event-codes.js — Panneau "Codes événement" (création/activation/suppression
- * de codes déblocables donnant un badge exclusif).
+ * de codes déblocables donnant un badge exclusif, un titre, ou les deux — 2.4).
+ *
+ * ⚠️ Un code exclusif au Discord se crée ICI, jamais dans une migration : le dépôt
+ * est public (tests/event_codes_not_in_repo.test.js).
  */
 
 import { api, toast, escHtml, pathPrefix, renderLoading, renderError } from "./admin-api.js";
-import { badgesCatalog, loadBadgesCatalog } from "./catalogs.js";
+import { badgesCatalog, loadBadgesCatalog, loadTitlesCatalog, titlesCatalog } from "./catalogs.js";
 import { ouvrirSelecteurBadge } from "./badge_picker.js";
 
 export async function renderEventCodes() {
@@ -21,6 +24,12 @@ export async function renderEventCodes() {
   }
 
   const now = new Date().toISOString().slice(0, 10);
+  if (!titlesCatalog.length) await loadTitlesCatalog();
+  const titleOptions = titlesCatalog
+    .map((t) => ({ slug: t.slug, name: t.name_en || t.name || t.slug }))
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((t) => `<option value="${escHtml(t.slug)}">${escHtml(t.name)} — ${escHtml(t.slug)}</option>`)
+    .join("");
 
   const rows = codes
     .map((c) => {
@@ -36,7 +45,7 @@ export async function renderEventCodes() {
 
       return `<tr class="code-row">
       <td><code class="code-pill">${escHtml(c.code)}</code></td>
-      <td>${escHtml(c.badge_id)}</td>
+      <td>${[c.badge_id && `🏅 ${escHtml(c.badge_id)}`, c.title_slug && `🎖️ ${escHtml(c.title_slug)}`].filter(Boolean).join("<br>") || "—"}</td>
       <td>${dates}</td>
       <td>${active}</td>
       <td><strong>${c.redemption_count ?? 0}</strong></td>
@@ -59,7 +68,7 @@ export async function renderEventCodes() {
         <table class="codes-table">
           <thead>
             <tr>
-              <th>Code</th><th>Badge</th><th>Dates</th><th>Statut</th><th>Utilisations</th><th>Description</th><th>Actions</th>
+              <th>Code</th><th>Récompense</th><th>Dates</th><th>Statut</th><th>Utilisations</th><th>Description</th><th>Actions</th>
             </tr>
           </thead>
           <tbody>${rows || '<tr><td colspan="7" style="text-align:center;color:var(--text-muted)">Aucun code</td></tr>'}</tbody>
@@ -72,11 +81,17 @@ export async function renderEventCodes() {
           <label>Code (majuscules, chiffres, _)
             <input id="new-code" type="text" placeholder="EX: PERSONA2027" maxlength="50">
           </label>
-          <label>Badge
+          <label>Badge (ou un titre, ou les deux)
             <span class="badge-choice">
               <input id="new-badge-id" type="text" placeholder="slug_du_badge" maxlength="100" readonly>
               <button type="button" id="pick-badge-btn" class="btn-small">📋 Choisir…</button>
             </span>
+          </label>
+          <label>Titre (optionnel, 2.4)
+            <select id="new-title-slug">
+              <option value="">— aucun —</option>
+              ${titleOptions}
+            </select>
           </label>
           <label>Description
             <input id="new-description" type="text" placeholder="Optionnel" maxlength="255">
@@ -162,15 +177,17 @@ export async function renderEventCodes() {
     btn.disabled = true;
     btn.textContent = "…";
     const slug = document.getElementById("new-badge-id").value.trim();
-    if (!slug) {
-      toast("❌ Choisis un badge avant de créer le code", "error");
+    const titleSlug = document.getElementById("new-title-slug").value;
+    if (!slug && !titleSlug) {
+      toast("❌ Choisis un badge, un titre, ou les deux", "error");
       btn.disabled = false;
       btn.textContent = "➕ Créer le code";
       return;
     }
     const res = await api.post("/api/admin/event_codes", {
       code: document.getElementById("new-code").value.trim(),
-      badge_id: slug,
+      badge_id: slug || null,
+      title_slug: titleSlug || null,
       description: document.getElementById("new-description").value.trim(),
       is_permanent: isPerm,
       is_active: true,

@@ -793,9 +793,11 @@ CREATE TABLE event_codes_redeemed (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Catalogue des codes événement (migration 011 ; api/admin/event_codes + redeem).
+-- Un code accorde un badge, un titre (migration 057), ou les deux.
 CREATE TABLE event_codes (
     code         VARCHAR(50)   NOT NULL,
-    badge_id     VARCHAR(100)  NOT NULL,
+    badge_id     VARCHAR(100)  NULL,
+    title_slug   VARCHAR(100)  NULL,
     start_date   DATE          NULL,
     end_date     DATE          NULL,
     is_permanent TINYINT(1)    NOT NULL DEFAULT 0,

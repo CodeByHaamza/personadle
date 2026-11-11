@@ -386,7 +386,8 @@
     "about_badges_title": "Sobre nuestras insignias",
     "about_badges_text": "¡Hola! Solo quería ser transparente — estas insignias se hicieron con ayuda de IA. Somos solo estudiantes trabajando en este proyecto de pasión de forma gratuita en nuestro tiempo libre, y honestamente, no teníamos el presupuesto ni el tiempo para contratar a un artista. Respetamos absolutamente a los artistas humanos y nos encantaría trabajar con uno algún día si tenemos la oportunidad. ¡Fue puramente por necesidad, no por preferencia. Gracias por entenderlo y por jugar! ❤️",
     "event_code_title": "Código de evento",
-    "event_code_desc": "¡Introduce un código válido para desbloquear una insignia exclusiva!",
+    "event_code_desc": "Los códigos de evento desbloquean insignias y títulos exclusivos. Se publican en nuestro Discord.",
+    "event_code_discord": "Consigue los códigos en Discord →",
     "share_btn": "Compartir mi perfil",
     "copy_link": "Copiar enlace",
     "link_copied": "¡Enlace copiado!",
@@ -453,6 +454,8 @@
     "event_code_placeholder": "Introduce el código del evento...",
     "event_code_submit": "Canjear",
     "event_code_success": "¡Código canjeado! Insignia desbloqueada.",
+    "event_code_title_success": "🎉 ¡Código canjeado! Un nuevo título te espera en tus títulos.",
+    "event_code_both_success": "🎉 ¡Código canjeado! Insignia y título desbloqueados.",
     "event_code_error": "Código inválido o ya utilizado.",
     "ace_detective": {
       "name": "Detective As",

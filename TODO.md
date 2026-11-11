@@ -8,7 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 1693 tests Vitest (97 suites), 434 méthodes PHPUnit, 344 tests E2E,
+> Vérifié le 2026-08-26 : 1696 tests Vitest (98 suites), 441 méthodes PHPUnit, 345 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
@@ -30,6 +30,17 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       `INSERT IGNORE INTO schema_migrations (version) VALUES ('056_remember_tokens')`.
 - [x] **2.3.4 — Bumper `CACHE_VERSION` dans `sw.js`** (v106 → v107, fait le 2026-11-09) : `js/gameCore.js`,
       `css/global.css`, `lang/*.json` et `allOutAttackMode/modeAllOutAttack.js` changent.
+- [ ] **2.4 — Jouer `sql/migrations/057_event_code_titles.sql`** (lot 9 : un code
+      événement peut accorder un titre ; `event_codes.badge_id` devient NULL-able,
+      `event_codes.title_slug` ajoutée). **À jouer AVANT le `git pull` Hostinger** : sans
+      la colonne, `POST /api/badges/redeem` et `GET /api/admin/event_codes` tombent en 500
+      (`Unknown column 'title_slug'`). Rejouable (`MODIFY` + `ADD COLUMN IF NOT EXISTS`),
+      répétée deux fois sur la base Docker le 2026-11-11. Puis
+      `INSERT IGNORE INTO schema_migrations (version) VALUES ('057_event_code_titles')`.
+- [ ] **2.4 — Codes déjà publics** (décision Hamza) : les codes encore actifs écrits dans
+      le dépôt (`sql/bdd_mysql.sql`, migration 054 — dont `IAMNOTAPRINCESS`, « annonce
+      Discord ») sont lisibles par tous sur GitHub. Seule parade : les désactiver dans
+      l'admin et en créer de nouveaux là, jamais dans un fichier.
 - [ ] *(optionnel, 2.4)* **Erreurs JS des joueurs** : créer un salon Discord **privé** (staff),
       un webhook dedans, et ajouter `define('DISCORD_ERRORS_WEBHOOK', '…');` au `config.php` de
       prod (cf. `api/config.example.php`). Sans lui, `api/client_errors.php` range quand même

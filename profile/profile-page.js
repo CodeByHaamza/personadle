@@ -1577,6 +1577,15 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("personadle:auth-ready", _fullCloudSync, { once: true });
   }
 
+  // Un code événement vient d'accorder un titre (2.4, lot 9) : la liste des titres
+  // vient de l'API, on la recharge pour qu'il apparaisse sans rechargement.
+  if (!window._titlesChangedBound) {
+    window._titlesChangedBound = true;
+    window.addEventListener("personadle:titles-changed", () => {
+      initTitlesSection(profile, saveProfile, saveProfileToCloud, markDirty).catch(() => {});
+    });
+  }
+
   // Ré-sync complet au login/register (sans rechargement de page)
   window.addEventListener("personadle:auth-login", () => _fullCloudSync());
 

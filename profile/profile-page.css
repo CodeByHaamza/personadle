@@ -1081,6 +1081,26 @@ body.darkmode .mode-stat-rate {
   min-height: 18px;
 }
 
+/* Où trouver les codes (2.4, lot 9) : un <a>, hors du piège min-height des <button>. */
+.event-code-discord {
+  display: inline-block;
+  margin: -6px 0 12px;
+  color: #4752c4;
+  font-size: 0.82em;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.event-code-discord:hover,
+.event-code-discord:focus-visible {
+  color: #5865f2;
+}
+
+body.darkmode .event-code-discord {
+  color: #9aa3ff;
+}
+
 /* =====================================================
    9. IO BUTTONS (Export / Import / Share)
    ===================================================== */

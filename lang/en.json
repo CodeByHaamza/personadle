@@ -386,7 +386,8 @@
     "about_badges_title": "About Our Badges",
     "about_badges_text": "Hey! Just wanted to be transparent – these badges were made with AI help. We're just students working on this passion project for free in our spare time, and honestly, we didn't have the budget or time to commission an artist. We absolutely respect human artists and would love to work with one someday if we get the chance! This was purely out of necessity, not preference. Thanks for understanding and for playing! ❤️",
     "event_code_title": "Event Code",
-    "event_code_desc": "Enter a valid code to unlock an exclusive badge!",
+    "event_code_desc": "Event codes unlock exclusive badges and titles. They're posted on our Discord.",
+    "event_code_discord": "Get the codes on Discord →",
     "share_btn": "Share My Profile",
     "copy_link": "Copy link",
     "link_copied": "Link copied!",
@@ -453,6 +454,8 @@
     "event_code_placeholder": "Enter event code...",
     "event_code_submit": "Redeem",
     "event_code_success": "Code redeemed! Badge unlocked.",
+    "event_code_title_success": "🎉 Code redeemed! A new title is waiting in your titles.",
+    "event_code_both_success": "🎉 Code redeemed! Badge and title unlocked.",
     "event_code_error": "Invalid or already used code.",
     "ace_detective": {
       "name": "Ace Detective",
