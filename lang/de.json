@@ -441,7 +441,12 @@
     "delete_account_login_required": "Melde dich an, um dein Konto zu löschen.",
     "expert_title": "⚡ Expertenmodus",
     "expert_cols": "Gewonnen / Gespielt · Quote · Rekord · Serie",
-    "expert_best_hint": "Wenigste Versuche bei einem Sieg"
+    "expert_best_hint": "Wenigste Versuche bei einem Sieg",
+    "next_unlocks_title": "Fast geschafft",
+    "next_unlocks_expert": "Expertenmodus — {{mode}}",
+    "next_unlocks_kind_badge": "Abzeichen",
+    "next_unlocks_kind_title": "Titel",
+    "next_unlocks_kind_expert": "Experte"
   },
   "badges": {
     "notification_title": "🎖️ Abzeichen freigeschaltet!",

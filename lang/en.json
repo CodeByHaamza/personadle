@@ -441,7 +441,12 @@
     "delete_account_login_required": "Log in to delete your account.",
     "expert_title": "⚡ Expert Mode",
     "expert_cols": "Won / Played · Rate · Best · Streak",
-    "expert_best_hint": "Fewest guesses in a win"
+    "expert_best_hint": "Fewest guesses in a win",
+    "next_unlocks_title": "Almost there",
+    "next_unlocks_expert": "Expert mode — {{mode}}",
+    "next_unlocks_kind_badge": "Badge",
+    "next_unlocks_kind_title": "Title",
+    "next_unlocks_kind_expert": "Expert"
   },
   "badges": {
     "notification_title": "🎖️ Badge Unlocked!",

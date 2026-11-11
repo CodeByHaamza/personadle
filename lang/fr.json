@@ -441,7 +441,12 @@
     "delete_account_login_required": "Connecte-toi pour supprimer ton compte.",
     "expert_title": "⚡ Mode Expert",
     "expert_cols": "Gagnées / Jouées · Taux · Record · Série",
-    "expert_best_hint": "Le moins d'essais sur une victoire"
+    "expert_best_hint": "Le moins d'essais sur une victoire",
+    "next_unlocks_title": "Presque là",
+    "next_unlocks_expert": "Mode Expert — {{mode}}",
+    "next_unlocks_kind_badge": "Badge",
+    "next_unlocks_kind_title": "Titre",
+    "next_unlocks_kind_expert": "Expert"
   },
   "badges": {
     "notification_title": "🎖️ Badge débloqué !",

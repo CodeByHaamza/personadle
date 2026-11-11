@@ -441,7 +441,12 @@
     "delete_account_login_required": "Accedi per eliminare il tuo account.",
     "expert_title": "⚡ Modalità Esperto",
     "expert_cols": "Vinte / Giocate · Tasso · Record · Serie",
-    "expert_best_hint": "Meno tentativi in una vittoria"
+    "expert_best_hint": "Meno tentativi in una vittoria",
+    "next_unlocks_title": "Quasi fatto",
+    "next_unlocks_expert": "Modalità Esperto — {{mode}}",
+    "next_unlocks_kind_badge": "Badge",
+    "next_unlocks_kind_title": "Titolo",
+    "next_unlocks_kind_expert": "Esperto"
   },
   "badges": {
     "notification_title": "🎖️ Badge sbloccato!",

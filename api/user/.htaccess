@@ -29,5 +29,8 @@ RewriteRule ^expert-status$ expert_status.php [L,QSA]
 # /api/user/compendium    → compendium.php (GET ?code= | ?id= | soi — carnet de collection, public)
 RewriteRule ^compendium$    compendium.php [L,QSA]
 
+# /api/user/next-unlocks  → next_unlocks.php (GET — déblocages les plus proches, 2.4 lot 11)
+RewriteRule ^next-unlocks$  next_unlocks.php [L,QSA]
+
 # /api/user/42         → index.php  (GET, PATCH, DELETE)
 RewriteRule ^[0-9]+$         index.php   [L,QSA]

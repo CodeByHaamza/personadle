@@ -62,6 +62,7 @@ import {
   refreshTitlesAfterCloudSync,
 } from "./titles-ui.js";
 import { renderSongCard, setupSongPicker, stopProfileSong } from "./song-player.js";
+import { renderNextUnlocks } from "./next_unlocks_ui.js";
 import {
   setupShareProfile,
   setupCopyProfileLink,
@@ -1566,6 +1567,9 @@ document.addEventListener("DOMContentLoaded", () => {
       await checkSocialBadges(profile, saveProfileAndSyncBadges);
       // Re-fetcher /api/titles avec session valide → is_unlocked correct par user
       await initTitlesSection(profile, saveProfile, saveProfileToCloud, markDirty);
+      // « Presque là » (2.4, lot 11) : après titres et badges, pour que ce qui
+      // vient d'être accordé n'y figure plus.
+      renderNextUnlocks().catch(() => {});
       // Pousser les badges locaux manquants vers le backend (local → cloud)
       await syncBadgesWithBackend(profile, saveProfileAndSyncBadges);
     } catch (_) {}
@@ -1583,6 +1587,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window._titlesChangedBound = true;
     window.addEventListener("personadle:titles-changed", () => {
       initTitlesSection(profile, saveProfile, saveProfileToCloud, markDirty).catch(() => {});
+      renderNextUnlocks().catch(() => {});
     });
   }
 

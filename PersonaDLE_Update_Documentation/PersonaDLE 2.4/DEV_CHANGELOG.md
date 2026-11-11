@@ -32,7 +32,7 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 8 | `feat/discord_fin_de_partie` | Discord au bon moment : fin de partie, journée 6/6, profil, menu Jouer ; membres en ligne ; modale recentrée — **fait** |
 | 9 | `feat/codes_evenement_discord` | Codes événement exclusifs au Discord (badge ou titre) — **fait**, migration 057 |
 | 10 | `feat/partage_journee` | Partage « journée complète » des six modes — **fait** |
-| 11 | `feat/prochains_deblocages` | Profil : quêtes Expert et badges les plus proches |
+| 11 | `feat/prochains_deblocages` | Profil : quêtes Expert et badges les plus proches — **fait** |
 | 12 | `feat/filtre_en_cours_de_partie` | Étape B anti-triche : changer de filtre en cours de partie = abandon, avec avertissement |
 | 13 | `feat/accueil_explications` | Une ligne sous chaque mode, slogan à jour, profil invité qui explique le compte, textes anglais restants |
 | 14 | `feat/nav_ordinateur` | Ordinateur : navigation en haut, pastilles qui ne masquent plus les bannières, un seul ⚙ par mode |
@@ -56,6 +56,77 @@ site, préprod accessible par Tailscale, page de statut publique.
 - **« Puzzle commun du jour »** (une cible identique pour tous) : idée validée sur le
   principe, à cadrer avant d'en faire un lot — reportée à la 2.5 avec la salle à part
   (Archives de Velvet, Cognition) et l'OAuth Discord.
+
+---
+
+## 2026-11-11 — Lot 11 : « Presque là », ce qui est sur le point de se débloquer
+
+Le profil montrait ce qu'on a, jamais ce qui est presque là. Un joueur à 8 / 10
+victoires Silhouette d'un badge ne le savait pas, à moins d'ouvrir la collection et de
+compter lui-même. Le bug Expert de la 2.3.4 (« la quête n'avance pas ») venait aussi de
+là : la progression ne se voyait que dans une infobulle.
+
+### Ce qui change pour le joueur
+
+Une carte **« Presque là »** sur son profil (connecté), entre Statistiques et Badges :
+- les six badges, titres et Modes Expert les plus avancés ;
+- pour chacun : icône, nom, condition, barre de progression et « 4 / 5 ».
+
+Jamais de badge secret, jamais ce qui est déjà obtenu. Les badges et titres qui
+demandent de jouer en Expert sont écartés tant que le mode est verrouillé : la quête
+qui l'ouvre est déjà dans la liste. Sur téléphone, la carte est repliable comme les
+autres et reste ouverte par défaut.
+
+### Une seule source pour la progression et le déblocage
+
+`personadle_condition_progress()` (`api/lib/condition_check.php`) donne « actuel /
+seuil » pour toutes les conditions **chiffrées** (22 types : victoires, parties,
+séries, amis, badges, titres, Expert…). `personadle_verify_condition()` **l'appelle**
+au lieu de garder son propre calcul. Deux calculs séparés finiraient par annoncer
+« 10 / 10 » sur un titre que l'unlock refuse. Restent dans le `switch` de `verify` les
+conditions non chiffrées : dates, Pâques, ensembles de cibles, Same Energy, manuelles.
+
+C'est un recâblage de la fonction qui décide de **tous** les déblocages, d'où les
+vérifications :
+- la suite PHPUnit complète (445 tests, dont `BadgeWallpaperCatalogTest`, qui exige
+  chaque entrée du catalogue accordée au seuil exact) passe sans changer un test ;
+- `NextUnlocksTest` vérifie que la progression et la décision suivent la même stat (4 / 5
+  refusé, 5 / 5 accordé) ;
+- une condition chiffrée mal configurée (`mode_wins` sans mode) reste **jamais
+  remplie**, comme avant. Elle renvoie `valid: false` et non `null`, sinon le
+  `default: return true` du `switch` l'aurait accordée.
+
+### Détails techniques
+
+- `GET /api/user/next-unlocks?lang=` (`api/user/next_unlocks.php`, RewriteRule dans
+  `api/user/.htaccess`). Il commence par la même réconciliation que `GET /api/titles` et
+  `/api/badges` : ce qui est dû est accordé avant d'être listé.
+- `api/lib/next_unlocks.php` :
+  - `personadle_next_unlocks()` lit les badges non secrets et les titres non
+    obtenus, en écartant ceux adossés à un code événement (pas de progression : on a
+    le code ou pas), puis les quêtes Expert verrouillées ;
+  - `personadle_rank_next_unlocks()` (pure) classe le plus avancé d'abord, puis ce à
+    quoi il manque le moins.
+  - Un `$memo` par requête évite de recompter : des dizaines d'entrées partagent quelques
+    compteurs. Une condition qui plante est loguée et sautée, jamais propagée (§7).
+- `profile/next_unlocks_ui.js` : libellés en i18n.
+  - Badge : `badges.<slug>.name/condition`. La colonne `name_*` est souvent vide en
+    base, les noms vivent dans `lang/`.
+  - Titre : déjà traduit par l'API.
+  - Quête Expert : `expertConditionLabel()`, comme l'infobulle du bouton Expert.
+  - HTML échappé. La carte reste cachée pour un invité ou une API muette.
+- La liste se rafraîchit après la synchro du profil et quand un code accorde un titre
+  (`personadle:titles-changed`, lot 9).
+- Tests : `tests/php/NextUnlocksTest.php` (4), `tests/next_unlocks_ui.test.js` (4).
+
+### Vérifié à l'écran (pile Docker)
+
+Compte neuf, une victoire Silhouette enregistrée :
+- `first_win` est accordé et quitte la liste ;
+- « Shadow Slayer 1 / 5 », « Pancakes? 1 / 3 » et la quête Expert Silhouette 1 / 10
+  apparaissent ;
+- à 1280 px clair et 390 px nuit, pas de débordement. Les noms illisibles en mode nuit
+  ont été corrigés après capture.
 
 ---
 

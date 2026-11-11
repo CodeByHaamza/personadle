@@ -1081,6 +1081,123 @@ body.darkmode .mode-stat-rate {
   min-height: 18px;
 }
 
+/* « Presque là » — déblocages les plus proches (2.4, lot 11, next_unlocks_ui.js).
+   `[hidden]` doit battre tout `display` posé sur les cartes. */
+.profile-card[hidden] {
+  display: none;
+}
+
+.next-unlocks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.next-unlock {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.next-unlock__img {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: contain;
+  background: #f4f4f4;
+}
+
+/* Les titres sont des bannières 16:4 : on en montre le centre. */
+.next-unlock__img--title {
+  object-fit: cover;
+}
+
+.next-unlock__img--expert {
+  display: grid;
+  place-items: center;
+  font-size: 1.3rem;
+  background: linear-gradient(135deg, #2b2b2b, #111);
+  color: #ffd54a;
+}
+
+.next-unlock__body {
+  min-width: 0;
+}
+
+.next-unlock__head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.next-unlock__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+.next-unlock__kind {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #999;
+}
+
+.next-unlock__cond {
+  margin: 2px 0 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.78rem;
+  color: #777;
+}
+
+.next-unlock__bar {
+  height: 6px;
+  border-radius: 99px;
+  background: #ececec;
+  overflow: hidden;
+}
+
+.next-unlock__bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent, #e63946);
+}
+
+.next-unlock__count {
+  font-weight: 800;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+body.darkmode .next-unlock__img {
+  background: #222;
+}
+
+body.darkmode .next-unlock__name,
+body.darkmode .next-unlock__count {
+  color: #f2f2f2;
+}
+
+body.darkmode .next-unlock__cond {
+  color: #aaa;
+}
+
+body.darkmode .next-unlock__bar {
+  background: #2a2a2a;
+}
+
 /* Où trouver les codes (2.4, lot 9) : un <a>, hors du piège min-height des <button>. */
 .event-code-discord {
   display: inline-block;

@@ -441,7 +441,12 @@
     "delete_account_login_required": "Inicia sesión para eliminar tu cuenta.",
     "expert_title": "⚡ Modo Experto",
     "expert_cols": "Ganadas / Jugadas · Tasa · Récord · Racha",
-    "expert_best_hint": "Menos intentos en una victoria"
+    "expert_best_hint": "Menos intentos en una victoria",
+    "next_unlocks_title": "Casi lo tienes",
+    "next_unlocks_expert": "Modo Experto — {{mode}}",
+    "next_unlocks_kind_badge": "Insignia",
+    "next_unlocks_kind_title": "Título",
+    "next_unlocks_kind_expert": "Experto"
   },
   "badges": {
     "notification_title": "🎖️ ¡Insignia desbloqueada!",

@@ -441,7 +441,12 @@
     "delete_account_login_required": "Inicia sessão para eliminares a tua conta.",
     "expert_title": "⚡ Modo Especialista",
     "expert_cols": "Vencidas / Jogadas · Taxa · Recorde · Sequência",
-    "expert_best_hint": "Menos tentativas numa vitória"
+    "expert_best_hint": "Menos tentativas numa vitória",
+    "next_unlocks_title": "Quase lá",
+    "next_unlocks_expert": "Modo Especialista — {{mode}}",
+    "next_unlocks_kind_badge": "Crachá",
+    "next_unlocks_kind_title": "Título",
+    "next_unlocks_kind_expert": "Especialista"
   },
   "badges": {
     "notification_title": "🎖️ Emblema Desbloqueado!",
