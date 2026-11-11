@@ -42,7 +42,6 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 16 | `fix/badge_modal_prod` | Le détail d'un badge reprend la modale de la production |
 | 17 | `feat/badge_cafe_leblanc` | Badge secret Ko-fi |
 | 18 | `perf/aoa_reencode_hd` | Les 33 animations AOA en 1080p au calibre des autres |
-| 22 | `feat/pwa_polices` | Application installable (PWA) + polices auto-hébergées |
 
 ---
 
