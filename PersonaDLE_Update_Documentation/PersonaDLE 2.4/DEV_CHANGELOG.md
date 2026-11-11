@@ -281,3 +281,97 @@ sont arrivés par des joueurs. Aucun code ne captait les erreurs du navigateur.
   s'y écrirait une fois par heure et par empreinte — borné, mais à surveiller les premiers
   jours dans l'admin.
 - Les erreurs des pages sans `api.js` (FAQ, confidentialité) ne remontent pas.
+
+---
+
+## 2026-10-20 — Série gelée au profil, `?v=` par empreinte de contenu
+
+Trois demandes de Hamza dans un même lot, chacune dans son commit.
+
+### 1. La série cassée s'affiche gelée, avec Jack Frost à portée de clic
+
+**Le bouton Jack Frost du profil ne s'affichait pour personne.** Il testait
+`streak === 0`, valeur que le jeu n'écrit jamais après une première partie :
+
+- tant que le joueur n'a pas rejoué, `stats.streak` (local) et `users.global_streak`
+  (serveur) gardent l'**ancienne** valeur — le profil affichait « 15 🔥 » pour une série
+  morte depuis trois jours ;
+- dès qu'il rejoue, `profileStats.js` remet la série à **1** (pas 0) et pose la trace
+  `streakRecovery.previousStreak`.
+
+Désormais, `getRecoverableStreak()` (`profile/profile-format.js`, pure, testée) distingue :
+
+- `frozen` — dernière partie avant hier (jours **Paris**, `shiftDateKey`) et série > 1 :
+  la tuile passe en glace (🧊, libellé « Série gelée », chiffre conservé — c'est lui que
+  Jack Frost rend) ;
+- `broken` — le joueur a rejoué, la trace vaut plus que la série actuelle.
+
+Dans les deux cas, sous les stats : le bouton « ❄️ Appeler Jack Frost — retour à N jours »
+qui ouvre la pop-up existante, ou, si le cooldown de 60 jours court, « 🧊 Jack Frost se
+repose — de retour dans N jours » (`recoveryCooldownDaysLeft()`, `js/streak-recovery.js`).
+
+**Décisions :**
+
+- **Connecté, rien avant le premier pull cloud** (`_statsFromCloud`). Le profil local peut
+  dater d'un autre appareil : une série jouée hier ailleurs passerait pour gelée, et un clic
+  brûlerait le crédit de 60 jours. L'invité, lui, n'a que son localStorage : affiché dès que
+  l'auth est résolue (`_fullCloudSync` re-rend les stats pour lui).
+- **`_applyRecoveryLocally()` pose `stats.lastPlayed` à maintenant.** Le serveur date déjà la
+  série restaurée d'aujourd'hui (`global_streak_date`). Sans le même jour côté client, une
+  série récupérée encore gelée était vue cassée par la partie suivante : remise à 1, nouvelle
+  trace Jack Frost. Test d'intégration `performRecovery` → `updateProfileStats`.
+- **Le profil écoute `personadle:streak-recovered`** et relit `stats` depuis le localStorage :
+  sans ça, la tuile restait gelée après le clic, et le prochain `saveProfile()` réécrivait
+  l'ancienne série par-dessus celle que Jack Frost venait de rendre.
+- Clé `streak_recovery.profile_btn` réécrite dans les 6 langues (« 0 → N » était faux : la
+  série vaut 1 ou l'ancienne valeur, jamais 0) ; ajout de `profile.stat_frozen_streak_label`
+  et `streak_recovery.profile_cooldown`.
+
+**Côté serveur : rien à changer.** `personadle_apply_streak_recovery()` fait déjà
+`GREATEST(global_streak, ?)` et date d'aujourd'hui ; plafond « jours distincts joués » et
+cooldown inchangés.
+
+### 2. `?v=` = empreinte du contenu, posée à la release
+
+`scripts/stamp_assets.js` (+ `npm run assets:stamp` / `assets:check` / `assets:refs`)
+remplace `version-all.sh` (supprimé) et les `?v=1`…`?v=21` tenus à la main — la moitié des
+balises n'en portait pas. Empreinte = sha256 du fichier, 8 caractères : elle ne change que
+si le fichier change, là où un SHA de commit forcerait tout le monde à tout retélécharger à
+chaque déploiement.
+
+- **Jamais les specifiers d'`import`, et jamais un module d'entrée importé ailleurs.**
+  `x.js?v=a` et `x.js` sont deux modules pour le navigateur : `../../js/api.js`, chargé en
+  `<script type="module">` par compendium/friends/leaderboard et importé par tout le reste,
+  aurait existé en deux instances (jeton CSRF, utilisateur courant). Le script détecte les
+  imports (statiques, dynamiques, ré-exports, `<script type="module">` inline) dans le seul
+  code servi — pas `tests/` : un test Vitest qui importe `friends.js` ne crée pas de doublon
+  chez le joueur.
+- **Tamponné à la release, pas à chaque commit** — sinon deux branches qui touchent
+  `global.css` se disputent ~16 pages en conflit. CI : `assets:refs` sur toute PR (aucune
+  page ne cite un fichier absent — vérifié : zéro aujourd'hui), `assets:check` seulement sur
+  les PR vers `main`. Étape ajoutée à la checklist de `DEPLOY.md` et au guide du mainteneur.
+- Les 16 pages sont tamponnées dans ce lot (point de départ).
+- **`CACHE_VERSION` de `sw.js` calculé, plus bumpé.** Le même script y pose
+  `personadle-<empreinte>`, où l'empreinte couvre chemin + blob git de chaque fichier servi
+  en cache-first (images, sons, polices ; hors docs, tests, changelogs). Lue dans l'index
+  git (`git ls-files -s`) plutôt qu'en relisant ≈ 1 Go de médias : il faut donc stager les
+  médias avant de tamponner, ce que dit la checklist de `DEPLOY.md`. Le piège du §7
+  (« Assets périmés après un déploiement ») passe de « penser à bumper » à « rien à faire ».
+- **Repli hors ligne de `sw.js` : `ignoreSearch` en second essai.** Le précache stocke
+  `global.css`, les pages demandent `global.css?v=…` : hors ligne, le repli de
+  `networkFirstWithFallback` ne trouvait rien. Il tente maintenant l'URL exacte, puis la
+  même sans query string. Le cache-first, lui, garde la correspondance exacte.
+
+### 3. Outillage local
+
+Le lot ajoutait aussi des fichiers d'outillage de développement local. Ils sont retirés du
+dépôt public avec le guide du mainteneur (2026-11-10) : ce lot ne livre que les deux
+premiers points.
+
+### Angles morts connus
+
+- Les dépendances d'un module d'entrée ne sont pas versionnées (limite assumée, documentée
+  dans le script) : le `no-cache` du `.htaccess` les tient fraîches.
+- `index.html` lance toujours la pop-up automatique **uniquement** après la trace
+  (`checkStreakRecovery`) : une série gelée ne la déclenche pas à l'accueil — seulement le
+  bouton du profil, comme demandé.

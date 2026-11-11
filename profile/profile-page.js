@@ -32,14 +32,19 @@ import {
   renderBadgePicker,
 } from "./badges/badgesManager.js";
 import { songs as ALL_SONGS } from "../musicsMode/database/songs.js";
-import { canRecover, getPreviousStreak, showStreakRecoveryMenu } from "../js/streak-recovery.js";
+import {
+  getPreviousStreak,
+  recoveryCooldownDaysLeft,
+  showStreakRecoveryMenu,
+} from "../js/streak-recovery.js";
 import { openModal, closeModal } from "../js/modal.js";
 import { pullProfileFromCloud, pushLangToCloud } from "../js/cloud-sync.js";
 import { formatPlayTime } from "./formatPlayTime.js";
-import { MODES, modeLabel, normalizeModeKey } from "../js/gameCore.js";
+import { MODES, modeLabel, normalizeModeKey, parisDateKey } from "../js/gameCore.js";
 import { AVATAR_GROUPS, ANIMATED_AVATARS, isAnimatedAvatar } from "./avatars_data.js";
 import {
   getStreakTier,
+  getRecoverableStreak,
   formatSongTime,
   normalizeAvatarPath,
   bestModeOverall,
@@ -231,6 +236,7 @@ let dragging = false; // État du drag
 let startX = 0; // Position X initiale du drag
 let startY = 0; // Position Y initiale du drag
 let selectedAvatarSrc = ""; // Portrait sélectionné dans la grille (chemin ../img/avatar/…)
+let _statsFromCloud = false; // true après le premier pull réussi (cf. _recoverableStreak)
 
 // ─────────────────────────────────────────────────────────
 // ÉLÉMENTS DOM
@@ -623,8 +629,11 @@ function _applyCloudToUI() {
  * @param {string} label  - Label traduit
  * @param {string} delay  - Valeur de animation-delay (ex: "0.22s")
  */
-function buildStreakItem(streak, label, delay, forceFull) {
-  const tier = getStreakTier(streak);
+function buildStreakItem(streak, label, delay, forceFull, frozen = false) {
+  // Gelée : la valeur reste affichée (c'est ce que Jack Frost rend), mais avec
+  // l'habillage glace du palier 0 au lieu des flammes de son palier.
+  // forceFull : la largeur décidée par pairStatTiles() (grille sans trou).
+  const tier = frozen ? 0 : getStreakTier(streak);
 
   // Décorateurs selon le tier
   const flameL = (n) => `<span class="streak-side-flame" aria-hidden="true">🔥</span>`.repeat(n);
@@ -644,7 +653,7 @@ function buildStreakItem(streak, label, delay, forceFull) {
   if (tier === 0) {
     leftDeco = snowL(1);
     rightDeco = snowR(1);
-    icon = "❄️";
+    icon = frozen ? "🧊" : "❄️";
     iconSize = "1.3em";
   }
 
@@ -668,6 +677,7 @@ function buildStreakItem(streak, label, delay, forceFull) {
     "stat-item",
     "stat-streak",
     `stat-streak-t${tier}`,
+    frozen ? "stat-streak--frozen" : "",
     fullWidth ? "stat-item--full" : "",
   ]
     .filter(Boolean)
@@ -741,17 +751,26 @@ function renderStats() {
     { icon: "🏅", value: modeBest, label: tf("profile.stat_best_mode_label", "Best Mode Overall") },
   ];
 
+  const recoverable = _recoverableStreak(s);
+  const frozen = recoverable.state === "frozen";
   // Rangées sans trou : cf. pairStatTiles() (capture joueur 2026-11, « Temps joué »
-  // et « Série actuelle » seuls sur leur ligne, l'autre moitié vide).
-  const tiles = pairStatTiles([...stats, { streak: true, full: getStreakTier(s.streak || 0) >= 5 }]);
+  // et « Série actuelle » seuls sur leur ligne, l'autre moitié vide). Une série
+  // gelée prend l'habillage du palier 0 : jamais pleine largeur d'office.
+  const tiles = pairStatTiles([
+    ...stats,
+    { streak: true, full: !frozen && getStreakTier(s.streak || 0) >= 5 },
+  ]);
   statsContainer.innerHTML = tiles
     .map((st, idx) =>
       st.streak
         ? buildStreakItem(
             s.streak || 0,
-            tf("profile.stat_current_streak_label", "Current Streak"),
+            frozen
+              ? tf("profile.stat_frozen_streak_label", "Frozen Streak")
+              : tf("profile.stat_current_streak_label", "Current Streak"),
             `${0.1 + idx * 0.06}s`,
-            st.full
+            st.full,
+            frozen
           )
         : `
     <div class="stat-item${st.full ? " stat-item--full" : ""}"
@@ -765,27 +784,64 @@ function renderStats() {
     )
     .join("");
 
-  // Bouton de récupération visible sous les stats quand streak = 0 et cooldown OK
-  const recoveryPrompt = document.getElementById("streakRecoveryPrompt");
-  if (recoveryPrompt) {
-    if ((s.streak || 0) === 0 && canRecover()) {
-      const prev = getPreviousStreak();
-      if (prev > 1) {
-        const btnLabel = tf("streak_recovery.profile_btn", `❄️ Reignite — 0 → ${prev} days`, {
-          count: prev,
-        });
-        recoveryPrompt.innerHTML = `<button class="srp-btn">${btnLabel}</button>`;
-        recoveryPrompt
-          .querySelector(".srp-btn")
-          .addEventListener("click", () => showStreakRecoveryMenu(prev));
-        recoveryPrompt.classList.remove("hidden");
-      } else {
-        recoveryPrompt.classList.add("hidden");
-      }
-    } else {
-      recoveryPrompt.classList.add("hidden");
-    }
+  _renderRecoveryPrompt(recoverable);
+}
+
+/**
+ * Série rendable par Jack Frost, ou `{ state: null }` tant qu'on ne peut pas
+ * s'y fier. Connecté, le profil local peut dater d'un autre appareil : avant le
+ * premier pull, une série jouée hier ailleurs passerait pour gelée — et un clic
+ * brûlerait le crédit de 60 jours pour rien. On attend donc le cloud ; l'invité,
+ * lui, n'a que son localStorage.
+ */
+function _recoverableStreak(s) {
+  const trusted = _statsFromCloud || (window._authResolved && !window._currentUser?.id);
+  if (!trusted) return { state: null, value: 0 };
+  let lastPlayedKey = null;
+  if (s.lastPlayed) {
+    const d = new Date(s.lastPlayed);
+    if (!Number.isNaN(d.getTime())) lastPlayedKey = parisDateKey(d);
   }
+  return getRecoverableStreak({
+    streak: s.streak || 0,
+    lastPlayedKey,
+    todayKey: parisDateKey(),
+    previousStreak: getPreviousStreak(),
+  });
+}
+
+/** Bouton Jack Frost sous les stats, ou le délai avant son retour. */
+function _renderRecoveryPrompt({ state, value }) {
+  const recoveryPrompt = document.getElementById("streakRecoveryPrompt");
+  if (!recoveryPrompt) return;
+  if (!state) {
+    recoveryPrompt.classList.add("hidden");
+    return;
+  }
+  const daysLeft = recoveryCooldownDaysLeft();
+  if (daysLeft > 0) {
+    // Série cassée et Jack Frost au repos : on le dit plutôt que de laisser le
+    // joueur chercher un bouton qui n'existe pas.
+    const msg = tf(
+      "streak_recovery.profile_cooldown",
+      `🧊 Jack Frost is resting — back in ${daysLeft} days`,
+      { count: daysLeft }
+    );
+    recoveryPrompt.innerHTML = `<p class="srp-cooldown">${msg}</p>`;
+  } else {
+    const btnLabel = tf(
+      "streak_recovery.profile_btn",
+      `❄️ Call Jack Frost — back to ${value} days`,
+      {
+        count: value,
+      }
+    );
+    recoveryPrompt.innerHTML = `<button type="button" class="srp-btn">${btnLabel}</button>`;
+    recoveryPrompt
+      .querySelector(".srp-btn")
+      .addEventListener("click", () => showStreakRecoveryMenu(value));
+  }
+  recoveryPrompt.classList.remove("hidden");
 }
 
 /** Icônes et couleurs par mode */
@@ -1484,10 +1540,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // Chaîne : pull → apply UI → re-init titres avec session valide → sync badges local→back.
   // Dual approach : immédiat si auth déjà résolue, sinon event listener.
   const _fullCloudSync = async () => {
-    if (!window._currentUser?.id) return;
+    if (!window._currentUser?.id) {
+      // Invité : rien à tirer, mais l'auth est résolue → la série gelée peut
+      // maintenant s'afficher (cf. _recoverableStreak).
+      renderStats();
+      return;
+    }
     _renderFriendCode();
     try {
       await pullProfileFromCloud();
+      _statsFromCloud = true;
       _applyCloudToUI();
       // Re-vérifier les badges dont la condition dépend de stats agrégées côté
       // backend (giveups_total, wins…) : le premier appel à initBadgesSystem()
@@ -1522,6 +1584,7 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("personadle:auth-logout", () => {
     // Arrêter la musique si elle joue
     stopProfileSong();
+    _statsFromCloud = false; // le prochain compte attendra SON pull
     _renderFriendCode(); // window._currentUser déjà à null → retire l'élément
     // localStorage déjà vidé par auth.js — initProfile() crée un profil vierge
     initProfile();
@@ -1561,6 +1624,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // suite, sans attendre un rechargement complet fortuit de la page.
   window.addEventListener("pageshow", (event) => {
     if (event.persisted) _fullCloudSync();
+  });
+
+  // Jack Frost a rendu la série (bouton du profil) : streak-recovery.js a écrit
+  // le localStorage, pas notre `profile` en mémoire. Sans cette relecture, la
+  // tuile restait gelée et le prochain saveProfile() réécrivait l'ancienne série.
+  window.addEventListener("personadle:streak-recovered", () => {
+    try {
+      const fresh = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
+      if (fresh.stats) profile.stats = fresh.stats;
+      profile.streakRestorationUsed = fresh.streakRestorationUsed;
+    } catch (_) {}
+    renderStats();
   });
 
   // Callback appelé par cloud-sync.js après chaque pull périodique

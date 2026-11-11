@@ -205,7 +205,8 @@ graphify-out/
 .graphifyignore
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Outils de développement personnel (Claude Code, Superpowers)
+# Outillage de développement local : jamais versionné (décision du 2026-11-10,
+# avec la sortie du guide du mainteneur — aucune exception, agents compris).
 # ─────────────────────────────────────────────────────────────────────────────
 .claude/
 .superpowers/
