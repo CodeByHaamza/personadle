@@ -49,7 +49,9 @@
     "expert_cond_unknown": "Verbinde dich erneut, um deinen Fortschritt zu sehen.",
     "expert_locked_title": "Expertenmodus gesperrt",
     "expert_unlocked_title": "Expertenmodus freigeschaltet!",
-    "expert_unlocked_hint": "Der ⚡-Button gehört jetzt dir."
+    "expert_unlocked_hint": "Der ⚡-Button gehört jetzt dir.",
+    "filter_midgame_confirm": "Wenn du jetzt die Filter änderst, endet diese Runde: Sie zählt in deinen Statistiken als Aufgabe. Trotzdem ändern?",
+    "filter_midgame_done": "Runde als Aufgabe gewertet — es war {{target}}."
   },
   "modes": {
     "classic": {
@@ -376,6 +378,7 @@
     "share_download": "PNG herunterladen",
     "share_on_x": "Auf X teilen",
     "share_discord": "Für Discord kopieren",
+    "share_open_server": "PersonaDLE-Discord-Server öffnen →",
     "share_email": "E-Mail",
     "theme_custom": "Benutzerdefinierte Farbe",
     "friend_code_copy_hint": "Klicken, um deinen Freundescode zu kopieren",
@@ -385,7 +388,8 @@
     "about_badges_title": "Über unsere Abzeichen",
     "about_badges_text": "Hallo! Ich wollte nur transparent sein – diese Abzeichen wurden mit KI-Hilfe erstellt. Wir sind nur Studenten, die an diesem Leidenschaftsprojekt kostenlos in unserer Freizeit arbeiten, und ehrlich gesagt hatten wir weder das Budget noch die Zeit, einen Künstler zu beauftragen. Wir respektieren menschliche Künstler absolut und würden gerne mit einem zusammenarbeiten, wenn sich die Gelegenheit ergibt! Das war rein aus der Not heraus, nicht aus Vorliebe. Danke fürs Verständnis und fürs Spielen! ❤️",
     "event_code_title": "Event-Code",
-    "event_code_desc": "Gib einen gültigen Code ein, um ein exklusives Abzeichen freizuschalten!",
+    "event_code_desc": "Event-Codes schalten exklusive Abzeichen und Titel frei. Sie werden auf unserem Discord veröffentlicht.",
+    "event_code_discord": "Codes auf Discord holen →",
     "share_btn": "Mein Profil teilen",
     "copy_link": "Link kopieren",
     "link_copied": "Link kopiert!",
@@ -439,7 +443,19 @@
     "delete_account_login_required": "Melde dich an, um dein Konto zu löschen.",
     "expert_title": "⚡ Expertenmodus",
     "expert_cols": "Gewonnen / Gespielt · Quote · Rekord · Serie",
-    "expert_best_hint": "Wenigste Versuche bei einem Sieg"
+    "expert_best_hint": "Wenigste Versuche bei einem Sieg",
+    "next_unlocks_title": "Fast geschafft",
+    "next_unlocks_expert": "Expertenmodus — {{mode}}",
+    "next_unlocks_kind_badge": "Abzeichen",
+    "next_unlocks_kind_title": "Titel",
+    "next_unlocks_kind_expert": "Experte",
+    "title_unlocked_notif": "🏅 Titel freigeschaltet!",
+    "wallpaper_unlocked_notif": "🖼️ Hintergrund freigeschaltet!",
+    "guest_name": "Gast",
+    "guest_account_pitch": "Kostenlos. Deine Serie, Statistiken und Abzeichen folgen dir auf jedes Gerät, und du kannst Freunde hinzufügen, sie herausfordern und in die Rangliste kommen.",
+    "pseudo_placeholder": "Dein Benutzername…",
+    "song_artwork_alt": "Cover des Songs",
+    "song_remove": "Entfernen"
   },
   "badges": {
     "notification_title": "🎖️ Abzeichen freigeschaltet!",
@@ -452,6 +468,8 @@
     "event_code_placeholder": "Event-Code eingeben...",
     "event_code_submit": "Einlösen",
     "event_code_success": "Code eingelöst! Abzeichen freigeschaltet.",
+    "event_code_title_success": "🎉 Code eingelöst! Ein neuer Titel wartet in deinen Titeln.",
+    "event_code_both_success": "🎉 Code eingelöst! Abzeichen und Titel freigeschaltet.",
     "event_code_error": "Ungültiger oder bereits verwendeter Code.",
     "ace_detective": {
       "name": "Ass-Detektiv",
@@ -963,7 +981,14 @@
     "scope_friends": "Freunde",
     "login_for_friends": "Melde dich an, um das Freundes-Ranking zu sehen.",
     "no_friends": "Noch keiner deiner Freunde erscheint in diesem Ranking.",
-    "expert_no_streak": "Für die beste Serie gibt es keine Experten-Rangliste: eine Serie zählt aufeinanderfolgende Tage, und der Experten-Modus ist kein tägliches Ritual."
+    "expert_no_streak": "Für die beste Serie gibt es keine Experten-Rangliste: eine Serie zählt aufeinanderfolgende Tage, und der Experten-Modus ist kein tägliches Ritual.",
+    "rank_up": "{{n}} Plätze hoch seit deinem letzten Besuch",
+    "rank_down": "{{n}} Plätze runter seit deinem letzten Besuch",
+    "filter_counts": "Gezählte Runden",
+    "counts_daily": "Tagesrunden",
+    "counts_all": "Alle Runden",
+    "counts_daily_note": "Nur die erste Runde jedes Modus pro Tag zählt — Wiederholen bringt dich nicht nach oben.",
+    "counts_all_note": "Jede Runde zählt, Wiederholungen eingeschlossen."
   },
   "friends": {
     "title": "Freunde",
@@ -1208,7 +1233,7 @@
     "danger_intro": "Diese beiden Aktionen sind unwiderruflich. Im Zweifel vorher das Profil exportieren."
   },
   "index": {
-    "main_title": "Versuche, den Persona-Charakter zu erraten (Persona 1 bis Persona 5)",
+    "main_title": "Errate den Persona-Charakter des Tages, von Persona 1 bis Persona 5X",
     "update_history": "Update-Verlauf",
     "changelog_button": "Vollständiges Changelog anzeigen",
     "copyright": "personadle.net — 2026",
@@ -1220,8 +1245,8 @@
     "discord_modal_sub": "Zwei Server, eine Persona-Familie.",
     "discord_grimoire_tag": "🇫🇷 Französischer Server",
     "discord_grimoire_desc": "Unsere französischsprachige Partner-Community — die aktivste. Events, Diskussionen und die ganze Persona-FR-Szene.",
-    "discord_personadle_tag": "🌍 International",
-    "discord_personadle_desc": "Der offizielle PersonaDLE-Server — immer aktiv, englischsprachig. Bug-Reports, Feedback, und wir rekrutieren!",
+    "discord_personadle_tag": "⭐ Offiziell · 🌍 International",
+    "discord_personadle_desc": "Der offizielle PersonaDLE-Server: Teile deine Raster, melde Bugs, gib Feedback — und wir rekrutieren!",
     "discord_join": "Beitreten",
     "daily_btn": "🕛 Tages-Reset",
     "daily_title": "🕛 Tages-Reset",
@@ -1534,7 +1559,9 @@
     "failed": "Ergebnis konnte nicht kopiert werden.",
     "one_try": "✅ Beim ersten Versuch!",
     "tries": "✅ {{count}} Versuche",
-    "gave_up": "🏳️ Aufgegeben nach {{count}} Versuchen"
+    "gave_up": "🏳️ Aufgegeben nach {{count}} Versuchen",
+    "day_button": "Meinen Tag teilen",
+    "day_copied": "Dein Tag ist kopiert — füge ihn überall ein!"
   },
   "reset_password": {
     "title": "🔐 Setze dein Passwort zurück",
@@ -1577,6 +1604,7 @@
     "play_todo": "Offen",
     "play_left": "Heute noch {{count}}",
     "play_all_done": "Heute alle Modi gespielt",
-    "home_status_done": "Heute gespielt"
+    "home_status_done": "Heute gespielt",
+    "play_discord": "Für heute alles gespielt — komm zum Plaudern auf Discord"
   }
 }

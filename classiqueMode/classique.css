@@ -266,6 +266,21 @@
   pointer-events: none;
 }
 
+/* Dernière colonne (« Jeu ») : centrée, la bulle dépassait du bord droit — et,
+   même cachée (visibility: hidden), elle élargissait la page à 1 309 px sur un
+   écran de 1 280 (2.4, lot 13). Ancrée à droite, elle reste dans l'écran. */
+.tooltip:last-child .tooltip-text {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+.tooltip:last-child .tooltip-text::after {
+  left: auto;
+  right: 14px;
+  transform: none;
+}
+
 /* Affiche la tooltip au survol */
 .tooltip:hover .tooltip-text {
   visibility: visible;

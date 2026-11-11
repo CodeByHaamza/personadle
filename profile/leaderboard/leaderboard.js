@@ -16,6 +16,8 @@
  *   - window.__i18nReady     (injecté par i18n.js)
  */
 
+import { deltaBadge, rankDelta, takeBaseline, viewKey } from "./rank_delta.js";
+
 const PAGE_SIZE = 50;
 
 // ─────────────────────────────────────────────────────────
@@ -31,6 +33,9 @@ const filters = {
   // tirage, autre barème, et un taux de victoire sans commune mesure — les
   // mélanger ne décrirait ni l'un ni l'autre.
   expert: false,
+  // Parties comptées (2.4, lot 16) : "daily" | "all", ou null = défaut du serveur
+  // (PERSONADLE_LEADERBOARD_DEFAULT_SCOPE). La réponse dit ce qui a été servi.
+  counts: null,
   // Troisième dimension (2.3), et la seule qui change la NATURE de la ligne :
   // on n'y classe plus des joueurs mais des AMITIÉS. Mode, période et métrique
   // n'ont alors aucun sens — leurs groupes sont masqués.
@@ -66,6 +71,20 @@ function t(key) {
  * amitié très active dépasse largement les 2 700 du rang 10, et « 18450 XP » ne
  * se lit plus. Même logique que `fmtXp()` dans js/social-link.js.
  */
+/** t() avec variables et vrai repli (CLAUDE.md §5). */
+function tv(key, fallback, vars) {
+  const r = window.i18n?.t?.(key, vars);
+  return r != null && r !== key ? r : fallback;
+}
+
+/** Référence des rangs de la dernière visite pour la vue affichée (rank_delta.js). */
+let _baseline = null;
+
+/** Pastille ▲▼ d'une entrée, ou chaîne vide. */
+function deltaFor(entry) {
+  return deltaBadge(rankDelta(_baseline, entry.user_id, entry.rank), tv);
+}
+
 function fmtXp(n) {
   const v = Number(n) || 0;
   try {
@@ -174,13 +193,20 @@ function renderFilterNote() {
   // (cf. api/lib/leaderboard_metrics.php). Sans cette phrase, le joueur voit une
   // page vide et conclut à une panne — c'est le même réflexe que le texte qui
   // explique pourquoi la liste d'amis est plus courte en défi Expert.
+  // Ce que « parties du jour » veut dire, une fois : sans ça, un joueur qui
+  // rejoue beaucoup se demande pourquoi son total a fondu (2.4, lot 16).
+  const countsNote =
+    filters.counts === "all"
+      ? t("leaderboard.counts_all_note") || "Every game counts, replays included."
+      : t("leaderboard.counts_daily_note") ||
+        "Only the first game of each mode, each day, counts — replaying doesn't climb.";
   const streakNote =
     filters.expert && filters.metric === "streak"
       ? esc(
           t("leaderboard.expert_no_streak") ||
             "Best streak has no Expert ranking: a streak counts consecutive days, and Expert is not a daily run."
         )
-      : note;
+      : `${esc(countsNote)} ${note}`;
 
   el.innerHTML = `
     <span class="lb-fn-chips">
@@ -244,7 +270,7 @@ function renderPodium(top, myId) {
                    alt="${esc(entry.pseudo)}"
                    loading="lazy" ${border}
                    onerror="this.src='../../img/default_avatar.png'">
-              <span class="lb-podium-name">${esc(entry.pseudo)}</span>
+              <span class="lb-podium-name">${esc(entry.pseudo)}${deltaFor({ ...entry, rank })}</span>
               <span class="lb-podium-score">${esc(formatScore(entry))}</span>
               <span class="lb-podium-sub">${
                 entry.total_games ? esc(gamesLabel(entry.total_games)) : esc(metricLabel())
@@ -283,7 +309,7 @@ function renderRow(entry, myId) {
            ${borderStyle}
            onerror="this.src='../../img/default_avatar.png'">
       <div class="lb-info">
-        <div class="lb-pseudo">${esc(entry.pseudo)}</div>
+        <div class="lb-pseudo">${esc(entry.pseudo)}${deltaFor({ ...entry, rank })}</div>
         <div class="lb-sub">${
           entry.total_games ? esc(gamesLabel(entry.total_games)) : esc(metricLabel())
         }</div>
@@ -304,11 +330,39 @@ function renderMyRank(myRank) {
     return;
   }
 
+  const myId = window._currentUser?.id ?? null;
   banner.innerHTML = `
     <span class="lb-my-rank__rank">#${myRank.rank}</span>
-    <span>${t("leaderboard.your_rank") || "Your rank"} — <strong>${esc(formatScore(myRank))}</strong> ${metricLabel()}</span>
+    <span class="lb-my-rank__text">${t("leaderboard.your_rank") || "Your rank"} — <strong>${esc(formatScore(myRank))}</strong> ${metricLabel()}${deltaFor({ user_id: myId, rank: myRank.rank })}</span>
   `;
   banner.classList.remove("hidden");
+
+  // « Ta place » reste épinglée en haut de la liste (2.4, lot 15). Si ta ligne est
+  // sur cette page, la toucher t'y ramène.
+  const mine = document.querySelector("#leaderboardBody .lb-row--me, #leaderboardBody .lb-podium-card--me");
+  banner.classList.toggle("lb-my-rank--jump", !!mine);
+  banner.onclick = mine
+    ? () => {
+        mine.scrollIntoView({ behavior: "smooth", block: "center" });
+        mine.classList.remove("lb-flash");
+        void mine.offsetWidth; // relance l'animation
+        mine.classList.add("lb-flash");
+      }
+    : null;
+  if (mine) {
+    banner.setAttribute("role", "button");
+    banner.tabIndex = 0;
+    banner.onkeydown = (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        banner.onclick?.();
+      }
+    };
+  } else {
+    banner.removeAttribute("role");
+    banner.removeAttribute("tabindex");
+    banner.onkeydown = null;
+  }
 }
 
 /** Affiche le corps du leaderboard. */
@@ -458,6 +512,12 @@ function renderLeaderboard(data) {
     return;
   }
 
+  // ▲▼ depuis la dernière visite (rank_delta.js) : la référence est lue AVANT le
+  // rendu, et remplacée seulement depuis la première page.
+  const rows = entries.map((e, i) => ({ user_id: e.user_id, rank: e.rank ?? filters.offset + i + 1 }));
+  if (myId && data.my_rank?.rank) rows.push({ user_id: myId, rank: data.my_rank.rank });
+  _baseline = takeBaseline(viewKey(filters), rows, { write: filters.offset === 0 });
+
   // Podium sur la première page seulement, et seulement s'il y a un vrai top 3.
   const podium = filters.offset === 0 && entries.length >= 3;
   let html = podium ? renderPodium(entries.slice(0, 3), myId) : "";
@@ -540,8 +600,19 @@ async function loadLeaderboard() {
       offset: filters.offset,
       friends_only: filters.friendsOnly ? 1 : 0,
       expert: filters.expert ? 1 : 0,
+      ...(filters.counts ? { scope: filters.counts } : {}),
       ...(filters.bonds ? { view: "bonds" } : {}),
     });
+
+    // La pastille suit la vue réellement servie (défaut du serveur compris).
+    if (!filters.bonds && data.scope) {
+      const countsGroup = document.getElementById("countsFilter");
+      if (countsGroup) activatePill(countsGroup, data.scope);
+      if (filters.counts !== data.scope) {
+        filters.counts = data.scope;
+        renderFilterNote();
+      }
+    }
 
     if (filters.bonds) {
       renderBonds(data);
@@ -628,9 +699,19 @@ function attachFilterListeners() {
       ?.classList.toggle("lb-filters-card--expert", filters.expert);
     // Les filtres sans objet pour les amitiés sont MASQUÉS, pas désactivés : un
     // groupe grisé laisse croire qu'il s'appliquera peut-être.
-    for (const id of ["modeFilter", "periodFilter", "metricFilter"]) {
+    for (const id of ["modeFilter", "periodFilter", "metricFilter", "countsFilter"]) {
       document.getElementById(id)?.closest(".lb-filter-group")?.classList.toggle("hidden", filters.bonds);
     }
+    loadLeaderboard();
+  });
+
+  const countsGroup = document.getElementById("countsFilter");
+  countsGroup?.addEventListener("click", (e) => {
+    const pill = e.target.closest(".lb-pill");
+    if (!pill) return;
+    filters.counts = pill.dataset.value;
+    filters.offset = 0;
+    activatePill(countsGroup, filters.counts);
     loadLeaderboard();
   });
 

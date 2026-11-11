@@ -8,7 +8,7 @@
 
 Ce dossier regroupe les pages qui cohabitaient auparavant à la racine du projet à côté de la
 config (`package.json`, `.htaccess`…). Déplacées ici le 2026-07-05 pour clarifier l'arborescence
-(cf. `AMELIORATIONS.md` #6).
+(cf. `docs/archive/audits_2026.md` #6).
 
 ## Contenu
 

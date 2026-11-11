@@ -37,6 +37,7 @@ import {
 
 // Collapsible opus filter panel (shared across all modes)
 import { initFilterMenu } from "../js/filterMenu.js";
+import { createMidGameFilterGuard } from "../js/filter_guard.js";
 import { closeAutocompleteList, removeFromAutocomplete } from "../js/autocomplete.js";
 import { checkChallengeCompletion } from "../js/challenge-result.js";
 import { trackUniqueDay } from "../profile/badges/badgesManager.js";
@@ -723,6 +724,24 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   // Synchronise activeOpus avec ce qu'initFilterMenu a chargé depuis localStorage
   activeOpus = _filterApi.getActive();
+  // Changer de filtre en cours de partie = abandon, après avertissement (2.4,
+  // lot 12, js/filter_guard.js) : sinon on esquivait une cible ratée sans que
+  // l'abandon compte.
+  _filterApi.setBeforeChange(
+    createMidGameFilterGuard({
+      scope: STATS_SCOPE,
+      modeKey: "classic",
+      sessionMode: modeName,
+      isExpert: EXPERT.isExpert,
+      getState: () => ({
+        attempts,
+        gameOver,
+        targetName: target?.nom ?? null,
+        filters: activeOpus,
+        startedAt: sessionStartTime,
+      }),
+    })
+  );
 
   filterCharacterPool();
   // Lié une seule fois — filterCharacterPool() mute `personas` en place,

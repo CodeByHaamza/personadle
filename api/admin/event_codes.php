@@ -1,7 +1,7 @@
 <?php
 /**
  * GET    /api/admin/event_codes          → liste tous les codes + stats usage
- * POST   /api/admin/event_codes          → créer un nouveau code
+ * POST   /api/admin/event_codes          → créer un nouveau code (badge, titre ou les deux)
  * PATCH  /api/admin/event_codes/:code    → modifier (is_active, dates, description)
  * DELETE /api/admin/event_codes/:code    → supprimer un code
  */
@@ -22,7 +22,7 @@ $isCollection = ($codeParam === 'EVENT_CODES' || $codeParam === '');
 // ── GET — liste + stats ──────────────────────────────────────────────────────
 if ($method === 'GET') {
     $stmt = $pdo->query(
-        'SELECT ec.code, ec.badge_id, ec.start_date, ec.end_date,
+        'SELECT ec.code, ec.badge_id, ec.title_slug, ec.start_date, ec.end_date,
                 ec.is_permanent, ec.is_active, ec.description, ec.created_at,
                 COUNT(ecr.id) AS redemption_count
          FROM event_codes ec
@@ -38,7 +38,8 @@ if ($method === 'POST') {
     $data = getJsonBody();
 
     $code        = strtoupper(trim($data['code']        ?? ''));
-    $badgeId     = trim($data['badge_id']               ?? '');
+    $badgeId     = trim((string) ($data['badge_id']     ?? ''));
+    $titleSlug   = trim((string) ($data['title_slug']   ?? ''));
     $description = trim($data['description']            ?? '');
     $isPermanent = (int) (bool) ($data['is_permanent']  ?? false);
     $isActive    = (int) (bool) ($data['is_active']     ?? true);
@@ -48,11 +49,20 @@ if ($method === 'POST') {
     if ($codeError = personadle_validate_event_code($code)) {
         jsonError($codeError, 400);
     }
-    if (!$badgeId || strlen($badgeId) > 100) jsonError('badge_id invalide', 400);
+    // Un badge, un titre (migration 057), ou les deux — au moins l'un des deux.
+    if ($badgeId === '' && $titleSlug === '') jsonError('Choisis un badge, un titre, ou les deux', 400);
+    if (strlen($badgeId) > 100 || strlen($titleSlug) > 100) jsonError('Slug trop long', 400);
 
-    $badgeCheck = $pdo->prepare('SELECT slug FROM badges WHERE slug = ? LIMIT 1');
-    $badgeCheck->execute([$badgeId]);
-    if (!$badgeCheck->fetch()) jsonError('Badge introuvable dans le catalogue (vérifie le slug exact)', 400);
+    if ($badgeId !== '') {
+        $badgeCheck = $pdo->prepare('SELECT slug FROM badges WHERE slug = ? LIMIT 1');
+        $badgeCheck->execute([$badgeId]);
+        if (!$badgeCheck->fetch()) jsonError('Badge introuvable dans le catalogue (vérifie le slug exact)', 400);
+    }
+    if ($titleSlug !== '') {
+        $titleCheck = $pdo->prepare('SELECT slug FROM titles WHERE slug = ? LIMIT 1');
+        $titleCheck->execute([$titleSlug]);
+        if (!$titleCheck->fetch()) jsonError('Titre introuvable dans le catalogue (vérifie le slug exact)', 400);
+    }
 
     if (!$isPermanent && (!$startDate || !$endDate)) {
         jsonError('start_date et end_date requis pour un code non permanent', 400);
@@ -63,11 +73,12 @@ if ($method === 'POST') {
     if ($check->fetch()) jsonError('Code déjà existant', 409);
 
     $pdo->prepare(
-        'INSERT INTO event_codes (code, badge_id, start_date, end_date, is_permanent, is_active, description)
-         VALUES (?, ?, ?, ?, ?, ?, ?)'
+        'INSERT INTO event_codes (code, badge_id, title_slug, start_date, end_date, is_permanent, is_active, description)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
     )->execute([
         $code,
-        $badgeId,
+        $badgeId !== '' ? $badgeId : null,
+        $titleSlug !== '' ? $titleSlug : null,
         $isPermanent ? null : ($startDate ?: null),
         $isPermanent ? null : ($endDate   ?: null),
         $isPermanent,
@@ -76,7 +87,8 @@ if ($method === 'POST') {
     ]);
 
     personadle_log_admin_action($pdo, $adminId, 'event_code.create', 'event_code', $code, [
-        'badge_id' => $badgeId,
+        'badge_id' => $badgeId !== '' ? $badgeId : null,
+        'title_slug' => $titleSlug !== '' ? $titleSlug : null,
         'is_permanent' => (bool) $isPermanent,
         'is_active' => (bool) $isActive,
         'start_date' => $startDate ?: null,

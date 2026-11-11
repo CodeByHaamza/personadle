@@ -682,6 +682,7 @@ CREATE TABLE game_sessions (
     user_id         BIGINT UNSIGNED  NOT NULL,
     mode            VARCHAR(30)      NOT NULL,
     is_expert       TINYINT(1)       NOT NULL DEFAULT 0,  -- 1 = partie en Mode Expert (migration 031)
+    is_daily        TINYINT(1)       NOT NULL DEFAULT 0,  -- 1 = 1re partie du jour du mode/dimension (migration 058)
     client_session_id CHAR(36)       NULL,                -- clé d'idempotence client (migration 032)
     played_date     DATE             NOT NULL,   -- date Paris (Europe/Paris)
     target_name     VARCHAR(200)     NOT NULL,
@@ -706,6 +707,7 @@ CREATE INDEX idx_game_sessions_date      ON game_sessions(played_date);
 CREATE INDEX idx_game_sessions_target    ON game_sessions(mode, played_date, target_name);
 CREATE INDEX idx_game_sessions_user_mode_expert ON game_sessions(user_id, mode, is_expert);
 CREATE INDEX idx_session_per_day ON game_sessions(user_id, mode, played_date, is_expert);
+CREATE INDEX idx_game_sessions_daily ON game_sessions(is_daily, played_date);
 
 
 -- =============================================================================
@@ -793,9 +795,11 @@ CREATE TABLE event_codes_redeemed (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Catalogue des codes événement (migration 011 ; api/admin/event_codes + redeem).
+-- Un code accorde un badge, un titre (migration 057), ou les deux.
 CREATE TABLE event_codes (
     code         VARCHAR(50)   NOT NULL,
-    badge_id     VARCHAR(100)  NOT NULL,
+    badge_id     VARCHAR(100)  NULL,
+    title_slug   VARCHAR(100)  NULL,
     start_date   DATE          NULL,
     end_date     DATE          NULL,
     is_permanent TINYINT(1)    NOT NULL DEFAULT 0,

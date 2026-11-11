@@ -1,41 +1,43 @@
-<p align="center">
-  <img src="./img/New_Logo_PersonaDLE.png" alt="PersonaDLE" width="640">
-</p>
+<div align="center">
 
-<h3 align="center">A daily guessing game set in the Persona universe — from Persona 1 to Persona 5X.</h3>
+<img src="./img/readme/banner.svg" width="100%" alt="PersonaDLE — the daily guessing game">
 
-<p align="center">
-  <a href="https://personadle.net"><img src="https://img.shields.io/badge/▶%20Play-personadle.net-E60012?style=for-the-badge" alt="Play at personadle.net"></a>
-  <a href="https://github.com/CodeByHaamza/personadle/releases"><img src="https://img.shields.io/github/v/release/CodeByHaamza/personadle?style=for-the-badge&label=Release&color=1E3A8A" alt="Latest release"></a>
-  <a href="https://github.com/CodeByHaamza/personadle/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/CodeByHaamza/personadle/ci.yml?branch=develop&style=for-the-badge&label=CI" alt="CI"></a>
-  <img src="https://img.shields.io/badge/Tests-1678%20passing-2ECC71?style=for-the-badge&logo=vitest&logoColor=white" alt="Tests">
-  <a href="LICENSE.txt"><img src="https://img.shields.io/badge/License-MIT%20(code)-blue?style=for-the-badge" alt="MIT (code only)"></a>
-</p>
+<img src="./img/readme/quotes.svg" width="100%" alt="I am thou, thou art I...">
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Vanilla%20JS-no%20framework-F7DF1E?style=flat-square&logo=javascript&logoColor=black" alt="Vanilla JS">
-  <img src="https://img.shields.io/badge/PHP%208.2-PDO-8892BF?style=flat-square&logo=php&logoColor=white" alt="PHP 8.2">
-  <img src="https://img.shields.io/badge/MariaDB-31%20tables-003545?style=flat-square&logo=mariadb&logoColor=white" alt="MariaDB">
-  <img src="https://img.shields.io/badge/i18n-EN%20FR%20ES%20DE%20IT%20PT-8E44AD?style=flat-square" alt="6 languages">
-  <a href="https://discord.gg/wpMdGGDp3y"><img src="https://img.shields.io/badge/Discord-join%20the%20Velvet%20Room-5865F2?style=flat-square&logo=discord&logoColor=white" alt="Discord"></a>
-</p>
+[![Play](https://img.shields.io/badge/▶%20play-personadle.net-E60012?style=for-the-badge&labelColor=0D0D0D)](https://personadle.net)
+[![Release](https://img.shields.io/github/v/release/CodeByHaamza/personadle?style=for-the-badge&label=release&color=E60012&labelColor=0D0D0D)](https://github.com/CodeByHaamza/personadle/releases)
+[![CI](https://img.shields.io/github/actions/workflow/status/CodeByHaamza/personadle/ci.yml?branch=develop&style=for-the-badge&label=CI&labelColor=0D0D0D)](https://github.com/CodeByHaamza/personadle/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/Tests-1719%20passing-FFFFFF?style=for-the-badge&logo=vitest&logoColor=white&labelColor=0D0D0D)](tests/README.md)
+[![Discord](https://img.shields.io/badge/Discord-the%20Velvet%20Room-5865F2?style=for-the-badge&logo=discord&logoColor=white&labelColor=0D0D0D)](https://discord.gg/wpMdGGDp3y)
+[![License](https://img.shields.io/badge/code-MIT-FFFFFF?style=for-the-badge&labelColor=0D0D0D)](LICENSE.txt)
 
-<p align="center">
-  <a href="#-play">Play</a> ·
-  <a href="#-six-modes-twelve-ways-to-play">Modes</a> ·
-  <a href="#-features">Features</a> ·
-  <a href="#-whats-new">What's new</a> ·
-  <a href="#-under-the-hood">Under the hood</a> ·
-  <a href="#-run-it-locally">Run it locally</a> ·
-  <a href="#-community">Community</a> ·
-  <a href="#-credits">Credits</a>
-</p>
+### Guess today's Persona character.
 
-<p align="center">
-  <img src="./img/preview/home.png" alt="PersonaDLE home — six game modes" width="820">
-</p>
+**Six modes**, a **new target every day** at midnight (Paris time), from *Persona 1* to *Persona 5X*.<br>
+*Classic · Emoji · Silhouette · All-Out Attack · Personae · Music* — each with its **Expert** twin.
 
----
+![Vanilla JS](https://img.shields.io/badge/Vanilla%20JS-no%20framework-F7DF1E?style=flat-square&logo=javascript&logoColor=black&labelColor=0D0D0D)
+![PHP](https://img.shields.io/badge/PHP%208.2-PDO-8892BF?style=flat-square&logo=php&logoColor=white&labelColor=0D0D0D)
+![MariaDB](https://img.shields.io/badge/MariaDB-31%20tables-003545?style=flat-square&logo=mariadb&logoColor=white&labelColor=0D0D0D)
+![i18n](https://img.shields.io/badge/i18n-EN%20FR%20ES%20DE%20IT%20PT-E60012?style=flat-square&labelColor=0D0D0D)
+
+<br>
+
+<img src="./img/preview/home.png" width="88%" alt="PersonaDLE home — six game modes">
+
+<br>
+
+[**▶ Play**](#-play) &nbsp;·&nbsp;
+[**🎯 Modes**](#-six-modes-twelve-ways-to-play) &nbsp;·&nbsp;
+[**✨ Features**](#-features) &nbsp;·&nbsp;
+[**🆕 What's new**](#-whats-new) &nbsp;·&nbsp;
+[**🛠️ Under the hood**](#️-under-the-hood) &nbsp;·&nbsp;
+[**🧑‍💻 Run it locally**](#-run-it-locally) &nbsp;·&nbsp;
+[**💬 Community**](#-community)
+
+</div>
+
+<img src="./img/readme/divider.svg" width="100%" alt="">
 
 ## 🎮 Play
 
@@ -45,14 +47,16 @@ compare with your friends, keep your streak alive.
 1. Open **[personadle.net](https://personadle.net)** — no install, no account required.
 2. Pick a mode. Type a name; the autocomplete shows portraits.
 3. Every guess reveals something. Find the answer, or **give up** to see it.
-4. **Replay** as many times as you like — every game counts toward your stats.
+4. **Replay** as many times as you like — every game counts toward your stats; the main leaderboard counts each mode's first game of the day.
 5. Create a free account to sync across devices, add friends, climb the leaderboard and unlock badges.
 
 > 🇫🇷 🇪🇸 🇩🇪 🇮🇹 🇵🇹 The whole game is available in six languages, auto-detected from your browser.
 
----
+<img src="./img/readme/divider.svg" width="100%" alt="">
 
 ## 🎯 Six modes, twelve ways to play
+
+<img src="./img/readme/band_modes.svg" width="100%" alt="Six modes — twelve ways to play">
 
 <table>
   <tr>
@@ -71,9 +75,11 @@ compare with your friends, keep your streak alive.
 one _lying_ emoji, a flash you trigger yourself, a frozen black-and-white blur, lyrics without audio,
 the Persona's real myth with its name masked. Expert keeps its own targets, stats and leaderboard.
 
----
+<img src="./img/readme/divider.svg" width="100%" alt="">
 
 ## ✨ Features
+
+<img src="./img/readme/band_features.svg" width="100%" alt="Features">
 
 <table>
   <tr>
@@ -108,7 +114,7 @@ the Persona's real myth with its name masked. Expert keeps its own targets, stat
 </table>
 </details>
 
----
+<img src="./img/readme/divider.svg" width="100%" alt="">
 
 ## 🆕 What's new
 
@@ -139,7 +145,7 @@ the Persona's real myth with its name masked. Expert keeps its own targets, stat
 📖 Player changelogs: [2.3](./PersonaDLE_Update_Documentation/PersonaDLE%202.3/PersonaDLE_Update.html) · [2.2](./PersonaDLE_Update_Documentation/PersonaDLE%202.2/PersonaDLE_Update.html) · [2.1](./PersonaDLE_Update_Documentation/PersonaDLE%202.1/PersonaDLE_Update.html) ·
 🔧 Dev changelogs: [2.3](./PersonaDLE_Update_Documentation/PersonaDLE%202.3/DEV_CHANGELOG.md) · [2.2](./PersonaDLE_Update_Documentation/PersonaDLE%202.2/DEV_CHANGELOG.md) · [2.1](./PersonaDLE_Update_Documentation/PersonaDLE%202.1/DEV_CHANGELOG.md) · [2.0](./PersonaDLE_Update_Documentation/PersonaDLE%202.0/DEV_CHANGELOG.md)
 
----
+<img src="./img/readme/divider.svg" width="100%" alt="">
 
 ## 🛠️ Under the hood
 
@@ -159,8 +165,8 @@ Service worker              Cron: leaderboard cache, Discord daily & weekly post
 | ------------- | ------------------------------------------------------------------------------------------------- |
 | **Front end** | HTML5 · CSS3 (one file per component, dark mode) · Vanilla JavaScript ES6+                        |
 | **Back end**  | PHP 8.2 REST API — `GET/POST/PATCH/DELETE /api/{resource}`, JSON, proper status codes             |
-| **Database**  | MariaDB 10.6+ / MySQL 8.0 — 31-table relational schema, 1678+ unit tests keep the contract honest |
-| **i18n**      | EN · FR · ES · DE · IT · PT (1338 keys each), `en.json` is the source of truth                    |
+| **Database**  | MariaDB 10.6+ / MySQL 8.0 — 31-table relational schema, 1719+ unit tests keep the contract honest |
+| **i18n**      | EN · FR · ES · DE · IT · PT (1366 keys each), `en.json` is the source of truth                    |
 | **Hosting**   | Hostinger, auto-deploy on push to `main`; SQL migrations applied by hand _before_ the merge       |
 
 ### Quality gates
@@ -168,16 +174,16 @@ Service worker              Cron: leaderboard cache, Discord daily & weekly post
 Every pull request runs the whole thing; `main` only receives releases from `develop`.
 
 ```
-Vitest + jsdom → 1678 tests unitaires (logique de jeu, backend, streak, i18n, validation données)
+Vitest + jsdom → 1719 tests unitaires (logique de jeu, backend, streak, i18n, validation données)
 PHPUnit        → tests de logique pure + intégration DB (contrat de schéma)
-Playwright     → 342 E2E sur la stack Docker complète (smoke, API, Social Link)
+Playwright     → 346 E2E sur la stack Docker complète (smoke, API, Social Link)
 PHPStan        → analyse statique PHP niveau 5 · Psalm → taint analysis
 ESLint+Prettier→ lint + format · i18n / data / daily-pool consistency checks
 ```
 
 Supported browsers: Chrome 90+, Firefox 88+, Safari 14+ (iOS 14+), Edge 90+.
 
----
+<img src="./img/readme/divider.svg" width="100%" alt="">
 
 ## 🧑‍💻 Run it locally
 
@@ -186,7 +192,7 @@ git clone https://github.com/CodeByHaamza/personadle.git && cd personadle
 npm install
 
 make up          # MariaDB + PHP + phpMyAdmin in Docker, schema and seed loaded → http://localhost:8080
-npm test         # 1678 unit tests
+npm test         # 1719 unit tests
 make test-php    # PHPUnit, inside the container
 npm run test:e2e # Playwright against the Docker stack
 make check       # lint + data + i18n + doc numbers + daily pools
@@ -196,15 +202,17 @@ Where to read next: **[CONTRIBUTING.md](CONTRIBUTING.md)** (branches, convention
 **[DEPLOY.md](DEPLOY.md)** (release procedure, migrations) · **[ROADMAP.md](ROADMAP.md)** (what's next) ·
 **[tests/README.md](tests/README.md)** and **[tests-e2e/README.md](tests-e2e/README.md)** (the test pyramid).
 
----
+<img src="./img/readme/divider.svg" width="100%" alt="">
 
 ## 💬 Community
+
+<img src="./img/readme/band_community.svg" width="100%" alt="Community — join the Velvet Room">
 
 - **Discord — PersonaDLE** · [discord.gg/wpMdGGDp3y](https://discord.gg/wpMdGGDp3y): daily puzzle announcements, weekly top 3, the Velvet Room Arcana test, profile gallery, bug reports and ideas (one thread each — every thread gets a status).
 - **Discord — Le Grimoire du Cœur** · [discord.gg/CfR8UHXTAE](https://discord.gg/CfR8UHXTAE): our French partner server, the most active.
 - **Bugs & ideas** · [GitHub issues](https://github.com/CodeByHaamza/personadle/issues) work too.
 
----
+<img src="./img/readme/divider.svg" width="100%" alt="">
 
 ## 👥 Credits
 
@@ -248,7 +256,7 @@ PersonaDLE started as a small team in spring 2025. These people shaped its early
 - The **[Megami Tensei Wiki](https://megamitensei.fandom.com/)** for character data, r/persona4golden and both Discord servers for testing and endless feedback.
 - **Atlus / SEGA** for the universe, **Shoji Meguro** for the music.
 
----
+<img src="./img/readme/divider.svg" width="100%" alt="">
 
 ## ⚖️ License & disclaimer
 
@@ -265,7 +273,7 @@ honoured.
 free, we didn't have the budget to commission artists; we deeply respect them and would prioritise
 working with human artists if PersonaDLE ever received support.</sub>
 
----
+<img src="./img/readme/divider.svg" width="100%" alt="">
 
 <p align="center">
   <strong>"I am thou, thou art I… And together, we'll reach the truth."</strong><br>

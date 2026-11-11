@@ -31,6 +31,7 @@ import {
 
 // Collapsible opus filter panel (shared across all modes)
 import { initFilterMenu } from "../js/filterMenu.js";
+import { createMidGameFilterGuard } from "../js/filter_guard.js";
 import { checkChallengeCompletion } from "../js/challenge-result.js";
 import { closeAutocompleteList, removeFromAutocomplete } from "../js/autocomplete.js";
 import { checkUnlocksAfterGame } from "../js/unlock-notify.js";
@@ -844,6 +845,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     resetGame();
   });
   activeOpusFilters = _filterApi.getActive();
+  // Changer de filtre en cours de partie = abandon, après avertissement (2.4,
+  // lot 12, js/filter_guard.js) : sinon on esquivait une cible ratée sans que
+  // l'abandon compte.
+  _filterApi.setBeforeChange(
+    createMidGameFilterGuard({
+      scope: STATS_SCOPE,
+      modeKey: "alloutattack",
+      sessionMode: "AllOutAttack",
+    statsMode: "All Out Attack",
+      isExpert: EXPERT.isExpert,
+      getState: () => ({
+        attempts,
+        gameOver,
+        targetName: target ?? null,
+        filters: activeOpusFilters,
+        startedAt: sessionStartTime,
+      }),
+    })
+  );
 
   personas = getFilteredPersonas();
   setTimeout(() => smartPreload(personas, "low"), 1500);

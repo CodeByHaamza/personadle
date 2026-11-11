@@ -49,7 +49,9 @@
     "expert_cond_unknown": "Reconnect to check your progress.",
     "expert_locked_title": "Expert mode locked",
     "expert_unlocked_title": "Expert mode unlocked!",
-    "expert_unlocked_hint": "The ⚡ button is yours now."
+    "expert_unlocked_hint": "The ⚡ button is yours now.",
+    "filter_midgame_confirm": "Changing filters now ends this game: it will count as a give-up in your stats. Change anyway?",
+    "filter_midgame_done": "Game counted as a give-up — it was {{target}}."
   },
   "modes": {
     "classic": {
@@ -376,6 +378,7 @@
     "share_download": "Download PNG",
     "share_on_x": "Share on X",
     "share_discord": "Copy for Discord",
+    "share_open_server": "Open the PersonaDLE Discord server →",
     "share_email": "Email",
     "theme_custom": "Custom color",
     "friend_code_copy_hint": "Click to copy your friend code",
@@ -385,7 +388,8 @@
     "about_badges_title": "About Our Badges",
     "about_badges_text": "Hey! Just wanted to be transparent – these badges were made with AI help. We're just students working on this passion project for free in our spare time, and honestly, we didn't have the budget or time to commission an artist. We absolutely respect human artists and would love to work with one someday if we get the chance! This was purely out of necessity, not preference. Thanks for understanding and for playing! ❤️",
     "event_code_title": "Event Code",
-    "event_code_desc": "Enter a valid code to unlock an exclusive badge!",
+    "event_code_desc": "Event codes unlock exclusive badges and titles. They're posted on our Discord.",
+    "event_code_discord": "Get the codes on Discord →",
     "share_btn": "Share My Profile",
     "copy_link": "Copy link",
     "link_copied": "Link copied!",
@@ -439,7 +443,19 @@
     "delete_account_login_required": "Log in to delete your account.",
     "expert_title": "⚡ Expert Mode",
     "expert_cols": "Won / Played · Rate · Best · Streak",
-    "expert_best_hint": "Fewest guesses in a win"
+    "expert_best_hint": "Fewest guesses in a win",
+    "next_unlocks_title": "Almost there",
+    "next_unlocks_expert": "Expert mode — {{mode}}",
+    "next_unlocks_kind_badge": "Badge",
+    "next_unlocks_kind_title": "Title",
+    "next_unlocks_kind_expert": "Expert",
+    "title_unlocked_notif": "🏅 Title Unlocked!",
+    "wallpaper_unlocked_notif": "🖼️ Wallpaper Unlocked!",
+    "guest_name": "Guest",
+    "guest_account_pitch": "Free. Your streak, stats and badges follow you on every device, and you can add friends, send them challenges and enter the leaderboard.",
+    "pseudo_placeholder": "Enter username…",
+    "song_artwork_alt": "Song artwork",
+    "song_remove": "Remove"
   },
   "badges": {
     "notification_title": "🎖️ Badge Unlocked!",
@@ -452,6 +468,8 @@
     "event_code_placeholder": "Enter event code...",
     "event_code_submit": "Redeem",
     "event_code_success": "Code redeemed! Badge unlocked.",
+    "event_code_title_success": "🎉 Code redeemed! A new title is waiting in your titles.",
+    "event_code_both_success": "🎉 Code redeemed! Badge and title unlocked.",
     "event_code_error": "Invalid or already used code.",
     "ace_detective": {
       "name": "Ace Detective",
@@ -963,7 +981,14 @@
     "scope_friends": "Friends",
     "login_for_friends": "Log in to see your friends leaderboard.",
     "no_friends": "None of your friends appear in this ranking yet.",
-    "expert_no_streak": "Best streak has no Expert ranking: a streak counts consecutive days, and Expert is not a daily run."
+    "expert_no_streak": "Best streak has no Expert ranking: a streak counts consecutive days, and Expert is not a daily run.",
+    "rank_up": "Up {{n}} since your last visit",
+    "rank_down": "Down {{n}} since your last visit",
+    "filter_counts": "Games counted",
+    "counts_daily": "Daily games",
+    "counts_all": "All games",
+    "counts_daily_note": "Only the first game of each mode, each day, counts — replaying doesn't climb.",
+    "counts_all_note": "Every game counts, replays included."
   },
   "friends": {
     "title": "Friends",
@@ -1060,7 +1085,7 @@
     "danger_intro": "These two are irreversible. Export your profile first if you are unsure."
   },
   "index": {
-    "main_title": "Try to guess the Persona character (Persona 1 to Persona 5)",
+    "main_title": "Guess the Persona character of the day, from Persona 1 to Persona 5X",
     "update_history": "Update History",
     "changelog_button": "See full Changelog",
     "copyright": "personadle.net — 2026",
@@ -1072,8 +1097,8 @@
     "discord_modal_sub": "Two servers, one Persona family.",
     "discord_grimoire_tag": "🇫🇷 French server",
     "discord_grimoire_desc": "Our French-speaking partner community — the most active. Events, discussions and the whole Persona FR scene.",
-    "discord_personadle_tag": "🌍 International",
-    "discord_personadle_desc": "The official PersonaDLE server — always active, English-friendly. Bug reports, feedback, and we're recruiting!",
+    "discord_personadle_tag": "⭐ Official · 🌍 International",
+    "discord_personadle_desc": "The official PersonaDLE server: post your grids, report bugs, share feedback — and we're recruiting!",
     "discord_join": "Join",
     "daily_btn": "🕛 Daily Reset",
     "daily_title": "🕛 Daily Reset",
@@ -1534,7 +1559,9 @@
     "failed": "Couldn't copy the result.",
     "one_try": "✅ First try!",
     "tries": "✅ {{count}} tries",
-    "gave_up": "🏳️ Gave up after {{count}} tries"
+    "gave_up": "🏳️ Gave up after {{count}} tries",
+    "day_button": "Share my day",
+    "day_copied": "Your day is copied — paste it anywhere!"
   },
   "reset_password": {
     "title": "🔐 Reset your password",
@@ -1577,6 +1604,7 @@
     "play_todo": "To play",
     "play_left": "{{count}} left today",
     "play_all_done": "All modes played today",
-    "home_status_done": "Played today"
+    "home_status_done": "Played today",
+    "play_discord": "All done for today — come chat on Discord"
   }
 }

@@ -178,6 +178,16 @@ export const api = {
     expertStatus: () => get("/user/expert-status"),
 
     /**
+     * Les déblocages les plus proches (badges, titres, Modes Expert), classés par
+     * avancement — panneau « Prochains déblocages » du profil (2.4, lot 11).
+     * @param {string} lang
+     * @returns {Promise<{items: {kind: "badge"|"title"|"expert", slug: string, name: ?string,
+     *   image: ?string, description: ?string, condition_type: string, condition_mode: ?string,
+     *   current: number, required: number}[]}>}
+     */
+    nextUnlocks: (lang = "en") => get(`/user/next-unlocks?lang=${encodeURIComponent(lang)}`),
+
+    /**
      * Met à jour le profil (avatar, pseudo, thème, wallpaper…).
      * @param {number} userId
      * @param {object} data
@@ -443,10 +453,13 @@ export const api = {
       friends_only = 0,
       expert = 0,
       view = "",
+      scope = "",
     } = {}) =>
       get(
         `/leaderboard/?mode=${mode}&period=${period}&metric=${metric}&limit=${limit}&offset=${offset}` +
           `&friends_only=${friends_only}&expert=${expert}` +
+          // 'daily' | 'all' (2.4, lot 16) ; vide = choix par défaut du serveur.
+          (scope ? `&scope=${encodeURIComponent(scope)}` : "") +
           // `view=bonds` classe des AMITIÉS et non des joueurs : mode, période et
           // métrique y sont ignorés côté serveur, mais restent envoyés — la
           // signature de l'appel ne change pas selon la dimension choisie.

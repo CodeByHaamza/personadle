@@ -46,7 +46,7 @@ function _normalizeAvatar(avatar) {
  * Identifie la page courante d'après l'URL.
  * @returns {'home' | 'profile' | 'other'}
  */
-import { siteRootPrefix } from "./gameCore.js";
+import { DISCORD_INVITE_URL, siteRootPrefix } from "./gameCore.js";
 import { dailyProgress, MODE_ICON, modeHref } from "./daily_status.js";
 
 /** Traduction avec repli (CLAUDE.md §5 : t(key) rend la clé si elle manque). */
@@ -306,6 +306,18 @@ export function buildPlaySheetHTML(progress, currentPath = window.location.pathn
         <span class="play-sheet-count">${progress.done} / ${progress.total}</span>
       </h2>
       <div class="play-sheet-list">${items}</div>
+      ${
+        progress.total > 0 && progress.done >= progress.total
+          ? `<button type="button" class="play-sheet-share" data-play-share>
+               <span aria-hidden="true">📅</span>
+               <span>${_t("share.day_button", "Share my day")}</span>
+             </button>
+             <a class="play-sheet-discord" href="${DISCORD_INVITE_URL}" target="_blank" rel="noopener">
+               <span aria-hidden="true">💬</span>
+               <span>${_t("nav.play_discord", "All done for today — come chat on Discord")}</span>
+             </a>`
+          : ""
+      }
     </div>`;
 }
 
@@ -318,6 +330,7 @@ function _openPlaySheet() {
     document.body.appendChild(sheet);
     sheet.addEventListener("click", (e) => {
       if (e.target.closest("[data-play-close]")) _closePlaySheet();
+      if (e.target.closest("[data-play-share]")) _shareDay();
     });
   }
   const progress = dailyProgress();
@@ -329,6 +342,21 @@ function _openPlaySheet() {
     sheet.querySelector(".play-sheet-item:not(.is-done)") ?? sheet.querySelector(".play-sheet-item")
   )?.focus();
   document.addEventListener("keydown", _onSheetKey);
+}
+
+/** « Partager ma journée » depuis la feuille (2.4, lot 10) — modules chargés au clic. */
+async function _shareDay() {
+  try {
+    const [{ currentDayShareText }, { shareText }] = await Promise.all([
+      import("./share_day.js"),
+      import("./share_result.js"),
+    ]);
+    const outcome = await shareText(currentDayShareText());
+    if (outcome === "copied") showToast(_t("share.day_copied", "Your day is copied — paste it anywhere!"));
+    else if (outcome === "failed") showToast(_t("share.failed", "Couldn't copy the result."));
+  } catch {
+    /* module introuvable (hors ligne) : rien de cassé */
+  }
 }
 
 function _closePlaySheet() {

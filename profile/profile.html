@@ -354,6 +354,11 @@
               </div>
               <!-- État : non connecté -->
               <div id="authGuest" data-auth="anonymous" class="auth-guest">
+                <!-- 2.4, lot 13 : rien ne disait à un invité ce que le compte change. -->
+                <p class="auth-guest-pitch" data-i18n="profile.guest_account_pitch">
+                  Free. Your streak, stats and badges follow you on every device, and you can add
+                  friends, send them challenges and enter the leaderboard.
+                </p>
                 <button
                   id="btnOpenLogin"
                   data-open-modal="loginModal"
@@ -433,6 +438,25 @@
             </button>
           </div>
 
+          <!-- Card : Prochains déblocages (2.4, lot 11) — ce qui est presque là :
+               badges, titres et Modes Expert les plus avancés. Joueur connecté
+               seulement ; rempli par next_unlocks_ui.js, caché tant qu'il est vide.
+               SOUS les badges et non au-dessus : elle arrive après la synchro, et
+               posée plus haut elle faisait sauter la rangée des badges épinglés
+               pendant qu'on la visait. -->
+          <div
+            id="nextUnlocksCard"
+            class="profile-card animate-right"
+            style="animation-delay: 0.12s"
+            hidden
+          >
+            <h3 class="card-title">
+              <span class="card-accent">◆</span>
+              <span data-i18n="profile.next_unlocks_title">Almost there</span>
+            </h3>
+            <ul id="nextUnlocksList" class="next-unlocks"></ul>
+          </div>
+
           <!-- Card : Code événement -->
           <div class="profile-card animate-right" style="animation-delay: 0.24s">
             <h3 class="card-title">
@@ -440,8 +464,17 @@
               <span data-i18n="profile.event_code_title">Event Code</span>
             </h3>
             <p class="card-desc" data-i18n="profile.event_code_desc">
-              Enter a valid code to unlock an exclusive badge!
+              Event codes unlock exclusive badges and titles. They're posted on our Discord.
             </p>
+            <!-- 2.4, lot 9 : les codes exclusifs passent par le Discord — dire où les trouver. -->
+            <a
+              class="event-code-discord"
+              href="https://discord.gg/wpMdGGDp3y"
+              target="_blank"
+              rel="noopener"
+              data-i18n="profile.event_code_discord"
+              >Get the codes on Discord →</a
+            >
             <div class="event-code-row">
               <input
                 type="text"
@@ -863,6 +896,15 @@
           <button id="shareEmailBtn" class="share-btn share-btn--email">
             📧 <span data-i18n="profile.share_email">Email</span>
           </button>
+          <!-- 2.4, lot 8 : « Copier pour Discord » copiait l'image sans dire où la coller. -->
+          <a
+            class="share-server-link"
+            href="https://discord.gg/wpMdGGDp3y"
+            target="_blank"
+            rel="noopener"
+            data-i18n="profile.share_open_server"
+            >Open the PersonaDLE Discord server →</a
+          >
         </div>
       </div>
     </div>

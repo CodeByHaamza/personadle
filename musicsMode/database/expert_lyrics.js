@@ -2,7 +2,7 @@
  * musicsMode/database/expert_lyrics.js
  * Paroles pour le mode Music Expert — révélation cumulative, un vers par essai raté.
  *
- * Données GÉNÉRÉES depuis expert_mode_content.md (curé à la main par Hamza) — ne pas
+ * Données GÉNÉRÉES depuis docs/expert_mode_content.md (curé à la main par Hamza) — ne pas
  * éditer les paroles ici, éditer le .md puis régénérer.
  * - Clé = `titre` exact de songs.js. Les instrumentaux n'ont pas d'entrée : une
  *   chanson absente d'ici est hors du tirage Expert Music.

@@ -3776,6 +3776,11 @@ body.darkmode #rulesModal em {
   border-color: #5865f2;
   box-shadow: 0 8px 26px rgba(88, 101, 242, 0.35);
 }
+/* Le serveur officiel en tête (2.4, lot 8) : liseré et halo, sans éteindre le partenaire. */
+.discord-server-card--official {
+  border: 2px solid #5865f2;
+  box-shadow: 0 0 0 4px rgba(88, 101, 242, 0.14);
+}
 
 .discord-server-icon {
   width: 76px;
@@ -4240,6 +4245,26 @@ body.darkmode .btn-share-result {
   font-weight: 700;
   font-size: 0.85rem;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+/* =============================================================================
+   BLOC DE FIN DE PARTIE (endgameSlot(), js/share_result.js) — 2.4
+   Posé SOUS la barre de fin de partie : le bouton « Partager » n'entre plus dans
+   la rangée précédent / défi / suivant, qu'il déplaçait.
+   ============================================================================= */
+.endgame-extras {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  box-sizing: border-box;
+  width: 100%;
+  margin: -16px auto 40px;
+  padding: 0 12px;
+}
+.endgame-extras[hidden],
+.endgame-extras:empty {
+  display: none;
 }
 
 /* =====================================================================

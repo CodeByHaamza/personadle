@@ -49,7 +49,9 @@
     "expert_cond_unknown": "Liga-te novamente para veres o teu progresso.",
     "expert_locked_title": "Modo Especialista bloqueado",
     "expert_unlocked_title": "Modo Especialista desbloqueado!",
-    "expert_unlocked_hint": "O botão ⚡ agora é teu."
+    "expert_unlocked_hint": "O botão ⚡ agora é teu.",
+    "filter_midgame_confirm": "Mudar os filtros agora termina esta partida: vai contar como desistência nas tuas estatísticas. Mudar mesmo assim?",
+    "filter_midgame_done": "Partida contada como desistência — era {{target}}."
   },
   "modes": {
     "classic": {
@@ -376,6 +378,7 @@
     "share_download": "Transferir PNG",
     "share_on_x": "Partilhar no X",
     "share_discord": "Copiar para o Discord",
+    "share_open_server": "Abrir o servidor Discord do PersonaDLE →",
     "share_email": "E-mail",
     "theme_custom": "Cor personalizada",
     "friend_code_copy_hint": "Clica para copiar o teu código de amigo",
@@ -385,7 +388,8 @@
     "about_badges_title": "Sobre os Nossos Emblemas",
     "about_badges_text": "Olá! Só queríamos ser transparentes – estes emblemas foram feitos com ajuda de IA. Somos apenas estudantes a trabalhar neste projeto de paixão de graça no nosso tempo livre e, honestamente, não tínhamos orçamento nem tempo para contratar um artista. Respeitamos totalmente os artistas humanos e adoraríamos trabalhar com um algum dia, se tivermos a oportunidade! Isto foi puramente por necessidade, não por preferência. Obrigado pela compreensão e por jogares! ❤️",
     "event_code_title": "Código de Evento",
-    "event_code_desc": "Introduz um código válido para desbloquear um emblema exclusivo!",
+    "event_code_desc": "Os códigos de evento desbloqueiam crachás e títulos exclusivos. São publicados no nosso Discord.",
+    "event_code_discord": "Encontra os códigos no Discord →",
     "share_btn": "Partilhar o Meu Perfil",
     "copy_link": "Copiar ligação",
     "link_copied": "Ligação copiada!",
@@ -439,7 +443,19 @@
     "delete_account_login_required": "Inicia sessão para eliminares a tua conta.",
     "expert_title": "⚡ Modo Especialista",
     "expert_cols": "Vencidas / Jogadas · Taxa · Recorde · Sequência",
-    "expert_best_hint": "Menos tentativas numa vitória"
+    "expert_best_hint": "Menos tentativas numa vitória",
+    "next_unlocks_title": "Quase lá",
+    "next_unlocks_expert": "Modo Especialista — {{mode}}",
+    "next_unlocks_kind_badge": "Crachá",
+    "next_unlocks_kind_title": "Título",
+    "next_unlocks_kind_expert": "Especialista",
+    "title_unlocked_notif": "🏅 Título desbloqueado!",
+    "wallpaper_unlocked_notif": "🖼️ Fundo desbloqueado!",
+    "guest_name": "Convidado",
+    "guest_account_pitch": "Grátis. A tua série, estatísticas e crachás seguem-te em todos os dispositivos, e podes adicionar amigos, desafiá-los e entrar na classificação.",
+    "pseudo_placeholder": "O teu nome de utilizador…",
+    "song_artwork_alt": "Capa da música",
+    "song_remove": "Remover"
   },
   "badges": {
     "notification_title": "🎖️ Emblema Desbloqueado!",
@@ -452,6 +468,8 @@
     "event_code_placeholder": "Introduz o código de evento...",
     "event_code_submit": "Resgatar",
     "event_code_success": "Código resgatado! Emblema desbloqueado.",
+    "event_code_title_success": "🎉 Código resgatado! Um novo título espera-te nos teus títulos.",
+    "event_code_both_success": "🎉 Código resgatado! Crachá e título desbloqueados.",
     "event_code_error": "Código inválido ou já utilizado.",
     "ace_detective": {
       "name": "Detetive Ás",
@@ -963,7 +981,14 @@
     "scope_friends": "Amigos",
     "login_for_friends": "Inicia sessão para veres a classificação dos teus amigos.",
     "no_friends": "Nenhum dos teus amigos aparece ainda nesta classificação.",
-    "expert_no_streak": "A melhor sequência não tem classificação Especialista: uma sequência conta dias consecutivos, e o Especialista não é um compromisso diário."
+    "expert_no_streak": "A melhor sequência não tem classificação Especialista: uma sequência conta dias consecutivos, e o Especialista não é um compromisso diário.",
+    "rank_up": "Subiu {{n}} desde a tua última visita",
+    "rank_down": "Desceu {{n}} desde a tua última visita",
+    "filter_counts": "Partidas contadas",
+    "counts_daily": "Partidas do dia",
+    "counts_all": "Todas as partidas",
+    "counts_daily_note": "Só conta a primeira partida de cada modo, por dia: voltar a jogar não te faz subir.",
+    "counts_all_note": "Todas as partidas contam, repetições incluídas."
   },
   "friends": {
     "title": "Amigos",
@@ -1060,7 +1085,7 @@
     "danger_intro": "Estas duas ações são irreversíveis. Na dúvida, exporta o teu perfil antes."
   },
   "index": {
-    "main_title": "Tenta adivinhar a personagem Persona (Persona 1 a Persona 5)",
+    "main_title": "Adivinha a personagem Persona do dia, de Persona 1 a Persona 5X",
     "update_history": "Histórico de Atualizações",
     "changelog_button": "Ver o Changelog completo",
     "copyright": "personadle.net — 2026",
@@ -1072,8 +1097,8 @@
     "discord_modal_sub": "Dois servidores, uma só família Persona.",
     "discord_grimoire_tag": "🇫🇷 Servidor francês",
     "discord_grimoire_desc": "A nossa comunidade parceira francófona — a mais ativa. Eventos, discussões e toda a cena Persona FR.",
-    "discord_personadle_tag": "🌍 Internacional",
-    "discord_personadle_desc": "O servidor oficial do PersonaDLE — sempre ativo, em inglês. Reportes de bugs, feedback, e estamos a recrutar!",
+    "discord_personadle_tag": "⭐ Oficial · 🌍 Internacional",
+    "discord_personadle_desc": "O servidor oficial do PersonaDLE: publica as tuas grelhas, reporta bugs, dá a tua opinião — e estamos a recrutar!",
     "discord_join": "Juntar",
     "daily_btn": "🕛 Reset Diário",
     "daily_title": "🕛 Reset Diário",
@@ -1534,7 +1559,9 @@
     "failed": "Não foi possível copiar o resultado.",
     "one_try": "✅ À primeira!",
     "tries": "✅ {{count}} tentativas",
-    "gave_up": "🏳️ Desisti após {{count}} tentativas"
+    "gave_up": "🏳️ Desisti após {{count}} tentativas",
+    "day_button": "Partilhar o meu dia",
+    "day_copied": "O teu dia foi copiado — cola onde quiseres!"
   },
   "reset_password": {
     "title": "🔐 Repõe a tua palavra-passe",
@@ -1577,6 +1604,7 @@
     "play_todo": "Por jogar",
     "play_left": "Faltam {{count}} hoje",
     "play_all_done": "Todos os modos jogados hoje",
-    "home_status_done": "Jogado hoje"
+    "home_status_done": "Jogado hoje",
+    "play_discord": "Tudo jogado por hoje — vem conversar no Discord"
   }
 }

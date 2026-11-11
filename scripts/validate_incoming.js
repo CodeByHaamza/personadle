@@ -2,7 +2,7 @@
 /**
  * scripts/validate_incoming.js — Validation des fichiers en attente d'ingestion.
  *
- * Convention (AMELIORATIONS.md #6, dossier "new data/" historique) : tout nouvel
+ * Convention (docs/archive/audits_2026.md #6, dossier "new data/" historique) : tout nouvel
  * asset à intégrer en base (portrait, animation AOA, musique...) doit d'abord être
  * déposé dans un dossier `incoming/<type>/` avec un nom de fichier en snake_case,
  * AVANT d'être renommé/converti et poussé dans database/ ou <mode>/database/.

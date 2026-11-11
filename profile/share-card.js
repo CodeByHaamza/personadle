@@ -840,7 +840,7 @@ export function setupShareProfile(profile, saveProfile) {
       // Partage Twitter
       twitterBtn.onclick = () => {
         const vars = {
-          pseudo: profile.pseudo || "Guest",
+          pseudo: profile.pseudo || tr("profile.guest_name", null, "Guest"),
           wins: profile.stats?.wins || 0,
           badges: profile.badges?.length || 0,
         };

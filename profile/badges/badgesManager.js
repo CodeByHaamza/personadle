@@ -1462,11 +1462,16 @@ export async function handleEventCodeSubmit(profile, saveProfile, input, msg) {
 
     if (!profile.eventCodes.includes(code)) profile.eventCodes.push(code);
 
-    const badge = getBadgeById(res.badge_id);
+    // Depuis la 2.4 (migration 057), un code accorde un badge, un titre, ou les
+    // deux : `badge_id` peut être null.
+    const badge = res.badge_id ? getBadgeById(res.badge_id) : null;
     if (badge && !profile.badges.includes(badge.id)) {
       profile.badges.push(badge.id);
       showBadgeNotification(badge);
     }
+    // Les titres viennent de GET /api/titles (le serveur est la liste) : la page
+    // profil les recharge sur cet événement (profile-page.js).
+    if (res.title_slug) window.dispatchEvent(new CustomEvent("personadle:titles-changed"));
 
     saveProfile();
     renderBadgesModal(profile, saveProfile);
@@ -1474,7 +1479,11 @@ export async function handleEventCodeSubmit(profile, saveProfile, input, msg) {
     renderBadgePicker(profile, saveProfile);
     showCodeMessage(
       msg,
-      tCode("badges.event_code_success", "🎉 Badge unlocked successfully!"),
+      res.title_slug && res.badge_id
+        ? tCode("badges.event_code_both_success", "🎉 Code redeemed! Badge and title unlocked.")
+        : res.title_slug
+          ? tCode("badges.event_code_title_success", "🎉 Code redeemed! A new title is waiting in your titles.")
+          : tCode("badges.event_code_success", "🎉 Badge unlocked successfully!"),
       "success"
     );
   } catch (e) {

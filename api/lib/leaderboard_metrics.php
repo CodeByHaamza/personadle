@@ -29,6 +29,21 @@
 const PERSONADLE_RATIO_PRIOR_GAMES = 20;
 
 /**
+ * Ce que compte le classement PAR DÉFAUT (2.4, lot 16, migration 058).
+ *
+ *  - 'daily' : la première partie de chaque mode, chaque jour (game_sessions.is_daily)
+ *    — tout le monde à armes égales, un Rejouer ne fait pas monter ;
+ *  - 'all'   : toutes les parties, Rejouer compris — la règle d'avant, décision
+ *    produit de Hamza (« 100 victoires dans la journée valent 100 », cf.
+ *    api/cron/leaderboard.php).
+ *
+ * Les deux vues restent servies (`?scope=`) ; seul le choix par défaut se règle
+ * ici. Le cron met en cache la vue 'daily' ; la vue 'all' par période est
+ * calculée en direct (bornée par la période, donc légère).
+ */
+const PERSONADLE_LEADERBOARD_DEFAULT_SCOPE = 'daily';
+
+/**
  * Taux de victoire moyen du site (le « m » de la formule), entre 0 et 1.
  *
  * Calculé sur les données réelles et non figé en dur : le lissage suit la

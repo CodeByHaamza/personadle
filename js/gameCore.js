@@ -795,6 +795,13 @@ function foldText(s) {
   return Array.from(s, foldChar).join("");
 }
 
+/**
+ * Invitation du serveur Discord officiel PersonaDLE (n'expire jamais), pour la
+ * feuille « Jouer » (bottomNav.js) ; le footer, la modale de l'accueil et la
+ * fenêtre de partage du profil l'ont en dur dans le HTML.
+ */
+export const DISCORD_INVITE_URL = "https://discord.gg/wpMdGGDp3y";
+
 // ─────────────────────────────────────────────────────────────────────────────
 // MODES — source unique de vérité pour le vocabulaire des modes de jeu
 // ─────────────────────────────────────────────────────────────────────────────
@@ -960,6 +967,10 @@ export function revealNextLink({ nextHref = "", prevHref = null } = {}) {
     // Bouton « Partager mon résultat » : la fin de partie des six modes passe ici,
     // rechargement compris. Import dynamique (cycle évité, voir buildGameSession).
     import("./share_result.js").then((m) => m.mountShareButton()).catch(() => {});
+    // La pastille « N à jouer » de la barre du bas était calculée au chargement :
+    // elle affichait encore 6 juste après la partie. Sans effet si la barre est
+    // absente (updatePlayBadge ne trouve pas #navPlayBadge).
+    import("./bottomNav.js").then((m) => m.updatePlayBadge()).catch(() => {});
     // Delay the scroll so the layout has time to update
     setTimeout(() => {
       nav.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -1157,6 +1168,47 @@ export function showWrongMini(
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
+ * Relevé de la journée pour « Partager ma journée » (js/share_day.js, 2.4 lot 10) :
+ * `{ day, modes: { classic: { result, attempts }, … } }`. Vit ici et non dans
+ * share_day.js parce que buildGameSession() l'écrit, et que gameCore ne doit pas
+ * importer un module qui l'importe (CLAUDE.md §7, imports circulaires).
+ */
+export const DAY_RESULTS_KEY = "dailyResults";
+
+/**
+ * Retient le résultat de la partie du jour d'un mode : la PREMIÈRE partie normale
+ * par mode et par jour. Un Replay ou une partie Expert n'est pas « la partie du
+ * jour » ; une partie armée la veille et finie après minuit appartient à la veille
+ * et n'efface pas la journée déjà commencée.
+ *
+ * @param {{mode: string, result: string, attempts: number, isExpert?: boolean, day: string}} r
+ * @returns {boolean} vrai si le résultat a été retenu
+ */
+export function recordDayResult({ mode, result, attempts, isExpert = false, day }, storage = localStorage) {
+  const key = normalizeModeKey(mode);
+  if (isExpert || !key || !day || (result !== "win" && result !== "giveup")) return false;
+  let current = null;
+  try {
+    current = JSON.parse(storage.getItem(DAY_RESULTS_KEY) || "null");
+  } catch {
+    current = null;
+  }
+  if (!current || typeof current.day !== "string" || typeof current.modes !== "object" || !current.modes) {
+    current = null;
+  }
+  if (current && current.day > day) return false;
+  const data = current && current.day === day ? current : { day, modes: {} };
+  if (data.modes[key]) return false;
+  data.modes[key] = { result, attempts: Math.max(1, Number(attempts) || 1) };
+  try {
+    storage.setItem(DAY_RESULTS_KEY, JSON.stringify(data));
+  } catch {
+    return false;
+  }
+  return true;
+}
+
+/**
  * Builds a standardised game session object ready to be POST-ed to /api/sessions.
  * Call this at the end of each game (win or giveup).
  *
@@ -1203,6 +1255,8 @@ export function buildGameSession({
     } catch {
       /* stockage plein ou bloqué : pas de bouton de partage, rien de cassé */
     }
+    // « Partager ma journée » : la partie du jour de ce mode (la première seulement).
+    recordDayResult({ mode, result, attempts, isExpert, day: currentGameDay() });
   }
   return {
     // Clé backend canonique, quelle que soit la graphie passée par le mode

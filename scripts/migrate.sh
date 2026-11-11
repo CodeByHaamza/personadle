@@ -39,7 +39,12 @@ err()  { echo -e "${RED}[migrate]${NC} $1" >&2; exit 1; }
 # ── Connexion BDD ─────────────────────────────────────────────────────────────
 if [ "$PROD" = true ]; then
   log "Cible : production Hostinger (SSH)"
-  MYSQL_CMD="ssh hostinger-personadle mysql -u u870779941_Hamza -p\$(cat ~/.db_pass_hostinger) u870779941_personadle"
+  # Identifiants de la base de prod HORS du dépôt (public) depuis la 2.4 (lot 18) :
+  # exporter HOSTINGER_DB_USER et HOSTINGER_DB_NAME — leurs valeurs sont dans
+  # personadle-discord/ops/COMMANDES.md (dépôt privé).
+  : "${HOSTINGER_DB_USER:?exporte HOSTINGER_DB_USER (voir personadle-discord/ops/COMMANDES.md)}"
+  : "${HOSTINGER_DB_NAME:?exporte HOSTINGER_DB_NAME (voir personadle-discord/ops/COMMANDES.md)}"
+  MYSQL_CMD="ssh hostinger-personadle mysql -u ${HOSTINGER_DB_USER} -p\$(cat ~/.db_pass_hostinger) ${HOSTINGER_DB_NAME}"
 else
   log "Cible : dev local"
   # Lire les credentials depuis api/config.php (variable DB_*)

@@ -109,7 +109,9 @@ final class EventCodeBadgeGateTest extends TestCase
         // passer AVANT elle dans le fichier : s'il passait après, il ne servirait
         // à rien (la condition aurait déjà répondu oui et l'endpoint aurait
         // inséré la ligne).
-        $posGuard = strpos(self::$endpointSrc, 'FROM event_codes WHERE badge_id');
+        // Depuis la 2.4 (lot 9), la requête vit dans api/lib/event_codes.php ;
+        // c'est l'APPEL du garde qui doit précéder la vérification de condition.
+        $posGuard = strpos(self::$endpointSrc, 'personadle_badge_is_code_gated(');
         $posCond  = strpos(self::$endpointSrc, 'personadle_condition_allows_unlock');
 
         $this->assertNotFalse($posGuard, 'le garde des codes événement a disparu de api/badges/index.php');
@@ -161,15 +163,23 @@ final class EventCodeBadgeGateTest extends TestCase
         $this->requireDb();
 
         // Le chemin légitime doit rester intact : c'est /redeem qui écrit dans
-        // badges_unlocked, dans une transaction avec event_codes_redeemed.
+        // badges_unlocked, dans une transaction avec event_codes_redeemed. Depuis
+        // la 2.4 (lot 9), via api/lib/event_codes.php — testé sur une vraie base
+        // dans EventCodeRedeemTest.php.
+        $libSrc = (string) file_get_contents(__DIR__ . '/../../api/lib/event_codes.php');
+        $this->assertStringContainsString(
+            'personadle_redeem_event_code(',
+            self::$endpointSrc,
+            '/redeem doit toujours passer par la lib des codes'
+        );
         $this->assertStringContainsString(
             'INSERT IGNORE INTO badges_unlocked',
-            self::$endpointSrc,
+            $libSrc,
             '/redeem doit toujours accorder le badge'
         );
         $this->assertStringContainsString(
             'INSERT INTO event_codes_redeemed',
-            self::$endpointSrc,
+            $libSrc,
             '/redeem doit toujours consommer la redemption'
         );
     }
@@ -182,10 +192,12 @@ final class EventCodeBadgeGateTest extends TestCase
         // /unlock refuserait désormais aussi : le badge deviendrait inatteignable
         // par les deux routes. L'endpoint a déjà un garde-fou pour ça (il refuse
         // sans consommer la redemption), mais autant le détecter ici.
+        // Un code « titre seul » (migration 057) a un badge_id NULL : ce n'est pas
+        // un orphelin. Son titre est vérifié dans EventCodeRedeemTest.php.
         $orphans = self::$pdo->query(
             'SELECT ec.code, ec.badge_id FROM event_codes ec
              LEFT JOIN badges b ON b.slug = ec.badge_id
-             WHERE b.slug IS NULL'
+             WHERE ec.badge_id IS NOT NULL AND b.slug IS NULL'
         )->fetchAll(PDO::FETCH_ASSOC);
 
         $this->assertSame(

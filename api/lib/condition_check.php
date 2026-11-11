@@ -113,85 +113,17 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
     if (in_array($condType, $valueRequiredTypes, true) && $condValue === null) {
         return false;
     }
-    $val = $condValue ?? 0;
+
+    // Conditions CHIFFRÉES (un compteur contre un seuil) : une seule source,
+    // personadle_condition_progress(), que lit aussi le panneau « Prochains
+    // déblocages » du profil (2.4, lot 11). Deux calculs séparés finiraient par
+    // annoncer « 10 / 10 » sur un titre que l'unlock refuse.
+    $progress = personadle_condition_progress($pdo, $userId, $condType, $condMode, $condValue);
+    if ($progress !== null) {
+        return $progress['valid'] && $progress['current'] >= $progress['required'];
+    }
 
     switch ($condType) {
-
-        case 'wins_total':
-            return personadle_aggregate_user_stat($pdo, $userId, 'wins', 'SUM') >= $val;
-
-        case 'mode_wins':
-        case 'classic_p1_wins':
-        case 'emoji_p2_wins': {
-            $mode = $condMode;
-            if (!$mode) {
-                $mode = match ($condType) {
-                    'classic_p1_wins' => 'classic',
-                    'emoji_p2_wins'   => 'emoji',
-                    default           => '',
-                };
-            }
-            if (!$mode) return false; // mode non résolu → condition invalide
-            return personadle_user_stat_for_mode($pdo, $userId, $mode, 'wins') >= $val;
-        }
-
-        case 'mode_games': {
-            // Nombre de PARTIES (games), pas de victoires — ex: wallpaper rise_dungeons
-            // ("30 total games in Music mode", peu importe le résultat).
-            if (!$condMode) return false;
-            return personadle_user_stat_for_mode($pdo, $userId, $condMode, 'games') >= $val;
-        }
-
-        case 'games_total':
-            return personadle_aggregate_user_stat($pdo, $userId, 'games', 'SUM') >= $val;
-
-        case 'streak_record': {
-            // « Reach a N-day streak » : le joueur lit sa série GLOBALE (users.global_streak_record,
-            // celle du profil, tous modes confondus). Ne comparer que le record par mode refusait
-            // Raphael à qui a 30 jours de série globale mais 25 dans son meilleur mode.
-            $g = $pdo->prepare('SELECT COALESCE(global_streak_record, 0) FROM users WHERE id = ?');
-            $g->execute([$userId]);
-            $global  = (int) $g->fetchColumn();
-            $perMode = personadle_aggregate_user_stat($pdo, $userId, 'streak_record', 'MAX');
-            return max($global, $perMode) >= $val;
-        }
-
-        case 'perfect_wins':
-            return personadle_aggregate_user_stat($pdo, $userId, 'perfect_wins', 'SUM') >= $val;
-
-        case 'giveups_total':
-            return personadle_aggregate_user_stat($pdo, $userId, 'giveups', 'SUM') >= $val;
-
-        case 'unique_days': {
-            $s = $pdo->prepare(
-                'SELECT COUNT(DISTINCT played_date) FROM game_sessions WHERE user_id = ?'
-            );
-            $s->execute([$userId]);
-            return (int) $s->fetchColumn() >= $val;
-        }
-
-        case 'friends_count': {
-            $s = $pdo->prepare(
-                'SELECT COUNT(*) FROM friendships
-                 WHERE (requester_id = ? OR addressee_id = ?) AND status = ?'
-            );
-            $s->execute([$userId, $userId, 'accepted']);
-            return (int) $s->fetchColumn() >= $val;
-        }
-
-        case 'badges_count': {
-            $s = $pdo->prepare('SELECT COUNT(*) FROM badges_unlocked WHERE user_id = ?');
-            $s->execute([$userId]);
-            return (int) $s->fetchColumn() >= $val;
-        }
-
-        case 'titles_count': {
-            // Une collection en appelle une autre : le titre SEES se gagne en
-            // rassemblant des titres, comme Thou Art I se gagne en badges.
-            $s = $pdo->prepare('SELECT COUNT(*) FROM user_titles WHERE user_id = ?');
-            $s->execute([$userId]);
-            return (int) $s->fetchColumn() >= $val;
-        }
 
         case 'played_on_date': {
             // Anniversaire : avoir joué un 24 juin, peu importe l'année.
@@ -267,69 +199,6 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
             return false;
         }
 
-        case 'social_link_min_rank': {
-            // Au moins un Social Link au rang >= condition_value (défaut 10 = rang
-            // maximum si non précisé, pour rester équivalent à l'ancien
-            // 'social_link_rank_10' sans dupliquer la requête — voir docblock).
-            $threshold = $condValue ?? 10;
-            $s = $pdo->prepare(
-                'SELECT COALESCE(MAX(`rank`), 0) FROM social_links
-                 WHERE user_a_id = ? OR user_b_id = ?'
-            );
-            $s->execute([$userId, $userId]);
-            return (int) $s->fetchColumn() >= $threshold;
-        }
-
-        case 'all_modes_won': {
-            // Au moins 1 victoire dans chacun des 6 modes reconnus
-            $modes = PERSONADLE_MODES;
-            $s = $pdo->prepare(
-                'SELECT COUNT(DISTINCT mode) FROM user_stats
-                 WHERE user_id = ? AND wins >= 1 AND mode IN (?,?,?,?,?,?)'
-            );
-            $s->execute(array_merge([$userId], $modes));
-            return (int) $s->fetchColumn() >= count($modes);
-        }
-
-        case 'weekly_clean_modes': {
-            $s = $pdo->prepare(
-                'SELECT COUNT(DISTINCT mode) FROM game_sessions
-                 WHERE user_id = ? AND played_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)'
-            );
-            $s->execute([$userId]);
-            return (int) $s->fetchColumn() >= $val;
-        }
-
-        // Les 3 types ci-dessous délèguent à des fonctions de comptage réutilisables :
-        // l'écran de déblocage du Mode Expert affiche la PROGRESSION (« 7 / 10 »), pas
-        // seulement un booléen — cf. api/lib/expert_unlocks.php.
-        case 'mode_wins_under_attempts':
-            if (!$condMode) return false;
-            return personadle_count_wins_under_attempts($pdo, $userId, $condMode) >= $val;
-
-        case 'mode_wins_single_day':
-            if (!$condMode) return false;
-            return personadle_count_best_single_day_wins($pdo, $userId, $condMode) >= $val;
-
-        case 'mode_consecutive_perfects':
-            if (!$condMode) return false;
-            return personadle_count_consecutive_perfects($pdo, $userId, $condMode) >= $val;
-
-        case 'expert_wins_total':
-            // Victoires EN EXPERT, tous modes confondus (titre `shadows_converge`).
-            // Surtout pas `wins_total` : celui-ci lit `user_stats`, que le Mode
-            // Expert n'alimente pas (cf. api/lib/game_session.php) — il compterait
-            // donc uniquement les parties normales.
-            return personadle_count_expert_wins($pdo, $userId) >= $val;
-
-        case 'mode_expert_perfect_wins':
-            // condition_value victoires EN EXPERT au premier essai dans le mode
-            // condition_mode (badge Don't Waste Your Breath : Classique Expert ne
-            // donne que la citation — gagner du premier coup, c'est n'avoir pas eu
-            // besoin d'un mot de plus).
-            if (!$condMode) return false;
-            return personadle_count_expert_perfect_wins($pdo, $userId, $condMode) >= $val;
-
         case 'targets_found':
             // condition_mode nomme un ENSEMBLE de cibles à avoir trouvées (gagnées),
             // décrit dans PERSONADLE_TARGET_SETS — vérifié depuis game_sessions,
@@ -338,32 +207,10 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
             if (!$condMode) return false;
             return personadle_target_set_met($pdo, $userId, $condMode);
 
-        case 'mode_challenge_wins': {
-            // condition_value défis d'AMI relevés (gagnés) dans condition_mode.
-            // Badge Chord Progression : 10 en mode Musique.
-            //
-            // Lu dans `challenge_wins`, une table qui ne fait QUE grandir, et non
-            // dans `messages` : un joueur a le droit de supprimer ses messages
-            // (DELETE /api/messages/:id). Compter les lignes vivantes ferait
-            // reperdre le badge à qui range sa boîte de réception — exactement ce
-            // que la règle de monotonie interdit (CLAUDE.md §7).
-            if (!$condMode) return false;
-            $stmt = $pdo->prepare('SELECT COUNT(*) FROM challenge_wins WHERE user_id = ? AND mode = ?');
-            $stmt->execute([$userId, $condMode]);
-            return (int) $stmt->fetchColumn() >= $val;
-        }
-
         case 'same_energy':
             // Un ami de rang Social Link ≥ 5 porte Motoha Arai quand je porte Chie
             // (ou l'inverse) — voir personadle_same_energy_partners().
             return personadle_same_energy_partners($pdo, $userId) !== [];
-
-        case 'expert_modes_mastered':
-            // condition_value victoires EN EXPERT dans chacun des 6 modes (badge Denial of Self).
-            // Pas besoin de vérifier en plus que les 6 gates sont franchis : le serveur
-            // (api/sessions.php) refuse d'enregistrer une session Expert tant que le mode
-            // n'est pas débloqué, donc une victoire Expert prouve le déblocage.
-            return personadle_count_mastered_expert_modes($pdo, $userId, $val) >= 6;
 
         // Conditions manuelles — flags/narratif client, redeem via code événement,
         // ou vérifiées par un autre endpoint (ex: social-links pour true_confidant,
@@ -377,6 +224,224 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
             // Type de condition inconnu → safe fallback (ne bloque pas les futurs ajouts)
             return true;
     }
+}
+
+/**
+ * Seuil d'une condition chiffrée. La plupart lisent `condition_value` ; trois ont
+ * un seuil propre (documenté dans leur cas de personadle_condition_current()).
+ */
+function personadle_condition_required(string $condType, ?int $condValue): int
+{
+    return match ($condType) {
+        // Défaut 10 = rang maximum, équivalent à l'ancien 'social_link_rank_10'.
+        'social_link_min_rank'  => $condValue ?? 10,
+        'all_modes_won'         => count(PERSONADLE_MODES),
+        'expert_modes_mastered' => 6,
+        default                 => $condValue ?? 0,
+    };
+}
+
+/**
+ * Valeur actuelle d'une condition chiffrée pour ce joueur.
+ *
+ * @return int|false|null  int = compteur ; false = condition chiffrée mal
+ *                         configurée (mode manquant) ; null = pas une condition
+ *                         chiffrée (dates, ensembles de cibles, manuelles…).
+ */
+function personadle_condition_current(PDO $pdo, int $userId, string $condType, ?string $condMode, int $val): int|false|null
+{
+    switch ($condType) {
+        case 'wins_total':
+            return personadle_aggregate_user_stat($pdo, $userId, 'wins', 'SUM');
+
+        case 'mode_wins':
+        case 'classic_p1_wins':
+        case 'emoji_p2_wins': {
+            $mode = $condMode;
+            if (!$mode) {
+                $mode = match ($condType) {
+                    'classic_p1_wins' => 'classic',
+                    'emoji_p2_wins'   => 'emoji',
+                    default           => '',
+                };
+            }
+            if (!$mode) return false; // mode non résolu → condition invalide
+            return personadle_user_stat_for_mode($pdo, $userId, $mode, 'wins');
+        }
+
+        case 'mode_games':
+            // Nombre de PARTIES (games), pas de victoires — ex: wallpaper rise_dungeons
+            // ("30 total games in Music mode", peu importe le résultat).
+            if (!$condMode) return false;
+            return personadle_user_stat_for_mode($pdo, $userId, $condMode, 'games');
+
+        case 'games_total':
+            return personadle_aggregate_user_stat($pdo, $userId, 'games', 'SUM');
+
+        case 'streak_record': {
+            // « Reach a N-day streak » : le joueur lit sa série GLOBALE (users.global_streak_record,
+            // celle du profil, tous modes confondus). Ne comparer que le record par mode refusait
+            // Raphael à qui a 30 jours de série globale mais 25 dans son meilleur mode.
+            $g = $pdo->prepare('SELECT COALESCE(global_streak_record, 0) FROM users WHERE id = ?');
+            $g->execute([$userId]);
+            $global  = (int) $g->fetchColumn();
+            $perMode = personadle_aggregate_user_stat($pdo, $userId, 'streak_record', 'MAX');
+            return max($global, $perMode);
+        }
+
+        case 'perfect_wins':
+            return personadle_aggregate_user_stat($pdo, $userId, 'perfect_wins', 'SUM');
+
+        case 'giveups_total':
+            return personadle_aggregate_user_stat($pdo, $userId, 'giveups', 'SUM');
+
+        case 'unique_days': {
+            $s = $pdo->prepare('SELECT COUNT(DISTINCT played_date) FROM game_sessions WHERE user_id = ?');
+            $s->execute([$userId]);
+            return (int) $s->fetchColumn();
+        }
+
+        case 'friends_count': {
+            $s = $pdo->prepare(
+                'SELECT COUNT(*) FROM friendships
+                 WHERE (requester_id = ? OR addressee_id = ?) AND status = ?'
+            );
+            $s->execute([$userId, $userId, 'accepted']);
+            return (int) $s->fetchColumn();
+        }
+
+        case 'badges_count': {
+            $s = $pdo->prepare('SELECT COUNT(*) FROM badges_unlocked WHERE user_id = ?');
+            $s->execute([$userId]);
+            return (int) $s->fetchColumn();
+        }
+
+        case 'titles_count': {
+            // Une collection en appelle une autre : le titre SEES se gagne en
+            // rassemblant des titres, comme Thou Art I se gagne en badges.
+            $s = $pdo->prepare('SELECT COUNT(*) FROM user_titles WHERE user_id = ?');
+            $s->execute([$userId]);
+            return (int) $s->fetchColumn();
+        }
+
+        case 'social_link_min_rank': {
+            // Meilleur rang de Social Link du joueur (seuil : personadle_condition_required()).
+            $s = $pdo->prepare(
+                'SELECT COALESCE(MAX(`rank`), 0) FROM social_links
+                 WHERE user_a_id = ? OR user_b_id = ?'
+            );
+            $s->execute([$userId, $userId]);
+            return (int) $s->fetchColumn();
+        }
+
+        case 'all_modes_won': {
+            // Nombre de modes reconnus avec au moins 1 victoire (seuil : les 6).
+            $modes = PERSONADLE_MODES;
+            $s = $pdo->prepare(
+                'SELECT COUNT(DISTINCT mode) FROM user_stats
+                 WHERE user_id = ? AND wins >= 1 AND mode IN (?,?,?,?,?,?)'
+            );
+            $s->execute(array_merge([$userId], $modes));
+            return (int) $s->fetchColumn();
+        }
+
+        case 'weekly_clean_modes': {
+            $s = $pdo->prepare(
+                'SELECT COUNT(DISTINCT mode) FROM game_sessions
+                 WHERE user_id = ? AND played_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)'
+            );
+            $s->execute([$userId]);
+            return (int) $s->fetchColumn();
+        }
+
+        // Les 3 types ci-dessous délèguent à des fonctions de comptage réutilisables :
+        // l'écran de déblocage du Mode Expert affiche la PROGRESSION (« 7 / 10 »), pas
+        // seulement un booléen — cf. api/lib/expert_unlocks.php.
+        case 'mode_wins_under_attempts':
+            if (!$condMode) return false;
+            return personadle_count_wins_under_attempts($pdo, $userId, $condMode);
+
+        case 'mode_wins_single_day':
+            if (!$condMode) return false;
+            return personadle_count_best_single_day_wins($pdo, $userId, $condMode);
+
+        case 'mode_consecutive_perfects':
+            if (!$condMode) return false;
+            return personadle_count_consecutive_perfects($pdo, $userId, $condMode);
+
+        case 'expert_wins_total':
+            // Victoires EN EXPERT, tous modes confondus (titre `shadows_converge`).
+            // Surtout pas `wins_total` : celui-ci lit `user_stats`, que le Mode
+            // Expert n'alimente pas (cf. api/lib/game_session.php) — il compterait
+            // donc uniquement les parties normales.
+            return personadle_count_expert_wins($pdo, $userId);
+
+        case 'mode_expert_perfect_wins':
+            // Victoires EN EXPERT au premier essai dans le mode condition_mode (badge
+            // Don't Waste Your Breath : Classique Expert ne donne que la citation —
+            // gagner du premier coup, c'est n'avoir pas eu besoin d'un mot de plus).
+            if (!$condMode) return false;
+            return personadle_count_expert_perfect_wins($pdo, $userId, $condMode);
+
+        case 'mode_challenge_wins': {
+            // Défis d'AMI relevés (gagnés) dans condition_mode. Badge Chord
+            // Progression : 10 en mode Musique.
+            //
+            // Lu dans `challenge_wins`, une table qui ne fait QUE grandir, et non
+            // dans `messages` : un joueur a le droit de supprimer ses messages
+            // (DELETE /api/messages/:id). Compter les lignes vivantes ferait
+            // reperdre le badge à qui range sa boîte de réception — exactement ce
+            // que la règle de monotonie interdit (CLAUDE.md §7).
+            if (!$condMode) return false;
+            $stmt = $pdo->prepare('SELECT COUNT(*) FROM challenge_wins WHERE user_id = ? AND mode = ?');
+            $stmt->execute([$userId, $condMode]);
+            return (int) $stmt->fetchColumn();
+        }
+
+        case 'expert_modes_mastered':
+            // Nombre de modes où le joueur a condition_value victoires EN EXPERT (seuil :
+            // les 6, badge Denial of Self). Pas besoin de vérifier en plus que les 6
+            // gates sont franchis : le serveur (api/sessions.php) refuse d'enregistrer une
+            // session Expert tant que le mode n'est pas débloqué.
+            return personadle_count_mastered_expert_modes($pdo, $userId, $val);
+
+        default:
+            return null;
+    }
+}
+
+/**
+ * Progression d'une condition chiffrée : `current` contre `required`.
+ *
+ * Seule source de vérité des conditions chiffrées : personadle_verify_condition()
+ * l'appelle pour décider d'un déblocage, et GET /api/user/next-unlocks pour
+ * afficher « 7 / 10 » (2.4, lot 11). `valid` est faux quand la condition est mal
+ * configurée (mode manquant) : elle n'est alors jamais remplie.
+ *
+ * @param array<string, int|false|null> $memo  cache le temps d'une requête : le
+ *        panneau lit des dizaines d'entrées qui partagent les mêmes compteurs.
+ * @return array{current: int, required: int, valid: bool}|null  null = condition
+ *         non chiffrée (dates, ensembles de cibles, manuelles…)
+ */
+function personadle_condition_progress(PDO $pdo, int $userId, ?string $condType, ?string $condMode, ?int $condValue, array &$memo = []): ?array
+{
+    if ($condType === null || $condType === '') {
+        return null;
+    }
+    $val = $condValue ?? 0;
+    $key = $condType . '|' . ($condMode ?? '') . '|' . ($condType === 'expert_modes_mastered' ? $val : '');
+    if (!array_key_exists($key, $memo)) {
+        $memo[$key] = personadle_condition_current($pdo, $userId, $condType, $condMode, $val);
+    }
+    $current = $memo[$key];
+    if ($current === null) {
+        return null;
+    }
+    return [
+        'current'  => $current === false ? 0 : $current,
+        'required' => personadle_condition_required($condType, $condValue),
+        'valid'    => $current !== false,
+    ];
 }
 
 /**

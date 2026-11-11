@@ -168,6 +168,29 @@ describe("handleEventCodeSubmit", () => {
     expect(input.value).toBe("");
   });
 
+  // 2.4 (migration 057) : un code peut n'accorder qu'un titre — badge_id null.
+  it("handles a title-only code: no badge, titles reloaded, title message", async () => {
+    const profile = baseProfile();
+    const saveProfile = vi.fn();
+    const onTitles = vi.fn();
+    window.addEventListener("personadle:titles-changed", onTitles);
+    redeemSpy.mockResolvedValue({
+      redeemed: true,
+      code: "DISCORDX",
+      badge_id: null,
+      title_slug: "velvet_guest",
+    });
+    input.value = "discordx";
+
+    await handleEventCodeSubmit(profile, saveProfile, input, msg);
+    window.removeEventListener("personadle:titles-changed", onTitles);
+
+    expect(profile.eventCodes).toContain("DISCORDX");
+    expect(profile.badges).toEqual(baseProfile().badges);
+    expect(onTitles).toHaveBeenCalledOnce();
+    expect(msg.textContent).toMatch(/title/i);
+  });
+
   // ── Messages d'erreur : chaque cause doit être distinguable ────────────────
   // Auparavant tout ce qui n'était ni 409 ni 410 devenait « Invalid code. Check
   // your spelling! ». Un joueur déconnecté (401) ou hors ligne croyait s'être

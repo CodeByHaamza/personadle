@@ -163,12 +163,19 @@ describe("mountShareButton", () => {
     );
   };
 
-  it("mounts once in the end-of-game navigation", () => {
-    document.body.innerHTML = '<div id="modeNavigationContainer"></div>';
+  it("mounts once, UNDER the end-of-game navigation, never inside it", () => {
+    document.body.innerHTML =
+      '<div id="modeNavigationContainer"><div id="prevModeButton"></div><div id="nextModeButton"></div></div>';
     seed();
     mountShareButton();
     mountShareButton();
     expect(document.querySelectorAll("#shareResultBtn")).toHaveLength(1);
+    // Dans la barre, il déplaçait « mode précédent / suivant » (retour Hamza, 2.4).
+    const nav = document.getElementById("modeNavigationContainer");
+    expect(nav.querySelector("#shareResultBtn")).toBeNull();
+    expect(nav.children).toHaveLength(2);
+    expect(nav.nextElementSibling.id).toBe("endgameExtras");
+    expect(nav.nextElementSibling.querySelector("#shareResultBtn")).not.toBeNull();
   });
 
   it("stays hidden without a result for the displayed game", () => {

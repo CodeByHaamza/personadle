@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../lib/condition_check.php';
 require_once __DIR__ . '/../lib/unlock_reconcile.php';
+require_once __DIR__ . '/../lib/event_codes.php';
 
 $authId = requireAuth();
 $pdo    = pdo();
@@ -77,9 +78,7 @@ if ($action === 'unlock') {
     // serveur-d'abord (le badge n'entre dans le profil local qu'une fois
     // /redeem revenu OK), donc le backend le connaît toujours avant le local et
     // la synchro n'a jamais à le repousser par cette route.
-    $codeGated = $pdo->prepare('SELECT 1 FROM event_codes WHERE badge_id = ? LIMIT 1');
-    $codeGated->execute([$badgeId]);
-    if ($codeGated->fetchColumn()) {
+    if (personadle_badge_is_code_gated($pdo, $badgeId)) {
         jsonError('This badge can only be unlocked with its event code', 403);
     }
 
@@ -121,61 +120,21 @@ if ($action === 'unlock') {
 }
 
 // ── POST /api/badges/redeem ──────────────────────────────────────────────────
+// Un code accorde un badge, un titre (migration 057), ou les deux — logique dans
+// api/lib/event_codes.php. Le chemin reste /badges/redeem : le client et les
+// annonces Discord le connaissent déjà.
 if ($action === 'redeem') {
-    $code = strtoupper(trim($data['code'] ?? ''));
-    if (!$code || strlen($code) > 50) jsonError('Invalid code', 400);
-
-    // Validate code exists, is active, and within date range
-    $stmt = $pdo->prepare(
-        'SELECT code, badge_id, is_permanent, start_date, end_date
-         FROM event_codes
-         WHERE code = ? AND is_active = 1
-         LIMIT 1'
-    );
-    $stmt->execute([$code]);
-    $ec = $stmt->fetch();
-    if (!$ec) jsonError('Invalid or expired code', 404);
-
-    // Date-limited codes: check window
-    if (!$ec['is_permanent']) {
-        $now = new DateTime('now', new DateTimeZone('Europe/Paris'));
-        $today = $now->format('Y-m-d');
-        if ($today < $ec['start_date'] || $today > $ec['end_date']) {
-            jsonError('Code not active yet or already expired', 410);
-        }
+    $today  = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+    $result = personadle_redeem_event_code($pdo, $authId, (string) ($data['code'] ?? ''), $today);
+    if ($result['status'] !== 200) {
+        jsonError($result['error'] ?? 'Redeem failed', $result['status']);
     }
-
-    // Already redeemed?
-    $stmt = $pdo->prepare('SELECT id FROM event_codes_redeemed WHERE user_id = ? AND code = ? LIMIT 1');
-    $stmt->execute([$authId, $code]);
-    if ($stmt->fetch()) jsonError('Code already redeemed', 409);
-
-    $badgeId = $ec['badge_id'];
-
-    // Garde-fou : un code créé avant la validation admin (ou modifié en SQL direct)
-    // peut encore pointer vers un badge_id inexistant — ne jamais consommer la
-    // redemption dans ce cas, sinon le joueur perd sa chance une fois le slug corrigé.
-    $badgeCheck = $pdo->prepare('SELECT slug FROM badges WHERE slug = ? LIMIT 1');
-    $badgeCheck->execute([$badgeId]);
-    if (!$badgeCheck->fetch()) {
-        error_log("[PersonaDLE badges redeem] code {$code} references unknown badge_id {$badgeId}");
-        jsonError('Code mal configuré — contacte un admin', 500);
-    }
-
-    $pdo->beginTransaction();
-    try {
-        $pdo->prepare('INSERT INTO event_codes_redeemed (user_id, code) VALUES (?, ?)')
-            ->execute([$authId, $code]);
-        $pdo->prepare('INSERT IGNORE INTO badges_unlocked (user_id, badge_id) VALUES (?, ?)')
-            ->execute([$authId, $badgeId]);
-        $pdo->commit();
-    } catch (Throwable $e) {
-        $pdo->rollBack();
-        error_log('[PersonaDLE badges redeem] ' . $e->getMessage());
-        jsonError('Redeem failed', 500);
-    }
-
-    jsonSuccess(['redeemed' => true, 'code' => $code, 'badge_id' => $badgeId]);
+    jsonSuccess([
+        'redeemed'   => true,
+        'code'       => $result['code'],
+        'badge_id'   => $result['badge_id'],
+        'title_slug' => $result['title_slug'],
+    ]);
 }
 
 jsonError('Unknown action', 404);

@@ -1,3 +1,9 @@
+> 📦 **Archive** (2.4, lot 18) — ex-`AMELIORATIONS.md`, à la racine jusqu'au 2026-11-11.
+> Ce sont des AUDITS datés (2026-07 → 2026-10-20), gardés pour leur raisonnement. Ce qui
+> restait ouvert a été repris dans [`ROADMAP.md`](../../ROADMAP.md) § « Repris des audits » ;
+> l'opérationnel (bloquant release) vit dans [`TODO.md`](../../TODO.md). Ne plus rien
+> ajouter ici.
+
 # 🔧 PersonaDLE — Propositions d'amélioration
 
 > Audit du 2026-06-24, réaudité le 2026-07-05, **relu et complété le 2026-09-13** (section en tête).

@@ -49,7 +49,9 @@
     "expert_cond_unknown": "Reconnecte-toi pour voir ta progression.",
     "expert_locked_title": "Mode Expert verrouillé",
     "expert_unlocked_title": "Mode Expert débloqué !",
-    "expert_unlocked_hint": "Le bouton ⚡ est à toi."
+    "expert_unlocked_hint": "Le bouton ⚡ est à toi.",
+    "filter_midgame_confirm": "Changer de filtre maintenant met fin à cette partie : elle comptera comme un abandon dans tes stats. Changer quand même ?",
+    "filter_midgame_done": "Partie comptée comme un abandon — c'était {{target}}."
   },
   "modes": {
     "classic": {
@@ -376,6 +378,7 @@
     "share_download": "Télécharger en PNG",
     "share_on_x": "Partager sur X",
     "share_discord": "Copier pour Discord",
+    "share_open_server": "Ouvrir le serveur Discord PersonaDLE →",
     "share_email": "E-mail",
     "theme_custom": "Couleur personnalisée",
     "friend_code_copy_hint": "Cliquer pour copier ton code ami",
@@ -385,7 +388,8 @@
     "about_badges_title": "À propos des badges",
     "about_badges_text": "Hey ! Juste pour être transparent – ces badges ont été créés avec de l'aide IA. Nous sommes de simples étudiants qui travaillons sur ce projet passion gratuitement sur notre temps libre, et nous n'avions pas le budget pour faire appel à un artiste. Nous respectons absolument les artistes humains et aimerions collaborer avec l'un d'eux si l'occasion se présente ! C'était purement par nécessité. Merci pour votre compréhension et pour jouer ! ❤️",
     "event_code_title": "Code Événement",
-    "event_code_desc": "Entrez un code valide pour débloquer un badge exclusif !",
+    "event_code_desc": "Les codes événement débloquent des badges et des titres exclusifs. Ils sont publiés sur notre Discord.",
+    "event_code_discord": "Trouver les codes sur Discord →",
     "share_btn": "Partager mon profil",
     "copy_link": "Copier le lien",
     "link_copied": "Lien copié !",
@@ -439,7 +443,19 @@
     "delete_account_login_required": "Connecte-toi pour supprimer ton compte.",
     "expert_title": "⚡ Mode Expert",
     "expert_cols": "Gagnées / Jouées · Taux · Record · Série",
-    "expert_best_hint": "Le moins d'essais sur une victoire"
+    "expert_best_hint": "Le moins d'essais sur une victoire",
+    "next_unlocks_title": "Presque là",
+    "next_unlocks_expert": "Mode Expert — {{mode}}",
+    "next_unlocks_kind_badge": "Badge",
+    "next_unlocks_kind_title": "Titre",
+    "next_unlocks_kind_expert": "Expert",
+    "title_unlocked_notif": "🏅 Titre débloqué !",
+    "wallpaper_unlocked_notif": "🖼️ Fond d'écran débloqué !",
+    "guest_name": "Invité",
+    "guest_account_pitch": "Gratuit. Ta série, tes stats et tes badges te suivent sur tous tes appareils, et tu peux ajouter des amis, les défier et entrer au classement.",
+    "pseudo_placeholder": "Ton pseudo…",
+    "song_artwork_alt": "Pochette de la musique",
+    "song_remove": "Retirer"
   },
   "badges": {
     "notification_title": "🎖️ Badge débloqué !",
@@ -452,6 +468,8 @@
     "event_code_placeholder": "Entrez un code événement...",
     "event_code_submit": "Utiliser",
     "event_code_success": "Code utilisé ! Badge débloqué.",
+    "event_code_title_success": "🎉 Code validé ! Un nouveau titre t'attend dans tes titres.",
+    "event_code_both_success": "🎉 Code validé ! Badge et titre débloqués.",
     "event_code_error": "Code invalide ou déjà utilisé.",
     "ace_detective": {
       "name": "As Détective",
@@ -963,7 +981,14 @@
     "scope_friends": "Amis",
     "login_for_friends": "Connecte-toi pour voir le classement de tes amis.",
     "no_friends": "Aucun de tes amis n'apparaît encore dans ce classement.",
-    "expert_no_streak": "La meilleure série n'a pas de classement Expert : une série compte des jours consécutifs, et l'Expert n'est pas un rendez-vous quotidien."
+    "expert_no_streak": "La meilleure série n'a pas de classement Expert : une série compte des jours consécutifs, et l'Expert n'est pas un rendez-vous quotidien.",
+    "rank_up": "+{{n}} place(s) depuis ta dernière visite",
+    "rank_down": "−{{n}} place(s) depuis ta dernière visite",
+    "filter_counts": "Parties comptées",
+    "counts_daily": "Parties du jour",
+    "counts_all": "Toutes les parties",
+    "counts_daily_note": "Seule la première partie de chaque mode, chaque jour, compte : rejouer ne fait pas monter.",
+    "counts_all_note": "Toutes les parties comptent, rejouées comprises."
   },
   "friends": {
     "title": "Amis",
@@ -1208,7 +1233,7 @@
     "danger_intro": "Ces deux actions sont irréversibles. Dans le doute, exporte ton profil avant."
   },
   "index": {
-    "main_title": "Devinez le personnage Persona (Persona 1 à Persona 5)",
+    "main_title": "Devinez le personnage Persona du jour, de Persona 1 à Persona 5X",
     "update_history": "Historique des mises à jour",
     "changelog_button": "Voir le Changelog complet",
     "copyright": "personadle.net — 2026",
@@ -1220,8 +1245,8 @@
     "discord_modal_sub": "Deux serveurs, une seule famille Persona.",
     "discord_grimoire_tag": "🇫🇷 Serveur français",
     "discord_grimoire_desc": "Notre communauté partenaire francophone — la plus active. Événements, discussions et toute la scène Persona FR.",
-    "discord_personadle_tag": "🌍 International",
-    "discord_personadle_desc": "Le serveur officiel PersonaDLE — toujours actif, anglophone. Bugs, retours, et on recrute !",
+    "discord_personadle_tag": "⭐ Officiel · 🌍 International",
+    "discord_personadle_desc": "Le serveur officiel PersonaDLE : poste tes grilles, signale les bugs, donne ton avis — et on recrute !",
     "discord_join": "Rejoindre",
     "daily_btn": "🕛 Reset Quotidien",
     "daily_title": "🕛 Reset Quotidien",
@@ -1534,7 +1559,9 @@
     "failed": "Impossible de copier le résultat.",
     "one_try": "✅ Du premier coup !",
     "tries": "✅ {{count}} essais",
-    "gave_up": "🏳️ Abandon après {{count}} essais"
+    "gave_up": "🏳️ Abandon après {{count}} essais",
+    "day_button": "Partager ma journée",
+    "day_copied": "Ta journée est copiée — colle-la où tu veux !"
   },
   "reset_password": {
     "title": "🔐 Réinitialise ton mot de passe",
@@ -1577,6 +1604,7 @@
     "play_todo": "À jouer",
     "play_left": "Encore {{count}} aujourd'hui",
     "play_all_done": "Tous les modes joués aujourd'hui",
-    "home_status_done": "Joué aujourd'hui"
+    "home_status_done": "Joué aujourd'hui",
+    "play_discord": "Tout est joué pour aujourd'hui — viens discuter sur Discord"
   }
 }

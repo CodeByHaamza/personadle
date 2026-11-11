@@ -14,6 +14,7 @@ const STORAGE_KEY = "profileCardsCollapsed";
 
 /** Sections repliables, par clé i18n de leur titre → repliée par défaut ? */
 export const COLLAPSIBLE_CARDS = {
+  "profile.next_unlocks_title": false,
   "profile.badges_title": false,
   "profile.event_code_title": true,
   "profile.share_title": true,

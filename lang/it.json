@@ -49,7 +49,9 @@
     "expert_cond_unknown": "Riconnettiti per vedere i tuoi progressi.",
     "expert_locked_title": "Modalità Esperto bloccata",
     "expert_unlocked_title": "Modalità Esperto sbloccata!",
-    "expert_unlocked_hint": "Il pulsante ⚡ ora è tuo."
+    "expert_unlocked_hint": "Il pulsante ⚡ ora è tuo.",
+    "filter_midgame_confirm": "Cambiare i filtri ora termina questa partita: conterà come un abbandono nelle tue statistiche. Cambiare comunque?",
+    "filter_midgame_done": "Partita contata come abbandono — era {{target}}."
   },
   "modes": {
     "classic": {
@@ -376,6 +378,7 @@
     "share_download": "Scarica PNG",
     "share_on_x": "Condividi su X",
     "share_discord": "Copia per Discord",
+    "share_open_server": "Apri il server Discord di PersonaDLE →",
     "share_email": "E-mail",
     "theme_custom": "Colore personalizzato",
     "friend_code_copy_hint": "Clicca per copiare il tuo codice amico",
@@ -385,7 +388,8 @@
     "about_badges_title": "Sui nostri badge",
     "about_badges_text": "Ciao! Volevo solo essere trasparente – questi badge sono stati creati con l'aiuto dell'IA. Siamo solo studenti che lavorano su questo progetto passionale gratuitamente nel nostro tempo libero, e onestamente non avevamo il budget né il tempo per ingaggiare un artista. Rispettiamo assolutamente gli artisti umani e adoreremo lavorare con uno un giorno se ne avremo l'opportunità! Questo era puramente per necessità, non per preferenza. Grazie per la comprensione e per giocare! ❤️",
     "event_code_title": "Codice evento",
-    "event_code_desc": "Inserisci un codice valido per sbloccare un badge esclusivo!",
+    "event_code_desc": "I codici evento sbloccano badge e titoli esclusivi. Vengono pubblicati sul nostro Discord.",
+    "event_code_discord": "Trova i codici su Discord →",
     "share_btn": "Condividi il mio profilo",
     "copy_link": "Copia link",
     "link_copied": "Link copiato!",
@@ -439,7 +443,19 @@
     "delete_account_login_required": "Accedi per eliminare il tuo account.",
     "expert_title": "⚡ Modalità Esperto",
     "expert_cols": "Vinte / Giocate · Tasso · Record · Serie",
-    "expert_best_hint": "Meno tentativi in una vittoria"
+    "expert_best_hint": "Meno tentativi in una vittoria",
+    "next_unlocks_title": "Quasi fatto",
+    "next_unlocks_expert": "Modalità Esperto — {{mode}}",
+    "next_unlocks_kind_badge": "Badge",
+    "next_unlocks_kind_title": "Titolo",
+    "next_unlocks_kind_expert": "Esperto",
+    "title_unlocked_notif": "🏅 Titolo sbloccato!",
+    "wallpaper_unlocked_notif": "🖼️ Sfondo sbloccato!",
+    "guest_name": "Ospite",
+    "guest_account_pitch": "Gratis. La tua serie, le statistiche e i badge ti seguono su ogni dispositivo, e puoi aggiungere amici, sfidarli ed entrare in classifica.",
+    "pseudo_placeholder": "Il tuo nome utente…",
+    "song_artwork_alt": "Copertina del brano",
+    "song_remove": "Rimuovi"
   },
   "badges": {
     "notification_title": "🎖️ Badge sbloccato!",
@@ -452,6 +468,8 @@
     "event_code_placeholder": "Inserisci il codice evento...",
     "event_code_submit": "Riscatta",
     "event_code_success": "Codice riscattato! Badge sbloccato.",
+    "event_code_title_success": "🎉 Codice riscattato! Un nuovo titolo ti aspetta tra i tuoi titoli.",
+    "event_code_both_success": "🎉 Codice riscattato! Badge e titolo sbloccati.",
     "event_code_error": "Codice non valido o già utilizzato.",
     "ace_detective": {
       "name": "Asso Detective",
@@ -963,7 +981,14 @@
     "scope_friends": "Amici",
     "login_for_friends": "Accedi per vedere la classifica dei tuoi amici.",
     "no_friends": "Nessuno dei tuoi amici appare ancora in questa classifica.",
-    "expert_no_streak": "La serie migliore non ha una classifica Esperto: una serie conta giorni consecutivi, e l'Esperto non è un appuntamento quotidiano."
+    "expert_no_streak": "La serie migliore non ha una classifica Esperto: una serie conta giorni consecutivi, e l'Esperto non è un appuntamento quotidiano.",
+    "rank_up": "Su di {{n}} dalla tua ultima visita",
+    "rank_down": "Giù di {{n}} dalla tua ultima visita",
+    "filter_counts": "Partite contate",
+    "counts_daily": "Partite del giorno",
+    "counts_all": "Tutte le partite",
+    "counts_daily_note": "Conta solo la prima partita di ogni modalità, ogni giorno: rigiocare non fa salire.",
+    "counts_all_note": "Contano tutte le partite, anche quelle rigiocate."
   },
   "friends": {
     "title": "Amici",
@@ -1208,7 +1233,7 @@
     "danger_intro": "Queste due azioni sono irreversibili. Nel dubbio, esporta prima il profilo."
   },
   "index": {
-    "main_title": "Prova a indovinare il personaggio di Persona (da Persona 1 a Persona 5)",
+    "main_title": "Indovina il personaggio di Persona del giorno, da Persona 1 a Persona 5X",
     "update_history": "Cronologia aggiornamenti",
     "changelog_button": "Vedi il Changelog completo",
     "copyright": "personadle.net — 2026",
@@ -1220,8 +1245,8 @@
     "discord_modal_sub": "Due server, un'unica famiglia Persona.",
     "discord_grimoire_tag": "🇫🇷 Server francese",
     "discord_grimoire_desc": "La nostra community partner francofona — la più attiva. Eventi, discussioni e tutta la scena Persona FR.",
-    "discord_personadle_tag": "🌍 Internazionale",
-    "discord_personadle_desc": "Il server ufficiale di PersonaDLE — sempre attivo, in inglese. Segnalazioni bug, feedback, e stiamo reclutando!",
+    "discord_personadle_tag": "⭐ Ufficiale · 🌍 Internazionale",
+    "discord_personadle_desc": "Il server ufficiale di PersonaDLE: pubblica le tue griglie, segnala bug, lascia un feedback — e stiamo reclutando!",
     "discord_join": "Unisciti",
     "daily_btn": "🕛 Reset Giornaliero",
     "daily_title": "🕛 Reset Giornaliero",
@@ -1534,7 +1559,9 @@
     "failed": "Impossibile copiare il risultato.",
     "one_try": "✅ Al primo colpo!",
     "tries": "✅ {{count}} tentativi",
-    "gave_up": "🏳️ Arreso dopo {{count}} tentativi"
+    "gave_up": "🏳️ Arreso dopo {{count}} tentativi",
+    "day_button": "Condividi la mia giornata",
+    "day_copied": "La tua giornata è copiata — incollala dove vuoi!"
   },
   "reset_password": {
     "title": "🔐 Reimposta la tua password",
@@ -1577,6 +1604,7 @@
     "play_todo": "Da giocare",
     "play_left": "Ancora {{count}} oggi",
     "play_all_done": "Tutte le modalità giocate oggi",
-    "home_status_done": "Giocato oggi"
+    "home_status_done": "Giocato oggi",
+    "play_discord": "Tutto giocato per oggi — vieni a chiacchierare su Discord"
   }
 }

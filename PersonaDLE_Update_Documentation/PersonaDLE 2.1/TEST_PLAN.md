@@ -473,7 +473,7 @@ documenté, pas un défaut.
 
 ```bash
 ssh hostinger-personadle
-mysql -u u870779941_Hamza -p u870779941_personadle   -e "SELECT version FROM schema_migrations ORDER BY version;"
+mysql -u <utilisateur_bdd> -p <base_prod>   -e "SELECT version FROM schema_migrations ORDER BY version;"
 ```
 
 Ne rejouer que ce qui manque. Toutes ces migrations sont idempotentes

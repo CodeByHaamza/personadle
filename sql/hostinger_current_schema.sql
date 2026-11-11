@@ -440,7 +440,7 @@ CREATE TABLE `wallpapers` (
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`u870779941_Hamza`@`127.0.0.1` SQL SECURITY DEFINER */
+/*!50013 DEFINER=`db_user`@`127.0.0.1` SQL SECURITY DEFINER */
 /*!50001 VIEW `v_friends` AS select `f`.`id` AS `id`,`f`.`requester_id` AS `user_a_id`,`f`.`addressee_id` AS `user_b_id`,`f`.`status` AS `status`,`f`.`created_at` AS `created_at`,`f`.`updated_at` AS `updated_at` from `friendships` `f` where `f`.`status` = 'accepted' */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -453,7 +453,7 @@ CREATE TABLE `wallpapers` (
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`u870779941_Hamza`@`127.0.0.1` SQL SECURITY DEFINER */
+/*!50013 DEFINER=`db_user`@`127.0.0.1` SQL SECURITY DEFINER */
 /*!50001 VIEW `v_global_stats` AS select `u`.`id` AS `user_id`,`u`.`pseudo` AS `pseudo`,sum(`s`.`wins`) AS `total_wins`,sum(`s`.`games`) AS `total_games`,max(`s`.`streak_record`) AS `best_streak` from (`users` `u` join `user_stats` `s` on(`s`.`user_id` = `u`.`id`)) where `u`.`is_deleted` = 0 group by `u`.`id`,`u`.`pseudo` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -466,7 +466,7 @@ CREATE TABLE `wallpapers` (
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_uca1400_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`u870779941_Hamza`@`127.0.0.1` SQL SECURITY DEFINER */
+/*!50013 DEFINER=`db_user`@`127.0.0.1` SQL SECURITY DEFINER */
 /*!50001 VIEW `v_social_links` AS select `sl`.`id` AS `id`,least(`sl`.`user_a_id`,`sl`.`user_b_id`) AS `user_a_id`,greatest(`sl`.`user_a_id`,`sl`.`user_b_id`) AS `user_b_id`,`sl`.`current_rank` AS `current_rank`,`sl`.`xp` AS `xp`,`sl`.`last_interaction` AS `last_interaction`,`sl`.`rank_updated_at` AS `rank_updated_at` from `social_links` `sl` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;

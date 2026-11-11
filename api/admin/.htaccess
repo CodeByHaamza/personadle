@@ -63,3 +63,5 @@ RewriteRule ^activity$                  activity.php    [L,QSA]
 RewriteRule ^announcements              announcements.php [L,QSA]
 RewriteRule ^settings$                  settings.php    [L,QSA]
 RewriteRule ^anticheat$                 anticheat.php   [L,QSA]
+# /api/admin/outliers → comptes hors norme (2.4, lot 16)
+RewriteRule ^outliers$                  outliers.php    [L,QSA]

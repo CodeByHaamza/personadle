@@ -11,6 +11,9 @@
  *   ✅ 2 essais
  *   https://personadle.net
  *
+ * Le bouton vit SOUS la barre de fin de partie (endgameSlot()), pas dedans : y
+ * glisser un bouton déplaçait « mode précédent / suivant ».
+ *
  * Câblage, sans toucher aux six modes un par un :
  *  - buildGameSession() (gameCore.js) retient le résultat de la partie en cours
  *    dans `lastGameResult` (LAST_RESULT_KEY : résultat, essais, identifiant) ;
@@ -21,6 +24,7 @@
  */
 
 import { isExpertPage, modeLabel, normalizeModeKey } from "./gameCore.js";
+import { currentDayShareText, isDayComplete } from "./share_day.js";
 
 /** Emoji de chaque mode dans le texte partagé. */
 export const MODE_ICON = {
@@ -117,7 +121,7 @@ export function buildShareText({ mode, result, attempts, isExpert = false, day, 
   return lines.join("\n");
 }
 
-function _toast(msg) {
+export function toast(msg) {
   if (typeof window.showToast === "function") {
     window.showToast(msg); // bottomNav.js
     return;
@@ -151,26 +155,74 @@ export async function shareText(text, nav = navigator) {
   }
 }
 
-/** Monte le bouton dans la navigation de fin de partie (#modeNavigationContainer). */
+/**
+ * Texte à partager pour la partie affichée (grille de couleurs en Classique
+ * normal, ligne d'essais ailleurs).
+ * @returns {string|null}
+ */
+export function currentShareText(doc = document, result = readCurrentResult()) {
+  if (!result) return null;
+  const isClassic = normalizeModeKey(result.mode) === "classic" && !result.isExpert;
+  return buildShareText({ ...result, grid: isClassic ? readClassicGrid(doc) : [] });
+}
+
+/**
+ * Bloc posé SOUS la barre de fin de partie (#modeNavigationContainer), qui reçoit
+ * le bouton « Partager ».
+ *
+ * Hors de la barre, volontairement : elle est une rangée flex « précédent / défi /
+ * suivant » en `space-between`, et y glisser le bouton Partager DÉPLAÇAIT les
+ * boutons de mode (retour de Hamza sur la 2.4). Le bloc suit l'état de la barre :
+ * caché quand elle se recache (Replay, filtre, minuit).
+ */
+export function endgameSlot(doc = document) {
+  const nav = doc.getElementById("modeNavigationContainer");
+  if (!nav) return null;
+  let slot = doc.getElementById("endgameExtras");
+  if (!slot) {
+    slot = doc.createElement("div");
+    slot.id = "endgameExtras";
+    slot.className = "endgame-extras";
+    nav.insertAdjacentElement("afterend", slot);
+    const sync = () => {
+      slot.hidden = nav.style.display === "none";
+    };
+    new MutationObserver(sync).observe(nav, { attributes: true, attributeFilter: ["style"] });
+    sync();
+  }
+  return slot;
+}
+
+/** Monte le bouton sous la navigation de fin de partie (bloc endgameSlot()). */
 export function mountShareButton(doc = document) {
   const nav = doc.getElementById("modeNavigationContainer");
   const result = readCurrentResult();
   doc.getElementById("shareResultBtn")?.remove();
   if (!nav || !result || result.isExpert !== isExpertPage()) return null;
 
+  // À 6/6, le bouton partage la JOURNÉE (js/share_day.js, 2.4 lot 10) : elle
+  // contient la partie qui vient de finir, et un second bouton surchargerait la
+  // barre de fin de partie sur téléphone. Jamais en Expert : la journée ne compte
+  // que les parties normales.
+  const day = !result.isExpert && isDayComplete();
   const btn = doc.createElement("button");
   btn.type = "button";
   btn.id = "shareResultBtn";
-  btn.className = "btn-share-result";
-  btn.innerHTML = `<span aria-hidden="true">📋</span><span>${_t("share.button", "Share my result")}</span>`;
+  btn.className = day ? "btn-share-result btn-share-result--day" : "btn-share-result";
+  btn.innerHTML = day
+    ? `<span aria-hidden="true">📅</span><span>${_t("share.day_button", "Share my day")}</span>`
+    : `<span aria-hidden="true">📋</span><span>${_t("share.button", "Share my result")}</span>`;
   btn.addEventListener("click", async () => {
-    const current = readCurrentResult() ?? result;
-    const isClassic = normalizeModeKey(current.mode) === "classic" && !current.isExpert;
-    const text = buildShareText({ ...current, grid: isClassic ? readClassicGrid(doc) : [] });
+    const text = day ? currentDayShareText() : currentShareText(doc, readCurrentResult() ?? result);
     const outcome = await shareText(text);
-    if (outcome === "copied") _toast(_t("share.copied", "Result copied — paste it anywhere!"));
-    else if (outcome === "failed") _toast(_t("share.failed", "Couldn't copy the result."));
+    if (outcome === "copied") {
+      toast(
+        day
+          ? _t("share.day_copied", "Your day is copied — paste it anywhere!")
+          : _t("share.copied", "Result copied — paste it anywhere!")
+      );
+    } else if (outcome === "failed") toast(_t("share.failed", "Couldn't copy the result."));
   });
-  nav.prepend(btn);
+  endgameSlot(doc).prepend(btn);
   return btn;
 }
