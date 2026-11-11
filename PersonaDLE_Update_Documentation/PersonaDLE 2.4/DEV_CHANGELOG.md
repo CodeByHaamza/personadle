@@ -29,12 +29,12 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 5 | `feat/remontee_erreurs_js` (#234) | Les erreurs JS des joueurs remontent dans l'admin et sur Discord |
 | 6 | Dependabot (#240, #242) | Dépendances de dev (jsdom 31) |
 | 7 | `fix/profil_debordement_mobile` | Le profil déborde de 12–14 px à 390/480 px (alerte `prod_smoke` chaque nuit depuis le 2026-10-12) |
-| 8 | `feat/discord_fin_de_partie` | Discord au bon moment : fin de partie, journée 6/6, profil, menu Jouer ; membres en ligne ; modale recentrée — **fait** |
+| 8 | `feat/discord_fin_de_partie` | Discord au bon moment : journée 6/6 (menu Jouer), profil, modale recentrée — **fait** ; la carte de fin de partie et le compteur de membres ont été **retirés** à la demande de Hamza |
 | 9 | `feat/codes_evenement_discord` | Codes événement exclusifs au Discord (badge ou titre) — **fait**, migration 057 |
 | 10 | `feat/partage_journee` | Partage « journée complète » des six modes — **fait** |
 | 11 | `feat/prochains_deblocages` | Profil : quêtes Expert et badges les plus proches — **fait** |
 | 12 | `feat/filtre_en_cours_de_partie` | Étape B anti-triche : changer de filtre en cours de partie = abandon, avec avertissement — **fait** |
-| 13 | `feat/accueil_explications` | Une ligne sous chaque mode, slogan à jour, profil invité qui explique le compte, textes anglais restants — **fait** |
+| 13 | `feat/accueil_explications` | Slogan à jour, profil invité qui explique le compte, textes anglais restants — **fait** ; les légendes sous chaque mode ont été **retirées** à la demande de Hamza |
 | 14 | `feat/nav_ordinateur` | Ordinateur : un seul ⚙ par mode — **fait** ; la navigation en haut et les boutons rangés sous le titre ont été **retirés** à la demande de Hamza (voir « Retours de Hamza ») |
 | 15 | `feat/podium_classement` | Podium animé, évolution ▲▼, « ta place » toujours visible — **fait** |
 | 16 | `feat/classement_quotidien` | Classement principal sur les parties du jour ; comptes hors norme repérés dans l'admin — **fait**, migration 058 |
@@ -56,6 +56,35 @@ site, préprod accessible par Tailscale, page de statut publique.
 - **« Puzzle commun du jour »** (une cible identique pour tous) : idée validée sur le
   principe, à cadrer avant d'en faire un lot — reportée à la 2.5 avec la salle à part
   (Archives de Velvet, Cognition) et l'OAuth Discord.
+
+---
+
+## 2026-11-11 — Retirés à la demande de Hamza : la carte Discord après victoire, les légendes de l'accueil
+
+Après avoir regardé la série : « le README ok, … et quand on gagne partage Discord : non,
+j'aime pas ; et le Almost there j'aime bien ». Précisé ensuite : retirer **la carte
+Discord de fin de partie** (lot 8) et **les légendes de l'accueil** (lot 13), garder le
+reste.
+
+- **Carte « Poste ta grille sur Discord »** (et sa version 6/6) : retirée avec tout ce
+  qui ne servait qu'à elle. Cela comprend `js/discord_nudge.js`, le proxy
+  `/api/discord_counts` (+ `api/lib/discord_counts.php`), `api.discord.counts`, les
+  styles `.discord-nudge*`, la section i18n `discord` et leurs tests (JS et PHPUnit).
+  Rien n'est perdu : tout reste dans l'historique git si l'idée revient. **Gardés** du
+  lot 8 :
+  - PersonaDLE en premier dans la modale Discord de l'accueil ;
+  - le lien Discord de la feuille « Jouer » à 6/6 ;
+  - le lien sous le partage du profil ;
+  - la carte « Code événement », qui renvoie au Discord (lot 9).
+- Le bloc `#endgameExtras` (sous la barre de fin de partie) reste, pour le seul bouton
+  « Partager mon résultat » / « Partager ma journée ».
+- **Légendes de l'accueil** : la phrase en bas de chaque bannière, et sa copie sous
+  chaque mode dans la feuille « Jouer », sont retirées, avec leurs clés
+  `index.mode_caption_*` et `tests/home_captions.test.js`. **Gardés** du lot 13 :
+  - le slogan « de Persona 1 à Persona 5X » ;
+  - la pastille ✓ visible sur toutes les bannières (correctif de `z-index`) ;
+  - le profil invité ;
+  - les traductions manquantes.
 
 ---
 

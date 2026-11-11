@@ -431,16 +431,6 @@ export const api = {
       ),
   },
 
-  // ── Serveur Discord (lot 8 de la 2.4) ─────────────────
-  discord: {
-    /**
-     * Membres et présents du serveur PersonaDLE, via le proxy en cache du site
-     * (l'IP du joueur ne part pas chez Discord).
-     * @returns {Promise<{ members: number|null, online: number|null }>}
-     */
-    counts: () => get("/discord_counts"),
-  },
-
   // ── Leaderboard ───────────────────────────────────────
   leaderboard: {
     /**

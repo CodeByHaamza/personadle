@@ -796,9 +796,9 @@ function foldText(s) {
 }
 
 /**
- * Invitation du serveur Discord officiel PersonaDLE (n'expire jamais). Une seule
- * source pour la carte de fin de partie (discord_nudge.js) et la feuille « Jouer »
- * (bottomNav.js) ; le footer et la modale de l'accueil l'ont en dur dans le HTML.
+ * Invitation du serveur Discord officiel PersonaDLE (n'expire jamais), pour la
+ * feuille « Jouer » (bottomNav.js) ; le footer, la modale de l'accueil et la
+ * fenêtre de partage du profil l'ont en dur dans le HTML.
  */
 export const DISCORD_INVITE_URL = "https://discord.gg/wpMdGGDp3y";
 
@@ -967,8 +967,6 @@ export function revealNextLink({ nextHref = "", prevHref = null } = {}) {
     // Bouton « Partager mon résultat » : la fin de partie des six modes passe ici,
     // rechargement compris. Import dynamique (cycle évité, voir buildGameSession).
     import("./share_result.js").then((m) => m.mountShareButton()).catch(() => {});
-    // Carte « Poste ta grille sur Discord » après une victoire (lot 8 de la 2.4).
-    import("./discord_nudge.js").then((m) => m.mountDiscordNudge()).catch(() => {});
     // La pastille « N à jouer » de la barre du bas était calculée au chargement :
     // elle affichait encore 6 juste après la partie. Sans effet si la barre est
     // absente (updatePlayBadge ne trouve pas #navPlayBadge).

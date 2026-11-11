@@ -1119,13 +1119,7 @@
       "b3_text": "Mergulha na diversão do verão com as novíssimas animações sazonais!",
       "b4_label": "A Jogar ao Sol:",
       "b4_text": "Entra no modo All-Out Attack e desfruta do novo lote de verão P5X!"
-    },
-    "mode_caption_classic": "Adivinha a personagem pelos seus traços",
-    "mode_caption_emoji": "Adivinha a personagem pelos emojis",
-    "mode_caption_alloutattack": "Reconhece quem ataca no All-Out Attack",
-    "mode_caption_silhouette": "Adivinha a personagem pela silhueta",
-    "mode_caption_personae": "Descobre de quem é esta Persona",
-    "mode_caption_music": "Reconhece a música em poucos segundos"
+    }
   },
   "data": {
     "genre": {
@@ -1612,16 +1606,5 @@
     "play_all_done": "Todos os modos jogados hoje",
     "home_status_done": "Jogado hoje",
     "play_discord": "Tudo jogado por hoje — vem conversar no Discord"
-  },
-  "discord": {
-    "nudge_win_title": "Boa! Publica a tua grelha no Discord",
-    "nudge_perfect_title": "🏆 6/6 hoje! Vem mostrá-lo no Discord",
-    "nudge_text": "Cada um tem o seu próprio alvo: a tua grelha não revela nada.",
-    "nudge_cta": "Copiar e abrir o Discord",
-    "nudge_copied": "Resultado copiado — cola-o no servidor!",
-    "nudge_hide": "Esconder — já estou no servidor",
-    "members": "{{members}} membros",
-    "online": "{{online}} online agora",
-    "nudge_perfect_cta": "Copiar o meu dia e abrir o Discord"
   }
 }

@@ -294,7 +294,6 @@ export function buildPlaySheetHTML(progress, currentPath = window.location.pathn
           <span class="play-sheet-icon" aria-hidden="true">${MODE_ICON[key] ?? "🎮"}</span>
           <span class="play-sheet-name">${_t(`modes.${key}.name`, label)}</span>
           ${state}
-          <span class="play-sheet-caption">${_t(`index.mode_caption_${key}`, "")}</span>
         </a>`;
     })
     .join("");

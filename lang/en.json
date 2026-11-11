@@ -1119,13 +1119,7 @@
       "b3_text": "Dive into summer fun with the brand-new seasonal animations!",
       "b4_label": "Playing in the Sun:",
       "b4_text": "Jump into All-Out Attack mode and enjoy the new P5X summer batch!"
-    },
-    "mode_caption_classic": "Guess the character from their traits",
-    "mode_caption_emoji": "Guess the character from emojis",
-    "mode_caption_alloutattack": "Name who's striking in the All-Out Attack",
-    "mode_caption_silhouette": "Guess the character from their silhouette",
-    "mode_caption_personae": "Find whose Persona this is",
-    "mode_caption_music": "Name the song from a short clip"
+    }
   },
   "data": {
     "genre": {
@@ -1612,16 +1606,5 @@
     "play_all_done": "All modes played today",
     "home_status_done": "Played today",
     "play_discord": "All done for today — come chat on Discord"
-  },
-  "discord": {
-    "nudge_win_title": "Nice one! Post your grid on Discord",
-    "nudge_perfect_title": "🏆 6/6 today! Show it off on Discord",
-    "nudge_text": "Everyone gets their own target: your grid spoils nothing.",
-    "nudge_cta": "Copy & open Discord",
-    "nudge_copied": "Result copied — paste it on the server!",
-    "nudge_hide": "Hide — I'm already on the server",
-    "members": "{{members}} members",
-    "online": "{{online}} online now",
-    "nudge_perfect_cta": "Copy my day & open Discord"
   }
 }

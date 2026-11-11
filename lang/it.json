@@ -1267,13 +1267,7 @@
       "b3_text": "Immergiti nell'atmosfera estiva con le nuove animazioni stagionali!",
       "b4_label": "Sotto il sole:",
       "b4_text": "Gioca nella modalità All-Out Attack e goditi il nuovo lotto P5X estivo!"
-    },
-    "mode_caption_classic": "Indovina il personaggio dai suoi tratti",
-    "mode_caption_emoji": "Indovina il personaggio dalle emoji",
-    "mode_caption_alloutattack": "Riconosci chi colpisce nell'All-Out Attack",
-    "mode_caption_silhouette": "Indovina il personaggio dalla sua silhouette",
-    "mode_caption_personae": "Scopri di chi è questa Persona",
-    "mode_caption_music": "Riconosci il brano in pochi secondi"
+    }
   },
   "data": {
     "genre": {
@@ -1612,16 +1606,5 @@
     "play_all_done": "Tutte le modalità giocate oggi",
     "home_status_done": "Giocato oggi",
     "play_discord": "Tutto giocato per oggi — vieni a chiacchierare su Discord"
-  },
-  "discord": {
-    "nudge_win_title": "Ottimo! Pubblica la tua griglia su Discord",
-    "nudge_perfect_title": "🏆 6/6 oggi! Mostralo su Discord",
-    "nudge_text": "Ognuno ha il proprio bersaglio: la tua griglia non svela nulla.",
-    "nudge_cta": "Copia e apri Discord",
-    "nudge_copied": "Risultato copiato — incollalo sul server!",
-    "nudge_hide": "Nascondi — sono già sul server",
-    "members": "{{members}} membri",
-    "online": "{{online}} online ora",
-    "nudge_perfect_cta": "Copia la mia giornata e apri Discord"
   }
 }

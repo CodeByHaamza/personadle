@@ -1267,13 +1267,7 @@
       "b3_text": "¡Sumérgete en el ambiente veraniego con las nuevas animaciones estacionales!",
       "b4_label": "Bajo el sol:",
       "b4_text": "¡Juega en el modo All-Out Attack y disfruta del nuevo lote P5X de verano!"
-    },
-    "mode_caption_classic": "Adivina el personaje por sus rasgos",
-    "mode_caption_emoji": "Adivina el personaje con emojis",
-    "mode_caption_alloutattack": "Reconoce quién ataca en el All-Out Attack",
-    "mode_caption_silhouette": "Adivina el personaje por su silueta",
-    "mode_caption_personae": "Descubre de quién es esta Persona",
-    "mode_caption_music": "Reconoce la canción en unos segundos"
+    }
   },
   "data": {
     "genre": {
@@ -1612,16 +1606,5 @@
     "play_all_done": "Todos los modos jugados hoy",
     "home_status_done": "Jugado hoy",
     "play_discord": "Todo jugado por hoy — ven a charlar en Discord"
-  },
-  "discord": {
-    "nudge_win_title": "¡Bien hecho! Publica tu cuadrícula en Discord",
-    "nudge_perfect_title": "🏆 ¡6/6 hoy! Preséntalo en Discord",
-    "nudge_text": "Cada uno tiene su propio objetivo: tu cuadrícula no revela nada.",
-    "nudge_cta": "Copiar y abrir Discord",
-    "nudge_copied": "Resultado copiado — ¡pégalo en el servidor!",
-    "nudge_hide": "Ocultar — ya estoy en el servidor",
-    "members": "{{members}} miembros",
-    "online": "{{online}} en línea",
-    "nudge_perfect_cta": "Copiar mi día y abrir Discord"
   }
 }

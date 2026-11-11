@@ -157,8 +157,7 @@ export async function shareText(text, nav = navigator) {
 
 /**
  * Texte à partager pour la partie affichée (grille de couleurs en Classique
- * normal, ligne d'essais ailleurs). Sert aussi à la carte Discord
- * (js/discord_nudge.js), qui copie le résultat avant d'ouvrir le serveur.
+ * normal, ligne d'essais ailleurs).
  * @returns {string|null}
  */
 export function currentShareText(doc = document, result = readCurrentResult()) {
@@ -169,7 +168,7 @@ export function currentShareText(doc = document, result = readCurrentResult()) {
 
 /**
  * Bloc posé SOUS la barre de fin de partie (#modeNavigationContainer), qui reçoit
- * le bouton « Partager » et la carte Discord (js/discord_nudge.js).
+ * le bouton « Partager ».
  *
  * Hors de la barre, volontairement : elle est une rangée flex « précédent / défi /
  * suivant » en `space-between`, et y glisser le bouton Partager DÉPLAÇAIT les

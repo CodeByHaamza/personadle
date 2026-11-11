@@ -1267,13 +1267,7 @@
       "b3_text": "Tauche mit den neuen saisonalen Animationen in die Sommeratmosphäre ein!",
       "b4_label": "In der Sonne:",
       "b4_text": "Spiele den All-Out Attack-Modus und genieße das neue P5X-Sommerpaket!"
-    },
-    "mode_caption_classic": "Errate den Charakter anhand seiner Merkmale",
-    "mode_caption_emoji": "Errate den Charakter anhand von Emojis",
-    "mode_caption_alloutattack": "Erkenne, wer beim All-Out Attack zuschlägt",
-    "mode_caption_silhouette": "Errate den Charakter anhand seiner Silhouette",
-    "mode_caption_personae": "Finde heraus, wem diese Persona gehört",
-    "mode_caption_music": "Erkenne den Song in wenigen Sekunden"
+    }
   },
   "data": {
     "genre": {
@@ -1612,16 +1606,5 @@
     "play_all_done": "Heute alle Modi gespielt",
     "home_status_done": "Heute gespielt",
     "play_discord": "Für heute alles gespielt — komm zum Plaudern auf Discord"
-  },
-  "discord": {
-    "nudge_win_title": "Gut gemacht! Teile dein Raster auf Discord",
-    "nudge_perfect_title": "🏆 6/6 heute! Zeig es auf Discord",
-    "nudge_text": "Jeder hat sein eigenes Ziel: Dein Raster verrät nichts.",
-    "nudge_cta": "Kopieren & Discord öffnen",
-    "nudge_copied": "Ergebnis kopiert — füge es auf dem Server ein!",
-    "nudge_hide": "Ausblenden — ich bin schon auf dem Server",
-    "members": "{{members}} Mitglieder",
-    "online": "{{online}} gerade online",
-    "nudge_perfect_cta": "Meinen Tag kopieren & Discord öffnen"
   }
 }
