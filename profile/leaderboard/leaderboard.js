@@ -33,6 +33,9 @@ const filters = {
   // tirage, autre barème, et un taux de victoire sans commune mesure — les
   // mélanger ne décrirait ni l'un ni l'autre.
   expert: false,
+  // Parties comptées (2.4, lot 16) : "daily" | "all", ou null = défaut du serveur
+  // (PERSONADLE_LEADERBOARD_DEFAULT_SCOPE). La réponse dit ce qui a été servi.
+  counts: null,
   // Troisième dimension (2.3), et la seule qui change la NATURE de la ligne :
   // on n'y classe plus des joueurs mais des AMITIÉS. Mode, période et métrique
   // n'ont alors aucun sens — leurs groupes sont masqués.
@@ -190,13 +193,20 @@ function renderFilterNote() {
   // (cf. api/lib/leaderboard_metrics.php). Sans cette phrase, le joueur voit une
   // page vide et conclut à une panne — c'est le même réflexe que le texte qui
   // explique pourquoi la liste d'amis est plus courte en défi Expert.
+  // Ce que « parties du jour » veut dire, une fois : sans ça, un joueur qui
+  // rejoue beaucoup se demande pourquoi son total a fondu (2.4, lot 16).
+  const countsNote =
+    filters.counts === "all"
+      ? t("leaderboard.counts_all_note") || "Every game counts, replays included."
+      : t("leaderboard.counts_daily_note") ||
+        "Only the first game of each mode, each day, counts — replaying doesn't climb.";
   const streakNote =
     filters.expert && filters.metric === "streak"
       ? esc(
           t("leaderboard.expert_no_streak") ||
             "Best streak has no Expert ranking: a streak counts consecutive days, and Expert is not a daily run."
         )
-      : note;
+      : `${esc(countsNote)} ${note}`;
 
   el.innerHTML = `
     <span class="lb-fn-chips">
@@ -590,8 +600,19 @@ async function loadLeaderboard() {
       offset: filters.offset,
       friends_only: filters.friendsOnly ? 1 : 0,
       expert: filters.expert ? 1 : 0,
+      ...(filters.counts ? { scope: filters.counts } : {}),
       ...(filters.bonds ? { view: "bonds" } : {}),
     });
+
+    // La pastille suit la vue réellement servie (défaut du serveur compris).
+    if (!filters.bonds && data.scope) {
+      const countsGroup = document.getElementById("countsFilter");
+      if (countsGroup) activatePill(countsGroup, data.scope);
+      if (filters.counts !== data.scope) {
+        filters.counts = data.scope;
+        renderFilterNote();
+      }
+    }
 
     if (filters.bonds) {
       renderBonds(data);
@@ -678,9 +699,19 @@ function attachFilterListeners() {
       ?.classList.toggle("lb-filters-card--expert", filters.expert);
     // Les filtres sans objet pour les amitiés sont MASQUÉS, pas désactivés : un
     // groupe grisé laisse croire qu'il s'appliquera peut-être.
-    for (const id of ["modeFilter", "periodFilter", "metricFilter"]) {
+    for (const id of ["modeFilter", "periodFilter", "metricFilter", "countsFilter"]) {
       document.getElementById(id)?.closest(".lb-filter-group")?.classList.toggle("hidden", filters.bonds);
     }
+    loadLeaderboard();
+  });
+
+  const countsGroup = document.getElementById("countsFilter");
+  countsGroup?.addEventListener("click", (e) => {
+    const pill = e.target.closest(".lb-pill");
+    if (!pill) return;
+    filters.counts = pill.dataset.value;
+    filters.offset = 0;
+    activatePill(countsGroup, filters.counts);
     loadLeaderboard();
   });
 

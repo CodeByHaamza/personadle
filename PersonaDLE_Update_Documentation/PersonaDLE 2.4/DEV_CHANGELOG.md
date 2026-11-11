@@ -37,7 +37,7 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 13 | `feat/accueil_explications` | Une ligne sous chaque mode, slogan à jour, profil invité qui explique le compte, textes anglais restants — **fait** |
 | 14 | `feat/nav_ordinateur` | Ordinateur : navigation en haut, pastilles qui ne masquent plus les bannières, un seul ⚙ par mode — **fait** |
 | 15 | `feat/podium_classement` | Podium animé, évolution ▲▼, « ta place » toujours visible — **fait** |
-| 16 | `feat/classement_quotidien` | Classement principal sur les parties du jour ; comptes hors norme repérés dans l'admin |
+| 16 | `feat/classement_quotidien` | Classement principal sur les parties du jour ; comptes hors norme repérés dans l'admin — **fait**, migration 058 |
 | 17 | `docs/readme_anime` | README façon thème GRUB : bannière et citation animées, démo des six modes |
 | 18 | `chore/menage_depot` | Fichiers inutiles retirés, trois documents de planification fusionnés, identifiant Hostinger retiré des fichiers suivis |
 
@@ -56,6 +56,102 @@ site, préprod accessible par Tailscale, page de statut publique.
 - **« Puzzle commun du jour »** (une cible identique pour tous) : idée validée sur le
   principe, à cadrer avant d'en faire un lot — reportée à la 2.5 avec la salle à part
   (Archives de Velvet, Cognition) et l'OAuth Discord.
+
+---
+
+## 2026-11-11 — Lot 16 : le classement compte les parties du jour ; l'admin repère les comptes hors norme
+
+Depuis la 032, chaque Rejouer ajoute une ligne à `game_sessions`, et `user_stats` cumule
+tout. Le classement « depuis toujours » récompensait donc qui rejoue le plus. En base
+locale, les comptes de démo y affichent 600+ parties, pour 24 jours de jeu.
+
+### Ce qui change
+
+- **La partie du jour** (migration 058, `game_sessions.is_daily`) est la première partie
+  d'un joueur par mode, par jour et par dimension (normal / Expert). Elle est posée à
+  l'enregistrement (`personadle_record_game_session()`, lecture juste avant l'insertion)
+  et rattrapée sur tout l'historique par la migration. `api/user/migrate.php` importe
+  toujours une partie du jour : il n'importe que s'il n'y en a pas déjà une.
+- **Le classement a deux vues** (`?scope=daily|all`) :
+  - « Parties du jour » : seules ces parties comptent, et un Rejouer ne fait pas monter.
+  - « Toutes les parties » : la règle d'avant.
+
+  Un nouveau groupe de filtres « Parties comptées » permet de choisir, et la note sous
+  les filtres dit en une phrase ce que la vue compte.
+- **Vue par défaut : une seule constante**, `PERSONADLE_LEADERBOARD_DEFAULT_SCOPE` (ici
+  `'daily'`). **À trancher par Hamza** : le cron rappelait sa décision « toutes les
+  parties comptent ; 100 victoires dans la journée valent 100 ». La liste validée le
+  2026-11-09 dit « classement principal sur les parties du jour ». Les deux restent
+  possibles, et basculer tient en une ligne.
+- **Comptes hors norme** (admin, panneau 🛡️ Anti-triche) : ce sont des **signaux**, pas
+  des preuves ni des sanctions, calculés sur les parties normales de la période.
+  - 🔁 Rejeu en masse : au moins 4 parties par partie du jour, et au moins 60 parties.
+  - 🎯 Premier coup trop fréquent : au moins 60 % des parties du jour. La cible est
+    tirée par joueur, la deviner d'emblée aussi souvent suppose de la connaître.
+  - 🏆 Presque jamais d'abandon : au moins 98 % de victoires, sur au moins 30 parties
+    du jour.
+  - ⚡ Victoires éclair : au moins la moitié des victoires en moins de 4 s.
+
+  Seuils en constantes, décision pure (`personadle_outlier_flags()`), lien « Voir le
+  joueur ».
+
+### Détails techniques
+
+- **Depuis toujours, parties du jour** : `user_stats` mélange tout, donc on relit
+  `game_sessions` (`is_expert = 0 AND is_daily = 1`) avec les formules de l'Expert.
+  `buildEverExpertLeaderboard()` prend `$expert` et `$dailyOnly`. Exception : la
+  **série** se mesure en jours, elle est identique dans les deux vues et reste sur
+  `user_stats`.
+- **Périodes** : le cron ne met plus en cache que la vue « parties du jour »
+  (`AND gs.is_daily = 1`). La vue « toutes les parties » par période est calculée en
+  direct : elle est bornée par la période, donc légère.
+- La réponse renvoie `scope`, et le front affiche **la vue servie** : la pastille active
+  suit la réponse, défaut du serveur compris. Les flèches ▲▼ (lot 15) gardent une
+  référence par vue, `counts` inclus.
+- Tests :
+  - `tests/php/IsDailyTest.php` : Rejouer = 0, autre mode = 1, l'Expert a sa propre
+    partie du jour, le lendemain = 1 ;
+  - `tests/php/OutliersTest.php` (6) : chaque signal à son seuil, un joueur ordinaire
+    n'en lève aucun, pas de division par zéro ;
+  - PHPUnit complet : 452 tests.
+
+### Vérifié (pile Docker)
+
+- Migration 058 jouée deux fois sur la base locale : 579 groupes donnent 579 parties du
+  jour, et la seconde passe ne change rien.
+- Cron relancé. Classement « depuis toujours / parties » : en vue du jour, tête à 24
+  parties ; en vue « toutes », 678. La semaine en « toutes » est servie en direct.
+- Bascule dans la page : `scope=all` envoyé seulement sur clic, la note suit.
+- Admin : `/api/admin/outliers` remonte les comptes E2E aux victoires de moins de 4 s,
+  ce qui est attendu sur des données de test.
+
+### Trouvé en route (commit à part, `fix(profil,nav)`)
+
+La suite E2E complète a levé deux défauts des lots 11 et 14 :
+- la carte « Presque là » chargeait les images de badges et de titres, jusqu'à 7,7 Mo
+  pièce. Elle montre désormais une pastille, et passe **sous** la carte Badges, où son
+  arrivée ne fait plus sauter la rangée épinglée ;
+- sur ordinateur, un défilement vers un élément le laissait sous la barre du haut, qui
+  interceptait ses clics. `scroll-padding-top: 72px`.
+
+Les autres échecs de la suite en parallèle sont des 503 de la fenêtre de maintenance
+(`moderation.spec.js`) et des `ECONNRESET` d'Apache local saturé. Rejoués seuls, ces
+fichiers passent.
+
+### À jouer en prod (release)
+
+`058_game_sessions_is_daily.sql` **avant** le `git pull` : sans la colonne, chaque
+enregistrement de partie tomberait en 500. Le rattrapage parcourt tout `game_sessions` :
+le mesurer d'abord sur la copie du serveur maison. Puis relancer une fois le cron du
+classement.
+
+### Angles morts
+
+- En « parties du jour », « depuis toujours » ne compte que ce que le serveur a
+  enregistré. Les statistiques d'avant le backend, importées dans `user_stats` sans
+  sessions, n'y figurent pas.
+- Deux premières parties du même mode envoyées au même instant seraient toutes deux « du
+  jour ». Le client envoie ses parties une à une, donc c'est en pratique impossible.
 
 ---
 

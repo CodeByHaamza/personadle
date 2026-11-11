@@ -983,7 +983,12 @@
     "no_friends": "Noch keiner deiner Freunde erscheint in diesem Ranking.",
     "expert_no_streak": "Für die beste Serie gibt es keine Experten-Rangliste: eine Serie zählt aufeinanderfolgende Tage, und der Experten-Modus ist kein tägliches Ritual.",
     "rank_up": "{{n}} Plätze hoch seit deinem letzten Besuch",
-    "rank_down": "{{n}} Plätze runter seit deinem letzten Besuch"
+    "rank_down": "{{n}} Plätze runter seit deinem letzten Besuch",
+    "filter_counts": "Gezählte Runden",
+    "counts_daily": "Tagesrunden",
+    "counts_all": "Alle Runden",
+    "counts_daily_note": "Nur die erste Runde jedes Modus pro Tag zählt — Wiederholen bringt dich nicht nach oben.",
+    "counts_all_note": "Jede Runde zählt, Wiederholungen eingeschlossen."
   },
   "friends": {
     "title": "Freunde",

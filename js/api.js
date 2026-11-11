@@ -463,10 +463,13 @@ export const api = {
       friends_only = 0,
       expert = 0,
       view = "",
+      scope = "",
     } = {}) =>
       get(
         `/leaderboard/?mode=${mode}&period=${period}&metric=${metric}&limit=${limit}&offset=${offset}` +
           `&friends_only=${friends_only}&expert=${expert}` +
+          // 'daily' | 'all' (2.4, lot 16) ; vide = choix par défaut du serveur.
+          (scope ? `&scope=${encodeURIComponent(scope)}` : "") +
           // `view=bonds` classe des AMITIÉS et non des joueurs : mode, période et
           // métrique y sont ignorés côté serveur, mais restent envoyés — la
           // signature de l'appel ne change pas selon la dimension choisie.

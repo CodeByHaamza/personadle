@@ -2172,3 +2172,16 @@ i.act-bar--players {
   text-align: center;
   opacity: 0.7;
 }
+
+/* Signaux « comptes hors norme » (2.4, lot 16) */
+.ac-flag {
+  display: inline-block;
+  margin: 1px 2px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(230, 57, 70, 0.12);
+  color: var(--red, #e63946);
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}

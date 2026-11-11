@@ -983,7 +983,12 @@
     "no_friends": "Nessuno dei tuoi amici appare ancora in questa classifica.",
     "expert_no_streak": "La serie migliore non ha una classifica Esperto: una serie conta giorni consecutivi, e l'Esperto non è un appuntamento quotidiano.",
     "rank_up": "Su di {{n}} dalla tua ultima visita",
-    "rank_down": "Giù di {{n}} dalla tua ultima visita"
+    "rank_down": "Giù di {{n}} dalla tua ultima visita",
+    "filter_counts": "Partite contate",
+    "counts_daily": "Partite del giorno",
+    "counts_all": "Tutte le partite",
+    "counts_daily_note": "Conta solo la prima partita di ogni modalità, ogni giorno: rigiocare non fa salire.",
+    "counts_all_note": "Contano tutte le partite, anche quelle rigiocate."
   },
   "friends": {
     "title": "Amici",

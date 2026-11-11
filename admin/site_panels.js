@@ -193,12 +193,28 @@ export async function renderMaintenance() {
 
 let _acDays = 30;
 
+/** Libellés des signaux « hors norme » (api/lib/outliers.php). */
+const OUTLIER_LABELS = {
+  replay_farming: "🔁 rejeu en masse",
+  perfect_rate: "🎯 1er coup trop fréquent",
+  win_rate: "🏆 presque jamais d'abandon",
+  fast_wins: "⚡ victoires éclair",
+};
+
 export async function renderAnticheat(openUser) {
   const el = document.getElementById("anticheat-panel-content");
   renderLoading(el);
   let res;
+  let outliers = [];
   try {
-    res = await api.get(`/api/admin/anticheat?days=${_acDays}`);
+    // Comptes hors norme (2.4, lot 16) chargés en parallèle : un échec de cette
+    // section ne doit pas masquer les écarts de cible.
+    const [ac, out] = await Promise.all([
+      api.get(`/api/admin/anticheat?days=${_acDays}`),
+      api.get(`/api/admin/outliers?days=${_acDays}`).catch(() => null),
+    ]);
+    res = ac;
+    outliers = out?.users ?? [];
   } catch {
     renderError(el, "Erreur lors du chargement.");
     return;
@@ -226,6 +242,25 @@ export async function renderAnticheat(openUser) {
               )
               .join("")}</tbody></table>`
           : `<p class="act-muted">Aucun écart sur la période. 🎉</p>`
+      }
+
+      <h3 style="margin:22px 0 6px">📈 Comptes hors norme</h3>
+      <p class="act-muted">Signaux statistiques sur les parties normales des ${_acDays} derniers jours (<code>api/lib/outliers.php</code>) — des pistes à regarder, pas des preuves : un joueur très fort peut lever « 1er coup ». Seuils : rejeu ≥ ${4} parties par partie du jour (et ≥ 60 parties), 1er coup ≥ 60 % des parties du jour, victoires ≥ 98 % sur ≥ 30 parties du jour, victoires de moins de 4 s ≥ 50 %.</p>
+      ${
+        outliers.length
+          ? `<table class="act-table"><thead><tr><th>Joueur</th><th>Signaux</th><th>Parties (du jour)</th><th>1er coup</th><th>Victoires (&lt; 4 s)</th><th></th></tr></thead><tbody>${outliers
+              .map(
+                (u) => `<tr>
+            <td>${escHtml(u.pseudo ?? `#${u.user_id}`)}${u.is_banned ? ' <span class="ac-banned">banni</span>' : ""}</td>
+            <td>${u.flags.map((f) => `<span class="ac-flag">${escHtml(OUTLIER_LABELS[f] ?? f)}</span>`).join(" ")}</td>
+            <td>${u.total} <span class="act-muted">(${u.daily})</span></td>
+            <td>${u.daily ? Math.round((u.daily_perfect / u.daily) * 100) : 0} %</td>
+            <td>${u.wins} <span class="act-muted">(${u.fast_wins})</span></td>
+            <td style="white-space:nowrap"><button class="btn-sm ac-open" data-id="${u.user_id}">Voir le joueur →</button></td>
+          </tr>`
+              )
+              .join("")}</tbody></table>`
+          : `<p class="act-muted">Aucun compte hors norme sur la période.</p>`
       }
     </div>`;
 

@@ -134,10 +134,12 @@ $stmtCheckSession = $pdo->prepare('
     WHERE user_id = ? AND mode = ? AND played_date = ?
     LIMIT 1
 ');
+// is_daily = 1 (migration 058) : une session n'est importée que s'il n'y en a
+// aucune ce jour-là pour ce mode (contrôle ci-dessus) — c'est donc la partie du jour.
 $stmtInsertSession = $pdo->prepare('
     INSERT INTO game_sessions
-        (user_id, mode, played_date, target_name, result, attempts, time_ms, active_filters)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        (user_id, mode, is_daily, played_date, target_name, result, attempts, time_ms, active_filters)
+    VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?)
 ');
 // Garde-fou : si la ligne (user, mode) n'existe pas encore (premier compte, jamais
 // joué en étant connecté), le SELECT/UPDATE plus bas matcheraient 0 ligne et les

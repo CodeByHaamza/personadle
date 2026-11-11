@@ -983,7 +983,12 @@
     "no_friends": "None of your friends appear in this ranking yet.",
     "expert_no_streak": "Best streak has no Expert ranking: a streak counts consecutive days, and Expert is not a daily run.",
     "rank_up": "Up {{n}} since your last visit",
-    "rank_down": "Down {{n}} since your last visit"
+    "rank_down": "Down {{n}} since your last visit",
+    "filter_counts": "Games counted",
+    "counts_daily": "Daily games",
+    "counts_all": "All games",
+    "counts_daily_note": "Only the first game of each mode, each day, counts — replaying doesn't climb.",
+    "counts_all_note": "Every game counts, replays included."
   },
   "friends": {
     "title": "Friends",

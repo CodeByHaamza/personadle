@@ -271,15 +271,27 @@ function personadle_record_game_session(
     string $clientSessionId = '',
     ?array $guesses = null
 ): array {
+    // 0. Partie du jour ou partie rejouée ? (migration 058, 2.4 lot 16) — la
+    //    première d'un joueur pour ce mode, ce jour et cette dimension. C'est elle
+    //    seule que compte le classement principal. Lue avant l'insertion plutôt
+    //    qu'en sous-requête sur la table qu'on remplit ; deux premières parties
+    //    du même mode envoyées au même instant seraient toutes deux « du jour »,
+    //    ce que le client ne fait pas (il envoie ses parties une à une).
+    $firstToday = $pdo->prepare(
+        'SELECT 1 FROM game_sessions WHERE user_id = ? AND mode = ? AND played_date = ? AND is_expert = ? LIMIT 1'
+    );
+    $firstToday->execute([$userId, $mode, $playedDate, $isExpert ? 1 : 0]);
+    $isDaily = $firstToday->fetchColumn() === false;
+
     // 1. Insérer la session — la contrainte UNIQUE (user, mode, date, is_expert)
     //    protège même en cas de requêtes concurrentes (pas de TOCTOU).
     try {
         $pdo->prepare('
             INSERT INTO game_sessions
-                (user_id, mode, is_expert, client_session_id, played_date, target_name, result, attempts, time_ms, active_filters, guesses)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (user_id, mode, is_expert, is_daily, client_session_id, played_date, target_name, result, attempts, time_ms, active_filters, guesses)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ')->execute([
-            $userId, $mode, $isExpert ? 1 : 0, $clientSessionId !== '' ? $clientSessionId : null,
+            $userId, $mode, $isExpert ? 1 : 0, $isDaily ? 1 : 0, $clientSessionId !== '' ? $clientSessionId : null,
             $playedDate, $targetName, $result,
             $attempts, $timeMs, json_encode($filters),
             $guesses === null ? null : json_encode($guesses, JSON_UNESCAPED_UNICODE),

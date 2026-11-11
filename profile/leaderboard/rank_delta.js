@@ -31,7 +31,7 @@ export function periodInstance(period, today = parisDateKey()) {
 }
 
 /** Clé de la vue (une référence par vue). */
-export function viewKey({ expert, mode, period, metric, friendsOnly }, today) {
+export function viewKey({ expert, mode, period, metric, friendsOnly, counts }, today) {
   return [
     RANK_BASELINE_PREFIX + (expert ? "expert" : "normal"),
     mode,
@@ -39,6 +39,8 @@ export function viewKey({ expert, mode, period, metric, friendsOnly }, today) {
     periodInstance(period, today),
     metric,
     friendsOnly ? "friends" : "all",
+    // « Parties du jour » et « toutes les parties » sont deux classements (lot 16).
+    counts || "daily",
   ].join("|");
 }
 

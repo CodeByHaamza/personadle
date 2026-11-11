@@ -25,6 +25,12 @@
  *             ⚠️ metric=streak n'existe pas en Expert — voir
  *             personadle_ever_expert_score_expr(). Le classement revient vide.
  *
+ *   scope   : 'daily' | 'all' — ce que le classement compte (2.4, lot 16) :
+ *             'daily' = la première partie de chaque mode, chaque jour
+ *             (game_sessions.is_daily, migration 058) ; 'all' = toutes les parties,
+ *             Rejouer compris. Défaut : PERSONADLE_LEADERBOARD_DEFAULT_SCOPE
+ *             (api/lib/leaderboard_metrics.php). La série est la même dans les deux.
+ *
  *   limit   : nombre de résultats (défaut 50, max 100)
  *   offset  : pagination (défaut 0)
  *
@@ -70,6 +76,11 @@ $friendsOnly = (bool) ($_GET['friends_only'] ?? 0) && $myId > 0;
 // Un bool ne peut rien injecter ; une chaîne venue de $_GET, si.
 $expertOnly = ($_GET['expert'] ?? '0') === '1';
 
+// Ce que compte le classement (2.4, lot 16) : les parties du jour seulement, ou
+// toutes (Rejouer compris). Défaut réglé par PERSONADLE_LEADERBOARD_DEFAULT_SCOPE.
+$scope     = in_array($_GET['scope'] ?? '', ['daily', 'all'], true) ? $_GET['scope'] : PERSONADLE_LEADERBOARD_DEFAULT_SCOPE;
+$dailyOnly = $scope === 'daily';
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // CAS : LIENS SOCIAUX — on ne classe plus des JOUEURS mais des PAIRES
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -88,9 +99,21 @@ if (($_GET['view'] ?? '') === 'bonds') {
 if ($period === 'ever') {
     // user_stats n'agrège pas l'Expert : ce cas a son propre chemin, sur game_sessions.
     if ($expertOnly) {
-        buildEverExpertLeaderboard($pdo, $mode, $metric, $limit, $offset, $myId, $friendsOnly);
+        buildEverExpertLeaderboard($pdo, $mode, $metric, $limit, $offset, $myId, $friendsOnly, true, $dailyOnly);
+    }
+    // « Parties du jour » : user_stats cumule tout, Rejouer compris — on relit
+    // game_sessions (is_daily), avec les formules de l'Expert. La série, elle, se
+    // mesure en jours : identique dans les deux vues, elle reste sur user_stats.
+    if ($dailyOnly && $metric !== 'streak') {
+        buildEverExpertLeaderboard($pdo, $mode, $metric, $limit, $offset, $myId, $friendsOnly, false, true);
     }
     buildEverLeaderboard($pdo, $mode, $metric, $limit, $offset, $myId, $friendsOnly);
+}
+
+// « Toutes les parties » par période : jamais en cache (le cron ne garde que la
+// vue « parties du jour »), calculé en direct sur la période.
+if (!$dailyOnly) {
+    buildPeriodLeaderboardLive($pdo, $mode, $period, $metric, $limit, $offset, $myId, $friendsOnly, $expertOnly, false);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -321,9 +344,11 @@ function buildEverLeaderboard(PDO $pdo, string $mode, string $metric, int $limit
  * moyenne du mode normal tirerait tous les joueurs Expert vers un repère qui
  * n'est pas le leur.
  */
-function buildEverExpertLeaderboard(PDO $pdo, string $mode, string $metric, int $limit, int $offset, int $myId, bool $friendsOnly = false): never
+function buildEverExpertLeaderboard(PDO $pdo, string $mode, string $metric, int $limit, int $offset, int $myId, bool $friendsOnly = false, bool $expert = true, bool $dailyOnly = false): never
 {
-    $prior     = personadle_leaderboard_prior($pdo, $mode, true);
+    // Sert aussi la vue « parties du jour » du mode normal ($expert = false,
+    // $dailyOnly = true, 2.4 lot 16) : même source (game_sessions), mêmes formules.
+    $prior     = personadle_leaderboard_prior($pdo, $mode, $expert);
     $scoreExpr = personadle_ever_expert_score_expr($metric, $prior);
 
     // `streak` renvoie null ici volontairement (cf. leaderboard_metrics.php) : une
@@ -332,15 +357,18 @@ function buildEverExpertLeaderboard(PDO $pdo, string $mode, string $metric, int 
     // front laisse la métrique sélectionnable, et un 400 ressemblerait à une
     // panne alors que c'est une absence assumée.
     if ($scoreExpr === null) {
-        formatAndSend($pdo, [], $metric, $myId, $mode, 'ever', $limit, $offset, 0, true);
+        formatAndSend($pdo, [], $metric, $myId, $mode, 'ever', $limit, $offset, 0, $expert);
     }
 
     $modeFilter    = $mode === 'all' ? '' : 'AND gs.mode = ' . $pdo->quote($mode);
     $participation = $metric === 'winrate' ? 'AND COUNT(*) >= 1' : '';
+    // Littéraux issus de bools, jamais d'une chaîne de $_GET.
+    $dimension   = 'AND gs.is_expert = ' . ($expert ? 1 : 0);
+    $dailyFilter = $dailyOnly ? 'AND gs.is_daily = 1' : '';
 
     $friendsFilter = buildFriendsClause($pdo, $friendsOnly, $myId);
     if ($friendsFilter === '__EMPTY__') {
-        formatAndSend($pdo, [], $metric, $myId, $mode, 'ever', $limit, $offset, 0, true);
+        formatAndSend($pdo, [], $metric, $myId, $mode, 'ever', $limit, $offset, 0, $expert);
     }
 
     $sql = "
@@ -357,7 +385,8 @@ function buildEverExpertLeaderboard(PDO $pdo, string $mode, string $metric, int 
         JOIN users u ON u.id = gs.user_id
         LEFT JOIN profiles p ON p.user_id = u.id
         WHERE u.is_deleted = 0
-          AND gs.is_expert = 1
+          {$dimension}
+          {$dailyFilter}
         {$modeFilter}
         {$friendsFilter}
         GROUP BY u.id, u.pseudo, u.friend_code, p.avatar_data, p.avatar_border_color, p.selected_badges
@@ -372,7 +401,8 @@ function buildEverExpertLeaderboard(PDO $pdo, string $mode, string $metric, int 
             FROM game_sessions gs
             JOIN users u ON u.id = gs.user_id
             WHERE u.is_deleted = 0
-              AND gs.is_expert = 1
+              {$dimension}
+              {$dailyFilter}
             {$modeFilter}
             {$friendsFilter}
             GROUP BY u.id
@@ -381,7 +411,7 @@ function buildEverExpertLeaderboard(PDO $pdo, string $mode, string $metric, int 
     ";
     $total = (int) $pdo->query($countSql)->fetchColumn();
 
-    formatAndSend($pdo, $rows, $metric, $myId, $mode, 'ever', $limit, $offset, $total, true,
+    formatAndSend($pdo, $rows, $metric, $myId, $mode, 'ever', $limit, $offset, $total, $expert,
         fn () => personadle_leaderboard_find_mine($pdo, $sql, [], $myId));
 }
 
@@ -476,8 +506,11 @@ function buildPeriodLeaderboard(PDO $pdo, string $mode, string $period, string $
  * Fallback : calcul leaderboard day/week/month directement sur game_sessions.
  * Utilisé quand leaderboard_cache est vide (cron pas encore exécuté).
  */
-function buildPeriodLeaderboardLive(PDO $pdo, string $mode, string $period, string $metric, int $limit, int $offset, int $myId, bool $friendsOnly = false, bool $expertOnly = false): never
+function buildPeriodLeaderboardLive(PDO $pdo, string $mode, string $period, string $metric, int $limit, int $offset, int $myId, bool $friendsOnly = false, bool $expertOnly = false, bool $dailyOnly = true): never
 {
+    // 2.4, lot 16 : par défaut la même vue que le cache (parties du jour) ;
+    // `false` pour « toutes les parties ». Littéral, jamais une entrée utilisateur.
+    $dailyFilter = $dailyOnly ? 'AND gs.is_daily = 1' : '';
     // Littéral 0/1 issu d'un bool, jamais d'une chaîne de $_GET — cf. la
     // normalisation en tête de fichier.
     $expertFilter = 'AND gs.is_expert = ' . ($expertOnly ? 1 : 0);
@@ -553,6 +586,7 @@ function buildPeriodLeaderboardLive(PDO $pdo, string $mode, string $period, stri
         WHERE gs.played_date >= ?
           AND u.is_deleted = 0
           {$expertFilter}
+          {$dailyFilter}
           {$modeFilter}
           {$friendsFilter}
         GROUP BY u.id, u.pseudo, u.friend_code, p.avatar_data, p.avatar_border_color, p.selected_badges
@@ -573,6 +607,7 @@ function buildPeriodLeaderboardLive(PDO $pdo, string $mode, string $period, stri
             WHERE gs.played_date >= ?
               AND u.is_deleted = 0
               {$expertFilter}
+              {$dailyFilter}
               {$modeFilter}
               {$friendsFilter}
             GROUP BY u.id
@@ -642,6 +677,9 @@ function formatAndSend(PDO $pdo, array $rows, string $metric, int $myId, string 
         // le front s'en sert pour vérifier qu'il affiche bien ce qu'il croit, au
         // lieu d'un classement normal silencieusement servi à la place.
         'expert'  => $expertOnly,
+        // Vue servie (2.4, lot 16) : le front affiche ce qu'il reçoit, pas ce qu'il
+        // croit avoir demandé. Global plutôt que paramètre : chaque chemin y passe.
+        'scope'   => $GLOBALS['scope'] ?? PERSONADLE_LEADERBOARD_DEFAULT_SCOPE,
         'entries' => $entries,
         'my_rank' => $myRank,
         'count'   => $total,    // total rows matching (not just current page)

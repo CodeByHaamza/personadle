@@ -983,7 +983,12 @@
     "no_friends": "Nenhum dos teus amigos aparece ainda nesta classificação.",
     "expert_no_streak": "A melhor sequência não tem classificação Especialista: uma sequência conta dias consecutivos, e o Especialista não é um compromisso diário.",
     "rank_up": "Subiu {{n}} desde a tua última visita",
-    "rank_down": "Desceu {{n}} desde a tua última visita"
+    "rank_down": "Desceu {{n}} desde a tua última visita",
+    "filter_counts": "Partidas contadas",
+    "counts_daily": "Partidas do dia",
+    "counts_all": "Todas as partidas",
+    "counts_daily_note": "Só conta a primeira partida de cada modo, por dia: voltar a jogar não te faz subir.",
+    "counts_all_note": "Todas as partidas contam, repetições incluídas."
   },
   "friends": {
     "title": "Amigos",

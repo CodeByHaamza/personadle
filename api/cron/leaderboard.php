@@ -111,6 +111,10 @@ function _recalculate(PDO $pdo, string $mode, string $period, string $periodStar
     $expertFilter = 'AND gs.is_expert = ' . ($expertOnly ? 1 : 0);
 
     // ── Le classement compte des PARTIES, volontairement ─────────────────────
+    // ⚠️ 2.4, lot 16 : le cache ne compte plus que les PARTIES DU JOUR (is_daily),
+    // vue par défaut du classement ; « toutes les parties » (la règle ci-dessous)
+    // reste une vue au choix, calculée en direct — voir
+    // PERSONADLE_LEADERBOARD_DEFAULT_SCOPE (api/lib/leaderboard_metrics.php).
     // Décision produit (Hamza) : « toutes les parties comptent » vaut aussi pour le
     // classement. 100 victoires jouées dans la journée valent 100 — compter des
     // jours distincts pénaliserait le joueur assidu, qui est précisément celui que
@@ -149,6 +153,10 @@ function _recalculate(PDO $pdo, string $mode, string $period, string $periodStar
               -- stockées séparément : sans ce filtre, les parties Expert gonfleraient
               -- le classement du mode normal.
               {$expertFilter}
+              -- Le cache est la vue « parties du jour » (migration 058, 2.4 lot 16) :
+              -- un Rejouer n'y fait pas monter. « Toutes les parties » est calculée
+              -- en direct par l'API.
+              AND gs.is_daily = 1
             {$modeFilter}
             GROUP BY gs.user_id
             HAVING score IS NOT NULL AND score > 0 {$participation}

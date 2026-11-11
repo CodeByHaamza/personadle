@@ -983,7 +983,12 @@
     "no_friends": "Ninguno de tus amigos aparece aún en este ranking.",
     "expert_no_streak": "La mejor racha no tiene clasificación Experto: una racha cuenta días consecutivos, y el Experto no es una cita diaria.",
     "rank_up": "Sube {{n}} desde tu última visita",
-    "rank_down": "Baja {{n}} desde tu última visita"
+    "rank_down": "Baja {{n}} desde tu última visita",
+    "filter_counts": "Partidas contadas",
+    "counts_daily": "Partidas del día",
+    "counts_all": "Todas las partidas",
+    "counts_daily_note": "Solo cuenta la primera partida de cada modo, cada día: volver a jugar no te hace subir.",
+    "counts_all_note": "Cuentan todas las partidas, también las repetidas."
   },
   "friends": {
     "title": "Amigos",

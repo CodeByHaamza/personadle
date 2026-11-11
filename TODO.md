@@ -37,6 +37,23 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       (`Unknown column 'title_slug'`). Rejouable (`MODIFY` + `ADD COLUMN IF NOT EXISTS`),
       répétée deux fois sur la base Docker le 2026-11-11. Puis
       `INSERT IGNORE INTO schema_migrations (version) VALUES ('057_event_code_titles')`.
+- [ ] **2.4 — Jouer `sql/migrations/058_game_sessions_is_daily.sql`** (lot 16 : la partie
+      du jour se distingue des rejouées ; colonne `game_sessions.is_daily`, rattrapage de
+      tout l'historique, index `idx_game_sessions_daily`). **À jouer AVANT le `git pull`
+      Hostinger** : sans la colonne, CHAQUE enregistrement de partie tombe en 500
+      (`Unknown column 'is_daily'`) — la migration la plus bloquante de la 2.4.
+      Rejouable (`ADD COLUMN IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, UPDATE qui ne
+      pose que des 1 manquants). Le rattrapage parcourt tout `game_sessions` : le jouer
+      d'abord sur la copie du serveur maison pour mesurer sa durée. Puis
+      `INSERT IGNORE INTO schema_migrations (version) VALUES ('058_game_sessions_is_daily')`,
+      et lancer une fois le cron du classement pour recalculer le cache.
+- [ ] **2.4 — Décision Hamza : vue par défaut du classement** —
+      `PERSONADLE_LEADERBOARD_DEFAULT_SCOPE` (`api/lib/leaderboard_metrics.php`) vaut
+      `'daily'` (liste du 2026-11-09) alors que la règle écrite dans le cron disait
+      « toutes les parties comptent ». Les deux vues existent ; seule la valeur par
+      défaut se règle là. En « parties du jour », « depuis toujours » ne compte que ce
+      que le serveur a enregistré : les stats d'avant le backend (importées dans
+      `user_stats` sans sessions) n'y figurent pas.
 - [ ] **2.4 — Codes déjà publics** (décision Hamza) : les codes encore actifs écrits dans
       le dépôt (`sql/bdd_mysql.sql`, migration 054 — dont `IAMNOTAPRINCESS`, « annonce
       Discord ») sont lisibles par tous sur GitHub. Seule parade : les désactiver dans

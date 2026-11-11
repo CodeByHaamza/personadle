@@ -983,7 +983,12 @@
     "no_friends": "Aucun de tes amis n'apparaît encore dans ce classement.",
     "expert_no_streak": "La meilleure série n'a pas de classement Expert : une série compte des jours consécutifs, et l'Expert n'est pas un rendez-vous quotidien.",
     "rank_up": "+{{n}} place(s) depuis ta dernière visite",
-    "rank_down": "−{{n}} place(s) depuis ta dernière visite"
+    "rank_down": "−{{n}} place(s) depuis ta dernière visite",
+    "filter_counts": "Parties comptées",
+    "counts_daily": "Parties du jour",
+    "counts_all": "Toutes les parties",
+    "counts_daily_note": "Seule la première partie de chaque mode, chaque jour, compte : rejouer ne fait pas monter.",
+    "counts_all_note": "Toutes les parties comptent, rejouées comprises."
   },
   "friends": {
     "title": "Amis",
