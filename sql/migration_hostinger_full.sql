@@ -3,7 +3,7 @@
 -- MariaDB 10.6+ (Hostinger) — idempotent (safe to re-run)
 -- ============================================================
 -- Lancer via SSH :
---   mysql -u u870779941_Hamza -p u870779941_personadle < sql/migration_hostinger_full.sql
+--   mysql -u <utilisateur_bdd> -p <base_prod> < sql/migration_hostinger_full.sql
 -- ============================================================
 
 -- ── m000 : Social foundation ──────────────────────────────────

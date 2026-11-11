@@ -39,7 +39,7 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 15 | `feat/podium_classement` | Podium animé, évolution ▲▼, « ta place » toujours visible — **fait** |
 | 16 | `feat/classement_quotidien` | Classement principal sur les parties du jour ; comptes hors norme repérés dans l'admin — **fait**, migration 058 |
 | 17 | `docs/readme_anime` | README à la manière de Persona GRUB Themes : bannière et citations animées, bandeaux de section — **fait** |
-| 18 | `chore/menage_depot` | Fichiers inutiles retirés, trois documents de planification fusionnés, identifiant Hostinger retiré des fichiers suivis |
+| 18 | `chore/menage_depot` | Fichiers inutiles retirés, trois documents de planification fusionnés, identifiant Hostinger retiré des fichiers suivis — **fait** |
 
 Depuis le lot 8, les lots sont des **commits successifs d'une seule branche,
 `feat/v2_4_suite`** (partie du lot 7), avec une seule PR vers `develop` : Hamza teste
@@ -56,6 +56,75 @@ site, préprod accessible par Tailscale, page de statut publique.
 - **« Puzzle commun du jour »** (une cible identique pour tous) : idée validée sur le
   principe, à cadrer avant d'en faire un lot — reportée à la 2.5 avec la salle à part
   (Archives de Velvet, Cognition) et l'OAuth Discord.
+
+---
+
+## 2026-11-11 — Lot 18 : ménage du dépôt
+
+### Fichiers retirés ou rangés
+
+- **`nom`** (vide) et **`iddée_demander.txt`** (deux lignes d'idées) sont supprimés. Leurs
+  idées sont reprises dans `ROADMAP.md` (« Nouveaux personnages », « Cémantix &
+  Pédantix »). Les règles `.htaccess` qui les refusent restent : défense en profondeur si
+  quelqu'un les recrée, et `tests/htaccess_fichiers_internes.test.js` les vérifie toujours.
+  `version-all.sh` avait déjà disparu.
+- **`expert_mode_content.md` → `docs/`** : la source curée à la main des paroles Expert
+  n'avait rien à faire à la racine. `scripts/export_expert_lyrics.js` suit le nouveau chemin,
+  et `npm run lyrics:build` régénère à l'identique (78 chansons, 1 133 vers) : seule la ligne
+  d'en-tête change.
+
+### Trois documents de planification, deux vivants
+
+- **`AMELIORATIONS.md` → `docs/archive/audits_2026.md`** (`git mv`, historique gardé).
+  C'étaient des **audits datés** (2026-07 → 2026-10-20), sans case à cocher. On les garde
+  pour leur raisonnement, mais ce n'est pas une liste de travail. Un en-tête dit
+  désormais où est la suite.
+- **Ce qui restait ouvert** est repris dans `ROADMAP.md`, § « Repris des audits » :
+  - la marche 2 de l'anti-triche ;
+  - le poids des images du profil ;
+  - les 186 Ko d'`index.html` ;
+  - Cémantix et Pédantix ;
+  - le rappel « série qui va geler » ;
+  - les archives des jours passés ;
+  - la statistique du jour ;
+  - les nouveaux personnages ;
+  - un renvoi aux idées par mode « à trancher ».
+- **`TODO.md` reste l'opérationnel** (bloquant release), référencé par `CLAUDE.md`,
+  `DEPLOY.md` et `scripts/check-doc-numbers.js`. Le fondre dans `ROADMAP.md` aurait cassé
+  ces renvois pour rien. Résultat : `ROADMAP.md` pour les idées et versions, `TODO.md` pour
+  ce qui bloque une sortie.
+- Les six renvois vers l'ancien chemin sont mis à jour : `ci.yml`, `.htaccess`,
+  `ROADMAP.md`, `pages/README.md`, `scripts/validate_incoming.js`.
+- `ROADMAP.md` annonçait encore « purger l'historique git (3,9 Go) » : c'est fait, voir
+  ci-dessous.
+
+### Identifiant Hostinger retiré des fichiers suivis
+
+L'identifiant du compte (préfixe des noms d'utilisateur et de base de prod) apparaissait
+dans 6 fichiers suivis :
+- `scripts/migrate.sh` lit maintenant `HOSTINGER_DB_USER` / `HOSTINGER_DB_NAME` dans
+  l'environnement, avec un message clair s'ils manquent. Leurs valeurs sont dans
+  `personadle-discord/ops/COMMANDES.md`, le dépôt privé ;
+- les exemples de commandes (`sql/README.md`, `TODO.md`, plan de test 2.1, en-tête de
+  `sql/migration_hostinger_full.sql`) utilisent `<utilisateur_bdd>` / `<base_prod>` ;
+- l'instantané `sql/hostinger_current_schema.sql` (DEFINER des vues) passe à `db_user`.
+
+⚠️ L'historique git le contient toujours. Ça ne change rien au risque réel : ce n'est
+pas un secret, aucun mot de passe n'a jamais été commité, mais ça cesse de l'afficher.
+Le dépôt privé `CLAUDE.md` le garde.
+
+### Pour mémoire : la purge de l'historique (2026-11-09)
+
+Elle avait été faite pendant la 2.3.4 sans être racontée ici.
+- **Une seule passe** `git filter-repo`, depuis un miroir d'origin : anciens `.gif` (les
+  animations All-Out Attack d'avant le réencodage webp), signatures d'outils dans les
+  messages et corps de PR, auteurs remappés.
+- `.git` passe de **4,0 Go à 1,2 Go**.
+- Hostinger a été recloné, la préprod et le clone local resynchronisés. Les corps des 83
+  PR ont été nettoyés.
+- Une sauvegarde du dépôt d'avant (4,0 Go) est gardée un mois hors du dépôt.
+- À faire par Hamza : décocher « Allow force pushes » sur `main`, et prévenir les
+  contributeurs de recloner.
 
 ---
 

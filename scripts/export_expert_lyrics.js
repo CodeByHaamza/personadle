@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { songs } from "../musicsMode/database/songs.js";
 
-const SRC = new URL("../expert_mode_content.md", import.meta.url);
+const SRC = new URL("../docs/expert_mode_content.md", import.meta.url);
 const OUT = new URL("../musicsMode/database/expert_lyrics.js", import.meta.url);
 
 // `split(/\r?\n/)` et non `split("\n")` : le repérage de la section Music se fait
@@ -60,7 +60,7 @@ for (const r of rows) {
 // Un contenu de jeu ne doit pas pouvoir disparaître sans que rien ne le dise.
 if (Object.keys(result).length === 0) {
   console.error(
-    "❌ Aucune chanson n'a été extraite de expert_mode_content.md.\n" +
+    "❌ Aucune chanson n'a été extraite de docs/expert_mode_content.md.\n" +
       "   Le fichier n'est pas écrit : l'écraser viderait le pool Music Expert.\n" +
       "   Causes déjà vues : section « == Music == » absente ou renommée, ou fins de\n" +
       "   ligne CRLF (le repérage de section se fait par égalité stricte)."
@@ -76,7 +76,7 @@ const header = `/**
  * musicsMode/database/expert_lyrics.js
  * Paroles pour le mode Music Expert — révélation cumulative, un vers par essai raté.
  *
- * Données GÉNÉRÉES depuis expert_mode_content.md (curé à la main par Hamza) — ne pas
+ * Données GÉNÉRÉES depuis docs/expert_mode_content.md (curé à la main par Hamza) — ne pas
  * éditer les paroles ici, éditer le .md puis régénérer.
  * - Clé = \`titre\` exact de songs.js. Les instrumentaux n'ont pas d'entrée : une
  *   chanson absente d'ici est hors du tirage Expert Music.

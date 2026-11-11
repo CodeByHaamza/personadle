@@ -120,7 +120,7 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       `int` → `DECIMAL(8,1)`, MODIFY idempotent, rejouable). Sans elle, la métrique winrate du
       classement mis en cache est tronquée à l'entier (73.4 → 73, égalités artificielles). Pas
       bloquante pour le déploiement (aucun crash, et le cache était vide en prod) — à jouer dès
-      que possible : `ssh hostinger-personadle mysql u870779941_personadle < sql/migrations/047_leaderboard_cache_score_decimal.sql`
+      que possible : `ssh hostinger-personadle mysql <base_prod> < sql/migrations/047_leaderboard_cache_score_decimal.sql`
       puis `INSERT IGNORE INTO schema_migrations (version) VALUES ('047_leaderboard_cache_score_decimal')`.
 - [x] Jouer `sql/migrations/048_reconcile_prod_id_columns.sql` — **jouée en urgence le 2026-09-18**,
       trente minutes après la mise en prod : le Compendium tombait en 500 (`user_titles.id` absente en

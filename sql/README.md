@@ -79,10 +79,10 @@ mutuel + rank-up. Label `proc_body:` requis par MariaDB.
 ssh hostinger-personadle
 
 # Schéma — bdd_mysql.sql, PAS bdd_mariadb.sql (déprécié, voir tableau ci-dessus)
-mysql -u u870779941_Hamza -p u870779941_personadle < sql/bdd_mysql.sql
+mysql -u <utilisateur_bdd> -p <base_prod> < sql/bdd_mysql.sql
 
 # Procédure stockée (DELIMITER obligatoire — pas via phpMyAdmin)
-mysql -u u870779941_Hamza -p u870779941_personadle --delimiter='$$' < sql/hostinger_procedure.sql
+mysql -u <utilisateur_bdd> -p <base_prod> --delimiter='$$' < sql/hostinger_procedure.sql
 ```
 
 → Détail de chaque table : [`explication.md`](explication.md) · Migrations : [`migrations/README.md`](migrations/README.md)

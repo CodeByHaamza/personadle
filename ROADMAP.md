@@ -245,12 +245,44 @@
 
 ---
 
+## 📥 Repris des audits (2026-09 → 2026-11) — ce qui restait ouvert
+
+Les audits datés (ex-`AMELIORATIONS.md`) sont archivés dans
+[`docs/archive/audits_2026.md`](docs/archive/audits_2026.md) pour leur raisonnement. Ce qui
+n'était ni fait ni écarté est ici (2.4, lot 18) — un seul endroit pour les idées, `TODO.md`
+restant celui de l'opérationnel.
+
+- [ ] **Anti-triche, marche 2** : refuser (422) la première partie du jour dont la cible ne
+      correspond pas — aujourd'hui détection seule (`Daily target mismatch`). Préalable :
+      mesurer les faux positifs dans l'admin (panneau Anti-triche + « comptes hors norme »,
+      lot 16). *(audit 09-13 §4, 10-20 §C)*
+- [ ] **Poids des images du profil** : badges en PNG de 6 à 8 Mo (111 Mo au total, affichés
+      en 80 px), bannières de titres jusqu'à 4,4 Mo, fonds d'écran ~115 Mo → webp
+      redimensionnés. Premier coût mobile du site. *(09-13 §1, 10-20 §C)*
+- [ ] **`index.html` à 186 Ko** : la modale Nouveautés embarque toutes les versions × 6
+      langues — ne charger les anciennes qu'à l'ouverture. *(10-20 §C)*
+- [ ] **Cémantix & Pédantix version Persona**, en « salle à part » et non en 7ᵉ/8ᵉ mode —
+      reporté à la 2.5 avec l'OAuth Discord. *(10-20 §A)*
+- [ ] **Rappel « ta série va geler »** : bot Discord en DM opt-in le soir (suppose de lier
+      les comptes : OAuth, 2.5). *(10-20 §C)*
+- [ ] **Archives des jours passés** : `getDailyTarget(date)` est déterministe, rejouer le
+      personnage du 12 octobre ne coûte qu'un sélecteur de date (hors série et classement).
+- [ ] **Statistique du jour** : « 38 % des joueurs l'ont trouvé en 3 essais ou moins »,
+      agrégée depuis `game_sessions` après la partie.
+- [ ] **Nouveaux personnages**, surtout des anciens opus — note « nouveau perso (oldlogie
+      surtout) » de l'ex-`iddée_demander.txt`, à préciser par Hamza.
+- [ ] Les **idées par page et par mode** de l'audit du 09-13 (§8) restent « à trancher » :
+      les relire là-bas avant d'en faire un lot.
+
 ## 🎯 Prochaines étapes
 
 ### 🔴 À prévoir assez tôt
 
-- [ ] **Purger l'historique git — `.git` pèse 3,9 Go** _(mesuré le 2026-09-25, à faire hors
-      semaine de release)_
+- [x] **Purger l'historique git — `.git` pèse 3,9 Go** _(mesuré le 2026-09-25, à faire hors
+      semaine de release)_ — **fait le 2026-11-09** : une passe `git filter-repo` depuis un
+      miroir d'origin, 4,0 Go → 1,2 Go, anciens `.gif` et signatures d'outils retirés ;
+      Hostinger, préprod et clone local resynchronisés ; sauvegarde du dépôt d'avant gardée un
+      mois hors du dépôt (récit : DEV_CHANGELOG 2.4, lot 18).
 
   L'arbre de travail est passé de 2,5 Go à **1,2 Go** avec le réencodage des animations
   All-Out Attack (lot `perf/aoa_reencode_hd`). `.git`, lui, n'a pas bougé : les anciennes
@@ -301,11 +333,11 @@
       un aller-retour (un bug de garde-fou sur `social_link_min_rank` a été attrapé et
       corrigé grâce à elle)._
 - [ ] **Stratégie assets AOA** (~1,8 Go dans git) — 🎯 _cible 2.1._ Git LFS (**pas** CDN-only/sortir
-      les assets du repo — option explicitement écartée, voir AMELIORATIONS.md §1 : casse la
+      les assets du repo — option explicitement écartée, voir docs/archive/audits_2026.md §1 : casse la
       philosophie "un `git clone` suffit pour jouer", Git LFS reste compatible avec elle). Migration
       des binaires lourds (`.webp`/`.mp3`/`.mp4`) + `scripts/purge_git_history.sh` (prêt, destructif,
       à coordonner) pour purger le poids déjà accumulé + `.gitattributes` LFS. Réencodage AOA en
-      parallèle (webp q70 : 37-81 Mo → 9-25 Mo par fichier, voir AMELIORATIONS.md §2).
+      parallèle (webp q70 : 37-81 Mo → 9-25 Mo par fichier, voir docs/archive/audits_2026.md §2).
 
 ### 🔗 2.3 — Social Link sans plafond, visible sur Discord (idée Hamza, 2026-09-21)
 

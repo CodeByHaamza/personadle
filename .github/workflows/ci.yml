@@ -67,7 +67,7 @@ jobs:
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
         run: npm run assets:check
 
-      # Non bloquant tant que le repo n'est pas entièrement formaté (cf. AMELIORATIONS.md §8).
+      # Non bloquant tant que le repo n'est pas entièrement formaté (cf. docs/archive/audits_2026.md §8).
       - name: Check Prettier formatting (non-blocking)
         run: npm run format:check
         continue-on-error: true
