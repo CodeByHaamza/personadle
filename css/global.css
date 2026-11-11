@@ -4338,9 +4338,12 @@ body.darkmode .btn-share-result {
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.05em;
+  text-align: center;
   text-transform: uppercase;
   text-decoration: none;
-  white-space: nowrap;
+  /* Le libellé « 6/6 » est long (« Copier ma journée et ouvrir Discord ») : il
+     revient à la ligne plutôt que d'écraser la colonne de texte. */
+  max-width: 210px;
 }
 .discord-nudge__cta:hover,
 .discord-nudge__cta:focus-visible {
@@ -4405,6 +4408,7 @@ body.darkmode .discord-nudge__close:focus-visible {
   }
   .discord-nudge__cta {
     grid-column: 1 / -1;
+    max-width: none;
   }
 }
 

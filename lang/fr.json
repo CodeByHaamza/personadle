@@ -1538,7 +1538,9 @@
     "failed": "Impossible de copier le résultat.",
     "one_try": "✅ Du premier coup !",
     "tries": "✅ {{count}} essais",
-    "gave_up": "🏳️ Abandon après {{count}} essais"
+    "gave_up": "🏳️ Abandon après {{count}} essais",
+    "day_button": "Partager ma journée",
+    "day_copied": "Ta journée est copiée — colle-la où tu veux !"
   },
   "reset_password": {
     "title": "🔐 Réinitialise ton mot de passe",
@@ -1592,6 +1594,7 @@
     "nudge_copied": "Résultat copié — colle-le sur le serveur !",
     "nudge_hide": "Masquer — je suis déjà sur le serveur",
     "members": "{{members}} membres",
-    "online": "{{online}} en ligne"
+    "online": "{{online}} en ligne",
+    "nudge_perfect_cta": "Copier ma journée et ouvrir Discord"
   }
 }

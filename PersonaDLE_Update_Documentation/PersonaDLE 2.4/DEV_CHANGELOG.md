@@ -31,7 +31,7 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 7 | `fix/profil_debordement_mobile` | Le profil déborde de 12–14 px à 390/480 px (alerte `prod_smoke` chaque nuit depuis le 2026-10-12) |
 | 8 | `feat/discord_fin_de_partie` | Discord au bon moment : fin de partie, journée 6/6, profil, menu Jouer ; membres en ligne ; modale recentrée — **fait** |
 | 9 | `feat/codes_evenement_discord` | Codes événement exclusifs au Discord (badge ou titre) — **fait**, migration 057 |
-| 10 | `feat/partage_journee` | Partage « journée complète » des six modes |
+| 10 | `feat/partage_journee` | Partage « journée complète » des six modes — **fait** |
 | 11 | `feat/prochains_deblocages` | Profil : quêtes Expert et badges les plus proches |
 | 12 | `feat/filtre_en_cours_de_partie` | Étape B anti-triche : changer de filtre en cours de partie = abandon, avec avertissement |
 | 13 | `feat/accueil_explications` | Une ligne sous chaque mode, slogan à jour, profil invité qui explique le compte, textes anglais restants |
@@ -56,6 +56,69 @@ site, préprod accessible par Tailscale, page de statut publique.
 - **« Puzzle commun du jour »** (une cible identique pour tous) : idée validée sur le
   principe, à cadrer avant d'en faire un lot — reportée à la 2.5 avec la salle à part
   (Archives de Velvet, Cognition) et l'OAuth Discord.
+
+---
+
+## 2026-11-11 — Lot 10 : partager sa journée entière
+
+« Partager mon résultat » (lot 4) ne parlait que de la partie qui venait de finir. Un
+joueur qui fait ses six modes chaque jour veut montrer la journée, comme une grille Wordle :
+
+```
+PersonaDLE 📅 11/11 — 5/6
+🔤 Classique ✅ 2
+😄 Emoji 🎯 1
+👤 Silhouette 🏳️
+⚔️ All-Out Attack ✅ 2
+✨ Personae ✅ 5
+🎵 Musique ✅ 4
+https://personadle.net
+```
+
+Le texte ne contient que des marques, aucune cible. Chaque joueur a d'ailleurs la sienne.
+
+### Où le partager
+
+- **À 6/6, le bouton de fin de partie partage la journée** (« 📅 Partager ma journée »),
+  dans les six modes. Pas de second bouton : la barre de fin de partie
+  (précédent / partager / défi / suivant) déborderait sur téléphone, et la journée
+  contient déjà la partie qui vient de finir. Avant 6/6, rien ne change.
+- **La carte Discord « 6/6 »** (lot 8) copie la journée : « Copier ma journée et ouvrir
+  Discord ».
+- **La feuille « Jouer »** de la barre du bas, à 6/6 : un bouton au-dessus du lien Discord.
+
+### Détails techniques
+
+- **Relevé du jour** `dailyResults` (`{ day, modes: { classic: { result, attempts } } }`),
+  écrit par `recordDayResult()` depuis `buildGameSession()`, au même endroit que
+  `lastGameResult`. Seule la **première** partie normale de chaque mode compte : un Replay
+  ou une partie Expert n'est pas « la partie du jour ». Une partie armée la veille et
+  finie après minuit appartient à la veille et n'efface pas la journée en cours.
+- `recordDayResult()` vit dans `gameCore.js` et non dans `share_day.js` : gameCore
+  l'appelle, et `share_day.js` importe gameCore (§7, imports circulaires).
+  `share_day.js` prend `MODE_ICON` dans `daily_status.js` pour la même raison : le
+  prendre dans `share_result.js` aurait bouclé.
+- Un mode marqué joué (`dailyDone_*`) sans résultat retenu (joué avant cette version, ou
+  sur un autre appareil) s'affiche « ✔️ », sans détail. Pas de remontée au serveur pour
+  l'instant : le relevé est local, comme `lastGameResult`.
+- Carte Discord : le libellé « 6/6 », long, revient à la ligne (`max-width: 210px`) au
+  lieu d'écraser la colonne de texte. Défaut vu à la capture.
+- Tests : `tests/share_day.test.js` (8), plus un cas chacun dans `discord_nudge.test.js` et
+  `bottomNav.test.js`.
+
+### Vérifié à l'écran (pile Docker)
+
+Cinq modes pré-remplis, puis une vraie victoire en Classique à 1280 px :
+- le bouton devient « Partager ma journée » ;
+- la carte Discord passe en « 6/6 » ;
+- le presse-papiers contient exactement le texte ci-dessus.
+
+### Angle mort
+
+Une journée jouée sur deux appareils n'a de détail que pour les modes joués sur celui-ci.
+Les autres modes s'affichent « ✔️ ». Le serveur sait tout (`game_sessions`) : un
+`GET /api/sessions/today` pourrait compléter le relevé, mais ça n'a pas paru nécessaire
+pour une première version.
 
 ---
 

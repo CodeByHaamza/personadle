@@ -1170,6 +1170,47 @@ export function showWrongMini(
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
+ * Relevé de la journée pour « Partager ma journée » (js/share_day.js, 2.4 lot 10) :
+ * `{ day, modes: { classic: { result, attempts }, … } }`. Vit ici et non dans
+ * share_day.js parce que buildGameSession() l'écrit, et que gameCore ne doit pas
+ * importer un module qui l'importe (CLAUDE.md §7, imports circulaires).
+ */
+export const DAY_RESULTS_KEY = "dailyResults";
+
+/**
+ * Retient le résultat de la partie du jour d'un mode : la PREMIÈRE partie normale
+ * par mode et par jour. Un Replay ou une partie Expert n'est pas « la partie du
+ * jour » ; une partie armée la veille et finie après minuit appartient à la veille
+ * et n'efface pas la journée déjà commencée.
+ *
+ * @param {{mode: string, result: string, attempts: number, isExpert?: boolean, day: string}} r
+ * @returns {boolean} vrai si le résultat a été retenu
+ */
+export function recordDayResult({ mode, result, attempts, isExpert = false, day }, storage = localStorage) {
+  const key = normalizeModeKey(mode);
+  if (isExpert || !key || !day || (result !== "win" && result !== "giveup")) return false;
+  let current = null;
+  try {
+    current = JSON.parse(storage.getItem(DAY_RESULTS_KEY) || "null");
+  } catch {
+    current = null;
+  }
+  if (!current || typeof current.day !== "string" || typeof current.modes !== "object" || !current.modes) {
+    current = null;
+  }
+  if (current && current.day > day) return false;
+  const data = current && current.day === day ? current : { day, modes: {} };
+  if (data.modes[key]) return false;
+  data.modes[key] = { result, attempts: Math.max(1, Number(attempts) || 1) };
+  try {
+    storage.setItem(DAY_RESULTS_KEY, JSON.stringify(data));
+  } catch {
+    return false;
+  }
+  return true;
+}
+
+/**
  * Builds a standardised game session object ready to be POST-ed to /api/sessions.
  * Call this at the end of each game (win or giveup).
  *
@@ -1216,6 +1257,8 @@ export function buildGameSession({
     } catch {
       /* stockage plein ou bloqué : pas de bouton de partage, rien de cassé */
     }
+    // « Partager ma journée » : la partie du jour de ce mode (la première seulement).
+    recordDayResult({ mode, result, attempts, isExpert, day: currentGameDay() });
   }
   return {
     // Clé backend canonique, quelle que soit la graphie passée par le mode

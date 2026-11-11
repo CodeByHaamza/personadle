@@ -200,6 +200,10 @@ describe("buildPlaySheetHTML", () => {
       buildPlaySheetHTML(all, "/index.html"),
       "text/html"
     );
+    expect(partial.querySelector(".play-sheet-share")).toBeNull();
+    expect(
+      done.querySelector(".play-sheet-share [data-play-share], .play-sheet-share")
+    ).not.toBeNull();
     const link = done.querySelector(".play-sheet-discord");
     expect(link.getAttribute("href")).toMatch(/^https:\/\/discord\.gg\//);
     expect(link.getAttribute("rel")).toBe("noopener");

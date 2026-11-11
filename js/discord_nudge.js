@@ -27,6 +27,7 @@
 import { DISCORD_INVITE_URL, isExpertPage, parisDateKey, siteRootPrefix } from "./gameCore.js";
 import { dailyProgress } from "./daily_status.js";
 import { currentShareText, readCurrentResult, toast } from "./share_result.js";
+import { currentDayShareText } from "./share_day.js";
 
 export const NUDGE_HIDDEN_KEY = "discordNudgeHidden";
 export const NUDGE_SHOWN_KEY = "discordNudgeShown";
@@ -176,7 +177,10 @@ export function mountDiscordNudge(
     "Everyone gets their own target: your grid spoils nothing."
   );
   const cta = card.querySelector(".discord-nudge__cta");
-  cta.textContent = _t("discord.nudge_cta", "Copy & open Discord");
+  cta.textContent =
+    variant === "perfect_day"
+      ? _t("discord.nudge_perfect_cta", "Copy my day & open Discord")
+      : _t("discord.nudge_cta", "Copy & open Discord");
   const close = card.querySelector(".discord-nudge__close");
   const hideLabel = _t("discord.nudge_hide", "Hide — I'm already on the server");
   close.setAttribute("aria-label", hideLabel);
@@ -186,7 +190,8 @@ export function mountDiscordNudge(
   // pendant le clic, tant que la page a encore le focus (le presse-papiers le
   // refuse sinon) ; l'onglet Discord s'ouvre juste après.
   cta.addEventListener("click", () => {
-    const text = currentShareText(doc);
+    // 6/6 : la journée entière (js/share_day.js), sinon la partie qui vient de finir.
+    const text = variant === "perfect_day" ? currentDayShareText({ storage }) : currentShareText(doc);
     if (!text || typeof navigator.clipboard?.writeText !== "function") return;
     navigator.clipboard
       .writeText(text)

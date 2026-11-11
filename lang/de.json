@@ -1538,7 +1538,9 @@
     "failed": "Ergebnis konnte nicht kopiert werden.",
     "one_try": "✅ Beim ersten Versuch!",
     "tries": "✅ {{count}} Versuche",
-    "gave_up": "🏳️ Aufgegeben nach {{count}} Versuchen"
+    "gave_up": "🏳️ Aufgegeben nach {{count}} Versuchen",
+    "day_button": "Meinen Tag teilen",
+    "day_copied": "Dein Tag ist kopiert — füge ihn überall ein!"
   },
   "reset_password": {
     "title": "🔐 Setze dein Passwort zurück",
@@ -1592,6 +1594,7 @@
     "nudge_copied": "Ergebnis kopiert — füge es auf dem Server ein!",
     "nudge_hide": "Ausblenden — ich bin schon auf dem Server",
     "members": "{{members}} Mitglieder",
-    "online": "{{online}} gerade online"
+    "online": "{{online}} gerade online",
+    "nudge_perfect_cta": "Meinen Tag kopieren & Discord öffnen"
   }
 }

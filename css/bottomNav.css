@@ -477,6 +477,34 @@ body.darkmode .play-sheet-item {
   border-color: #2a2a2a;
 }
 
+/* 6/6 du jour : « Partager ma journée » (2.4, lot 10). Bouton : min-height posé
+   ici, le §18 de global.css ne s'applique qu'aux <button> sans règle propre. */
+.play-sheet-share {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border: 2px solid #1a1a1a;
+  border-radius: 10px;
+  background: #fff;
+  color: #1a1a1a;
+  font: 700 0.86rem/1.3 Arial, sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow: 3px 3px 0 #e63946;
+  cursor: pointer;
+}
+
+body.darkmode .play-sheet-share {
+  background: #141414;
+  color: #fff;
+  border-color: #fff;
+}
+
 /* 6/6 du jour : un lien vers le serveur Discord sous la liste (2.4, lot 8). */
 .play-sheet-discord {
   display: flex;

@@ -1538,7 +1538,9 @@
     "failed": "Couldn't copy the result.",
     "one_try": "✅ First try!",
     "tries": "✅ {{count}} tries",
-    "gave_up": "🏳️ Gave up after {{count}} tries"
+    "gave_up": "🏳️ Gave up after {{count}} tries",
+    "day_button": "Share my day",
+    "day_copied": "Your day is copied — paste it anywhere!"
   },
   "reset_password": {
     "title": "🔐 Reset your password",
@@ -1592,6 +1594,7 @@
     "nudge_copied": "Result copied — paste it on the server!",
     "nudge_hide": "Hide — I'm already on the server",
     "members": "{{members}} members",
-    "online": "{{online}} online now"
+    "online": "{{online}} online now",
+    "nudge_perfect_cta": "Copy my day & open Discord"
   }
 }

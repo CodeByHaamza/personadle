@@ -205,6 +205,8 @@ describe("mountDiscordNudge", () => {
     const card = mountDiscordNudge(document, { today: TODAY });
     expect(card.classList.contains("discord-nudge--perfect_day")).toBe(true);
     expect(card.querySelector(".discord-nudge__title").textContent).toContain("6/6");
+    // À 6/6, le bouton copie la journée entière (lot 10), pas seulement la partie.
+    expect(card.querySelector(".discord-nudge__cta").textContent).toMatch(/my day/i);
   });
 
   it("is absent after a give-up and on the Expert page of a normal result", () => {

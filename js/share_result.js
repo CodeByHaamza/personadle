@@ -21,6 +21,7 @@
  */
 
 import { isExpertPage, modeLabel, normalizeModeKey } from "./gameCore.js";
+import { currentDayShareText, isDayComplete } from "./share_day.js";
 
 /** Emoji de chaque mode dans le texte partagé. */
 export const MODE_ICON = {
@@ -170,16 +171,28 @@ export function mountShareButton(doc = document) {
   doc.getElementById("shareResultBtn")?.remove();
   if (!nav || !result || result.isExpert !== isExpertPage()) return null;
 
+  // À 6/6, le bouton partage la JOURNÉE (js/share_day.js, 2.4 lot 10) : elle
+  // contient la partie qui vient de finir, et un second bouton surchargerait la
+  // barre de fin de partie sur téléphone. Jamais en Expert : la journée ne compte
+  // que les parties normales.
+  const day = !result.isExpert && isDayComplete();
   const btn = doc.createElement("button");
   btn.type = "button";
   btn.id = "shareResultBtn";
-  btn.className = "btn-share-result";
-  btn.innerHTML = `<span aria-hidden="true">📋</span><span>${_t("share.button", "Share my result")}</span>`;
+  btn.className = day ? "btn-share-result btn-share-result--day" : "btn-share-result";
+  btn.innerHTML = day
+    ? `<span aria-hidden="true">📅</span><span>${_t("share.day_button", "Share my day")}</span>`
+    : `<span aria-hidden="true">📋</span><span>${_t("share.button", "Share my result")}</span>`;
   btn.addEventListener("click", async () => {
-    const text = currentShareText(doc, readCurrentResult() ?? result);
+    const text = day ? currentDayShareText() : currentShareText(doc, readCurrentResult() ?? result);
     const outcome = await shareText(text);
-    if (outcome === "copied") toast(_t("share.copied", "Result copied — paste it anywhere!"));
-    else if (outcome === "failed") toast(_t("share.failed", "Couldn't copy the result."));
+    if (outcome === "copied") {
+      toast(
+        day
+          ? _t("share.day_copied", "Your day is copied — paste it anywhere!")
+          : _t("share.copied", "Result copied — paste it anywhere!")
+      );
+    } else if (outcome === "failed") toast(_t("share.failed", "Couldn't copy the result."));
   });
   nav.prepend(btn);
   return btn;
