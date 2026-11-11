@@ -85,7 +85,11 @@
         aria-expanded="false"
         aria-controls="filterDropdown"
       >
-        <span class="filter-toggle-icon">⚙</span>
+        <!-- Entonnoir et non ⚙ : le bouton Paramètres (en haut à droite) porte déjà
+             l'engrenage — deux ⚙ par page pour deux choses différentes (2.4, lot 14). -->
+        <svg class="filter-toggle-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+          <path d="M3 4h18l-7 8.5V19l-4 2v-8.5L3 4z" fill="currentColor" />
+        </svg>
         <span class="filter-toggle-text" data-i18n="ui.filters">FILTERS</span>
         <span class="filter-toggle-arrow">▼</span>
       </button>

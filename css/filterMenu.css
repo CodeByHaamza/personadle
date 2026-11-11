@@ -74,6 +74,9 @@
 
 /* Icône roue dentée */
 .filter-toggle-icon {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
   font-size: 14px;
   line-height: 1;
 }

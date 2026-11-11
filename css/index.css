@@ -4981,10 +4981,28 @@ body.darkmode .velvet-theme .version-content ul li strong {
   border-radius: 0 0 inherit inherit;
 }
 
-/* Au-delà de 480 px, la rangée n'existe pas pour la mise en page : News et
-   Daily gardent leurs positions fixes d'origine. */
+/* News et Daily rangés sous le titre, à TOUTES les tailles (2.4, lot 14) : fixés
+   en bas à gauche et à droite, ils se posaient sur les bannières Personae et
+   Musique dès qu'on faisait défiler l'accueil sur ordinateur. Rangée créée par
+   dockQuickActions() (js/home_mobile.js) ; ailleurs que sur l'accueil, le bouton
+   Daily garde sa position fixe. */
 .home-quick-actions {
-  display: contents;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 0 auto 18px;
+}
+
+.home-quick-actions .news-btn,
+.home-quick-actions .daily-btn {
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  /* Élément d'une rangée flex : son z-index s'applique même en `static`. Le 1000
+     des boutons flottants les faisait passer AU-DESSUS de la feuille « Jouer »
+     et de son fond assombri (vu en 2.4, lot 14 ; vrai aussi sur téléphone). */
+  z-index: auto !important;
+  margin: 0;
 }
 
 @media (max-width: 480px) {
@@ -5017,18 +5035,12 @@ body.darkmode .velvet-theme .version-content ul li strong {
   }
 
   .home-quick-actions {
-    display: flex;
-    justify-content: center;
     gap: 10px;
     margin: 0 auto 12px;
   }
 
   .home-quick-actions .news-btn,
   .home-quick-actions .daily-btn {
-    position: static !important;
-    inset: auto !important;
-    transform: none !important;
-    margin: 0;
     font-size: 12px;
     padding: 6px 12px;
   }

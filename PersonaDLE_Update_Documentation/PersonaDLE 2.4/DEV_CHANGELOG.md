@@ -35,7 +35,7 @@ Découpage en lots — une branche, une PR vers `develop` par ligne :
 | 11 | `feat/prochains_deblocages` | Profil : quêtes Expert et badges les plus proches — **fait** |
 | 12 | `feat/filtre_en_cours_de_partie` | Étape B anti-triche : changer de filtre en cours de partie = abandon, avec avertissement — **fait** |
 | 13 | `feat/accueil_explications` | Une ligne sous chaque mode, slogan à jour, profil invité qui explique le compte, textes anglais restants — **fait** |
-| 14 | `feat/nav_ordinateur` | Ordinateur : navigation en haut, pastilles qui ne masquent plus les bannières, un seul ⚙ par mode |
+| 14 | `feat/nav_ordinateur` | Ordinateur : navigation en haut, pastilles qui ne masquent plus les bannières, un seul ⚙ par mode — **fait** |
 | 15 | `feat/podium_classement` | Podium animé, évolution ▲▼, « ta place » toujours visible |
 | 16 | `feat/classement_quotidien` | Classement principal sur les parties du jour ; comptes hors norme repérés dans l'admin |
 | 17 | `docs/readme_anime` | README façon thème GRUB : bannière et citation animées, démo des six modes |
@@ -56,6 +56,53 @@ site, préprod accessible par Tailscale, page de statut publique.
 - **« Puzzle commun du jour »** (une cible identique pour tous) : idée validée sur le
   principe, à cadrer avant d'en faire un lot — reportée à la 2.5 avec la salle à part
   (Archives de Velvet, Cognition) et l'OAuth Discord.
+
+---
+
+## 2026-11-11 — Lot 14 : sur ordinateur, la navigation passe en haut
+
+La barre de navigation de la 2.4 (lot 3) a été pensée pour le téléphone. Sur un écran de
+1 280 px, elle restait une barre d'appli collée en bas, là où on la cherche le moins.
+Sur l'accueil, les boutons flottants « Nouveautés » et « Reset Quotidien » se posaient
+sur les bannières Personae et Musique dès qu'on faisait défiler. Et chaque page de mode
+avait deux ⚙ pour deux choses différentes : le bouton FILTRES et les Paramètres.
+
+### Ce qui change
+
+- **Ordinateur (≥ 1 025 px)** : la barre devient une pastille centrée en haut, entre le
+  choix de langue et le mode sombre, avec icône et libellé côte à côte. La page garde
+  64 px en haut pour elle. La feuille « Jouer » **descend** de la barre au lieu de
+  monter du bas. Le téléphone et la tablette ne changent pas.
+- **Accueil** : « Nouveautés » et « Reset Quotidien » sont rangés sous le titre **à toutes
+  les tailles**. Jusqu'ici c'était le cas sur téléphone seulement : au-dessus de 480 px,
+  la rangée était en `display: contents` et les boutons restaient flottants.
+- **Un seul ⚙ par mode** : le bouton FILTRES prend un entonnoir (SVG en ligne), et
+  l'engrenage reste aux Paramètres.
+
+### Bug trouvé en route
+
+Dans la rangée flex, « Nouveautés » et « Reset » passaient **au-dessus** de la feuille
+« Jouer » et de son fond assombri. Un élément de rangée flex applique son `z-index` même
+en `position: static`, et celui des boutons flottants valait 1000, contre 700 pour la
+feuille. Le défaut existait déjà sur téléphone depuis la rangée du lot 3.
+`z-index: auto` dans la rangée.
+
+### Vérifié (pile Docker)
+
+- Sept pages (accueil, Classique, Musique, profil, classement, amis, FAQ), à 1 280 et
+  1 025 px :
+  - la barre ne chevauche aucun élément fixe du haut ;
+  - aucun débordement horizontal.
+- Feuille « Jouer » sur ordinateur : elle descend sous la barre, couvre bien les
+  boutons de l'accueil et se ferme avec Échap.
+- E2E de mise en page, de fumée et mobile : 42/42.
+- `tests/one_gear_per_mode.test.js` (6) : exactement un ⚙ par page de mode (celui des
+  Paramètres), et l'entonnoir sur FILTRES.
+
+### Angle mort
+
+La pastille « N à jouer » est écartée du libellé par `:has()`. Les navigateurs récents le
+gèrent ; un vieux navigateur garde l'ancien écart, et le chiffre mord un peu sur le mot.
 
 ---
 
